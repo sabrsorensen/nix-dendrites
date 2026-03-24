@@ -57,8 +57,8 @@ The recommended split layout for modules which require new inputs:
 
 An example of this is the formatter module:
 
-- `modules/formatter/flake-parts.nix`
-- `modules/formatter/_formatter.nix`
+- `modules/nix/tools/formatter/flake-parts.nix`
+- `modules/nix/tools/formatter/_formatter.nix`
 
 `flake-parts.nix` is bootstrap-safe and only declares inputs:
 

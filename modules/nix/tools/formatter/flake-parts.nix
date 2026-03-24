@@ -1,8 +1,10 @@
 { inputs, lib, ... }:
 {
   flake-file.inputs = {
-    treefmt-nix.url = lib.mkDefault "github:numtide/treefmt-nix";
-    treefmt-nix.inputs.nixpkgs.follows = lib.mkDefault "nixpkgs";
+    treefmt-nix = {
+      url = lib.mkDefault "github:numtide/treefmt-nix";
+      #inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   # Bootstrap safely: declare the input first, and only import the consumer

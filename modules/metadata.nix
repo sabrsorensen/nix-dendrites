@@ -1,4 +1,4 @@
 { ... }:
 {
-  flake-file.description = "Minimal Dendritic Nix repository bootstrapped with flake-file";
+  flake-file.description = "sabrsorensen's Dendritic Nix configurations";
 }
