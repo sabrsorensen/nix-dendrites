@@ -17,7 +17,7 @@
       inputs.nixpkgs-lib.follows = "nixpkgs-lib";
     };
     home-manager = {
-      url = "https://flakehub.com/f/nix-community/home-manager/0";
+      url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     import-tree.url = "github:vic/import-tree";
