@@ -17,7 +17,7 @@
       inputs.nixpkgs-lib.follows = "nixpkgs-lib";
     };
     home-manager = {
-      url = "github:nix-community/home-manager/master";
+      url = "https://flakehub.com/f/nix-community/home-manager/0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     import-tree.url = "github:vic/import-tree";
@@ -27,6 +27,11 @@
     };
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0";
     nixpkgs-lib.follows = "nixpkgs";
+    packages = {
+      url = "path:./packages";
+      flake = false;
+    };
+    pkgs-by-name-for-flake-parts.url = "github:drupol/pkgs-by-name-for-flake-parts";
     treefmt-nix.url = "github:numtide/treefmt-nix";
   };
 }
