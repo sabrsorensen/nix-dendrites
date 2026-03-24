@@ -12,6 +12,7 @@
         ...
       }:
       {
+        users.groups.username = {};
         users.users."${username}" = {
           isNormalUser = true;
           home = "/home/${username}";
@@ -20,7 +21,6 @@
           ];
           shell = pkgs.bash;
         };
-        programs.fish.enable = true;
 
         home-manager.users."${username}" = {
           imports = [
