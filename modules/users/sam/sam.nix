@@ -1,7 +1,6 @@
 {
   inputs,
   lib,
-  pkgs,
   self,
   ...
 }:
@@ -30,6 +29,7 @@ in
         { pkgs, ... }:
         {
           imports = with inputs.self.modules.homeManager; [
+            sam-git
             system-desktop
           ];
           home.packages = with pkgs; [
