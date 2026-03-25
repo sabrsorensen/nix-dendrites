@@ -5,6 +5,11 @@
 {
   flake.modules.nixos.ZaphodBeeblebrox = {
     imports = with inputs.self.modules.nixos; [
+      sam
+      ./_zaphod/hardware.nix
+      ./_zaphod/filesystem.nix
+      ./_zaphod/network.nix
+      ./_zaphod/users/sam.nix
       system-desktop
       systemd-boot
       disko
@@ -12,11 +17,11 @@
       nvidia
       xserver
       virtualisation
-      threedprinter
+      kde
       appimage
       deskflow
       flatpak
-      kde
+      threedprinter
       minecraft
       steam
     ];
@@ -25,4 +30,6 @@
     imports = with inputs.self.modules.homeManager; [
     ];
   };
+
+  flake.nixosConfigurations = inputs.self.lib.mkNixos "x86_64-linux" "ZaphodBeeblebrox";
 }
