@@ -28,7 +28,12 @@
   };
   flake.modules.homeManager.ZaphodBeeblebrox = {
     imports = with inputs.self.modules.homeManager; [
+      bash
       fish
+      konsole
+      starship
+      tmux
+      vim
     ];
   };
 
