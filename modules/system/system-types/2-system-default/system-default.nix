@@ -26,6 +26,7 @@
       [
         system-minimal
         secrets
+        secrets-context
       ]
       ++ [ inputs.self.modules.generic.systemConstants ];
   };

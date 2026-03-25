@@ -30,6 +30,7 @@ in
         {
           imports = with inputs.self.modules.homeManager; [
             sam-git
+            sam-secrets
             system-desktop
           ];
           home.packages = with pkgs; [

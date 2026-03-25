@@ -4,12 +4,12 @@
 }:
 {
   flake.modules.homeManager.sam-git =
-    { osConfig, ... }:
+    { config, osConfig, ... }:
     let
       hostName = osConfig.networking.hostName;
+      secretRoot = config.my.gitSecretRoot;
       readGitValue =
-        path:
-        builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${inputs.nix-secrets}/${path}");
+        path: builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${secretRoot}/${path}");
 
       wslSigningKeyPath = "${inputs.nix-secrets}/gpg-keys/signing-key-hash-wsl.txt";
       signingKey =
