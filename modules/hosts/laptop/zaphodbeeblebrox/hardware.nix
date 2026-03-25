@@ -4,7 +4,7 @@
   ...
 }:
 {
-  flake.modules.nixos.zaphodbeeblebrox = {
+  flake.modules.nixos.ZaphodBeeblebrox = {
     nixpkgs.hostPlatform = "x86_64-linux";
     # Hardware modules needed for boot
     boot = {

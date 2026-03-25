@@ -12,7 +12,7 @@
         ...
       }:
       {
-        users.groups.username = {};
+        users.groups."${username}" = {};
         users.users."${username}" = {
           isNormalUser = true;
           home = "/home/${username}";

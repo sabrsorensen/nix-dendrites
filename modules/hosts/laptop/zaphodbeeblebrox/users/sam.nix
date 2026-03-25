@@ -4,7 +4,7 @@
   ...
 }:
 {
-  flake.modules.nixos.zaphodbeeblebrox =
+  flake.modules.nixos.ZaphodBeeblebrox =
     { config, ... }:
     {
       imports =

@@ -12,6 +12,7 @@
         system-minimal
         home-manager
         secrets
+        locale
       ]
       ++ (with inputs.self.modules.generic; [
         systemConstants

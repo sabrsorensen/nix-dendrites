@@ -3,12 +3,25 @@
   ...
 }:
 {
-  flake.modules.nixos.linux-desktop = {
+  flake.modules.nixos.ZaphodBeeblebrox = {
     imports = with inputs.self.modules.nixos; [
       system-desktop
       systemd-boot
       bluetooth
-      plymouth
+      nvidia
+      xserver
+      virtualisation
+      threedprinter
+      appimage
+      deskflow
+      flatpak
+      kde
+      minecraft
+      steam
+    ];
+  };
+  flake.modules.homeManager.ZaphodBeeblebrox = {
+    imports = with inputs.self.modules.homeManager; [
     ];
   };
 }

@@ -7,10 +7,6 @@
 
   inputs = {
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
-    determinate-home-manager = {
-      url = "https://flakehub.com/f/nix-community/home-manager/0";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";

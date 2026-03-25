@@ -9,6 +9,11 @@
     imports = with inputs.self.modules.nixos; [
       system-cli
       printing
+      plymouth
+      wayland
+      audio
+      zsa
+      cross-compile
     ];
   };
 

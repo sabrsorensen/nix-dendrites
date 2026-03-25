@@ -21,25 +21,6 @@
         "url": "https://flakehub.com/f/DeterminateSystems/determinate/3"
       }
     },
-    "determinate-home-manager": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1774274588,
-        "narHash": "sha256-dnHvv5EMUgTzGZmA+3diYjQU2O6BEpGLEOgJ1Qe9LaY=",
-        "rev": "cf9686ba26f5ef788226843bc31fda4cf72e373b",
-        "revCount": 5874,
-        "type": "tarball",
-        "url": "https://api.flakehub.com/f/pinned/nix-community/home-manager/0.2511.5874%2Brev-cf9686ba26f5ef788226843bc31fda4cf72e373b/019d1b02-98c6-7532-8e7e-7f7cf2fc4b68/source.tar.gz"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://flakehub.com/f/nix-community/home-manager/0"
-      }
-    },
     "determinate-nixd-aarch64-darwin": {
       "flake": false,
       "locked": {
@@ -458,7 +439,6 @@
     "root": {
       "inputs": {
         "determinate": "determinate",
-        "determinate-home-manager": "determinate-home-manager",
         "disko": "disko",
         "flake-file": "flake-file",
         "flake-parts": "flake-parts_2",
