@@ -26,11 +26,12 @@
       url = "github:fzakaria/nix-auto-follow";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
     nix-secrets = {
       url = "git+https://github.com/sabrsorensen/nix-secrets.git";
       flake = false;
     };
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-lib.follows = "nixpkgs";
     packages = {
       url = "path:./packages";

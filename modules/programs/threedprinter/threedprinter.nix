@@ -3,10 +3,12 @@
   ...
 }:
 {
-  flake.modules.nixos.threedprinter = {
-    environment.systemPackages = with pkgs; [
-      cura-appimage
-      orca-slicer
-    ];
-  };
+  flake.modules.nixos.threedprinter =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = with pkgs; [
+        cura-appimage
+        orca-slicer
+      ];
+    };
 }

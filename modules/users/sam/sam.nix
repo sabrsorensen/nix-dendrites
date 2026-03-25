@@ -26,14 +26,16 @@ in
     }
 
     {
-      homeManager."${username}" = {
-        imports = with inputs.self.modules.homeManager; [
-          system-desktop
-        ];
-        home.packages = with pkgs; [
-          mediainfo
-        ];
-      };
+      homeManager."${username}" =
+        { pkgs, ... }:
+        {
+          imports = with inputs.self.modules.homeManager; [
+            system-desktop
+          ];
+          home.packages = with pkgs; [
+            mediainfo
+          ];
+        };
     }
   ];
 }

@@ -11,5 +11,5 @@
     impermanence.url = "github:nix-community/impermanence";
   };
 
-  imports = lib.optional (inputs ? impermanence)  ./_impermanence.nix;
+  imports = lib.optional (inputs ? impermanence) ./_impermanence.nix;
 }

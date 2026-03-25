@@ -4,7 +4,8 @@
     networking = {
       firewall = {
         allowedTCPPorts = [
-          1400 3400 # noson
+          1400 # noson
+          3400 # noson
         ];
         allowedUDPPorts = [
         ];

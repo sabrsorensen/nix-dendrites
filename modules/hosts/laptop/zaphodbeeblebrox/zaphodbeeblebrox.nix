@@ -7,6 +7,7 @@
     imports = with inputs.self.modules.nixos; [
       system-desktop
       systemd-boot
+      disko
       bluetooth
       nvidia
       xserver

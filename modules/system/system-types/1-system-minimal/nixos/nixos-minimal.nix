@@ -24,10 +24,10 @@
         buildMachines = [
           {
             hostName = "sam@AtlasUponRaiden";
-            systems = ["x86_64-linux"];
+            systems = [ "x86_64-linux" ];
             protocol = "ssh";
             maxJobs = 8;
-            speedFactor = 99;  # Increased to prefer remote builds over emulation
+            speedFactor = 99; # Increased to prefer remote builds over emulation
             #supportedFeatures = [ "nixos-test" "benchmark" "big-parallel" "nix-command" "flakes" ];
             mandatoryFeatures = [ ];
           }

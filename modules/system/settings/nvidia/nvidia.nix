@@ -8,9 +8,22 @@
     # Hardware modules needed for boot
     boot = {
       initrd = {
-        kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
+        kernelModules = [
+          "nvidia"
+          "nvidia_drm"
+          "nvidia_modeset"
+          "nvidia_uvm"
+        ];
       };
-      kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
+      kernelModules = [
+        "nvidia"
+        "nvidia_drm"
+        "nvidia_modeset"
+        "nvidia_uvm"
+      ];
+      kernelParams = [
+        "nvidia-drm.modeset=1" # Enable NVIDIA DRM kernel mode setting
+      ];
     };
     hardware = {
       cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
@@ -19,7 +32,6 @@
         enable32Bit = true;
       };
       nvidia = {
-        package = config.boot.kernelPackages.nvidiaPackages.production;
         modesetting.enable = true;
         powerManagement = {
           enable = false;
@@ -34,10 +46,12 @@
         };
       };
     };
-    nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-      "nvidia-persistenced"
-      "nvidia-settings"
-      "nvidia-x11"
-    ];
+    nixpkgs.config.allowUnfreePredicate =
+      pkg:
+      builtins.elem (lib.getName pkg) [
+        "nvidia-persistenced"
+        "nvidia-settings"
+        "nvidia-x11"
+      ];
   };
 }

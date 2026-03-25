@@ -11,14 +11,22 @@
       initrd = {
         availableKernelModules = [
           # Detected by nixos-generate-config
-          "xhci_pci" "thunderbolt" "vmd" "nvme" "usb_storage" "sd_mod"
+          "xhci_pci"
+          "thunderbolt"
+          "vmd"
+          "nvme"
+          "usb_storage"
+          "sd_mod"
           # LUKS
           "dm-crypt"
           # LVM
           "dm-mod"
         ];
         includeDefaultModules = true;
-        kernelModules = [ "dm-crypt" "nvme" ];
+        kernelModules = [
+          "dm-crypt"
+          "nvme"
+        ];
         # Ensure systemd in initrd for better device handling
         systemd.enable = true;
         verbose = false;
