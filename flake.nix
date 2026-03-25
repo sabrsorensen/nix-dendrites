@@ -20,6 +20,7 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    impermanence.url = "github:nix-community/impermanence";
     import-tree.url = "github:vic/import-tree";
     nix-auto-follow = {
       url = "github:fzakaria/nix-auto-follow";
