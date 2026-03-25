@@ -53,7 +53,6 @@
           keep-derivations = true;
           keep-outputs = true;
           max-jobs = "auto";
-          parallel-building = true;
           substituters = [
             # high priority since it's almost always used
             "https://cache.nixos.org?priority=10"

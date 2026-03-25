@@ -28,6 +28,7 @@
   };
   flake.modules.homeManager.ZaphodBeeblebrox = {
     imports = with inputs.self.modules.homeManager; [
+      fish
     ];
   };
 

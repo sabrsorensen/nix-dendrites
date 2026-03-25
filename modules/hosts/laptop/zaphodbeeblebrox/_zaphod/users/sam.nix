@@ -7,6 +7,7 @@
   ];
 
   home-manager.users.sam = { };
+
   services = {
     displayManager = {
       autoLogin = {

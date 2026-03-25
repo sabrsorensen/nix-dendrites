@@ -4,54 +4,56 @@
   ...
 }:
 {
-  flake.modules.nixos.nvidia = {
-    # Hardware modules needed for boot
-    boot = {
-      initrd = {
+  flake.modules.nixos.nvidia =
+    { config, lib, ... }:
+    {
+      # Hardware modules needed for boot
+      boot = {
+        initrd = {
+          kernelModules = [
+            "nvidia"
+            "nvidia_drm"
+            "nvidia_modeset"
+            "nvidia_uvm"
+          ];
+        };
         kernelModules = [
           "nvidia"
           "nvidia_drm"
           "nvidia_modeset"
           "nvidia_uvm"
         ];
+        kernelParams = [
+          "nvidia-drm.modeset=1" # Enable NVIDIA DRM kernel mode setting
+        ];
       };
-      kernelModules = [
-        "nvidia"
-        "nvidia_drm"
-        "nvidia_modeset"
-        "nvidia_uvm"
-      ];
-      kernelParams = [
-        "nvidia-drm.modeset=1" # Enable NVIDIA DRM kernel mode setting
-      ];
-    };
-    hardware = {
-      cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-      graphics = {
-        enable = true;
-        enable32Bit = true;
-      };
-      nvidia = {
-        modesetting.enable = true;
-        powerManagement = {
-          enable = false;
-          finegrained = false;
+      hardware = {
+        cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+        graphics = {
+          enable = true;
+          enable32Bit = true;
         };
-        open = true;
-        nvidiaSettings = true;
-        prime = {
-          sync.enable = true;
-          #intelBusId = "PCI:0@0:2:0"; Device specific
-          #nvidiaBusId = "PCI:1@0:0:0"; Device specific
+        nvidia = {
+          modesetting.enable = true;
+          powerManagement = {
+            enable = false;
+            finegrained = false;
+          };
+          open = true;
+          nvidiaSettings = true;
+          prime = {
+            sync.enable = true;
+            #intelBusId = "PCI:0@0:2:0"; Device specific
+            #nvidiaBusId = "PCI:1@0:0:0"; Device specific
+          };
         };
       };
+      nixpkgs.config.allowUnfreePredicate =
+        pkg:
+        builtins.elem (lib.getName pkg) [
+          "nvidia-persistenced"
+          "nvidia-settings"
+          "nvidia-x11"
+        ];
     };
-    nixpkgs.config.allowUnfreePredicate =
-      pkg:
-      builtins.elem (lib.getName pkg) [
-        "nvidia-persistenced"
-        "nvidia-settings"
-        "nvidia-x11"
-      ];
-  };
 }
