@@ -1,6 +1,10 @@
 let
-  rootDevices = [ "/dev/nvme0n1p2" "/dev/nvme1n1p2" ];
-  commonMountOpts = [ "discard=async" "noatime" "space_cache=v2" "ssd" ];
+  commonMountOpts = [
+    "discard=async"
+    "noatime"
+    "space_cache=v2"
+    "ssd"
+  ];
   generalMountOpts = commonMountOpts ++ [ "compress=zstd:3" ];
   highChurnMountOpts = commonMountOpts ++ [ "nodatacow" ];
   rootSnapHomeMountOpts = generalMountOpts ++ [ "commit=120" ];
@@ -10,7 +14,10 @@ let
     content = {
       type = "filesystem";
       format = "vfat";
-      mountOptions = [ "fmask=0022" "dmask=0022" ];
+      mountOptions = [
+        "fmask=0022"
+        "dmask=0022"
+      ];
     };
   };
   raidRoot = {
@@ -81,8 +88,16 @@ in
         content = {
           type = "gpt";
           partitions = {
-            ESP = raidEsp // { content = raidEsp.content // { mountpoint = "/boot"; }; };
-            root = raidRoot // { content = raidRoot.content // { mountpoint = "/.btrfs-root"; }; };
+            ESP = raidEsp // {
+              content = raidEsp.content // {
+                mountpoint = "/boot";
+              };
+            };
+            root = raidRoot // {
+              content = raidRoot.content // {
+                mountpoint = "/.btrfs-root";
+              };
+            };
           };
         };
       };
@@ -93,9 +108,15 @@ in
         content = {
           type = "gpt";
           partitions = {
-            ESP = raidEsp // { content = raidEsp.content // { mountpoint = "/boot2"; }; };
-            #root = raidRoot // { content = raidRoot.content // { mountpoint = "/.btrfs-root2"; }; };
-            root = { size = "100%"; };
+            ESP = raidEsp // {
+              content = raidEsp.content // {
+                mountpoint = "/boot2";
+              };
+            };
+            # Manually convert the volume above to RAID1 and add this volume due to disko not supporting btrfs RAID
+            root = {
+              size = "100%";
+            };
           };
         };
       };

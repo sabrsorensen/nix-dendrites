@@ -16,12 +16,6 @@ in
         imports =
           (with inputs.self.modules.nixos; [
             virtualisation
-            appimage
-            deskflow
-            flatpak
-            threedprinter
-            minecraft
-            steam
           ])
           ++ [
             "${inputs.nix-secrets}/modules/system-secrets-private.nix"

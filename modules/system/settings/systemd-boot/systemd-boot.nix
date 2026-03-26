@@ -26,18 +26,20 @@
         systemd-boot = {
           enable = true;
           consoleMode = "max";
-          extraInstallCommands = lib.mkAfter (lib.optionalString (cfg.mirroredEspPaths != [ ]) ''
-            for target in ${mirroredTargets}; do
-              if [ -d "$target" ]; then
-                echo "Mirroring ${config.boot.loader.efi.efiSysMountPoint} to $target"
-                ${pkgs.rsync}/bin/rsync -a --delete \
-                  ${lib.escapeShellArg "${config.boot.loader.efi.efiSysMountPoint}/"} \
-                  "$target/"
-              else
-                echo "Skipping missing mirrored ESP $target" >&2
-              fi
-            done
-          '');
+          extraInstallCommands = lib.mkAfter (
+            lib.optionalString (cfg.mirroredEspPaths != [ ]) ''
+              for target in ${mirroredTargets}; do
+                if [ -d "$target" ]; then
+                  echo "Mirroring ${config.boot.loader.efi.efiSysMountPoint} to $target"
+                  ${pkgs.rsync}/bin/rsync -a --delete \
+                    ${lib.escapeShellArg "${config.boot.loader.efi.efiSysMountPoint}/"} \
+                    "$target/"
+                else
+                  echo "Skipping missing mirrored ESP $target" >&2
+                fi
+              done
+            ''
+          );
         };
       };
     };

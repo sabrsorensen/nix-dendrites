@@ -13,6 +13,9 @@
   fileSystems."/AnomalyRealm" = {
     device = "/dev/md127";
     fsType = "ext4";
-    options = [ "relatime" "stripe=384" ];
+    options = [
+      "relatime"
+      "stripe=384"
+    ];
   };
 }

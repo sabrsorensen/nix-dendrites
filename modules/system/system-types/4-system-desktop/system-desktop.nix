@@ -14,6 +14,11 @@
       audio
       zsa
       cross-compile
+      appimage
+      deskflow
+      threedprinter
+      minecraft
+      steam
     ];
   };
 

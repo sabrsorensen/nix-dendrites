@@ -25,7 +25,7 @@
     };
   };
 
-  users.groups.sonos = {};
+  users.groups.sonos = { };
   users.users.sonos = {
     isNormalUser = false;
     isSystemUser = true;

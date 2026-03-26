@@ -14,6 +14,7 @@
       systemd-boot
       disko
       bluetooth
+      flatpak
       kde
       nvidia
       xserver

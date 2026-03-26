@@ -12,6 +12,7 @@
       ./_atlas/users/sam.nix
       ./_atlas/docker.nix
       ./_atlas/samba.nix
+      system-cli
       systemd-boot
       disko
       nvidia
