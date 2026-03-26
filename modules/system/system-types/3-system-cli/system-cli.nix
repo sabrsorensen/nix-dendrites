@@ -21,6 +21,7 @@
 
       git
       shell
+      syncthing
     ];
   };
 }

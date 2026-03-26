@@ -31,6 +31,7 @@ in
           imports = with inputs.self.modules.homeManager; [
             sam-git
             sam-secrets
+            sam-syncthing-private
             system-desktop
           ];
           home.packages = with pkgs; [
