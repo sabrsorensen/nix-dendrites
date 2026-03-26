@@ -1,12 +1,14 @@
 {
+  inputs,
+  ...
+}:
+{
   users.users.sam.extraGroups = [
     "dialout"
     "docker"
     "networkmanager"
     "users"
   ];
-
-  home-manager.users.sam = { };
 
   services = {
     displayManager = {

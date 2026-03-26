@@ -25,7 +25,14 @@
       minecraft
       steam
     ];
+
+    home-manager.users.sam = {
+      imports = [
+        inputs.self.modules.homeManager.ZaphodBeeblebrox
+      ];
+    };
   };
+
 
   flake.modules.homeManager.ZaphodBeeblebrox = {
     imports = with inputs.self.modules.homeManager; [

@@ -31,6 +31,10 @@
       url = "git+https://github.com/sabrsorensen/nix-secrets.git";
       flake = false;
     };
+    nix4vscode = {
+      url = "github:nix-community/nix4vscode";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-lib.follows = "nixpkgs";
     packages = {
