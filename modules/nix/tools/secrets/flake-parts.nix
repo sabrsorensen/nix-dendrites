@@ -10,7 +10,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-secrets = {
-      url = "git+https://github.com/sabrsorensen/nix-secrets.git";
+      url = "github:sabrsorensen/nix-secrets";
       flake = false;
     };
   };

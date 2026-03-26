@@ -28,7 +28,7 @@
     };
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     nix-secrets = {
-      url = "git+https://github.com/sabrsorensen/nix-secrets.git";
+      url = "github:sabrsorensen/nix-secrets";
       flake = false;
     };
     nix4vscode = {
