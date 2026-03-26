@@ -24,7 +24,11 @@
 
     mkHomeManager = system: name: {
       ${name} = inputs.home-manager.lib.homeManagerConfiguration {
-        pkgs = inputs.nixpkgs.legacyPackages.${system};
+        pkgs = import inputs.nixpkgs {
+          inherit system;
+          overlays = [ inputs.self.overlays.default ];
+          config.allowUnfree = true;
+        };
         modules =
           lib.optionals (inputs ? determinate) [
             inputs.determinate.homeManagerModules.default

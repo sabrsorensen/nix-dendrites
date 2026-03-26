@@ -106,11 +106,11 @@
           ''}
 
           # Load NixOS testing functions on workstations
-          ${lib.optionalString hasNixFlake ''
-            for file in ${./functions/nix}/*.fish
-              source $file
-            end
-          ''}
+          #${lib.optionalString hasNixFlake ''
+          #  for file in ${./functions/nix}/*.fish
+          #    source $file
+          #  end
+          #''}
 
           # GPG TTY setup (Home Manager's gpg-agent service handles the rest)
           if command -s gpg > /dev/null
