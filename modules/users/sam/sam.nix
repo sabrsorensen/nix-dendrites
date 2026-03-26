@@ -15,7 +15,6 @@ in
       nixos."${username}" = {
         imports =
           (with inputs.self.modules.nixos; [
-            nix-ld
             virtualisation
             kde
             appimage

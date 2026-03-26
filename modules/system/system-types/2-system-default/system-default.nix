@@ -11,6 +11,7 @@
       [
         system-minimal
         home-manager
+        nix-ld
         secrets-base
         locale
       ]
