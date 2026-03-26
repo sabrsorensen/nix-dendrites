@@ -16,14 +16,6 @@
       bluetooth
       nvidia
       xserver
-      virtualisation
-      kde
-      appimage
-      deskflow
-      flatpak
-      threedprinter
-      minecraft
-      steam
     ];
 
     home-manager.users.sam = {
@@ -35,16 +27,10 @@
 
   flake.modules.homeManager.ZaphodBeeblebrox = {
     imports = with inputs.self.modules.homeManager; [
-      bash
       firefox
-      fish
-      git
-      gpg
       konsole
-      ssh
-      starship
-      tmux
-      vim
+      mcp
+      mcp-personal
       vscode
     ];
   };

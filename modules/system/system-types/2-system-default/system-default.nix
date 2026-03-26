@@ -11,13 +11,14 @@
       [
         system-minimal
         home-manager
-        secrets
+        secrets-base
         locale
       ]
       ++ (with inputs.self.modules.generic; [
         systemConstants
         pkgs-by-name
-      ]);
+      ])
+      ++ [ "${inputs.nix-secrets}/modules/system-secrets-private.nix" ];
   };
 
   flake.modules.homeManager.system-default = {
@@ -25,7 +26,7 @@
       with inputs.self.modules.homeManager;
       [
         system-minimal
-        secrets
+        secrets-base
         secrets-context
       ]
       ++ [ inputs.self.modules.generic.systemConstants ];

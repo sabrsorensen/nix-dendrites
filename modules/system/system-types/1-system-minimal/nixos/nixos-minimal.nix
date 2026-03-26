@@ -6,7 +6,12 @@
   # default settings needed for all nixosConfigurations
 
   flake.modules.nixos.system-minimal =
-    { pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     {
       nixpkgs.overlays = [
         (final: _prev: {
@@ -19,6 +24,13 @@
       #nixpkgs.config.allowUnfree = true;
       system.stateVersion = "26.05";
       console.keyMap = "dvorak";
+
+      boot = {
+        tmp = {
+          useTmpfs = true;
+          cleanOnBoot = true;
+        };
+      };
 
       nix = {
         buildMachines = [
@@ -35,6 +47,9 @@
         distributedBuilds = true;
         extraOptions = ''
           warn-dirty = false
+        ''
+        + lib.optionalString (config ? sops && config.sops.secrets ? github_nixos_token) ''
+          !include ${config.sops.secrets.github_nixos_token.path}
         '';
         settings = {
           auto-optimise-store = true;
@@ -70,6 +85,23 @@
           ];
           warn-dirty = false;
         };
+      };
+
+      environment.systemPackages = with pkgs; [
+        htop
+        openssl
+        pciutils.out
+        ps
+        ripgrep
+        vim
+        wget
+      ];
+
+      programs.nh = {
+        enable = true;
+        clean.enable = true;
+        clean.extraArgs = "--keep-since 4d --keep 3";
+        #flake = "/home/user/my-nixos-config"; # sets NH_OS_FLAKE variable for you
       };
     };
 }
