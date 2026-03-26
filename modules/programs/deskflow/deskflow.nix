@@ -1,5 +1,12 @@
 {
+  pkgs,
+  ...
+}:
+{
   flake.modules.nixos.deskflow = {
+    environment.systemPackages = with pkgs; [
+      deskflow
+    ];
     networking = {
       firewall = {
         allowedTCPPorts = [

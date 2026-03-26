@@ -16,7 +16,6 @@ in
         imports =
           (with inputs.self.modules.nixos; [
             virtualisation
-            kde
             appimage
             deskflow
             flatpak
@@ -65,10 +64,8 @@ in
           };
           home.packages = with pkgs; [
             nerd-fonts.caskaydia-cove
-
             bitwarden-desktop
             clementine
-            deskflow
             discord
             ferdium
             mediainfo

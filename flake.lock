@@ -363,11 +363,11 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1774560794,
-        "narHash": "sha256-hYuJPJZm4P4FTKlExVAIHMTd5zOx5NHTdnFNsVGSm1c=",
+        "lastModified": 1774567927,
+        "narHash": "sha256-Juqshe8QUJmdXB2Z5JAk87aKSVdObbQ3PRqBTyTbywc=",
         "owner": "sabrsorensen",
         "repo": "nix-secrets",
-        "rev": "370ef525718b301203e7b4b82ec438ff6c58d10c",
+        "rev": "921ecbd18dc11c37eb9aba28410251fffdaa42d0",
         "type": "github"
       },
       "original": {
