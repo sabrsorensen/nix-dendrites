@@ -1,15 +1,23 @@
 {
   flake.modules.homeManager.syncthing =
-    { config, lib, pkgs, osConfig, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      osConfig,
+      ...
+    }:
     let
       hostName = osConfig.networking.hostName;
       isSteamDeck = hostName == "EmeraldEcho";
-      disableTray = builtins.elem hostName [ "EmeraldEcho" "AtlasUponRaiden" ];
+      disableTray = builtins.elem hostName [
+        "EmeraldEcho"
+        "AtlasUponRaiden"
+      ];
 
       allDevices = config.my.syncthing.devices;
       allFolders = config.my.syncthing.folders;
-      filteredFolders =
-        lib.filterAttrs (_: folder: builtins.elem hostName folder.devices) allFolders;
+      filteredFolders = lib.filterAttrs (_: folder: builtins.elem hostName folder.devices) allFolders;
     in
     {
       options.my.syncthing = {

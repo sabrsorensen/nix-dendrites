@@ -28,12 +28,15 @@ in
       homeManager."${username}" =
         { pkgs, ... }:
         {
-          imports = with inputs.self.modules.homeManager; [
-            sam-git
-            sam-secrets
-            sam-syncthing-private
-            system-desktop
-          ];
+          imports =
+            (with inputs.self.modules.homeManager; [
+              sam-git
+              sam-secrets
+              system-desktop
+            ])
+            ++ [
+              "${inputs.nix-secrets}/modules/sam-syncthing-private.nix"
+            ];
           home.packages = with pkgs; [
             mediainfo
           ];
