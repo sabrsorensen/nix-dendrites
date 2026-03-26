@@ -10,11 +10,18 @@ jobs:
   flake:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4  
 
       - uses: DeterminateSystems/nix-installer-action@v17
 
       - uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: Configure Nix auth
+        run: |
+          mkdir -p ~/.config/nix
+          cat >> ~/.config/nix/nix.conf <<EOF
+          access-tokens = github.com=${{ secrets.NIX_SECRETS_PAT }}
+          EOF
 
       - name: Verify generated flake and checks
         run: nix flake check --print-build-logs
