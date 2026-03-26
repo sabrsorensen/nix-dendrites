@@ -26,14 +26,20 @@
       steam
     ];
   };
+
   flake.modules.homeManager.ZaphodBeeblebrox = {
     imports = with inputs.self.modules.homeManager; [
       bash
+      firefox
       fish
+      git
+      gpg
       konsole
+      ssh
       starship
       tmux
       vim
+      vscode
     ];
   };
 

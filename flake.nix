@@ -37,9 +37,21 @@
       url = "path:./packages";
       flake = false;
     };
+    partyowl84-vscode-theme = {
+      url = "github:sabrsorensen/partyowl84-vscode-theme";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     pkgs-by-name-for-flake-parts.url = "github:drupol/pkgs-by-name-for-flake-parts";
     sops-nix = {
       url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    synthwave-84-vscode-theme = {
+      url = "github:sabrsorensen/nix-synthwave-vscode";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    synthwave-blues-vscode-theme = {
+      url = "github:sabrsorensen/synthwave-blues-vscode-theme";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     treefmt-nix.url = "github:numtide/treefmt-nix";
