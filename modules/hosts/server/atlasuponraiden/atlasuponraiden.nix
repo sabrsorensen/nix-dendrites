@@ -15,7 +15,6 @@
       system-cli
       systemd-boot
       disko
-      nvidia
       virtualisation
     ];
 
