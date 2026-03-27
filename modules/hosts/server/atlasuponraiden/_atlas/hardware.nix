@@ -39,7 +39,7 @@
     swraid = {
       enable = true;
       mdadmConf = ''
-        MAILADDR test@test.com
+        MAILADDR ${config.systemConstants.adminEmail}
       '';
     };
   };

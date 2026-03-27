@@ -23,10 +23,8 @@
   };
 
   flake.modules.homeManager.system-desktop = {
-    imports = with inputs.self.modules.homeManager; [
-      system-cli
-      browser
-      office
+    imports = [
+      inputs.self.modules.homeManager."graphical-home"
     ];
   };
 }

@@ -3,9 +3,9 @@
   imports = [ inputs.treefmt-nix.flakeModule ];
 
   perSystem =
-    { pkgs, ... }:
+    { config, pkgs, ... }:
     {
-      formatter = pkgs.nixfmt;
+      formatter = config.treefmt.build.wrapper;
       treefmt.programs.nixfmt.enable = true;
     };
 }

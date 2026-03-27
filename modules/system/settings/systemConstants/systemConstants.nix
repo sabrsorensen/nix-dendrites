@@ -1,7 +1,12 @@
 {
   self,
+  lib,
   ...
 }:
+let
+  domain = lib.removeSuffix "\n" (builtins.readFile "${self.inputs.nix-secrets}/domain.txt");
+  network = builtins.fromJSON (builtins.readFile "${self.inputs.nix-secrets}/network.json");
+in
 {
   flake.modules.generic.systemConstants =
     { lib, ... }:
@@ -12,7 +17,8 @@
       };
 
       config.systemConstants = {
-        adminEmail = "admin@${lib.readFile "${self.inputs.nix-secrets}/domain.txt"}";
+        inherit domain network;
+        adminEmail = "admin@${domain}";
       };
     };
 }

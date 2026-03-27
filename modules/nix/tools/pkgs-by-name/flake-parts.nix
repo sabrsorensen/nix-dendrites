@@ -19,6 +19,7 @@
     overlays.default =
       final: prev:
       (inputs.nix4vscode.overlays.forVscode final prev)
+      // (if inputs ? decky-packages then inputs.decky-packages.overlays.default final prev else { })
       // {
         local = withSystem prev.stdenv.hostPlatform.system ({ config, ... }: config.packages);
         vscode-partyowl84 =

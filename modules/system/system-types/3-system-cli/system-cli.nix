@@ -17,11 +17,7 @@
 
   flake.modules.homeManager.system-cli = {
     imports = with inputs.self.modules.homeManager; [
-      system-default
-
-      git
-      shell
-      syncthing
+      home
     ];
   };
 }
