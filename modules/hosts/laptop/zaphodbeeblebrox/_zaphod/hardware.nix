@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 {
@@ -46,9 +47,26 @@
       };
     };
   };
+
   # Zenbook Duo specific - dual screen support
   services.xserver.xrandrHeads = [
     # Configure when you know the screen setup
     # "DP-1" "eDP-1" etc.
   ];
+
+  # Ensure alsa-tools (for hda-verb) is available
+  environment.systemPackages = with pkgs; [ alsa-tools ];
+
+  # Systemd service to enable ZenBook speakers at boot
+  # https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1850439/comments/172
+  systemd.services.enable-zenbook-speaker = {
+    description = "Enable ASUS ZenBook ALC294 speakers";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "sound.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.bash}/bin/bash -c 'for dev in /dev/snd/hwC*D0; do if [ -e \"$dev\" ]; then ${pkgs.alsa-tools}/bin/hda-verb \"$dev\" 0x20 0x500 0x1b && ${pkgs.alsa-tools}/bin/hda-verb \"$dev\" 0x20 0x477 0x4a4b && ${pkgs.alsa-tools}/bin/hda-verb \"$dev\" 0x20 0x500 0xf && ${pkgs.alsa-tools}/bin/hda-verb \"$dev\" 0x20 0x477 0x74; fi; done'";
+    };
+  };
 }

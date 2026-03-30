@@ -59,6 +59,7 @@
     age
     sops
     gh
+    lm_sensors.bin
     nix-tree
     nix-output-monitor
     maliit-keyboard
