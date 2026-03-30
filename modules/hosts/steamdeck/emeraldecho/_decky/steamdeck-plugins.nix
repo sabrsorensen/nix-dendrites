@@ -72,45 +72,44 @@
         "Yq8Nj" # Metroid Prime Boot screen (Version 2)
         "n87jk" # Big Enough scream meme (OLED version)
         "YM2Rr" # RETRO WAVE 2
+        "ndeje" # Sheakah Slate Startup (Minimal)
+        "PBRmG" # Sheikah Slate Suspend
+        "nv4lN" # [BOTW] Sheikah Slate - Boot Video
         "YqL2Q" # Zelda TOTK Purah Pad startup (OLED)
         "Erd7g" # Default Steam Deck Boot – (Neon Cyan) Variant
         "EA2Lx" # Analytics - Steam Deck Startup Movie wR_sixtee6 Gaming
         "EXNRN" # FATHER!
         "nOAlV" # Kirby Stampede 2 (But Pink Logo)
+        "Py0ok" # More Kirby Stampede!
         "EXNN7" # Game Changer
         "YMjez" # Bob's Burgers [BOOT]
-        "Py0ok" # More Kirby Stampede!
         "nZ70E" # Outrun Deck
-        "ndeje" # Steam Hades
-        "PBRmG" # Sheikah Slate Suspend
-        "YopwD" # Elevator
-        "YGqen" # Nintendo Gameboy
-        "n7qqJ" # crash1
-        "Pm66k" # Cowboy Bebop
-        "PBR1v" # cowboy bebop
-        "YGJzg" # suspend portal cores
-        "Pb67V" # Click Clock Wood
-        "YWq9m" # Falling into Zelda
-        "nvMq2" # steam Deck xv Splash
-        "nZg02" # N64 Boot
+        "YopwD" # Star Trek Deep Space Nine - Long Version
+        "YGqen" # Star Trek Universe - Trek Deck
+        "n7qqJ" # Spaceballs - The Steamdeck Suspend Animation
+        "Pm66k" # Spaceballs - The Steamdeck Throbber
+        "PBR1v" # The Bee Movie in One Second
+        "YGJzg" # Magic Fluid
+        "n8j8Y" # Stardew Valley
+        "Pb67V" # Stardew Suspend
+        "YWq9m" # Sci-Fi Throbber Quicker Load for Steam Deck
+        "nvMq2" # Sci-Fi Future Suspend screen for Steam Deck
+        "nZg02" # Frutiger Aero - Deck Logo (Suspend)
         "PmlBY" # Flowing Particles
         "MnZgE" # Star Wars Intro (Disney+)
-        "nv4lN" # Decky Loader Crash
-        "ENz0E" # PS1 startup movie
-        "2YJAE" # Easter Egg - Mini Motorways
-        "PmXkY" # Randomly Selected
-        "n7oLn" # Kakariko Village from OOT
-        "n87mG" # Kingsman Bootup
-        "n4QDE" # Corneria
-        "n51Ln" # Xbox startup
-        "PmqqP" # The Simpsons
-        "Yxe0P" # Futurama
-        "n8j8Y" # Borderlands Psycho startup
-        "YJ9jE" # Original XBOX startup
-        "n8KxP" # Family Guy
-        "YGkNY" # NGE standby animation
-        "nLQKE" # Monster Inc - Intro
-        "n3b7W" # Appa Yip Yip
+        "ENz0E" # Simple HUD Boot Screen
+        "2YJAE" # Adventure Time 5second
+        "PmXkY" # Simple Outlines Boot Up
+        "n7oLn" # Regular Show
+        "n87mG" # KPop Demon Hunters sniff
+        "n4QDE" # Steam Deck Implode Animation w/ Valve Theme
+        "n51Ln" # Retro computer Glitch boot sequence
+        "PmqqP" # Custom Steam Deck PC Boot Sequence With Accurate Specs and Details
+        "Yxe0P" # Star Wars Hyperjump
+        "YJ9jE" # Reboot Cyberpunk _ SteamDeck
+        "YGkNY" # Gravity Falls
+        "nLQKE" # Tech Glow
+        "n3b7W" # Retro UI boot up
       ];
       movieOverrides = [
         {

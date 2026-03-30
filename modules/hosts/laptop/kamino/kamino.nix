@@ -95,7 +95,6 @@ in
       konsole
       mcp
       mcp-personal
-      no-mans-sky
       vscode
     ];
   };

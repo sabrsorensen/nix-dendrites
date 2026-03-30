@@ -37,7 +37,7 @@
         in
         rec {
           decky-animation-changer = callPackage ./decky-animation-changer.nix { };
-          decky-animation-changer-enhanced = callPackage ./decky-animation-changer-enhanced.nix {
+          decky-animation-changer-enhanced = callPackage ./SDH-AnimationChanger/decky-animation-changer-enhanced.nix {
             inherit callPackage;
           };
           decky-css-loader = callPackage ./decky-css-loader.nix {
@@ -54,7 +54,7 @@
           decky-brightness-bar = callPackage ./decky-brightness-bar.nix { };
           decky-autoflatpaks = callPackage ./decky-autoflatpaks.nix { };
           decky-autosuspend = callPackage ./decky-autosuspend.nix { };
-          decky-syncthing = callPackage ./decky-syncthing.nix { };
+          decky-syncthing = callPackage ./decky-syncthing-jovian/decky-syncthing-jovian.nix { };
           decky-bluetooth = callPackage ./decky-bluetooth.nix { };
           decky-kdeconnect = callPackage ./decky-kdeconnect.nix { };
           decky-web-browser = callPackage ./decky-web-browser.nix { };
