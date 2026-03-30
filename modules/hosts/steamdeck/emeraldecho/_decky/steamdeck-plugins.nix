@@ -65,51 +65,66 @@
     "decky-XRGaming" = pkgs.decky-xrgaming;
     "SDH-AnimationChanger" = pkgs.decky-animation-changer-enhanced.withAnimations {
       downloadAnimationIds = [
+        # memes
+        "n87jk" # Big Enough scream meme (OLED version)
+        "n87mG" # KPop Demon Hunters sniff
+
+        # cartoons
         "Yw3jw" # bluey
-        "n8dXk" # lego
         "Pm4Mp" # Spongebob
         "E1Ne6" # new desktop futurama
+        "YMjez" # Bob's Burgers [BOOT]
+        "2YJAE" # Adventure Time 5second
+        "n7oLn" # Regular Show
+        "YGkNY" # Gravity Falls
+
+        # games
         "Yq8Nj" # Metroid Prime Boot screen (Version 2)
-        "n87jk" # Big Enough scream meme (OLED version)
-        "YM2Rr" # RETRO WAVE 2
-        "ndeje" # Sheakah Slate Startup (Minimal)
+        "n8dXk" # lego
+        "ndeje" # Sheikah Slate Startup (Minimal)
         "PBRmG" # Sheikah Slate Suspend
         "nv4lN" # [BOTW] Sheikah Slate - Boot Video
         "YqL2Q" # Zelda TOTK Purah Pad startup (OLED)
-        "Erd7g" # Default Steam Deck Boot – (Neon Cyan) Variant
-        "EA2Lx" # Analytics - Steam Deck Startup Movie wR_sixtee6 Gaming
-        "EXNRN" # FATHER!
         "nOAlV" # Kirby Stampede 2 (But Pink Logo)
         "Py0ok" # More Kirby Stampede!
+        "n8j8Y" # Stardew Valley
+        "Pb67V" # Stardew Suspend
+
+        # shows
+        "EXNRN" # FATHER!
         "EXNN7" # Game Changer
-        "YMjez" # Bob's Burgers [BOOT]
-        "nZ70E" # Outrun Deck
         "YopwD" # Star Trek Deep Space Nine - Long Version
         "YGqen" # Star Trek Universe - Trek Deck
+        "Yxe0P" # Star Wars Hyperjump
+        "MnZgE" # Star Wars Intro (Disney+)
+
+        # movies
         "n7qqJ" # Spaceballs - The Steamdeck Suspend Animation
         "Pm66k" # Spaceballs - The Steamdeck Throbber
         "PBR1v" # The Bee Movie in One Second
-        "YGJzg" # Magic Fluid
-        "n8j8Y" # Stardew Valley
-        "Pb67V" # Stardew Suspend
+
+        # sci-fi/tech
+        "EA2Lx" # Analytics - Steam Deck Startup Movie wR_sixtee6 Gaming
         "YWq9m" # Sci-Fi Throbber Quicker Load for Steam Deck
         "nvMq2" # Sci-Fi Future Suspend screen for Steam Deck
-        "nZg02" # Frutiger Aero - Deck Logo (Suspend)
-        "PmlBY" # Flowing Particles
-        "MnZgE" # Star Wars Intro (Disney+)
         "ENz0E" # Simple HUD Boot Screen
-        "2YJAE" # Adventure Time 5second
-        "PmXkY" # Simple Outlines Boot Up
-        "n7oLn" # Regular Show
-        "n87mG" # KPop Demon Hunters sniff
         "n4QDE" # Steam Deck Implode Animation w/ Valve Theme
         "n51Ln" # Retro computer Glitch boot sequence
         "PmqqP" # Custom Steam Deck PC Boot Sequence With Accurate Specs and Details
-        "Yxe0P" # Star Wars Hyperjump
+
+        # synthwave/outrun/retro
+        "YM2Rr" # RETRO WAVE 2
+        "nZ70E" # Outrun Deck
         "YJ9jE" # Reboot Cyberpunk _ SteamDeck
-        "YGkNY" # Gravity Falls
-        "nLQKE" # Tech Glow
         "n3b7W" # Retro UI boot up
+
+        # neat graphics
+        "Erd7g" # Default Steam Deck Boot – (Neon Cyan) Variant
+        "YGJzg" # Magic Fluid
+        "nZg02" # Frutiger Aero - Deck Logo (Suspend)
+        "PmlBY" # Flowing Particles
+        "PmXkY" # Simple Outlines Boot Up
+        "nLQKE" # Tech Glow
       ];
       movieOverrides = [
         {
