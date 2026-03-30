@@ -1,0 +1,16 @@
+{
+  "name": "Syncthing",
+  "author": "Sam Sorensen",
+  "api_version": 1,
+  "flags": [],
+  "publish": {
+    "tags": [
+      "syncthing",
+      "services",
+      "nixos",
+      "jovian",
+      "steam-deck"
+    ],
+    "description": "Manage a declarative Syncthing user service on Jovian NixOS from Decky."
+  }
+}

@@ -1,0 +1,58 @@
+diff --git a/main.py b/main.py
+index 2c158bc..4a5d2b0 100644
+--- a/main.py
++++ b/main.py
+@@ -13,6 +13,8 @@ from css_remoteinstall import install
+ from css_server import start_server
+ from css_browserhook import initialize
+ from css_loader import Loader
++
++NIX_THEME_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "nix-css-themes.json")
+ 
+ ALWAYS_RUN_SERVER = False
+ IS_STANDALONE = False
+@@ -79,6 +81,34 @@ class FileChangeHandler(FileSystemEventHandler):
+             Log("Reloading themes due to FS event")
+             self.loop.create_task(self.loader.reset(silent=True))
+         
++
++def apply_nix_theme_config():
++    if not NIX_THEME_CONFIG_PATH or not os.path.exists(NIX_THEME_CONFIG_PATH):
++        return
++
++    try:
++        with open(NIX_THEME_CONFIG_PATH, "r", encoding="utf-8") as fp:
++            nix_config = json.load(fp)
++    except Exception as ex:
++        Log(f"Failed to load Nix CSS theme config [{type(ex).__name__}]: {str(ex)}")
++        return
++
++    themes = nix_config.get("themes", {})
++    if not isinstance(themes, dict):
++        Log("Ignoring invalid Nix CSS theme config: themes must be an object")
++        return
++
++    for theme_name, theme_config in themes.items():
++        theme_dir = os.path.join(get_theme_path(), theme_name)
++        if not os.path.isdir(theme_dir):
++            Log(f"Configured theme '{theme_name}' is not installed locally. Skipping")
++            continue
++
++        try:
++            with open(os.path.join(theme_dir, "config_USER.json"), "w", encoding="utf-8") as fp:
++                json.dump(theme_config, fp, indent=2)
++        except Exception as ex:
++            Log(f"Failed to write Nix config for theme '{theme_name}' [{type(ex).__name__}]: {str(ex)}")
++
+ 
+ class Plugin:
+     async def is_standalone(self) -> bool:
+@@ -206,6 +236,8 @@ class Plugin:
+         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
+         
+         create_steam_symlink()
++
++        apply_nix_theme_config()
+ 
+         self.loader = Loader()
+         await self.loader.load(False)
