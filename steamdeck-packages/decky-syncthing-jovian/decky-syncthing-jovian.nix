@@ -1,14 +1,10 @@
 {
   lib,
-  nodejs,
-  pnpm_9,
-  fetchPnpmDeps,
-  pnpmConfigHook,
-  python3,
-  stdenv,
+  mkDeckyPlugin,
+  ...
 }:
 
-stdenv.mkDerivation rec {
+mkDeckyPlugin {
   pname = "decky-syncthing";
   version = "0.3.0-jovian";
   src = ./decky-syncthing-jovian;
