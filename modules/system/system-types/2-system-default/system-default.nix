@@ -13,6 +13,8 @@
         home-manager
         nix-ld
         secrets-base
+        secrets-context
+        system-secrets
         locale
       ]
       ++ (with inputs.self.modules.generic; [

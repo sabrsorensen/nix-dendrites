@@ -43,34 +43,9 @@
     rpi =
       let
         network = builtins.fromJSON (builtins.readFile "${inputs.nix-secrets}/network.json");
-        remoteDeployRule = {
-          users = [ "nix-remote" ];
-          commands = [
-            {
-              command = "/run/current-system/sw/bin/nixos-rebuild";
-              options = [ "NOPASSWD" ];
-            }
-            {
-              command = "/run/current-system/sw/bin/nix-env";
-              options = [ "NOPASSWD" ];
-            }
-            {
-              command = "/run/current-system/sw/bin/env";
-              options = [ "NOPASSWD" ];
-            }
-            {
-              command = "/run/current-system/sw/bin/nix";
-              options = [ "NOPASSWD" ];
-            }
-            {
-              command = "/nix/store/*/bin/switch-to-configuration";
-              options = [ "NOPASSWD" ];
-            }
-          ];
-        };
       in
       rec {
-        inherit network remoteDeployRule;
+        inherit network;
 
         mkBaseModule = hostName: {
           imports = [

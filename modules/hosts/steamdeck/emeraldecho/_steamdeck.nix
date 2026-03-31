@@ -1,11 +1,16 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   imports = [
     ./home.nix
     ./firefox/firefox.nix
     ./vscode/vscode.nix
-    ];
+  ];
 
   home.username = "deck";
   home.homeDirectory = "/home/deck";
@@ -20,7 +25,7 @@
   ];
 
   # Script to ensure Steam library btrfs subvolume is mounted in SteamOS
-  home.activation.setupSteamLibraryMount = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.setupSteamLibraryMount = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     # Check if we're running on SteamOS (has steamos-readonly command)
     if command -v steamos-readonly >/dev/null 2>&1; then
       echo "Checking Steam library mount setup..."

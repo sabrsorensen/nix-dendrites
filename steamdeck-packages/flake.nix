@@ -29,17 +29,21 @@
             file: args:
             let
               packageFn = import file;
-              extraArgs = nixpkgs.lib.optionalAttrs (builtins.hasAttr "mkDeckyPlugin" (builtins.functionArgs packageFn)) {
-                inherit mkDeckyPlugin;
-              };
+              extraArgs =
+                nixpkgs.lib.optionalAttrs (builtins.hasAttr "mkDeckyPlugin" (builtins.functionArgs packageFn))
+                  {
+                    inherit mkDeckyPlugin;
+                  };
             in
             pkgs.callPackage file (extraArgs // args);
         in
         rec {
           decky-animation-changer = callPackage ./decky-animation-changer.nix { };
-          decky-animation-changer-enhanced = callPackage ./SDH-AnimationChanger/decky-animation-changer-enhanced.nix {
-            inherit callPackage;
-          };
+          decky-animation-changer-enhanced =
+            callPackage ./SDH-AnimationChanger/decky-animation-changer-enhanced.nix
+              {
+                inherit callPackage;
+              };
           decky-css-loader = callPackage ./decky-css-loader.nix {
             inherit callPackage;
           };

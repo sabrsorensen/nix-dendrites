@@ -14,25 +14,24 @@
 
 let
   # Build a simple animation configuration for the enhanced plugin
-  buildNixAnimationConfig = {
-    animationIds ? [],
-    downloadAnimationIds ? [],
-    movieOverrides ? [],
-    bootAnimation ? null,
-    suspendAnimation ? null,
-    throbberAnimation ? null,
-    randomize ? "all",
-    forceIpv4 ? true
-  }:
+  buildNixAnimationConfig =
+    {
+      animationIds ? [ ],
+      downloadAnimationIds ? [ ],
+      movieOverrides ? [ ],
+      bootAnimation ? null,
+      suspendAnimation ? null,
+      throbberAnimation ? null,
+      randomize ? "all",
+      forceIpv4 ? true,
+    }:
     let
       normalizedMovieOverrides =
-        if movieOverrides != [] then
-          map
-            (override: {
-              movie = override.movie;
-              animation_id = override.animationId or override.animation_id;
-            })
-            movieOverrides
+        if movieOverrides != [ ] then
+          map (override: {
+            movie = override.movie;
+            animation_id = override.animationId or override.animation_id;
+          }) movieOverrides
         else
           lib.filter (override: override.animation_id != null) [
             {
@@ -51,8 +50,7 @@ let
 
       nixConfig = {
         animation_ids = animationIds;
-        download_animation_ids =
-          if downloadAnimationIds != [] then downloadAnimationIds else animationIds;
+        download_animation_ids = if downloadAnimationIds != [ ] then downloadAnimationIds else animationIds;
         movie_overrides = normalizedMovieOverrides;
         boot_animation = bootAnimation;
         suspend_animation = suspendAnimation;
@@ -65,7 +63,8 @@ let
         name = "nix-animations.json";
         text = builtins.toJSON nixConfig;
       };
-    in configFile;
+    in
+    configFile;
 
 in
 stdenv.mkDerivation rec {

@@ -170,15 +170,8 @@ let
       };
 
       users.groups.${steamUser}.gid = lib.mkForce 1000;
-      users.groups.nix-remote = { };
 
       users.users.nix-remote = {
-        isSystemUser = true;
-        description = "Nix remote deploy user";
-        group = "nix-remote";
-        home = "/var/empty";
-        shell = pkgs.bash;
-        hashedPasswordFile = config.sops.secrets.hashed_password.path;
         openssh.authorizedKeys.keyFiles = [
           "${inputs.nix-secrets}/ssh-keys/atlas_emeraldecho_nix.pub"
           "${inputs.nix-secrets}/ssh-keys/zaphod_emeraldecho_nix.pub"

@@ -59,7 +59,8 @@ stdenv.mkDerivation rec {
     pnpm_9
     pnpmConfigHook
     python3
-  ] ++ extraNativeBuildInputs;
+  ]
+  ++ extraNativeBuildInputs;
 
   inherit
     prePatch

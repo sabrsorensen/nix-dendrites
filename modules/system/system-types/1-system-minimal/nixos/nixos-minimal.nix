@@ -12,6 +12,33 @@
       pkgs,
       ...
     }:
+    let
+      remoteDeployRule = {
+        users = [ "nix-remote" ];
+        commands = [
+          {
+            command = "/run/current-system/sw/bin/nixos-rebuild";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/nix-env";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/env";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/run/current-system/sw/bin/nix";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/nix/store/*/bin/switch-to-configuration";
+            options = [ "NOPASSWD" ];
+          }
+        ];
+      };
+    in
     {
       nixpkgs.overlays = [
         (final: _prev: {
@@ -32,15 +59,31 @@
         };
       };
 
+      users.groups.nix-remote = { };
+      users.users.nix-remote = {
+        isSystemUser = true;
+        description = "Nix remote deploy user";
+        group = "nix-remote";
+        home = "/var/empty";
+        shell = pkgs.bash;
+        hashedPasswordFile = config.sops.secrets.hashed_password.path;
+        openssh.authorizedKeys.keyFiles = [
+        ];
+      };
+      security.sudo.extraRules = [ remoteDeployRule ];
+
       nix = {
         buildMachines = [
           {
             hostName = "sam@AtlasUponRaiden";
-            systems = [ "x86_64-linux" ];
+            systems = [
+              "x86_64-linux"
+              "aarch64-linux"
+              "i686-linux"
+            ];
             protocol = "ssh";
             maxJobs = 8;
             speedFactor = 99; # Increased to prefer remote builds over emulation
-            #supportedFeatures = [ "nixos-test" "benchmark" "big-parallel" "nix-command" "flakes" ];
             mandatoryFeatures = [ ];
           }
         ];
@@ -82,12 +125,14 @@
           trusted-users = [
             "root"
             "@wheel"
+            "nix-remote"
           ];
           warn-dirty = false;
         };
       };
 
       environment.systemPackages = with pkgs; [
+        dig.dnsutils
         htop
         openssl
         pciutils.out
@@ -101,7 +146,7 @@
         enable = true;
         clean.enable = true;
         clean.extraArgs = "--keep-since 4d --keep 3";
-        #flake = "/home/user/my-nixos-config"; # sets NH_OS_FLAKE variable for you
+        flake = "/home/sam/src/nix-dendrites";
       };
     };
 }

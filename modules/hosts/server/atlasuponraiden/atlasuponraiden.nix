@@ -25,6 +25,11 @@
         inputs.self.modules.homeManager.AtlasUponRaiden
       ];
     };
+    users.users.nix-remote = {
+      openssh.authorizedKeys.keyFiles = [
+        "${inputs.nix-secrets}/ssh-keys/zaphod_atlas_nix.pub"
+      ];
+    };
   };
 
   flake.modules.homeManager.AtlasUponRaiden = {

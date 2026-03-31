@@ -33,6 +33,8 @@
         else
           "unknown";
 
+      nixFlakePath = "~/src/nix-dendrites/";
+
       # Feature flags based on host type
       isWorkstation = hostType == "workstation";
       isPi = hostType == "pi";
@@ -58,7 +60,7 @@
             targetHost = if tail then "nix-(string lower $argv[1])-tail" else "nix-(string lower $argv[1])";
             upgradeFlag = if upgrade then "--update" else "";
           in
-          "inhibitSleep nh os switch ~/src/nix/ -H $argv[1] --target-host ${targetHost} ${upgradeFlag} --keep-going $argv[2..-1]"
+          "inhibitSleep nh os switch ${nixFlakePath} -H $argv[1] --target-host ${targetHost} ${upgradeFlag} --keep-going $argv[2..-1]"
         else
           null;
 
@@ -131,11 +133,11 @@
           '';
 
           # === WORKSTATION FUNCTIONS (development/testing) ===
-          updateFlake = if hasNixFlake then "inhibitSleep nix flake update --flake ~/src/nix/" else null;
+          updateFlake = if hasNixFlake then "inhibitSleep nix flake update --flake ${nixFlakePath}" else null;
 
           fetchFfAddons =
             if isWorkstation then
-              "python3 ~/src/nix/home-manager/firefox/fetch_firefox_addons.py ~/src/nix/home-manager/firefox/firefox_addons.json"
+              "python3 ${nixFlakePath}/home-manager/firefox/fetch_firefox_addons.py ${nixFlakePath}/home-manager/firefox/firefox_addons.json"
             else
               null;
 
@@ -145,7 +147,7 @@
               if isWsl then
                 "nh os switch ~/src/nix/wsl --keep-going"
               else
-                "inhibitSleep nh os switch ~/src/nix/ --keep-going"
+                "inhibitSleep nh os switch ${nixFlakePath} --keep-going"
             else
               null;
           nhs = if hasNixFlake then "nhSwitch" else null;
@@ -154,7 +156,7 @@
               if isWsl then
                 "nh os switch ~/src/nix/wsl --update --keep-going"
               else
-                "inhibitSleep nh os switch ~/src/nix/ --update --keep-going"
+                "inhibitSleep nh os switch ${nixFlakePath} --update --keep-going"
             else
               null;
           nhsu = if hasNixFlake then "nhSwitchUpgrade" else null;
@@ -174,7 +176,7 @@
                 if test "$argv[1]" = "Naboo" -o "$argv[1]" = "Nevarro"
                     ~/src/nix/scripts/secure-deploy.fish $argv
                 else
-                    inhibitSleep nh os switch ~/src/nix -H $argv[1] --target-host nix-(string lower $argv[1]) --keep-going $argv[2..-1]
+                    inhibitSleep nh os switch ${nixFlakePath} -H $argv[1] --target-host nix-(string lower $argv[1]) --keep-going $argv[2..-1]
                 end
               ''
             else
@@ -186,7 +188,7 @@
                 if test "$argv[1]" = "Naboo" -o "$argv[1]" = "Nevarro"
                     ~/src/nix/scripts/secure-deploy.fish --upgrade $argv
                 else
-                    inhibitSleep nh os switch ~/src/nix -H $argv[1] --target-host nix-(string lower $argv[1]) --update --keep-going $argv[2..-1]
+                    inhibitSleep nh os switch ${nixFlakePath} -H $argv[1] --target-host nix-(string lower $argv[1]) --update --keep-going $argv[2..-1]
                 end
               ''
             else
@@ -210,7 +212,7 @@
           # Quick unsafe deployment for emergencies (bypasses safety checks)
           nhsur_unsafe =
             if canDeployRemotely then
-              "inhibitSleep nh os switch ~/src/nix/ -H $argv[1] --target-host nix-(string lower $argv[1]) --update --keep-going $argv[2..-1]"
+              "inhibitSleep nh os switch ${nixFlakePath} -H $argv[1] --target-host nix-(string lower $argv[1]) --update --keep-going $argv[2..-1]"
             else
               null;
 

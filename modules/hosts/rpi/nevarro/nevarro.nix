@@ -46,22 +46,13 @@ in
         "${inputs.nix-secrets}/ssh-keys/zaphod_nevarro.pub"
       ];
 
-      users.groups.nix-remote = { };
       users.users.nix-remote = {
-        isSystemUser = true;
-        description = "Nix remote deploy user";
-        group = "nix-remote";
-        home = "/var/empty";
-        shell = pkgs.bash;
-        hashedPasswordFile = config.sops.secrets.hashed_password.path;
         openssh.authorizedKeys.keyFiles = [
           "${inputs.nix-secrets}/ssh-keys/kamino_nevarro_nix.pub"
           "${inputs.nix-secrets}/ssh-keys/zaphod_nevarro_nix.pub"
         ];
       };
 
-      nix.settings.trusted-users = lib.mkAfter [ "nix-remote" ];
-      security.sudo.extraRules = [ rpi.remoteDeployRule ];
       services.adguardhome.settings.dhcp.enabled = true;
     };
 
