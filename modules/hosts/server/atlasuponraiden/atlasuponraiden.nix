@@ -18,6 +18,7 @@
       disko
       virtualisation
       cross-compile
+      syncthing
     ];
 
     home-manager.users.sam = {

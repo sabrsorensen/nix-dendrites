@@ -42,12 +42,28 @@
         services.syncthing = {
           enable = true;
           guiAddress = "0.0.0.0:8384";
+          passwordFile = config.sops.secrets.syncthing_gui_password.path;
           overrideDevices = false;
           overrideFolders = false;
           settings = {
             devices = allDevices;
             folders = filteredFolders;
-            options.localAnnounceEnabled = true;
+            gui = {
+              theme = "black";
+              user = config.home.username;
+            };
+            options = {
+              localAnnounceEnabled = true;
+              urAccepted = -1;
+              # Disable QUIC to work around quic-go v0.56.0 TLS bug
+              # that causes "crypto/tls bug: where's my session ticket?" panics
+              connectionPriorityQuicLan = 0;
+              connectionPriorityQuicWan = 0;
+              # Force TCP-only mode to completely avoid QUIC
+              listenAddresses = [ "tcp://:22000" ];
+              # Disable crash reporting to avoid startup delays
+              crashReportingEnabled = false;
+            };
           };
           tray = {
             enable = !disableTray;

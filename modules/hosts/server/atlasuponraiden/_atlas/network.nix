@@ -3,6 +3,7 @@
   networking = {
     firewall = {
       allowedTCPPorts = [
+        8384 # syncthing GUI
       ];
       allowedUDPPorts = [
       ];
