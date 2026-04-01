@@ -11,8 +11,10 @@
       hostName = osConfig.networking.hostName;
       isSteamDeck = hostName == "EmeraldEcho";
       disableTray = builtins.elem hostName [
-        "EmeraldEcho"
         "AtlasUponRaiden"
+        "EmeraldEcho"
+        "Naboo"
+        "Nevarro"
       ];
 
       allDevices = config.my.syncthing.devices;
