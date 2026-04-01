@@ -50,6 +50,13 @@
         mkBaseModule = hostName: {
           imports = [
             inputs.nixos-hardware.nixosModules.raspberry-pi-4
+            {
+              _module.args.nixos-raspberrypi = inputs.nixos-raspberrypi;
+              imports = [
+                inputs.nixos-raspberrypi.nixosModules.trusted-nix-caches
+                inputs.nixos-raspberrypi.nixosModules.nixpkgs-rpi
+              ];
+            }
             inputs.self.modules.nixos.samCli
             inputs.self.modules.nixos.system-cli
             ./../../hosts/rpi/_rpi/base.nix
