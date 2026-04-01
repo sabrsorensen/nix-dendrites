@@ -82,4 +82,20 @@ in
     enable = true;
     enable32Bit = true;
   };
+
+  services.pipewire.wireplumber.extraConfig."10-steamdeck-audio-names" = {
+    "monitor.alsa.rules" = [
+      {
+        matches = [
+          {
+            "device.nick" = "sof-nau8821-max";
+          }
+        ];
+        actions.update-props = {
+          "device.product.name" = "Steam Deck Audio";
+          "device.description" = "Steam Deck Audio";
+        };
+      }
+    ];
+  };
 }

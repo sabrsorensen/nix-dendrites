@@ -110,14 +110,14 @@
   system.stateVersion = "26.05";
 
   # Disable drkonqi crash handler to prevent Qt6-related boot slowdowns
-  #systemd.services."drkonqi-coredump-launcher@" = {
-  #  enable = false;
-  #};
-  #systemd.services."drkonqi-coredump-processor@" = {
-  #  enable = false;
-  #};
-  ## Disable coredump handling to prevent cascade crashes
-  #systemd.settings.Manager = {
-  #  DefaultLimitCORE = 0;
-  #};
+  systemd.services."drkonqi-coredump-launcher@" = {
+    enable = false;
+  };
+  systemd.services."drkonqi-coredump-processor@" = {
+    enable = false;
+  };
+  # Disable coredump handling to prevent cascade crashes
+  systemd.settings.Manager = {
+    DefaultLimitCORE = 0;
+  };
 }

@@ -41,12 +41,14 @@ in
       };
 
       users.users.sam.openssh.authorizedKeys.keyFiles = [
+        "${inputs.nix-secrets}/ssh-keys/atlas_naboo.pub"
         "${inputs.nix-secrets}/ssh-keys/kamino_naboo.pub"
         "${inputs.nix-secrets}/ssh-keys/zaphod_naboo.pub"
       ];
 
       users.users.nix-remote = {
         openssh.authorizedKeys.keyFiles = [
+          "${inputs.nix-secrets}/ssh-keys/atlas_naboo_nix.pub"
           "${inputs.nix-secrets}/ssh-keys/kamino_naboo_nix.pub"
           "${inputs.nix-secrets}/ssh-keys/zaphod_naboo_nix.pub"
         ];

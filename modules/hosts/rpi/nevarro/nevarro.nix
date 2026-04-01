@@ -42,12 +42,14 @@ in
       };
 
       users.users.sam.openssh.authorizedKeys.keyFiles = [
+        "${inputs.nix-secrets}/ssh-keys/atlas_nevarro.pub"
         "${inputs.nix-secrets}/ssh-keys/kamino_nevarro.pub"
         "${inputs.nix-secrets}/ssh-keys/zaphod_nevarro.pub"
       ];
 
       users.users.nix-remote = {
         openssh.authorizedKeys.keyFiles = [
+          "${inputs.nix-secrets}/ssh-keys/atlas_nevarro_nix.pub"
           "${inputs.nix-secrets}/ssh-keys/kamino_nevarro_nix.pub"
           "${inputs.nix-secrets}/ssh-keys/zaphod_nevarro_nix.pub"
         ];
