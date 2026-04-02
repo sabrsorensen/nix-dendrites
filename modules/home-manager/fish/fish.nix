@@ -42,6 +42,7 @@
       isServer = hostType == "server";
       isAtlas = hostname == "AtlasUponRaiden";
       isWsl = hostname == "NixOS-WSL";
+      sleepySystem = builtins.elem hostname [ "EmeraldEcho" "Kamino" "ZaphodBeeblebrox" ];
 
       hasNixFlake = isWorkstation || isServer;
       canDeployRemotely = (isWorkstation || isServer) && !isWsl;
@@ -53,11 +54,10 @@
       mkNhSwitchRemote =
         {
           upgrade ? false,
-          tail ? false,
         }:
         if canDeployRemotely then
           let
-            targetHost = if tail then "nix-(string lower $argv[1])-tail" else "nix-(string lower $argv[1])";
+            targetHost = "nix-(string lower $argv[1])";
             upgradeFlag = if upgrade then "--update" else "";
           in
           "inhibitSleep nh os switch ${nixFlakePath} -H $argv[1] --target-host ${targetHost} ${upgradeFlag} --keep-going $argv[2..-1]"
@@ -105,6 +105,11 @@
           # Load greeting function
           source ${./functions/fish_greeting.fish}
 
+          # Load secure-deploy function (available on all deployment-capable hosts)
+          ${lib.optionalString canDeployRemotely ''
+            source ${./functions/secure-deploy.fish}
+          ''}
+
           # Load Pi-specific functions on Pi hosts
           ${lib.optionalString isPi ''
             source ${./functions/pi_functions.fish}
@@ -133,8 +138,6 @@
           '';
 
           # === WORKSTATION FUNCTIONS (development/testing) ===
-          updateFlake = if hasNixFlake then "inhibitSleep nix flake update --flake ${nixFlakePath}" else null;
-
           fetchFfAddons =
             if isWorkstation then
               "python3 ${nixFlakePath}/home-manager/firefox/fetch_firefox_addons.py ${nixFlakePath}/home-manager/firefox/firefox_addons.json"
@@ -144,56 +147,49 @@
           # === DEPLOYMENT FUNCTIONS (workstation only) ===
           nhSwitch =
             if hasNixFlake then
-              if isWsl then
-                "nh os switch ~/src/nix/wsl --keep-going"
-              else
+              if sleepySystem then
                 "inhibitSleep nh os switch ${nixFlakePath} --keep-going"
+              else
+                "nh os switch ~/src/nix/wsl --keep-going"
             else
               null;
           nhs = if hasNixFlake then "nhSwitch" else null;
           nhSwitchUpgrade =
             if hasNixFlake then
-              if isWsl then
-                "nh os switch ~/src/nix/wsl --update --keep-going"
-              else
+              if sleepySystem then
                 "inhibitSleep nh os switch ${nixFlakePath} --update --keep-going"
+              else
+                "nh os switch ~/src/nix/wsl --update --keep-going"
             else
               null;
           nhsu = if hasNixFlake then "nhSwitchUpgrade" else null;
 
           # Remote deployment functions - only on workstations
           nhSwitchRemote = mkNhSwitchRemote { };
-          nhSwitchRemoteTail = mkNhSwitchRemote { tail = true; };
           nhSwitchUpgradeRemote = mkNhSwitchRemote { upgrade = true; };
-          nhSwitchUpgradeRemoteTail = mkNhSwitchRemote {
-            upgrade = true;
-            tail = true;
-          };
 
           nhsr =
             if canDeployRemotely then
               ''
                 if test "$argv[1]" = "Naboo" -o "$argv[1]" = "Nevarro"
-                    ~/src/nix/scripts/secure-deploy.fish $argv
+                    secure-deploy $argv
                 else
                     inhibitSleep nh os switch ${nixFlakePath} -H $argv[1] --target-host nix-(string lower $argv[1]) --keep-going $argv[2..-1]
                 end
               ''
             else
               null;
-          nhsrt = if canDeployRemotely then "nhSwitchRemoteTail $argv" else null;
           nhsur =
             if canDeployRemotely then
               ''
                 if test "$argv[1]" = "Naboo" -o "$argv[1]" = "Nevarro"
-                    ~/src/nix/scripts/secure-deploy.fish --upgrade $argv
+                    secure-deploy --upgrade $argv
                 else
                     inhibitSleep nh os switch ${nixFlakePath} -H $argv[1] --target-host nix-(string lower $argv[1]) --update --keep-going $argv[2..-1]
                 end
               ''
             else
               null;
-          nhsurt = if canDeployRemotely then "nhSwitchUpgradeRemoteTail $argv" else null;
 
           # Secure deployment with safety checks (for Naboo/Nevarro)
           secure-deploy =
@@ -203,7 +199,7 @@
                     echo "Use nhsur for EmeraldEcho deployment"
                     return 1
                 else
-                    ~/src/nix/scripts/secure-deploy.fish --upgrade $argv
+                    secure-deploy --upgrade $argv
                 end
               ''
             else
