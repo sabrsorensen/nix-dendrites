@@ -17,6 +17,7 @@
       flatpak
       kde
       nvidia
+      wine
       xserver
     ];
 

@@ -183,11 +183,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1772408722,
-        "narHash": "sha256-rHuJtdcOjK7rAHpHphUb1iCvgkU3GpfvicLMwwnfMT0=",
+        "lastModified": 1775087534,
+        "narHash": "sha256-91qqW8lhL7TLwgQWijoGBbiD4t7/q75KTi8NxjVmSmA=",
         "owner": "hercules-ci",
         "repo": "flake-parts",
-        "rev": "f20dc5d9b8027381c474144ecabc9034d6a839a3",
+        "rev": "3107b77cd68437b9a76194f0f7f9c55f2329ca5b",
         "type": "github"
       },
       "original": {
@@ -283,11 +283,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775077327,
-        "narHash": "sha256-GtyG1JLfu8Nxr/aRsWv0qlPgcDuU8CHV/kaoUD5gw/A=",
+        "lastModified": 1775143651,
+        "narHash": "sha256-S0RqAyDPMTcv9vASMaE8eY1QexFysAOdnxUxFHIPOyE=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "51f49da12cb58883cc2c12d2b30ba211e5fd6532",
+        "rev": "d166a078541982a76f14d3e06e9665fa5c9ed85e",
         "type": "github"
       },
       "original": {
@@ -454,11 +454,11 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1775072360,
-        "narHash": "sha256-gu7412hfQ3yLFltqOPyNWPLNFJkvp2BVrZv4iC9ltbU=",
+        "lastModified": 1775155705,
+        "narHash": "sha256-kwiedAnfcDzdYmFmF2oqHIQdhoE2AO0nvnsjK75TDjc=",
         "owner": "sabrsorensen",
         "repo": "nix-secrets",
-        "rev": "1aae9470c5e37ab7c0190550c8e5177b4b51d56c",
+        "rev": "89a740028565531251a03126b01da936db59860e",
         "type": "github"
       },
       "original": {
@@ -475,11 +475,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1775014325,
-        "narHash": "sha256-q0nsKnJEXysfmPg05/ewTYtn0k9CDxQNGjAhljziaDQ=",
+        "lastModified": 1775098699,
+        "narHash": "sha256-jGk8XA+l8m9MPMJIGM+9pjmm/nBaMCfTdic1mp5Pu5c=",
         "owner": "nix-community",
         "repo": "nix4vscode",
-        "rev": "fff35539778f82508f1854d90ac2b9876035d52c",
+        "rev": "d1d0a6cc32ea9311a99bff97fd14898b227b3f4a",
         "type": "github"
       },
       "original": {
@@ -599,11 +599,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1774709303,
-        "narHash": "sha256-D3Q07BbIA2KnTcSXIqqu9P586uWxN74zNoCH3h2ESHg=",
+        "lastModified": 1775036866,
+        "narHash": "sha256-ZojAnPuCdy657PbTq5V0Y+AHKhZAIwSIT2cb8UgAz/U=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "8110df5ad7abf5d4c0f6fb0f8f978390e77f9685",
+        "rev": "6201e203d09599479a3b3450ed24fa81537ebc4e",
         "type": "github"
       },
       "original": {
@@ -661,11 +661,11 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1774709303,
-        "narHash": "sha256-D3Q07BbIA2KnTcSXIqqu9P586uWxN74zNoCH3h2ESHg=",
+        "lastModified": 1775036866,
+        "narHash": "sha256-ZojAnPuCdy657PbTq5V0Y+AHKhZAIwSIT2cb8UgAz/U=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "8110df5ad7abf5d4c0f6fb0f8f978390e77f9685",
+        "rev": "6201e203d09599479a3b3450ed24fa81537ebc4e",
         "type": "github"
       },
       "original": {
@@ -711,11 +711,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775065332,
-        "narHash": "sha256-i2hsfFJa8OwixQZUzouJhX3zPrZTIsygBxPKn949pcQ=",
+        "lastModified": 1775171615,
+        "narHash": "sha256-nesfeU5PmTgCtJ2prOgATONxnvI3CP+SGrkXqclSCv0=",
         "owner": "sabrsorensen",
         "repo": "partyowl84-vscode-theme",
-        "rev": "2b684ed4033f4637e102f8c07b5ea2ec93898956",
+        "rev": "858dd105c6e91febc30fd3c5aa54977e380c23eb",
         "type": "github"
       },
       "original": {
@@ -820,11 +820,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775065342,
-        "narHash": "sha256-jDdegrMptT5qrWcbsbG/BT8AhV7pkXaw8yVldTJ7wCI=",
+        "lastModified": 1775171671,
+        "narHash": "sha256-0CRvF7Y5Ed0zmr6F+69Kcrc/3StxNyhUs5CYdrW4tOE=",
         "owner": "sabrsorensen",
         "repo": "synthwave-blues-vscode-theme",
-        "rev": "66cf0a556c42423529dbb96416084ede6ae2e7ae",
+        "rev": "b66538a1a0ed7bc1d01d6fa5b7d550e7fa5e09c5",
         "type": "github"
       },
       "original": {
@@ -915,11 +915,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1773297127,
-        "narHash": "sha256-6E/yhXP7Oy/NbXtf1ktzmU8SdVqJQ09HC/48ebEGBpk=",
+        "lastModified": 1775125835,
+        "narHash": "sha256-2qYcPgzFhnQWchHo0SlqLHrXpux5i6ay6UHA+v2iH4U=",
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "rev": "71b125cd05fbfd78cab3e070b73544abe24c5016",
+        "rev": "75925962939880974e3ab417879daffcba36c4a3",
         "type": "github"
       },
       "original": {

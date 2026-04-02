@@ -25,6 +25,7 @@ in
         flatpak
         nvidia
         kde
+        wine
         xserver
       ];
 
