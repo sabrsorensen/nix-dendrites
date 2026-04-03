@@ -150,7 +150,7 @@
               if sleepySystem then
                 "inhibitSleep nh os switch ${nixFlakePath} --keep-going"
               else
-                "nh os switch ~/src/nix/wsl --keep-going"
+                "nh os switch ${nixFlakePath} --keep-going"
             else
               null;
           nhs = if hasNixFlake then "nhSwitch" else null;
@@ -159,7 +159,7 @@
               if sleepySystem then
                 "inhibitSleep nh os switch ${nixFlakePath} --update --keep-going"
               else
-                "nh os switch ~/src/nix/wsl --update --keep-going"
+                "nh os switch ${nixFlakePath} --update --keep-going"
             else
               null;
           nhsu = if hasNixFlake then "nhSwitchUpgrade" else null;
