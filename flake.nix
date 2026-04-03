@@ -6,12 +6,12 @@
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 
   inputs = {
-    decky-packages = {
-      url = "path:./steamdeck-packages";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     codex-nix = {
       url = "github:sadjow/codex-cli-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    decky-packages = {
+      url = "path:./steamdeck-packages";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
