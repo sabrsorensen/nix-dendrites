@@ -3,14 +3,12 @@
   config,
   pkgs,
   lib,
-  inputs,
-  steamUser ? "sam",
-  hostname,
-  enableSecrets ? true,
+  osConfig,
   ...
 }:
 let
   sopsKeyPath = "${config.home.homeDirectory}/.ssh/sops_ed25519";
+  hostname = osConfig.networking.hostName;
   isSteamDeck = builtins.elem hostname [
     "EmeraldEcho"
     "EmeraldEchoDualBoot"
@@ -96,29 +94,12 @@ let
   '';
 in
 {
-  imports = [
-    ../../../home-manager/home.nix
-    ../../../home-manager/firefox/firefox.nix
-    ../../../home-manager/vscode/vscode.nix
-    ../../../home-manager/syncthing.nix
-    ../../../home-manager/games/no-mans-sky.nix
-    ./steamdeck-shortcut.nix
-  ];
-
-  home.username = steamUser;
-  home.homeDirectory = "/home/${steamUser}";
-
-  sops = lib.mkIf enableSecrets {
+  sops = {
     age.sshKeyPaths = [ sopsKeyPath ];
-    defaultSopsFile = "${inputs.nix-secrets}/secrets.yaml";
+    defaultSopsFile = lib.mkDefault "${config.my.buildSecretRoot}/secrets.yaml";
     secrets = {
     };
   };
-
-  # Steam Deck specific home packages
-  home.packages = with pkgs; [
-    # These packages are available in addition to system packages
-  ];
 
   home.file = lib.mkIf isSteamDeck {
     ".config/reshade/Shaders/.keep".text = "";

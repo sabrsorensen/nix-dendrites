@@ -11,7 +11,7 @@
       readGitValue =
         path: builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${secretRoot}/${path}");
 
-      wslSigningKeyPath = "${inputs.nix-secrets}/gpg-keys/signing-key-hash-wsl.txt";
+      wslSigningKeyPath = "${secretRoot}/gpg-keys/signing-key-hash-wsl.txt";
       signingKey =
         if hostName == "NixOS-WSL" && builtins.pathExists wslSigningKeyPath then
           readGitValue "gpg-keys/signing-key-hash-wsl.txt"

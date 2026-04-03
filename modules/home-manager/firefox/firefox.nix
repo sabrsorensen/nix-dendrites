@@ -72,7 +72,7 @@
       };
       readCss = path: builtins.readFile (cssRepo + "/${path}");
 
-      username = "sam";
+      username = config.home.username;
       userChromePath = ".mozilla/firefox/${username}/chrome";
 
       cssFiles = [

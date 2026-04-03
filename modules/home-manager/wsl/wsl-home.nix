@@ -16,9 +16,9 @@
         sam-git
         sam-work-secrets
         vscode
-        "vscode-wsl"
+        vscode-wsl
         mcp
-        "mcp-work"
+        mcp-work
         codex
       ])
       ++ [

@@ -1,6 +1,9 @@
-{ lib, pkgs, ... }:
-let
-in
+{ steamUser ? "sam" }:
+{
+  lib,
+  pkgs,
+  ...
+}:
 {
   jovian = {
     devices.steamdeck.enable = true;
@@ -14,7 +17,7 @@ in
         FREETYPE_PROPERTIES = "truetype:interpreter-version=38";
       };
       updater.splash = "jovian";
-      user = "sam";
+      user = steamUser;
       desktopSession = "plasma";
     };
   };

@@ -46,11 +46,6 @@
 
       hasNixFlake = isWorkstation || isServer;
       canDeployRemotely = (isWorkstation || isServer) && !isWsl;
-      hasSecretsAccess =
-        config ? sops
-        && config.sops.secrets ? adguardhome_user
-        && config.sops.secrets ? adguardhome_password;
-
       mkNhSwitchRemote =
         {
           upgrade ? false,
@@ -140,7 +135,7 @@
           # === WORKSTATION FUNCTIONS (development/testing) ===
           fetchFfAddons =
             if isWorkstation then
-              "python3 ${nixFlakePath}/home-manager/firefox/fetch_firefox_addons.py ${nixFlakePath}/home-manager/firefox/firefox_addons.json"
+              "python3 ${nixFlakePath}/modules/home-manager/firefox/fetch_firefox_addons.py ${nixFlakePath}/modules/home-manager/firefox/firefox_addons.json"
             else
               null;
 
@@ -192,7 +187,7 @@
               null;
 
           # Secure deployment with safety checks (for Naboo/Nevarro)
-          secure-deploy =
+          secureDeployChecked =
             if canDeployRemotely then
               ''
                 if test "$argv[1]" = "EmeraldEcho"

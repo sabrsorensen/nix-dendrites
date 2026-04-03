@@ -6,7 +6,7 @@ let
         git
         tmux
         home-manager
-        local.cowsay
+        cowsay
       ];
     };
 in

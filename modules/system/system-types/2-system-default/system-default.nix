@@ -20,8 +20,7 @@
       ++ (with inputs.self.modules.generic; [
         systemConstants
         pkgs-by-name
-      ])
-      ++ [ "${inputs.nix-secrets}/modules/system-secrets-private.nix" ];
+      ]);
   };
 
   flake.modules.homeManager.system-default = {

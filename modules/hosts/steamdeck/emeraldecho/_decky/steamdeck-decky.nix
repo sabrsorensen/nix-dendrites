@@ -1,3 +1,4 @@
+{ steamUser ? "sam" }:
 {
   config,
   lib,
@@ -131,7 +132,7 @@ in
     jovian.decky-loader = {
       enable = true;
       package = deckyLoaderPackage;
-      user = "sam";
+      user = lib.mkDefault steamUser;
       extraPackages = with pkgs; [
         coreutils
         psmisc
