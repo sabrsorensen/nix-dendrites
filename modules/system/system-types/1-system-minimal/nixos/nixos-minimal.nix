@@ -13,6 +13,9 @@
       ...
     }:
     let
+      isWsl = config.wsl.enable or false;
+      hasHashedPasswordSecret = config ? sops && config.sops.secrets ? hashed_password;
+      enableNixRemote = !isWsl && hasHashedPasswordSecret;
       remoteDeployRule = {
         users = [ "nix-remote" ];
         commands = [
@@ -59,18 +62,22 @@
         };
       };
 
-      users.groups.nix-remote = { };
-      users.users.nix-remote = {
-        isSystemUser = true;
-        description = "Nix remote deploy user";
-        group = "nix-remote";
-        home = "/var/empty";
-        shell = pkgs.bash;
-        hashedPasswordFile = config.sops.secrets.hashed_password.path;
-        openssh.authorizedKeys.keyFiles = [
-        ];
+      users.groups = lib.mkIf enableNixRemote {
+        nix-remote = { };
       };
-      security.sudo.extraRules = [ remoteDeployRule ];
+      users.users = lib.mkIf enableNixRemote {
+        nix-remote = {
+          isSystemUser = true;
+          description = "Nix remote deploy user";
+          group = "nix-remote";
+          home = "/var/empty";
+          shell = pkgs.bash;
+          hashedPasswordFile = config.sops.secrets.hashed_password.path;
+          openssh.authorizedKeys.keyFiles = [
+          ];
+        };
+      };
+      security.sudo.extraRules = lib.optionals enableNixRemote [ remoteDeployRule ];
 
       nix = {
         buildMachines = [
@@ -122,10 +129,7 @@
             "cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM"
             "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
           ];
-          trusted-users = [
-            "@wheel"
-            "nix-remote"
-          ];
+          trusted-users = [ "@wheel" ] ++ lib.optionals enableNixRemote [ "nix-remote" ];
           warn-dirty = false;
         };
       };

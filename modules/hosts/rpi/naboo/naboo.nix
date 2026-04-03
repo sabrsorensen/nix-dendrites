@@ -13,6 +13,10 @@ in
       pkgs,
       ...
     }:
+    let
+      enableNixRemote =
+        !(config.wsl.enable or false) && config ? sops && config.sops.secrets ? hashed_password;
+    in
     {
       imports = [
         (rpi.mkBaseModule "Naboo")
@@ -46,7 +50,7 @@ in
         "${inputs.nix-secrets}/ssh-keys/zaphod_naboo.pub"
       ];
 
-      users.users.nix-remote = {
+      users.users.nix-remote = lib.mkIf enableNixRemote {
         openssh.authorizedKeys.keyFiles = [
           "${inputs.nix-secrets}/ssh-keys/atlas_naboo_nix.pub"
           "${inputs.nix-secrets}/ssh-keys/kamino_naboo_nix.pub"

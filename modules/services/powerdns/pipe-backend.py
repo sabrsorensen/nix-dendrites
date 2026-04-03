@@ -56,8 +56,6 @@ ZONE_DATA = {
     f"agh-nevarro.{ZONE_NAME}.": {"CNAME": f"nevarro.{ZONE_NAME}."},
     f"atlas.{ZONE_NAME}.": {"CNAME": f"atlasuponraiden.{ZONE_NAME}."},
     f"auth.{ZONE_NAME}.": {"CNAME": f"nevarro.{ZONE_NAME}."},
-    f"headplane.{ZONE_NAME}.": {"CNAME": f"nevarro.{ZONE_NAME}."},
-    f"headscale.{ZONE_NAME}.": {"CNAME": f"nevarro.{ZONE_NAME}."},
     f"home-gw.{ZONE_NAME}.": {"CNAME": f"gt-ax11000-pro.{ZONE_NAME}."},
     f"mealie.{ZONE_NAME}.": {"CNAME": f"atlasuponraiden.{ZONE_NAME}."},
     f"netbird.{ZONE_NAME}.": {"CNAME": f"nevarro.{ZONE_NAME}."},
@@ -74,7 +72,7 @@ def read_secret(path: str, default: Optional[str] = None) -> Optional[str]:
 
 def should_skip_hostname(hostname: str) -> bool:
     """Determine if a hostname should be skipped"""
-    static_entries = {'ns1', 'ns2', 'atlas', 'home-gw', 'agh-naboo', 'agh-nevarro', 'headplane', 'headscale', 'plex'}
+    static_entries = {'ns1', 'ns2', 'atlas', 'home-gw', 'agh-naboo', 'agh-nevarro', 'plex'}
     reserved_names = {
         'gateway', 'router', 'dns', 'dhcp', 'ns', 'ns1', 'ns2',
         'localhost', 'www', 'mail', 'ftp', 'pop', 'imap', 'smtp',

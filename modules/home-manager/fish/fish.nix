@@ -42,15 +42,14 @@
       isServer = hostType == "server";
       isAtlas = hostname == "AtlasUponRaiden";
       isWsl = hostname == "NixOS-WSL";
-      sleepySystem = builtins.elem hostname [ "EmeraldEcho" "Kamino" "ZaphodBeeblebrox" ];
+      sleepySystem = builtins.elem hostname [
+        "EmeraldEcho"
+        "Kamino"
+        "ZaphodBeeblebrox"
+      ];
 
       hasNixFlake = isWorkstation || isServer;
       canDeployRemotely = (isWorkstation || isServer) && !isWsl;
-      hasSecretsAccess =
-        config ? sops
-        && config.sops.secrets ? adguardhome_user
-        && config.sops.secrets ? adguardhome_password;
-
       mkNhSwitchRemote =
         {
           upgrade ? false,
@@ -140,7 +139,7 @@
           # === WORKSTATION FUNCTIONS (development/testing) ===
           fetchFfAddons =
             if isWorkstation then
-              "python3 ${nixFlakePath}/home-manager/firefox/fetch_firefox_addons.py ${nixFlakePath}/home-manager/firefox/firefox_addons.json"
+              "python3 ${nixFlakePath}/modules/home-manager/firefox/fetch_firefox_addons.py ${nixFlakePath}/modules/home-manager/firefox/firefox_addons.json"
             else
               null;
 
@@ -150,7 +149,7 @@
               if sleepySystem then
                 "inhibitSleep nh os switch ${nixFlakePath} --keep-going"
               else
-                "nh os switch ~/src/nix/wsl --keep-going"
+                "nh os switch ${nixFlakePath} --keep-going"
             else
               null;
           nhs = if hasNixFlake then "nhSwitch" else null;
@@ -159,7 +158,7 @@
               if sleepySystem then
                 "inhibitSleep nh os switch ${nixFlakePath} --update --keep-going"
               else
-                "nh os switch ~/src/nix/wsl --update --keep-going"
+                "nh os switch ${nixFlakePath} --update --keep-going"
             else
               null;
           nhsu = if hasNixFlake then "nhSwitchUpgrade" else null;
@@ -192,7 +191,7 @@
               null;
 
           # Secure deployment with safety checks (for Naboo/Nevarro)
-          secure-deploy =
+          secureDeployChecked =
             if canDeployRemotely then
               ''
                 if test "$argv[1]" = "EmeraldEcho"

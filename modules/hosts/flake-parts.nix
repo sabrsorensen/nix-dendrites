@@ -1,4 +1,5 @@
 {
+  inputs,
   ...
 }:
 {
@@ -6,4 +7,5 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
   };
+  imports = [ ./_outputs.nix ];
 }

@@ -6,6 +6,10 @@
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 
   inputs = {
+    codex-nix = {
+      url = "github:sadjow/codex-cli-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     decky-packages = {
       url = "path:./steamdeck-packages";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -39,12 +43,20 @@
       url = "github:sabrsorensen/nix-secrets";
       flake = false;
     };
+    nix-work-secrets = {
+      url = "git+https://github.com/sabrsorensen/nix-work-secrets.git";
+      flake = false;
+    };
     nix4vscode = {
       url = "github:nix-community/nix4vscode";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-lib.follows = "nixpkgs";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
