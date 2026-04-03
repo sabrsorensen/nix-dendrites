@@ -9,7 +9,13 @@
         servers = {
           Azure = {
             command = "uvx";
-            args = [ "--from" "msmcp-azure" "azmcp" "server" "start" ];
+            args = [
+              "--from"
+              "msmcp-azure"
+              "azmcp"
+              "server"
+              "start"
+            ];
             env = {
               AZURE_TOKEN_CREDENTIALS = "AzureCliCredential";
             };
@@ -45,7 +51,13 @@
 
           Snyk = {
             command = "npx";
-            args = [ "-y" "snyk@latest" "mcp" "-t" "stdio" ];
+            args = [
+              "-y"
+              "snyk@latest"
+              "mcp"
+              "-t"
+              "stdio"
+            ];
             env = {
               SNYK_TOKEN = "\${env:SNYK_NIXOS_MCP_TOKEN}";
             };

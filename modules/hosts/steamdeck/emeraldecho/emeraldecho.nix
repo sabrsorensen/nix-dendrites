@@ -10,7 +10,8 @@ let
     bootMode:
     { config, pkgs, ... }:
     let
-      enableNixRemote = !(config.wsl.enable or false) && config ? sops && config.sops.secrets ? hashed_password;
+      enableNixRemote =
+        !(config.wsl.enable or false) && config ? sops && config.sops.secrets ? hashed_password;
     in
     {
       imports = with inputs.self.modules.nixos; [
@@ -270,8 +271,9 @@ in
           home.homeDirectory = "/home/deck";
           home.stateVersion = "26.05";
           home.packages = map (name: pkgs.${name}) shared.deckSteamHomePackages;
-          home.activation.setupSteamLibraryMount =
-            lib.hm.dag.entryAfter [ "writeBoundary" ] shared.setupSteamLibraryMount;
+          home.activation.setupSteamLibraryMount = lib.hm.dag.entryAfter [
+            "writeBoundary"
+          ] shared.setupSteamLibraryMount;
         }
       )
     ];

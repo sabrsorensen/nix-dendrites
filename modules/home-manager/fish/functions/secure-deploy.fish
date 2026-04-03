@@ -89,9 +89,7 @@ function secure-deploy --description "Remote deployment script with safety check
 
     # Run the actual deployment
     set deploy_result 0
-    inhibitSleep nh os switch ~/src/nix-dendrites/ -H $target_host --target-host $nh_target_host $upgrade_flag --keep-going $additional_args
-    #inhibitSleep nh os switch ~/src/nix-dendrites/ -H $target_host --target-host $nh_target_host --keep-going $additional_args
-    #inhibitSleep nh os switch ~/src/nix-dendrites/ -H $target_host --target-host $nh_target_host --keep-going
+    nh os switch ~/src/nix-dendrites/ -H $target_host --target-host $nh_target_host $upgrade_flag --keep-going $additional_args
     set deploy_result $status
 
     if test $deploy_result -eq 0

@@ -42,7 +42,11 @@
       isServer = hostType == "server";
       isAtlas = hostname == "AtlasUponRaiden";
       isWsl = hostname == "NixOS-WSL";
-      sleepySystem = builtins.elem hostname [ "EmeraldEcho" "Kamino" "ZaphodBeeblebrox" ];
+      sleepySystem = builtins.elem hostname [
+        "EmeraldEcho"
+        "Kamino"
+        "ZaphodBeeblebrox"
+      ];
 
       hasNixFlake = isWorkstation || isServer;
       canDeployRemotely = (isWorkstation || isServer) && !isWsl;

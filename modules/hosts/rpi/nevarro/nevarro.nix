@@ -14,7 +14,8 @@ in
       ...
     }:
     let
-      enableNixRemote = !(config.wsl.enable or false) && config ? sops && config.sops.secrets ? hashed_password;
+      enableNixRemote =
+        !(config.wsl.enable or false) && config ? sops && config.sops.secrets ? hashed_password;
     in
     {
       imports = [

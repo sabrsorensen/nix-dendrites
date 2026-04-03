@@ -70,7 +70,13 @@
             };
             Snyk = {
               command = "npx";
-              args = [ "-y" "snyk@latest" "mcp" "-t" "stdio" ];
+              args = [
+                "-y"
+                "snyk@latest"
+                "mcp"
+                "-t"
+                "stdio"
+              ];
               env_vars = [ "SNYK_TOKEN" ];
               startup_timeout_sec = 300;
             };

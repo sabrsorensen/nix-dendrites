@@ -1,4 +1,6 @@
-{ steamUser ? "sam" }:
+{
+  steamUser ? "sam",
+}:
 {
   config,
   lib,

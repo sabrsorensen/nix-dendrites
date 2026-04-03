@@ -13,9 +13,12 @@
         zaphodbeeblebrox = inputs.self.nixosConfigurations.ZaphodBeeblebrox.config.system.build.toplevel;
         "nixos-wsl" = inputs.self.nixosConfigurations.NixOS-WSL.config.system.build.toplevel;
         emeraldecho = inputs.self.nixosConfigurations.EmeraldEcho.config.system.build.toplevel;
-        "emeraldecho-bootstrap" = inputs.self.nixosConfigurations.EmeraldEchoBootstrap.config.system.build.toplevel;
-        "emeraldecho-installer" = inputs.self.nixosConfigurations.EmeraldEchoInstaller.config.system.build.isoImage;
-        "emeraldecho-dualboot" = inputs.self.nixosConfigurations.EmeraldEchoDualBoot.config.system.build.toplevel;
+        "emeraldecho-bootstrap" =
+          inputs.self.nixosConfigurations.EmeraldEchoBootstrap.config.system.build.toplevel;
+        "emeraldecho-installer" =
+          inputs.self.nixosConfigurations.EmeraldEchoInstaller.config.system.build.isoImage;
+        "emeraldecho-dualboot" =
+          inputs.self.nixosConfigurations.EmeraldEchoDualBoot.config.system.build.toplevel;
         "emeraldecho-dualboot-bootstrap" =
           inputs.self.nixosConfigurations.EmeraldEchoDualBootBootstrap.config.system.build.toplevel;
         "emeraldecho-dualboot-installer" =
@@ -36,14 +39,18 @@
 
       steamDeckPackages = {
         emeraldecho = inputs.self.nixosConfigurations.EmeraldEcho.config.system.build.toplevel;
-        "emeraldecho-bootstrap" = inputs.self.nixosConfigurations.EmeraldEchoBootstrap.config.system.build.toplevel;
-        "emeraldecho-installer" = inputs.self.nixosConfigurations.EmeraldEchoInstaller.config.system.build.isoImage;
-        "emeraldecho-dualboot" = inputs.self.nixosConfigurations.EmeraldEchoDualBoot.config.system.build.toplevel;
+        "emeraldecho-bootstrap" =
+          inputs.self.nixosConfigurations.EmeraldEchoBootstrap.config.system.build.toplevel;
+        "emeraldecho-installer" =
+          inputs.self.nixosConfigurations.EmeraldEchoInstaller.config.system.build.isoImage;
+        "emeraldecho-dualboot" =
+          inputs.self.nixosConfigurations.EmeraldEchoDualBoot.config.system.build.toplevel;
         "emeraldecho-dualboot-bootstrap" =
           inputs.self.nixosConfigurations.EmeraldEchoDualBootBootstrap.config.system.build.toplevel;
         "emeraldecho-dualboot-installer" =
           inputs.self.nixosConfigurations.EmeraldEchoDualBootInstaller.config.system.build.isoImage;
-        "emeraldecho-singleboot" = inputs.self.nixosConfigurations.EmeraldEchoSingleBoot.config.system.build.toplevel;
+        "emeraldecho-singleboot" =
+          inputs.self.nixosConfigurations.EmeraldEchoSingleBoot.config.system.build.toplevel;
         "emeraldecho-singleboot-bootstrap" =
           inputs.self.nixosConfigurations.EmeraldEchoSingleBootBootstrap.config.system.build.toplevel;
         "emeraldecho-singleboot-installer" =

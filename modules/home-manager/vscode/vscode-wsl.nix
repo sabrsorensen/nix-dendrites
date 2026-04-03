@@ -14,15 +14,15 @@
           src = pkgs.emptyDirectory;
 
           installPhase = ''
-            mkdir -p "$out/lib/vscode/resources/app"
-            cat > "$out/lib/vscode/resources/app/product.json" <<'EOF'
-{
-  "nameShort": "Code",
-  "nameLong": "Visual Studio Code",
-  "applicationName": "code",
-  "dataFolderName": ".vscode"
-}
-EOF
+                        mkdir -p "$out/lib/vscode/resources/app"
+                        cat > "$out/lib/vscode/resources/app/product.json" <<'EOF'
+            {
+              "nameShort": "Code",
+              "nameLong": "Visual Studio Code",
+              "applicationName": "code",
+              "dataFolderName": ".vscode"
+            }
+            EOF
           '';
 
           fixupPhase = "";
