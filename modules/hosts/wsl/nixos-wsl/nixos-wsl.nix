@@ -1,51 +1,18 @@
 {
   inputs,
+  lib,
   ...
 }:
 {
-  flake.modules.nixos."NixOS-WSL" =
-    {
-      config,
-      pkgs,
-      lib,
-      ...
-    }:
-    let
-      username = config.my.wslUsername;
-    in
-    {
-      imports =
-        (with inputs.self.modules.nixos; [
-          wsl-base
-          system-cli
-        ])
-        ++ [ "${inputs.nix-work-secrets}/modules/system-secrets-private.nix" ];
-
-      nixpkgs.config.allowUnfree = true;
-
-      users.groups.${username} = { };
-      users.users.${username} = {
-        isNormalUser = true;
-        home = "/home/${username}";
-        extraGroups = [ "wheel" ];
-        shell = pkgs.bash;
-        group = username;
-      };
-
-      programs.fish.enable = true;
-
-      home-manager.users.${username} = {
-        imports = [
-          inputs.self.modules.homeManager."NixOS-WSL"
-        ];
-        home.username = lib.mkDefault username;
-        home.homeDirectory = lib.mkDefault "/home/${username}";
-      };
-    };
-
-  flake.modules.homeManager."NixOS-WSL" = {
-    imports = [ inputs.self.modules.homeManager."wsl-home" ];
+  flake.modules.nixos."NixOS-WSL" = {
+    imports = [
+      (import ./_nixos-wsl/system.nix { inherit inputs; })
+      ./_nixos-wsl/user.nix
+      (import ./_nixos-wsl/home-defaults.nix { inherit inputs lib; })
+    ];
   };
+
+  flake.modules.homeManager."NixOS-WSL" = import ./_nixos-wsl/home-manager.nix { inherit inputs; };
 
   flake.nixosConfigurations = inputs.self.lib.mkNixos "x86_64-linux" "NixOS-WSL";
 }
