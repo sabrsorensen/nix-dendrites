@@ -267,6 +267,7 @@
       defaultExts = [
         "docker.docker"
         "ms-azuretools.vscode-containers"
+        "rangav.vscode-thunder-client"
         "redhat.vscode-yaml"
       ]
       ++ uiExts

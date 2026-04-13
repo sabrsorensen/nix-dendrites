@@ -14,13 +14,13 @@ let
 in
 mkDeckyPlugin {
   pname = "decky-XRGaming";
-  version = "1.4.3-alpha";
+  version = "1.5.4";
 
   src = fetchFromGitHub {
     owner = "wheaney";
     repo = "decky-XRGaming";
-    rev = "v1.4.3-alpha";
-    sha256 = "sha256-uo76zIJ/bBTeDlgyk7xDQ3ujFzzrP53Zg+k+Z9S+xCU=";
+    rev = "646d431c19cb361c91cd3adf10a91d9ca886feda";
+    sha256 = "sha256-YEsCMfWR4ohXBhhyqVYrwhs5j49OuBFxahTaYarRv/o=";
     fetchSubmodules = true;
   };
 

@@ -41,8 +41,11 @@
       config = lib.mkIf config.my.syncthing.enable {
         services.syncthing = {
           enable = true;
-          guiAddress = "0.0.0.0:8384";
-          passwordFile = config.sops.secrets.syncthing_gui_password.path;
+          #guiAddress = "0.0.0.0:8384";
+          #guiCredentials = {
+          #  passwordFile = config.sops.secrets.syncthing_gui_password.path;
+          #  username = config.home.username;
+          #};
           overrideDevices = false;
           overrideFolders = false;
           settings = {

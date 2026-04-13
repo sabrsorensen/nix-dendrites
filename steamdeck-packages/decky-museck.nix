@@ -12,7 +12,7 @@ mkDeckyPlugin {
     owner = "Nezreka";
     repo = "Museck";
     rev = "main";
-    sha256 = "sha256-JOHvQ85tpFGYTH5S57Coz5Hc2e8wBDWRiosdxTCAI/0=";
+    sha256 = "sha256-l1DXMRfTd9CfOBPe9DVjnLGcaQVQXBgfJ0hIzfBUjGU=";
   };
 
   hash = "sha256-o7PQ7XMtaA3kypofskunp5/NaNcJFn+4CT1NIGm3MSI=";
