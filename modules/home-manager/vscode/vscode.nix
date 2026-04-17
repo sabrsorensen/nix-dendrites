@@ -3,10 +3,12 @@
     {
       config,
       lib,
+      osConfig ? null,
       pkgs,
       ...
     }:
     let
+      isWsl = (osConfig != null) && (osConfig.wsl.enable or false);
       context7ApiKeyPath =
         if config.sops.secrets ? context7_api_key then config.sops.secrets.context7_api_key.path else null;
 
@@ -547,9 +549,7 @@
       };
     in
     {
-      home.packages = with pkgs; [
-        pkgs.dotnetCorePackages.sdk_10_0-bin
-      ];
+      home.packages = lib.optionals (!isWsl) [ pkgs.dotnetCorePackages.sdk_10_0-bin ];
       programs.vscode = {
         enable = true;
         #mutableExtsDir = true; # mutually exclusive with profiles

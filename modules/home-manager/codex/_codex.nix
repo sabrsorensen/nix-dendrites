@@ -25,6 +25,7 @@
       codexWrapped = pkgs.symlinkJoin {
         name = "codex-wrapped";
         paths = [ codexPackage ];
+        version = codexPackage.version;
         nativeBuildInputs = [ pkgs.makeWrapper ];
         postBuild = ''
           wrapProgram "$out/bin/codex" \
@@ -48,6 +49,9 @@
           personality = "pragmatic";
 
           mcp_servers = {
+            Atlassian = {
+              url = "https://mcp.atlassian.com/v1/mcp";
+            };
             Context7 = {
               url = "https://mcp.context7.com/mcp";
               env_http_headers = {
