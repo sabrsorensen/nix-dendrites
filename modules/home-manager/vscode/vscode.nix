@@ -271,6 +271,7 @@
         "ms-azuretools.vscode-containers"
         "rangav.vscode-thunder-client"
         "redhat.vscode-yaml"
+        "tomoki1207.pdf"
       ]
       ++ uiExts
       ++ copilotExts
@@ -742,19 +743,19 @@
           #  languageSnippets = { };
           #  userSettings = dotnetSettings // defaultUserSettings;
           #};
-          #STM32 = {
-          #  extensions =
-          #    pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
-          #      defaultExts ++ [
-          #        "ms-vscode.cpptools"
-          #        "ms-vscode.cpptools-extension-pack"
-          #        "platformio.platformio-ide"
-          #      ]
-          #    );
-          #  keybindings = defaultKeyBindings ++ [];
-          #  languageSnippets = { };
-          #  userSettings = defaultUserSettings;
-          #};
+          STM32 = {
+            extensions =
+              pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
+                defaultExts ++ [
+                  "ms-vscode.cpptools"
+                  "ms-vscode.cpptools-extension-pack"
+                  "platformio.platformio-ide"
+                ]
+              );
+            keybindings = defaultKeyBindings ++ [];
+            languageSnippets = { };
+            userSettings = defaultUserSettings;
+          };
         };
       };
     };

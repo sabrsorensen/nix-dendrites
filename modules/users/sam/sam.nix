@@ -14,7 +14,7 @@ let
   homeImports = [ inputs.self.modules.homeManager.home ];
   graphicalImports = [ inputs.self.modules.homeManager."graphical-home" ];
   privateImports = [
-    "${inputs.nix-secrets}/modules/sam-syncthing-private.nix"
+    "${inputs.nix-secrets}/modules/sam-syncthing-universal.nix"
     "${inputs.nix-secrets}/modules/sam-secrets-private.nix"
   ];
 in
@@ -32,6 +32,7 @@ in
           ];
 
         users.users."${username}" = {
+          description = lib.strings.toUpper (lib.strings.substring 0 1 username) + lib.strings.substring 1 (-1) username;
           group = username;
         };
         programs.fish.enable = true;

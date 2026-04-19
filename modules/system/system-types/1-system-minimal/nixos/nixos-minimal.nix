@@ -140,6 +140,7 @@
         openssl
         pciutils.out
         ps
+        python3
         ripgrep
         vim
         wget

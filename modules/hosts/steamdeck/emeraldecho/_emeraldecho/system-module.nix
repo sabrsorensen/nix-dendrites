@@ -11,7 +11,7 @@ let
 in
 {
   imports = with inputs.self.modules.nixos; [
-    sam
+    samCli
     system-cli
     disko
     inputs.nix-flatpak.nixosModules.nix-flatpak

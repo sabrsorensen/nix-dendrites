@@ -20,11 +20,25 @@
       disko
       virtualisation
       cross-compile
-      syncthing
+      syncthing-server
       {
-        home-manager.users.sam.imports = [
-          inputs.self.modules.homeManager.AtlasUponRaiden
+        imports = [
+          # Universal syncthing config that works in both NixOS and Home Manager contexts
+          "${inputs.nix-secrets}/modules/sam-syncthing-universal.nix"
         ];
+
+        # Enable server-mode syncthing for AtlasUponRaiden
+        my.syncthing.enable = true;
+        my.syncthing.serverUser = "sam";
+      }
+      {
+        home-manager.users.sam = {
+          imports = [
+            inputs.self.modules.homeManager.AtlasUponRaiden
+          ];
+          # Force disable Home Manager syncthing to avoid conflicts with NixOS service
+          my.syncthing.enable = lib.mkForce false;
+        };
       }
     ];
   };

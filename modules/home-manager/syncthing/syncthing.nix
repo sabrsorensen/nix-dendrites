@@ -5,17 +5,24 @@
       lib,
       pkgs,
       osConfig,
+      inputs,
       ...
     }:
     let
       hostName = osConfig.networking.hostName;
+
+      # Desktop/laptop hosts that should use Home Manager syncthing
+      desktopHosts = [ "Kamino" "ZaphodBeeblebrox" "EmeraldEcho" ];
+
+      # Server/headless hosts that should use NixOS syncthing-server
+      serverHosts = [ "AtlasUponRaiden" ];
+
+      # Disabled hosts (RPis, WSL) that don't need syncthing
+      disabledHosts = [ "Naboo" "Nevarro" ];
+
+      shouldEnable = builtins.elem hostName desktopHosts;
       isSteamDeck = hostName == "EmeraldEcho";
-      disableTray = builtins.elem hostName [
-        "AtlasUponRaiden"
-        "EmeraldEcho"
-        "Naboo"
-        "Nevarro"
-      ];
+      shouldHaveTray = builtins.elem hostName [ "Kamino" "ZaphodBeeblebrox" ];
 
       allDevices = config.my.syncthing.devices;
       allFolders = config.my.syncthing.folders;
@@ -38,23 +45,34 @@
         };
       };
 
-      config = lib.mkIf config.my.syncthing.enable {
+      # Show a warning if enabled on a host that should use system service
+      config = lib.mkMerge [
+        {
+          warnings = lib.optionals (config.my.syncthing.enable) (
+            (lib.optional (builtins.elem hostName serverHosts)
+              "Syncthing enabled via Home Manager on ${hostName}, but this server host should use the NixOS syncthing-server module for always-on operation.")
+            ++
+            (lib.optional (builtins.elem hostName disabledHosts)
+              "Syncthing enabled via Home Manager on ${hostName}, but syncthing is currently disabled for RPi/WSL hosts.")
+          );
+        }
+        (lib.mkIf (config.my.syncthing.enable && shouldEnable) {
         services.syncthing = {
           enable = true;
           #guiAddress = "0.0.0.0:8384";
-          #guiCredentials = {
-          #  passwordFile = config.sops.secrets.syncthing_gui_password.path;
-          #  username = config.home.username;
-          #};
+          guiCredentials = {
+            passwordFile = config.sops.secrets.syncthing_gui_password.path;
+            username = config.home.username;
+          };
           overrideDevices = false;
           overrideFolders = false;
           settings = {
             devices = allDevices;
             folders = filteredFolders;
-            gui = {
-              theme = "black";
-              user = config.home.username;
-            };
+            #gui = {
+            #  theme = "black";
+            #  user = config.home.username;
+            #};
             options = {
               localAnnounceEnabled = true;
               urAccepted = -1;
@@ -69,12 +87,13 @@
             };
           };
           tray = {
-            enable = !disableTray;
+            enable = shouldHaveTray;
             package = pkgs.syncthingtray;
           };
         };
 
         home.packages = lib.optionals isSteamDeck [ pkgs.syncthingtray ];
-      };
+        })
+      ];
     };
 }
