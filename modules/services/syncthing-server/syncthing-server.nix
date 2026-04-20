@@ -47,7 +47,7 @@
           openDefaultPorts = true;
 
           # Web GUI configuration
-          guiAddress = "0.0.0.0:8384";  # Allow access from network
+          #guiAddress = "0.0.0.0:8384";  # Allow access from network
 
           settings = {
             devices = allDevices;

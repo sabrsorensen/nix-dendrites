@@ -20,6 +20,7 @@
       disko
       virtualisation
       cross-compile
+      nix-index
       syncthing-server
       {
         imports = [

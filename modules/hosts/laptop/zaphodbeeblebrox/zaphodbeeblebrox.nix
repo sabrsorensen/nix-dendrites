@@ -15,6 +15,7 @@
       disko
       bluetooth
       flatpak
+      nix-index
       kde
       nvidia
       wine
@@ -34,6 +35,7 @@
       konsole
       mcp
       mcp-personal
+      nix-index
       vscode
     ];
   };

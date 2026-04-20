@@ -21,6 +21,7 @@ in
         system-desktop
         systemd-boot
         flatpak
+        nix-index
         nvidia
         kde
         wine

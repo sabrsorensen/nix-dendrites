@@ -5,6 +5,7 @@
     konsole
     mcp
     mcp-personal
+    nix-index
     vscode
   ];
 }

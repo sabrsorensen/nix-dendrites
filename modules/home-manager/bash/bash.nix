@@ -7,10 +7,6 @@
       ...
     }:
     {
-      programs.nix-index = {
-        enable = true;
-        enableBashIntegration = true;
-      };
 
       programs.bash = {
         enable = true;

@@ -72,10 +72,6 @@
         lolcat
       ];
 
-      programs.nix-index = {
-        enable = true;
-        enableFishIntegration = true;
-      };
 
       programs.fish = {
         enable = true;
