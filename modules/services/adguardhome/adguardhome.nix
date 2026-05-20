@@ -219,7 +219,14 @@
               level DEBUG
             '';
             extraConfig = ''
-              reverse_proxy http://${config.services.adguardhome.host}:${toString config.services.adguardhome.port}
+              filter {
+                content_type text/html.*
+                search_pattern </head>
+                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/adguard/aquamarine.css'></head>"
+              }
+              reverse_proxy http://${config.services.adguardhome.host}:${toString config.services.adguardhome.port} {
+                header_up -Accept-Encoding
+              }
             '';
           };
         };

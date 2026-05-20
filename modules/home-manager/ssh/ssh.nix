@@ -69,7 +69,7 @@
       programs.ssh = {
         enable = true;
         enableDefaultConfig = false;
-        matchBlocks = lib.filterAttrs (_: v: v != null) ({
+        settings = lib.filterAttrs (_: v: v != null) ({
           "*" = {
             addKeysToAgent = "yes";
             forwardAgent = true;
@@ -84,9 +84,10 @@
             name = "AtlasUponRaiden";
             user = "sam";
             identityFile = "~/.ssh/atlas_id_ed25519";
+            port = 22;
             identitiesOnly = true;
           };
-          nix-atlasuponraiden = mkNixBlock { name = "AtlasUponRaiden"; };
+          nix-atlasuponraiden = mkNixBlock { name = "AtlasUponRaiden"; port = 22; };
 
           Naboo = mkBaseBlock {
             name = "Naboo";
@@ -107,10 +108,11 @@
           EmeraldEcho = mkBaseBlock {
             name = "EmeraldEcho";
             user = "sam";
+            port = 22;
             identityFile = "~/.ssh/emeraldecho_id_ed25519";
             identitiesOnly = true;
           };
-          nix-emeraldecho = mkNixBlock { name = "EmeraldEcho"; };
+          nix-emeraldecho = mkNixBlock { name = "EmeraldEcho"; port = 22; };
 
           GitHub =
             if builtins.elem hostname nixBlockHosts then

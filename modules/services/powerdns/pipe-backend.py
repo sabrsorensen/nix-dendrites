@@ -10,13 +10,15 @@ from datetime import datetime
 
 # Configuration
 ZONE_NAME = "dummydomain"
-CACHE_TTL = 300  # Cache DHCP data for 5 minutes
+CACHE_TTL = 180  # Cache DHCP data for 3 minutes
 
-# Global in-memory cache
+# Global cache and failure tracking
 _dhcp_cache = {}
 _cache_timestamp = 0
 _cache_lock = threading.Lock()
 _cache_initialized = False
+_failed_sources = set()  # Track persistently failing sources
+_failed_sources_clear_time = 0  # Last time failed sources were cleared
 
 # Configure logging
 def setup_logging():
@@ -56,10 +58,15 @@ ZONE_DATA = {
     f"agh-nevarro.{ZONE_NAME}.": {"CNAME": f"nevarro.{ZONE_NAME}."},
     f"atlas.{ZONE_NAME}.": {"CNAME": f"atlasuponraiden.{ZONE_NAME}."},
     f"auth.{ZONE_NAME}.": {"CNAME": f"nevarro.{ZONE_NAME}."},
+    f"homeassistant.{ZONE_NAME}.": {"CNAME": f"coruscant.{ZONE_NAME}."},
     f"home-gw.{ZONE_NAME}.": {"CNAME": f"gt-ax11000-pro.{ZONE_NAME}."},
+    f"immich.{ZONE_NAME}.": {"CNAME": f"atlasuponraiden.{ZONE_NAME}."},
     f"mealie.{ZONE_NAME}.": {"CNAME": f"atlasuponraiden.{ZONE_NAME}."},
     f"netbird.{ZONE_NAME}.": {"CNAME": f"nevarro.{ZONE_NAME}."},
+    f"ntfy.{ZONE_NAME}.": {"CNAME": f"atlasuponraiden.{ZONE_NAME}."},
     f"plex.{ZONE_NAME}.": {"CNAME": f"atlasuponraiden.{ZONE_NAME}."},
+    f"profilarr.{ZONE_NAME}.": {"CNAME": f"atlasuponraiden.{ZONE_NAME}."},
+    f"scrutiny.{ZONE_NAME}.": {"CNAME": f"atlasuponraiden.{ZONE_NAME}."},
 }
 
 def read_secret(path: str, default: Optional[str] = None) -> Optional[str]:
@@ -72,7 +79,7 @@ def read_secret(path: str, default: Optional[str] = None) -> Optional[str]:
 
 def should_skip_hostname(hostname: str) -> bool:
     """Determine if a hostname should be skipped"""
-    static_entries = {'ns1', 'ns2', 'atlas', 'home-gw', 'agh-naboo', 'agh-nevarro', 'plex'}
+    static_entries = {'ns1', 'ns2', 'atlas', 'home-gw', 'agh-naboo', 'agh-nevarro', 'plex', 'immich', 'mealie', 'netbird', 'scrutiny', 'profilarr', 'ntfy', 'homeassistant'}
     reserved_names = {
         'gateway', 'router', 'dns', 'dhcp', 'ns', 'ns1', 'ns2',
         'localhost', 'www', 'mail', 'ftp', 'pop', 'imap', 'smtp',
@@ -86,13 +93,32 @@ def should_skip_hostname(hostname: str) -> bool:
 
 def fetch_dhcp_leases() -> Dict[str, Dict]:
     """Fetch DHCP leases from AdGuard Home instances"""
+    global _failed_sources
+
     try:
+        import pwd
+        # Print environment and user info for debugging
+        logger.debug(f"Effective UID: {os.geteuid()}, Username: {pwd.getpwuid(os.geteuid()).pw_name}")
+        logger.debug(f"Current working directory: {os.getcwd()}")
+        logger.debug(f"Environment PATH: {os.environ.get('PATH')}")
+        logger.debug(f"Secrets file paths: /run/secrets/adguardhome_user, /run/secrets/adguardhome_password")
+
         # Get credentials
         username = read_secret("/run/secrets/adguardhome_user")
         password = read_secret("/run/secrets/adguardhome_password")
 
+        logger.debug(f"Read username: {'set' if username else 'NOT SET'}; password: {'set' if password else 'NOT SET'}")
+
         if not username or not password:
-            logger.error("AdGuard Home credentials not found")
+            logger.error("AdGuard Home credentials not found or not readable")
+            # Try to log file permissions
+            try:
+                user_stat = os.stat("/run/secrets/adguardhome_user")
+                pass_stat = os.stat("/run/secrets/adguardhome_password")
+                logger.debug(f"adguardhome_user perms: {oct(user_stat.st_mode)}, owner: {user_stat.st_uid}, group: {user_stat.st_gid}")
+                logger.debug(f"adguardhome_password perms: {oct(pass_stat.st_mode)}, owner: {pass_stat.st_uid}, group: {pass_stat.st_gid}")
+            except Exception as e:
+                logger.debug(f"Could not stat secrets files: {e}")
             return {}
 
         dynamic_records = {}
@@ -104,17 +130,26 @@ def fetch_dhcp_leases() -> Dict[str, Dict]:
             {"url": "https://ns2placeholder", "name": "Naboo AdGuard Home", "verify_ssl": False},
         ]
 
+        logger.debug(f"Sources to query: {[s['url'] for s in sources]}")
+
         for source in sources:
+            # Skip sources that have been failing consistently
+            if source["url"] in _failed_sources:
+                logger.debug(f"Skipping {source['name']} - marked as failing")
+                continue
+
             try:
-                logger.debug(f"Attempting to connect to {source['name']} at {source['url']}")
+                logger.debug(f"Attempting to connect to {source['name']} at {source['url']} (verify_ssl={source.get('verify_ssl', True)})")
 
                 # Configure requests with shorter timeout for non-blocking operation
                 session = requests.Session()
 
+                logger.debug(f"Requesting: {source['url']}/control/dhcp/status with user '{username}'")
+
                 response = session.get(
                     f"{source['url']}/control/dhcp/status",
                     auth=(username, password),
-                    timeout=5,  # Reduced timeout
+                    timeout=3,  # Reduced timeout for faster failures
                     verify=source.get('verify_ssl', True),
                     headers={
                         'User-Agent': 'PowerDNS-Pipe-Backend/1.0',
@@ -130,6 +165,9 @@ def fetch_dhcp_leases() -> Dict[str, Dict]:
                 static_leases = data.get('static_leases', [])
 
                 logger.info(f"Successfully fetched {len(static_leases)} leases from {source['name']}")
+
+                # Remove from failed sources on success
+                _failed_sources.discard(source["url"])
 
                 for lease in static_leases:
                     hostname = lease.get('hostname', '').strip()
@@ -154,32 +192,51 @@ def fetch_dhcp_leases() -> Dict[str, Dict]:
 
             except requests.exceptions.SSLError as e:
                 logger.warning(f"SSL certificate error for {source['name']} ({source['url']}): {e}")
+                _failed_sources.add(source["url"])
             except requests.exceptions.ConnectionError as e:
                 logger.warning(f"Connection error to {source['name']} ({source['url']}): {e}")
+                logger.debug(f"Exception details: {e}")
+                _failed_sources.add(source["url"])
             except requests.exceptions.Timeout as e:
                 logger.warning(f"Timeout connecting to {source['name']} ({source['url']}): {e}")
+                _failed_sources.add(source["url"])
             except requests.exceptions.HTTPError as e:
                 logger.warning(f"HTTP {e.response.status_code} error from {source['name']} ({source['url']}): {e}")
+                _failed_sources.add(source["url"])
             except Exception as e:
                 logger.warning(f"Unexpected error from {source['name']} ({source['url']}): {type(e).__name__}: {e}")
+                logger.debug(f"Exception details: {e}")
+                _failed_sources.add(source["url"])
 
         # Debug: Log if deskdockingstation was found in final records
         deskdockingstation_found = any("deskdockingstation" in fqdn for fqdn in dynamic_records.keys())
         logger.debug(f"deskdockingstation in final dynamic_records: {deskdockingstation_found}")
 
         logger.info(f"Collected {len(dynamic_records)} unique dynamic records from {len(sources)} sources")
+
+        if _failed_sources:
+            logger.debug(f"Failed sources: {_failed_sources}")
+
         return dynamic_records
 
     except Exception as e:
         logger.error(f"Error getting DHCP leases: {e}")
+        import traceback
+        logger.debug(traceback.format_exc())
         return {}
 
 def get_dynamic_records() -> Dict[str, Dict]:
     """Get dynamic records with in-memory caching"""
-    global _dhcp_cache, _cache_timestamp, _cache_initialized
+    global _dhcp_cache, _cache_timestamp, _cache_initialized, _failed_sources, _failed_sources_clear_time
 
     with _cache_lock:
         current_time = time.time()
+
+        # Clear failed sources every 10 minutes to allow retry
+        if current_time - _failed_sources_clear_time > 600 and _failed_sources:
+            logger.debug("Clearing failed sources list to allow retries")
+            _failed_sources.clear()
+            _failed_sources_clear_time = current_time
 
         # Check if cache is still valid
         if _dhcp_cache and (current_time - _cache_timestamp) < CACHE_TTL:
@@ -201,15 +258,17 @@ def get_dynamic_records() -> Dict[str, Dict]:
 def initialize_cache_async():
     """Initialize the cache asynchronously in a background thread"""
     def init_worker():
-        global _dhcp_cache, _cache_timestamp, _cache_initialized
+        global _dhcp_cache, _cache_timestamp, _cache_initialized, _failed_sources_clear_time
 
         logger.info("Pre-populating DHCP cache at startup...")
         try:
             initial_records = fetch_dhcp_leases()
+            current_time = time.time()
             with _cache_lock:
                 _dhcp_cache = initial_records
-                _cache_timestamp = time.time()
+                _cache_timestamp = current_time
                 _cache_initialized = True
+                _failed_sources_clear_time = current_time
             logger.info(f"Initial DHCP cache populated with {len(initial_records)} records")
 
             # Log some examples of what was loaded
@@ -225,10 +284,12 @@ def initialize_cache_async():
 
         except Exception as e:
             logger.error(f"Failed to pre-populate DHCP cache: {e}")
+            current_time = time.time()
             with _cache_lock:
                 _dhcp_cache = {}
                 _cache_timestamp = 0
                 _cache_initialized = True
+                _failed_sources_clear_time = current_time
 
     # Start the initialization in a background thread
     init_thread = threading.Thread(target=init_worker, daemon=True)

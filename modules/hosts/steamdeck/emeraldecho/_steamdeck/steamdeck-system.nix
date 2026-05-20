@@ -13,8 +13,16 @@
       "nix-command"
       "flakes"
     ];
-    extra-substituters = [ "https://cache.thalheim.io" ];
-    extra-trusted-public-keys = [ "cache.thalheim.io-1:R7msbosLEZKrxk/lKxf9BTjOOH7Ax3H0Qj0/6wiHOgc=" ];
+    extra-substituters = [
+      "https://nix-gaming.cachix.org"
+      "https://jovian-experiments.cachix.org"
+      "https://cache.thalheim.io"
+    ];
+    extra-trusted-public-keys = [
+      "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
+      "jovian-experiments.cachix.org-1:lwPS3KgK5sJlI2B9KBY4VpbWNGbAjCcKVkUyqfzVrJE="
+      "cache.thalheim.io-1:R7msbosLEZKrxk/lKxf9BTjOOH7Ax3H0Qj0/6wiHOgc="
+    ];
     max-jobs = "auto";
   };
 
@@ -79,7 +87,6 @@
       noto-fonts
       noto-fonts-cjk-sans
       noto-fonts-cjk-serif
-      noto-fonts-color-emoji
       source-han-sans
       source-han-serif
       source-han-mono

@@ -23,8 +23,8 @@
   };
 
   flake.modules.homeManager.system-desktop = {
-    imports = [
-      inputs.self.modules.homeManager."graphical-home"
+    imports = with inputs.self.modules.homeManager; [
+      "graphical-home"
     ];
   };
 }

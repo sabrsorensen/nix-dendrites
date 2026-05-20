@@ -9,6 +9,7 @@
     }:
     let
       isWsl = (osConfig != null) && (osConfig.wsl.enable or false);
+      hostname = osConfig.networking.hostName;
       context7ApiKeyPath =
         if config.sops.secrets ? context7_api_key then config.sops.secrets.context7_api_key.path else null;
 
@@ -268,8 +269,9 @@
 
       defaultExts = [
         "docker.docker"
+        "github.vscode-github-actions"
+        "humao.rest-client"
         "ms-azuretools.vscode-containers"
-        "rangav.vscode-thunder-client"
         "redhat.vscode-yaml"
         "tomoki1207.pdf"
       ]
@@ -303,6 +305,7 @@
         ms-dotnettools.csharp
         ms-dotnettools.csdevkit
         ms-dotnettools.vscode-dotnet-runtime
+        patcx.vscode-nuget-gallery
       ];
 
       sqlExts = [
@@ -613,7 +616,7 @@
           #  languageSnippets = { };
           #  userSettings = dotnetSettings // defaultUserSettings;
           #};
-          Higi_LLP = {
+          Higi_LLP = if builtins.elem hostname [ "NixOS-WSL" ] then {
             extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
               higiExts
               ++ pythonExts
@@ -627,7 +630,7 @@
             languageSnippets = { };
             userSettings = defaultUserSettings // higiSettings // { };
             enableMcpIntegration = true;
-          };
+          } else {};
           Nix = {
             extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
               defaultExts
@@ -699,8 +702,6 @@
           #        "tamasfe.even-better-toml"
           #        # Flatpak
           #        "bilelmoussaoui.flatpak-vscode"
-          #        # GitHub Actions
-          #        "github.vscode-github-actions"
           #        # Nix
           #        "jeff-hykin.better-nix-syntax"
           #      ]
@@ -718,7 +719,7 @@
           #  } // defaultUserSettings;
           #};
 
-          Python = {
+          Python = if !builtins.elem hostname [ "NixOS-WSL"] then {
             extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
               defaultExts
               ++ pythonExts
@@ -729,7 +730,7 @@
             languageSnippets = { };
             userSettings = pythonSettings // defaultUserSettings;
             enableMcpIntegration = true;
-          };
+          } else { };
           #StardewValley = {
           #  extensions =
           #    cSharpExts ++
@@ -743,7 +744,7 @@
           #  languageSnippets = { };
           #  userSettings = dotnetSettings // defaultUserSettings;
           #};
-          STM32 = {
+          STM32 = if !builtins.elem hostname ["NixOS-WSL"] then {
             extensions =
               pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
                 defaultExts ++ [
@@ -755,7 +756,7 @@
             keybindings = defaultKeyBindings ++ [];
             languageSnippets = { };
             userSettings = defaultUserSettings;
-          };
+          } else {};
         };
       };
     };

@@ -12,10 +12,10 @@ mkDeckyPlugin {
     owner = "Outpox";
     repo = "Bluetooth";
     rev = "main";
-    sha256 = "sha256-RMcEgjiKgmjCI9cj8dVfedx4LaGMPAk48R62hbWZHew=";
+    sha256 = "sha256-iRffRd13ABENTW4b1tFjaK40s2rvVbumeBPDsRIohjU=";
   };
 
-  hash = "sha256-D6g8rdsY0COHTCDcgTz+6RZ4IaWD6EsoGeli1qKIKSg=";
+  hash = "sha256-02S4/SRPo9hSioDwyPgPNBdfEurX9yaXbq8MbqwK8pY=";
   buildMessage = "Building Bluetooth frontend...";
 
   meta = with lib; {

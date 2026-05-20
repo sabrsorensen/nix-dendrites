@@ -7,7 +7,7 @@ let
   clientId = lib.removeSuffix "\n" (builtins.readFile "${inputs.nix-secrets}/netbird/clientId.txt");
 in
 {
-  flake.modules.nixos.netbird =
+  flake.modules.nixos.netbird-server =
     { config, ... }:
     let
       domain = config.systemConstants.domain;
@@ -49,6 +49,7 @@ in
       };
 
       services.netbird = {
+        useRoutingFeatures = lib.mkForce "server";
         server = {
           enable = true;
           enableNginx = false;

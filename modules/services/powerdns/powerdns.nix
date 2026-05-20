@@ -17,7 +17,7 @@
         extraConfig = ''
           launch=pipe
           pipe-command=/run/pdns/pipe-backend.py
-          pipe-timeout=2000
+          pipe-timeout=10000
           pipe-regex=
 
           cache-ttl=0
@@ -49,8 +49,10 @@
         chmod +x /run/pdns/pipe-backend.py
         sed -i '1s|#!/usr/bin/env python3|#!${python3Bin}|' /run/pdns/pipe-backend.py
         sed -i 's|ZONE_NAME = "dummydomain"|ZONE_NAME = "${domain}"|' /run/pdns/pipe-backend.py
-        sed -i 's|"ns1placeholder"|"${networkConfig.naboo}"|g' /run/pdns/pipe-backend.py
-        sed -i 's|"ns2placeholder"|"${networkConfig.nevarro}"|g' /run/pdns/pipe-backend.py
+        sed -i 's|"https://ns1placeholder"|"https://${networkConfig.nevarro}"|g' /run/pdns/pipe-backend.py
+        sed -i 's|"https://ns2placeholder"|"https://${networkConfig.naboo}"|g' /run/pdns/pipe-backend.py
+        sed -i 's|"ns1placeholder"|"${networkConfig.nevarro}"|g' /run/pdns/pipe-backend.py
+        sed -i 's|"ns2placeholder"|"${networkConfig.naboo}"|g' /run/pdns/pipe-backend.py
         chown pdns:pdns /run/pdns/pipe-backend.py
       '';
 

@@ -39,39 +39,48 @@
 
       config = lib.mkIf config.my.syncthing.enable {
         # System service configuration - runs at boot, independent of user login
-        services.syncthing = {
-          enable = true;
-          user = config.my.syncthing.serverUser;
-          dataDir = "/home/${config.my.syncthing.serverUser}/.local/share/syncthing";
-          configDir = "/home/${config.my.syncthing.serverUser}/.config/syncthing";
-          openDefaultPorts = true;
+        services = {
+          caddy = {
+            virtualHosts."{$DOMAIN}" = {
+              extraConfig = ''
+                redir /syncthing /syncthing/
+                handle_path /syncthing/* {
+                  reverse_proxy http://127.0.0.1:8384 {
+                    header_up Host {upstream_hostport}
+                  }
+                }
+              '';
+            };
+          };
+          syncthing = {
+            enable = true;
+            user = config.my.syncthing.serverUser;
+            dataDir = "/home/${config.my.syncthing.serverUser}/.local/share/syncthing";
+            configDir = "/home/${config.my.syncthing.serverUser}/.config/syncthing";
+            openDefaultPorts = true;
 
-          # Web GUI configuration
-          #guiAddress = "0.0.0.0:8384";  # Allow access from network
+            # Web GUI configuration
+            guiAddress = "127.0.0.1:8384";
+            guiPasswordFile = config.sops.secrets.syncthing_gui_password.path;
 
-          settings = {
-            devices = allDevices;
-            folders = filteredFolders;
+            settings = {
+              devices = allDevices;
+              folders = filteredFolders;
 
-            options = {
-              localAnnounceEnabled = true;
-              urAccepted = -1;
-              # Disable QUIC to work around quic-go v0.56.0 TLS bug
-              connectionPriorityQuicLan = 0;
-              connectionPriorityQuicWan = 0;
-              # Force TCP-only mode to completely avoid QUIC
-              listenAddresses = [ "tcp://:22000" ];
-              # Disable crash reporting to avoid startup delays
-              crashReportingEnabled = false;
+              options = {
+                localAnnounceEnabled = true;
+                urAccepted = -1;
+                # Disable QUIC to work around quic-go v0.56.0 TLS bug
+                connectionPriorityQuicLan = 0;
+                connectionPriorityQuicWan = 0;
+                # Force TCP-only mode to completely avoid QUIC
+                listenAddresses = [ "tcp://:22000" ];
+                # Disable crash reporting to avoid startup delays
+                crashReportingEnabled = false;
+              };
             };
           };
         };
-
-        # Optional: Set up GUI credentials via sops (if available)
-        # services.syncthing.guiCredentials = {
-        #   username = config.my.syncthing.serverUser;
-        #   passwordFile = config.sops.secrets.syncthing_gui_password.path;
-        # };
 
         # Ensure the user exists and has appropriate permissions
         users.users.${config.my.syncthing.serverUser} = {

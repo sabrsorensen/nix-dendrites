@@ -6,7 +6,8 @@
     }:
     let
       vim-night-owl = pkgs.vimUtils.buildVimPlugin {
-        name = "vim-night-owl";
+        pname = "vim-night-owl";
+        version = "unstable-2021-05-16";
         src = pkgs.fetchFromGitHub {
           owner = "haishanh";
           repo = "night-owl.vim";

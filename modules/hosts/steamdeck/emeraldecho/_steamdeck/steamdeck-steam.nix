@@ -33,7 +33,7 @@
           noto-fonts
           noto-fonts-cjk-sans
           noto-fonts-cjk-serif
-          noto-fonts-color-emoji
+          #noto-fonts-color-emoji
           source-han-sans
           source-han-serif
           source-han-mono
@@ -45,5 +45,8 @@
   programs.steam = {
     remotePlay.openFirewall = true;
     localNetworkGameTransfers.openFirewall = true;
+    extraPackages = with pkgs; [
+      hidapi
+    ];
   };
 }

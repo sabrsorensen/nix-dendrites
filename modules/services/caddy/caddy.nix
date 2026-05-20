@@ -16,7 +16,7 @@
           group = "caddy";
           mode = "0400";
           format = "dotenv";
-          sopsFile = "${inputs.nix-secrets}/caddy.env";
+          sopsFile = "${inputs.nix-secrets}/env_files/caddy.env";
           key = "";
         };
       };
@@ -28,14 +28,18 @@
       services = {
         caddy = {
           package = pkgs.caddy.withPlugins {
-            plugins = [ "github.com/caddy-dns/cloudflare@v0.2.2" ];
-            hash = "sha256-7DGnojZvcQBZ6LEjT0e5O9gZgsvEeHlQP9aKaJIs/Zg=";
+            plugins = [
+              "github.com/caddy-dns/cloudflare@v0.2.2"
+              "github.com/sjtug/caddy2-filter@v0.0.0-20230306214137-04be952a71e1"
+            ];
+            hash = "sha256-7KERaalHfJRRXMqz43508Fv8ECWE8MCmh+28rpvzCBk=";
           };
           enable = true;
           email = "letsencrypt@{$DOMAIN}";
           environmentFile = config.sops.secrets.caddy_env.path;
           globalConfig = ''
             acme_dns cloudflare {$CLOUDFLARE_API_KEY}
+            order filter after encode
           '';
           extraConfig = ''
             (cors) {
@@ -59,7 +63,7 @@
           logFormat = ''
             output stdout
             format console
-            level INFO
+            level DEBUG
           '';
         };
       };

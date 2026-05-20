@@ -137,9 +137,9 @@ in
       user = lib.mkDefault steamUser;
       extraPackages = with pkgs; [
         coreutils
+        hidapi
         psmisc
         python3
-        shadow
         steam-run
         systemd
       ];

@@ -19,6 +19,21 @@ in
       config.systemConstants = {
         inherit domain network;
         adminEmail = "admin@${domain}";
+        atlas = {
+          systemFeatures = [
+            "benchmark"     # Can run benchmark builds
+            "big-parallel"  # Has many cores for parallel builds
+            "kvm"          # Has KVM virtualization support
+            "nixos-test"   # Can run NixOS integration tests
+          ];
+          supportedSystems = [
+            "x86_64-linux"   # Native architecture
+            "aarch64-linux"  # Cross-compilation via emulation
+            "i686-linux"     # 32-bit compatibility
+          ];
+          maxJobs = 32;      # Match actual CPU cores (32)
+          speedFactor = 200; # Significantly prefer remote over local cross-compilation
+        };
       };
     };
 }

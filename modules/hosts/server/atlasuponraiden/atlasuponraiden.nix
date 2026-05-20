@@ -11,8 +11,12 @@
       ./_atlas/filesystem.nix
       ./_atlas/network.nix
       ./_atlas/users/sam.nix
+      ./_atlas/immich.nix
       ./_atlas/docker.nix
+      ./_atlas/nix.nix
+      (import ./_atlas/syncthing.nix { inherit inputs; })
       (import ./_atlas/nix-remote.nix { inherit inputs lib; })
+      (import ./_atlas/home-manager-config.nix { inherit inputs lib; })
       samba
       ./_atlas/samba.nix
       system-cli
@@ -21,30 +25,16 @@
       virtualisation
       cross-compile
       nix-index
+      caddy
+      immich
+      #mealie
+      media-server
+      scrutiny
       syncthing-server
-      {
-        imports = [
-          # Universal syncthing config that works in both NixOS and Home Manager contexts
-          "${inputs.nix-secrets}/modules/sam-syncthing-universal.nix"
-        ];
-
-        # Enable server-mode syncthing for AtlasUponRaiden
-        my.syncthing.enable = true;
-        my.syncthing.serverUser = "sam";
-      }
-      {
-        home-manager.users.sam = {
-          imports = [
-            inputs.self.modules.homeManager.AtlasUponRaiden
-          ];
-          # Force disable Home Manager syncthing to avoid conflicts with NixOS service
-          my.syncthing.enable = lib.mkForce false;
-        };
-      }
     ];
   };
 
-  flake.modules.homeManager.AtlasUponRaiden = import ./_atlas/home-manager.nix { };
+  flake.modules.homeManager.AtlasUponRaiden = import ./_atlas/home-manager.nix { inherit inputs; };
 
   flake.nixosConfigurations = inputs.self.lib.mkNixos "x86_64-linux" "AtlasUponRaiden";
 }

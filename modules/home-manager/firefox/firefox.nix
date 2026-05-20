@@ -63,7 +63,7 @@
         }
       ) addonMetadata;
 
-      currHash = "sha256-+l23+eZrYmKBMK92wuCzFdykJltZ0EwpNFUJC/bheLQ=";
+      currHash = "sha256-RuZ0ihlTNu3chVVYd5JZX7xrRl2+jtLmucAKROKFD3s=";
       cssRepo = pkgs.fetchFromGitHub {
         owner = "MrOtherGuy";
         repo = "firefox-csshacks";
@@ -73,7 +73,7 @@
       readCss = path: builtins.readFile (cssRepo + "/${path}");
 
       username = config.home.username;
-      userChromePath = ".mozilla/firefox/${username}/chrome";
+      userChromePath = "${config.xdg.configHome}/mozilla/firefox/${username}/chrome";
 
       cssFiles = [
         "chrome/hide_tabs_toolbar_v2.css"

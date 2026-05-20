@@ -51,7 +51,7 @@ in
           users.users."${username}" = {
             isNormalUser = true;
             home = "/home/${username}";
-            extraGroups = [ "wheel" ];
+            extraGroups = [ "media" "podman" "wheel" ];
             shell = pkgs.bash;
             group = username;
           };

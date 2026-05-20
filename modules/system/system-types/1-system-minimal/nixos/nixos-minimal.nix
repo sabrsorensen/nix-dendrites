@@ -82,16 +82,13 @@
       nix = {
         buildMachines = [
           {
-            hostName = "sam@AtlasUponRaiden";
-            systems = [
-              "x86_64-linux"
-              "aarch64-linux"
-              "i686-linux"
-            ];
+            hostName = "nix-atlasuponraiden";
+            systems = config.systemConstants.atlas.supportedSystems;
             protocol = "ssh";
-            maxJobs = 8;
-            speedFactor = 99; # Increased to prefer remote builds over emulation
-            mandatoryFeatures = [ ];
+            maxJobs = config.systemConstants.atlas.maxJobs;
+            speedFactor = config.systemConstants.atlas.speedFactor;
+            supportedFeatures = config.systemConstants.atlas.systemFeatures;
+            mandatoryFeatures = [ ];  # Remove mandatory requirement temporarily
           }
         ];
         distributedBuilds = true;
@@ -111,8 +108,14 @@
             "flakes"
             # "allow-import-from-derivation"
           ];
-          extra-substituters = [ "https://cache.thalheim.io" ];
+          extra-substituters = [
+            "https://nix-gaming.cachix.org"
+            "https://jovian-experiments.cachix.org"
+            "https://cache.thalheim.io"
+          ];
           extra-trusted-public-keys = [
+            "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
+            "jovian-experiments.cachix.org-1:lwPS3KgK5sJlI2B9KBY4VpbWNGbAjCcKVkUyqfzVrJE="
             "cache.thalheim.io-1:R7msbosLEZKrxk/lKxf9BTjOOH7Ax3H0Qj0/6wiHOgc="
           ];
           keep-derivations = true;

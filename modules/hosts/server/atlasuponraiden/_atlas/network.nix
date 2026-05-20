@@ -1,10 +1,14 @@
 { self, lib, ... }:
 {
+  services.netbirdProxy.turnForward = {
+    enable = true;
+    externalInterface = "eno1";
+  };
+
   networking = {
     firewall = {
       allowedTCPPorts = [
         4470 # ankerctl
-        8384 # syncthing GUI
       ];
       allowedUDPPorts = [
         32100 # ankerctl

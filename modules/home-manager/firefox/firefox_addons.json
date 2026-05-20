@@ -2,9 +2,9 @@
   {
     "pname": "bitwarden-password-manager",
     "addonId": "{446900e4-71c2-419f-a6a7-df9c091e268b}",
-    "version": "2025.12.1",
-    "url": "https://addons.mozilla.org/firefox/downloads/file/4664623/bitwarden_password_manager-2025.12.1.xpi",
-    "sha256": "a7a123eee4e40fdd8af7c0c67243731ddcc37ae1498cf2828995f4905600c51f",
+    "version": "2026.4.0",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4796063/bitwarden_password_manager-2026.4.0.xpi",
+    "sha256": "ccbdf6c3a11c8655d4fe9bdfcf5f16c4c9ff2d8732fadbb85396a2123274ae10",
     "description": {
       "ca": "Administrador de contrasenyes segur i gratu\u00eft per a tots els vostres dispositius",
       "cs": "Bezpe\u010dn\u00fd a bezplatn\u00fd spr\u00e1vce hesel pro v\u0161echna va\u0161e za\u0159\u00edzen\u00ed",
@@ -42,9 +42,9 @@
   {
     "pname": "dark-mode-webextension",
     "addonId": "{174b2d58-b983-4501-ab4b-07e71203cb43}",
-    "version": "0.5.4",
-    "url": "https://addons.mozilla.org/firefox/downloads/file/4587807/dark_mode_webextension-0.5.4.xpi",
-    "sha256": "1b614c05c713d5f27ca738b8a260095b1ee982fe6f20994b26ae74af14ae9d9d",
+    "version": "0.5.6",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4764181/dark_mode_webextension-0.5.6.xpi",
+    "sha256": "1e83c3b66ec3e505469736bec9c85ef3632eda094d6d643ad78b549fe20faf66",
     "description": {
       "en-US": "A global dark theme for the web"
     },
@@ -54,9 +54,9 @@
   {
     "pname": "decentraleyes",
     "addonId": "jid1-BoFifL9Vbdl2zQ@jetpack",
-    "version": "3.0.0",
-    "url": "https://addons.mozilla.org/firefox/downloads/file/4392113/decentraleyes-3.0.0.xpi",
-    "sha256": "6f2efed90696ac7f8ca7efb8ab308feb3bdf182350b3acfdf4050c09cc02f113",
+    "version": "3.0.1",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4785399/decentraleyes-3.0.1.xpi",
+    "sha256": "a0b6701636c7e1a44dc756b0e71d03f94d40e5f16787cf2c2306688bd0e249b9",
     "description": {
       "ar": "\u064a\u062d\u0645\u064a\u0643 \u0645\u0646 \u0627\u0644\u062a\u062a\u0628\u0639 \u0627\u0644\u0645\u0631\u062a\u0628\u0637 \u0628\u0627\u0644\u0648\u0635\u0648\u0644 \u0644\u0644\u0645\u062d\u062a\u0648\u0649 \"\u0645\u062c\u0627\u0646\u064a\"\u060c \u0645\u0631\u0643\u0632\u064a\u0629. \u0641\u0647\u0648 \u064a\u0645\u0646\u0639 \u0627\u0644\u0643\u062b\u064a\u0631 \u0645\u0646 \u0637\u0644\u0628\u0627\u062a \u0627\u0644\u0634\u0628\u0643\u0627\u062a \u0645\u0646 \u0627\u0644\u0648\u0635\u0648\u0644 \u0645\u062b\u0644 \u0627\u0644\u0645\u0643\u062a\u0628\u0627\u062a \u0627\u0644\u0645\u0633\u062a\u0636\u0627\u0641\u0629 \u063a\u0648\u063a\u0644 \u0648 \u0623\u062e\u0631\u0649\u060c \u0648\u064a\u0642\u062f\u0645 \u0645\u0644\u0641\u0627\u062a \u0645\u062d\u0644\u064a\u0629 \u0644\u0644\u062a\u062e\u0641\u064a\u0641 \u0639\u0644\u0649 \u0627\u0644\u0645\u0648\u0627\u0642\u0639. \u064a\u0643\u0645\u0644 \u0645\u0627\u0646\u0639 \u0627\u0644\u0645\u062d\u062a\u0648\u0649 \u0627\u0644\u0645\u0639\u062a\u0627\u062f.",
       "bg": "\u0417\u0430\u0449\u0438\u0442\u0430\u0432\u0430 \u0432\u0438 \u043e\u0442 \u0441\u043b\u0435\u0434\u0435\u043d\u0435 \u0447\u0440\u0435\u0437 \u0441\u0432\u043e\u0431\u043e\u0434\u043d\u0430, \u0446\u0435\u043d\u0442\u0440\u0430\u043b\u0438\u0437\u0438\u0440\u0430\u043d\u0430 \u0434\u043e\u0441\u0442\u0430\u0432\u043a\u0430 \u043d\u0430 \u0441\u044a\u0434\u044a\u0440\u0436\u0430\u043d\u0438\u0435. \u0421\u043f\u0438\u0440\u0430 \u0434\u043e\u0441\u0442\u0438\u0433\u0430\u043d\u0435\u0442\u043e \u043d\u0430 \u043c\u043d\u043e\u0433\u043e \u0437\u0430\u044f\u0432\u043a\u0438 \u043a\u044a\u043c \u043c\u0440\u0435\u0436\u0438 \u0437\u0430 \u0434\u043e\u0441\u0442\u0430\u0432\u043a\u0430 \u043d\u0430 \u0441\u044a\u0434\u044a\u0440\u0436\u0430\u043d\u0438\u0435 \u0438 \u043f\u043e\u0434\u0430\u0432\u0430 \u043c\u0435\u0441\u0442\u043d\u0438 \u0444\u0430\u0439\u043b\u043e\u0432\u0435, \u0437\u0430 \u0434\u0430 \u043d\u0435 \u0441\u0435 \u0441\u0447\u0443\u043f\u0432\u0430\u0442 \u0441\u0430\u0439\u0442\u043e\u0432\u0435\u0442\u0435. \u0414\u043e\u043f\u044a\u043b\u0432\u0430 \u043e\u0431\u0438\u043a\u043d\u043e\u0432\u0435\u043d\u0438\u0442\u0435 \u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u0430\u0447\u0438 \u043d\u0430 \u0441\u044a\u0434\u044a\u0440\u0436\u0430\u043d\u0438\u0435.",
@@ -68,11 +68,11 @@
       "en-US": "Protects you against tracking through \"free\", centralized, content delivery. It prevents a lot of requests from reaching networks like Google Hosted Libraries, and serves local files to keep sites from breaking. Complements regular content blockers.",
       "es-ES": "Protege contra el rastreo con la entrega centralizada y \u00abgratuita\u00bb de contenido. Previene interferencia de redes como Google Hosted Libraries, sirve archivos locales para prevenir que sitios se rompan. Complementa bloqueadores regulares.",
       "et": "Kaitseb sind \"tasuta\", tsentraliseeritud sisu edastamisest tuleneva j\u00e4litamise vastu. Keelab taotlused v\u00f5rgustikesse nagu Google Hosted Libraries, asendades need kohalike failidega, et saidid j\u00e4tkuvalt t\u00f6\u00f6taksid. T\u00e4iendab tavalisi sisublokeerijaid.",
-      "fi": "Suojaa sinua \"ilmaisen\", keskitetyn sis\u00e4ll\u00f6n jakelun v\u00e4lityksell\u00e4 tapahtuvalta seurannalta. Est\u00e4\u00e4 paljon pyynt\u00f6j\u00e4 jakeluverkkoihin ja korvaa ne paikallisilla tiedostoilla est\u00e4kseen sivustoja hajoamasta. T\u00e4ydent\u00e4\u00e4 tavallisia sis\u00e4ll\u00f6nestoja.",
+      "fi": "Suojaa \"ilmaisen\", keskitetyn sis\u00e4ll\u00f6n jakelun kautta tapahtuvalta seurannalta. Est\u00e4\u00e4 pyynt\u00f6j\u00e4 jakeluverkkoihin (kuten Google Hosted Libraries) ja korvaa ne paikallisilla tiedostoilla est\u00e4en sivustojen hajoamisen. T\u00e4ydent\u00e4\u00e4 tavallisia sis\u00e4ll\u00f6nestoja.",
       "fr": "Prot\u00e8ge du pistage li\u00e9 aux diffuseurs de contenus \u00ab\u202fgratuits\u202f\u00bb, centralis\u00e9s. Acc\u00e9l\u00e8re de nombreuses requ\u00eates (Google Hosted Libraries et autres) en les servant localement, all\u00e9geant la charge des sites. Compl\u00e8te les bloqueurs de contenus habituels.",
       "he": "\u05de\u05d2\u05df \u05e2\u05dc\u05d9\u05da \u05de\u05e4\u05e0\u05d9 \u05de\u05e2\u05e7\u05d1 \u05d4\u05de\u05d1\u05d5\u05e6\u05e2 \u05d3\u05e8\u05da \u05e8\u05e9\u05ea\u05d5\u05ea \u05d0\u05e1\u05e4\u05e7\u05ea \u05ea\u05d5\u05db\u05df \u05e8\u05d9\u05db\u05d5\u05d6\u05d9\u05d5\u05ea \u05d5\"\u05d7\u05d9\u05e0\u05de\u05d9\u05d5\u05ea\". \u05de\u05d5\u05e0\u05e2 \u05de\u05d1\u05e7\u05e9\u05d5\u05ea \u05de\u05dc\u05d4\u05d2\u05d9\u05e2 \u05dc\u05e8\u05e9\u05ea\u05d5\u05ea \u05db\u05de\u05d5 Google Hosted Libraries, \u05d5\u05de\u05e9\u05ea\u05de\u05e9 \u05d1\u05e7\u05d1\u05e6\u05d9\u05dd \u05de\u05e7\u05d5\u05de\u05d9\u05d9\u05dd \u05db\u05d3\u05d9 \u05dc\u05de\u05e0\u05d5\u05e2 \u05e9\u05d9\u05d1\u05d5\u05e9\u05d9\u05dd. \u05de\u05e9\u05dc\u05d9\u05dd \u05d7\u05d5\u05e1\u05de\u05d9 \u05ea\u05d5\u05db\u05df \u05e8\u05d2\u05d9\u05dc\u05d9\u05dd.",
       "hr": "\u0160titi Vas od pra\u0107enja kroz \"besplatnu\", centraliziranu dostavu sadr\u017eaja. Blokira mnoge zahtjeve prema mre\u017eama kao \u0161to su Google Hosted Libraries i u\u010ditava lokalne datoteke kako se stranice ne bi slomile. Upotpunjuje uobi\u010dajene blokatore sadr\u017eaja.",
-      "hu": "V\u00e9d att\u00f3l, hogy az \u201eingyenes\u201d, centraliz\u00e1lt tartalomszolg\u00e1ltat\u00f3k k\u00f6vessenek. Blokkolja a k\u00e9r\u00e9seket a Google Hosted Libraries \u00e9s eff\u00e9le h\u00e1l\u00f3zatok el\u00e9r\u00e9s\u00e9ben, az oldalak bet\u00f6r\u00e9s\u00e9t helyi f\u00e1jlokkal akad\u00e1lyozza meg.",
+      "hu": "V\u00e9d att\u00f3l, hogy az \u201eingyenes\u201d centraliz\u00e1lt tartalomszolg\u00e1ltat\u00f3k k\u00f6vessenek. Blokkolja a k\u00e9r\u00e9seket a Google Hosted Libraries \u00e9s eff\u00e9le h\u00e1l\u00f3zatok el\u00e9r\u00e9s\u00e9ben, az oldalak bet\u00f6r\u00e9s\u00e9t helyi f\u00e1jlokkal akad\u00e1lyozza meg. Kieg\u00e9sz\u00edti a bevett tartalomblokkol\u00f3kat.",
       "id": "Melindungi Anda dari pelacakan distribusi konten \"gratis\" dan terpusat. Mencegah permintaan ke jaringan seperti Google Hosted Libraries, dan menyediakan berkas lokal pengganti agar situs tetap bekerja baik. Pelengkap pemblokir konten umum.",
       "it": "Protegge dal tracciamento tramite CDN centralizzato \"gratis\". Impedisce a molte richieste di raggiungere reti come Google Hosted Libraries e fornisce file locali per impedire malfunzionamenti dei siti. \u00c8 complementare ai normali content blockers.",
       "ja": "\u300c\u7121\u6599\u300d\u3068\u79f0\u3057\u3066\u3042\u306a\u305f\u3092\u8ffd\u8de1\u3059\u308b\u5927\u898f\u6a21\u306aCDN\u3092\u8fc2\u56de\u3057\u3066\u3001\u30d7\u30e9\u30a4\u30d0\u30b7\u30fc\u3092\u5b88\u308a\u307e\u3059\u3002Google Hosted Libraries\u306a\u3069\u3078\u306e\u30ea\u30af\u30a8\u30b9\u30c8\u3092\u30d6\u30ed\u30c3\u30af\u3057\u307e\u3059\u3002\u307e\u305f\u3001\u30da\u30fc\u30b8\u306e\u8868\u793a\u3092\u58ca\u3055\u306a\u3044\u3088\u3046\u3001\u4ee3\u308f\u308a\u306b\u30ed\u30fc\u30ab\u30eb\u306b\u4fdd\u5b58\u3057\u305f\u30d5\u30a1\u30a4\u30eb\u3092\u4f7f\u7528\u3057\u307e\u3059\u3002\u4e00\u822c\u7684\u306a\u30b3\u30f3\u30c6\u30f3\u30c4\u30d6\u30ed\u30c3\u30ab\u30fc\u3092\u88dc\u52a9\u3057\u307e\u3059\u3002",
@@ -80,14 +80,14 @@
       "nb-NO": "Beskytter mot sporing gjort av \"gratis\" sentralisert innholdslevering. Den hindrer mange foresp\u00f8rsler fra \u00e5 n\u00e5 nettverk som Google Hosted Libraries, og tilbyr lokale filer for \u00e5 avverge rotede nettsteder. Bist\u00e5r vanlige innholdsblokkerere.",
       "nl": "Beschermt tegen tracking via het \"gratis\", gecentraliseerd, verzorgen van content. Het zorgt ervoor dat veel verzoeken netwerken als Google Hosted Libraries niet bereiken en imiteert ze, zodat sites niet stukgaan. Vult reguliere content blockers aan.",
       "pl": "Chroni przed \u015bledzeniem przez o\u015brodki CDN. Zapobiega wysy\u0142aniu zapyta\u0144 do sieci takich jak Google Hosted Libraries i dostarcza zasoby z lokalnych plik\u00f3w \u017ceby nie psu\u0107 stron. Jest uzupe\u0142nieniem do klasycznych dodatk\u00f3w blokuj\u0105cych.",
-      "pt-BR": "Te protege contra rastreamento atrav\u00e9s de entrega de conte\u00fado \"gr\u00e1tis\", e centralizado. Ele impede que muitos pedidos cheguem a redes como o Google Hosted Libraries e serve arquivos locais para impedir que os sites sejam quebrados.",
+      "pt-BR": "Protege contra rastreamento via entrega de conte\u00fado \"gr\u00e1tis\" e centralizado. Impede que pedidos cheguem a redes como o Google Hosted Libraries e serve arquivos locais para evitar que sites sejam quebrados. Complementa bloqueadores de conte\u00fado comuns.",
       "pt-PT": "Protege contra monitoriza\u00e7\u00e3o atrav\u00e9s de entrega de conte\u00fado centralizado. Impede pedidos de chegar a redes como Google Hosted Libraries e serve ficheiros locais para que os sites n\u00e3o quebrem. Complementa bloqueadores de conte\u00fado regulares.",
       "ro": "Protejeaz\u0103 \u00eempotriva urm\u0103ririi prin livrare de con\u021binut gratuit, centralizat. Previne cererile \u00een a ajunge la re\u0163ele precum Google Hosted Libraries, \u015fi livreaz\u0103 fi\u015fiere locale f\u0103r\u0103 a strica sit-urile. Ajut\u0103 extensiile obi\u0219nuite de blocaj de con\u021binut.",
       "ru": "\u0417\u0430\u0449\u0438\u0449\u0430\u0435\u0442 \u0412\u0430\u0441 \u043e\u0442 \u043e\u0442\u0441\u043b\u0435\u0436\u0438\u0432\u0430\u043d\u0438\u044f \u0447\u0435\u0440\u0435\u0437 \u00ab\u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u044b\u0435\u00bb, \u0446\u0435\u043d\u0442\u0440\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d\u043d\u044b\u0435 CDN. \u041f\u0440\u0435\u0434\u043e\u0442\u0432\u0440\u0430\u0449\u0430\u0435\u0442 \u043e\u0442\u0441\u043b\u0435\u0436\u0438\u0432\u0430\u043d\u0438\u0435 \u0447\u0435\u0440\u0435\u0437 \u043c\u043d\u043e\u0436\u0435\u0441\u0442\u0432\u043e \u0437\u0430\u043f\u0440\u043e\u0441\u043e\u0432 \u043a CDN (\u0430-\u043b\u044f GHL, MaxCDN, YandexCDN \u0438 \u0442.\u043f.), \u00ab\u0434\u043e\u0441\u0442\u0430\u0432\u043b\u044f\u044f\u00bb \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u044b\u0435 \u0444\u0430\u0439\u043b\u044b, \u0447\u0442\u043e\u0431\u044b \u043d\u0435 \u043b\u043e\u043c\u0430\u0442\u044c \u0441\u0430\u0439\u0442\u044b. \u0414\u043e\u043f\u043e\u043b\u043d\u044f\u0435\u0442 \u043a\u043e\u043d\u0442\u0435\u043d\u0442-\u0444\u0438\u043b\u044c\u0442\u0440\u044b.",
       "si": "\"\u0db1\u0ddc\u0db8\u0dd2\u0dbd\u0dda\", \u0db8\u0db0\u0dca\u200d\u0dba\u0d9c\u0dad, \u0d85\u0db1\u0dca\u0dad\u0dbb\u0dca\u0d9c\u0dad \u0db6\u0dd9\u0daf\u0dcf \u0dc4\u0dd0\u0dbb\u0dd3\u0db8\u0dca \u0dc4\u0dbb\u0dc4\u0dcf \u0dc0\u0db1 \u0dbd\u0dd4\u0dc4\u0dd4\u0db6\u0dd0\u0db3\u0dd3\u0db8\u0dca \u0dc0\u0dbd\u0da7 \u0d91\u0dbb\u0dd9\u0dc4\u0dd2\u0dc0 \u0d94\u0db6\u0dc0 \u0d86\u0dbb\u0d9a\u0dca\u0dc2\u0dcf \u0d9a\u0dbb\u0dba\u0dd2. \u0d91\u0dba Google Hosted Libraries \u0dc0\u0dd0\u0db1\u0dd2 \u0da2\u0dcf\u0dbd \u0dc0\u0dd9\u0dad \u0db4\u0dd0\u0db8\u0dd2\u0dab\u0dd3\u0db8\u0dd9\u0db1\u0dca \u0db6\u0ddc\u0dc4\u0ddd \u0d89\u0dbd\u0dca\u0dbd\u0dd3\u0db8\u0dca \u0dc0\u0dc5\u0d9a\u0dca\u0dc0\u0dba\u0dd2, \u0dc3\u0dc4 \u0d85\u0da9\u0dc0\u0dd2 \u0db6\u0dd2\u0db3\u0dd3 \u0dba\u0dcf\u0db8\u0dd9\u0db1\u0dca \u0dad\u0db6\u0dcf \u0d9c\u0dd0\u0db1\u0dd3\u0db8\u0da7 \u0daf\u0dda\u0dc1\u0dd3\u0dba \u0d9c\u0ddc\u0db1\u0dd4\u0dc0\u0dbd\u0da7 \u0dc3\u0dda\u0dc0\u0dba \u0d9a\u0dbb\u0dba\u0dd2.",
-      "sq": "Ju mbron ju ndaj gjurmimet n\u00ebp\u00ebrmjet d\u00ebrguesve t\u00eb p\u00ebrmbajtjeve \"Falas\" t\u00eb \u00e7entralizuara. Shmang shum\u00eb k\u00ebrkesa t\u00eb arrijn\u00eb rrjete si Librarit\u00eb e Hostuar n\u00eb Google, dhe sh\u00ebrben skedar\u00eb lokal duke mund\u00ebsuar shfletim normal t\u00eb faqeve.",
-      "sv-SE": "Skyddar dig mot att sp\u00e5ras av \"gratis\" centraliserad inneh\u00e5llsleverans. Det hindrar att f\u00f6rfr\u00e5gningar g\u00f6rs till n\u00e4tverk som Google Hosted Libraries och tillhandah\u00e5ller lokala filer, s\u00e5 att sidor inte g\u00e5r s\u00f6nder. Kompletterar vanliga blockerare.",
-      "tr": "Sizi i\u00e7erik da\u011f\u0131t\u0131m\u0131yla yap\u0131lan merkezi ve \"\u00fccretsiz\" takipten korur. Google Yerle\u015fimli K\u00fct\u00fcphaneler gibi a\u011flara eri\u015fimi engelleyip bunlar yerine siteler i\u00e7in gerekli yerel dosyalar\u0131 sunar. Ola\u011fan i\u00e7erik engelleyicileri i\u015flevsel olarak tamamlar.",
+      "sq": "Ju mbron ndaj gjurmimet n\u00ebp\u00ebrmjet d\u00ebrguesve t\u00eb p\u00ebrmbajtjeve \"Falas\" t\u00eb \u00e7entralizuara. Shmang k\u00ebrkesa t\u00eb arrijn\u00eb rrjete si Google Hosted Libraries, dhe sh\u00ebrben skedar\u00eb lokal p\u00ebr shfletim normal. Plot\u00ebson bllokuesit e zakonsh\u00ebm t\u00eb materialeve.",
+      "sv-SE": "Skyddar dig mot att sp\u00e5ras av \"gratis\" centraliserad inneh\u00e5llsleverans. Det f\u00f6rhindrar f\u00f6rfr\u00e5gningar till n\u00e4tverk som Google Hosted Libraries och tillhandah\u00e5ller lokala filer, s\u00e5 att sidor inte g\u00e5r s\u00f6nder. Kompletterar vanliga inneh\u00e5llsblockerare.",
+      "tr": "Sizi i\u00e7erik da\u011f\u0131t\u0131m\u0131yla yap\u0131lan merkezi ve \"\u00fccretsiz\" takipten korur. Google Hosted Libraries gibi a\u011flara yap\u0131lan istekleri engelleyerek ve yerel dosyalar sunarak sayfalar\u0131n i\u015flevsizli\u011fini \u00f6nler. Ola\u011fan i\u00e7erik engelleyicileri tamamlar.",
       "uk": "\u0417\u0430\u0445\u0438\u0449\u0430\u0454 \u0432\u0430\u0441 \u0432\u0456\u0434 \u0441\u0442\u0435\u0436\u0435\u043d\u043d\u044f \"\u0431\u0435\u0437\u043a\u043e\u0448\u0442\u043e\u0432\u043d\u0438\u043c\u0438\", \u0446\u0435\u043d\u0442\u0440\u0430\u043b\u0456\u0437\u043e\u0432\u0430\u043d\u0438\u043c\u0438 \u043c\u0435\u0440\u0435\u0436\u0430\u043c\u0438 \u0434\u043e\u0441\u0442\u0430\u0432\u043a\u0438 \u043a\u043e\u043d\u0442\u0435\u043d\u0442\u0443. \u0411\u043b\u043e\u043a\u0443\u0454 \u0431\u0435\u0437\u043b\u0456\u0447 \u0437\u0430\u043f\u0438\u0442\u0456\u0432 \u0434\u043e \u043c\u0435\u0440\u0435\u0436, \u044f\u043a-\u043e\u0442 Google Hosted Libraries, \u0432\u0437\u0430\u043c\u0456\u043d \u043d\u0430\u0434\u0430\u0454 \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u0456 \u0444\u0430\u0439\u043b\u0438 \u0434\u043b\u044f \u0437\u0430\u0431\u0435\u0437\u043f\u0435\u0447\u0435\u043d\u043d\u044f \u0441\u043f\u0440\u0430\u0432\u043d\u043e\u0441\u0442\u0456 \u0441\u0430\u0439\u0442\u0456\u0432. \u0414\u043e\u043f\u043e\u0432\u043d\u044e\u0454 \u0437\u0432\u0438\u0447\u043d\u0456 \u0431\u043b\u043e\u043a\u0430\u0442\u043e\u0440\u0438 \u043a\u043e\u043d\u0442\u0435\u043d\u0442\u0443.",
       "vi": "B\u1ea3o v\u1ec7 b\u1ea1n kh\u1ecfi b\u1ecb theo d\u00f5i th\u00f4ng qua vi\u1ec7c ph\u00e2n ph\u1ed1i n\u1ed9i dung \"mi\u1ec5n ph\u00ed\", t\u1eadp trung. N\u00f3 ng\u0103n nhi\u1ec1u y\u00eau c\u1ea7u \u0111\u1ebfn c\u00e1c m\u1ea1ng l\u01b0\u1edbi nh\u01b0 Google Hosted Libraries, v\u00e0 giao c\u00e1c t\u1ec7p c\u1ee5c b\u1ed9 \u0111\u1ec3 gi\u1eef c\u00e1c trang web kh\u1ecfi b\u1ecb l\u1ed7i. B\u1ed5 sung cho c\u00e1c tr\u00ecnh ch\u1eb7n n\u1ed9i dung.",
       "zh-CN": "\u4fdd\u62a4\u60a8\u514d\u53d7\u96c6\u4e2d\u5f0f\u7684\u5185\u5bb9\u4ea4\u4ed8\u7f51\u7edc\uff08CDN\uff09\u7684\u8ddf\u8e2a\u3002\u5b83\u53ef\u4ee5\u62e6\u622a\u8bb8\u591a\u79cd\u94fe\u5411 CDN \u7684\u8bf7\u6c42\uff0c\u8f6c\u800c\u6307\u5411\u672c\u5730\u63d0\u4f9b\u7684\u6587\u4ef6\uff0c\u4ecd\u7136\u4fdd\u6301\u7f51\u7ad9\u529f\u80fd\u5b8c\u6574\u3002\u8f85\u52a9\u5e38\u89c4\u7684\u5185\u5bb9\u8fc7\u6ee4\u89c4\u5219\u3002",
@@ -124,9 +124,9 @@
   {
     "pname": "multi-account-containers",
     "addonId": "@testpilot-containers",
-    "version": "8.3.6",
-    "url": "https://addons.mozilla.org/firefox/downloads/file/4627302/multi_account_containers-8.3.6.xpi",
-    "sha256": "bf3de35b844becf166449f1d927f994a2abafb8fc4ce877eca7a8c6cd124d34a",
+    "version": "8.3.7",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4733069/multi_account_containers-8.3.7.xpi",
+    "sha256": "7f6f5ef7b106d33d1b99d2c5e53a2065d07f784b1852fe9b9f78394e9b405165",
     "description": {
       "de": "Mit Firefox Multi-Account Containers unterteilen Sie Teile Ihres Online-Lebens separat in farbkodierte Tabs, sodass Sie mit mehreren Konten im Internet surfen und Mozilla VPN f\u00fcr den zus\u00e4tzlichen Schutz Ihrer Daten integrieren k\u00f6nnen.",
       "en-US": "Firefox Multi-Account Containers lets you keep parts of your online life separated into color-coded tabs. Cookies are separated by container, allowing you to use the web with multiple accounts and integrate Mozilla VPN for an extra layer of privacy.",
@@ -141,9 +141,9 @@
   {
     "pname": "old-reddit-redirect",
     "addonId": "{9063c2e9-e07c-4c2c-9646-cfe7ca8d0498}",
-    "version": "2.0.9",
-    "url": "https://addons.mozilla.org/firefox/downloads/file/4526031/old_reddit_redirect-2.0.9.xpi",
-    "sha256": "91e7554b85b79201f72c175f6e5f6f493b3330ee833b8289fb6417d991add50a",
+    "version": "2.1.0",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4716803/old_reddit_redirect-2.1.0.xpi",
+    "sha256": "2d1a432acab1b5dd8dfb8fd7eedadf88b5c1938600498a009710edf4ef1b0f9a",
     "description": {
       "en-GB": "Ensure Reddit always loads the old design"
     },
@@ -179,11 +179,15 @@
   {
     "pname": "privacy-badger17",
     "addonId": "jid1-MnnxcxisBPnSXQ@jetpack",
-    "version": "2025.12.9",
-    "url": "https://addons.mozilla.org/firefox/downloads/file/4638816/privacy_badger17-2025.12.9.xpi",
-    "sha256": "f432abdcdced726c992bfefa9ad00deb6fa8b6a7e439996095d507627439cea1",
+    "version": "2026.2.20",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4700632/privacy_badger17-2026.2.20.xpi",
+    "sha256": "eea49f1461de5eb00eb17b22b2864b55b54acb577b0360687460fe982633fbd6",
     "description": {
-      "en-US": "Automatically learns to block hidden trackers. Made by the leading digital rights nonprofit EFF to stop companies from spying on you."
+      "en-US": "Automatically learns to block hidden trackers. Made by the leading digital rights nonprofit EFF to stop companies from spying on you.",
+      "es-AR": "\"Autoaprende\" a bloquear rastreadores ocultos. Creado por la ONG de derechos digitales EFF.",
+      "es-CL": "\"Autoaprende\" a bloquear rastreadores ocultos. Creado por la ONG de derechos digitales EFF.",
+      "es-ES": "\"Autoaprende\" a bloquear rastreadores ocultos. Creado por la ONG de derechos digitales EFF.",
+      "es-MX": "\"Autoaprende\" a bloquear rastreadores ocultos. Creado por la ONG de derechos digitales EFF."
     },
     "homepage": "https://addons.mozilla.org/en-US/firefox/addon/privacy-badger17/",
     "license": "unknown"
@@ -215,9 +219,9 @@
   {
     "pname": "refined-github-",
     "addonId": "{a4c4eda4-fb84-4a84-b4a1-f7c1cbf2a1ad}",
-    "version": "26.2.3",
-    "url": "https://addons.mozilla.org/firefox/downloads/file/4691422/refined_github-26.2.3.xpi",
-    "sha256": "0d49c1f4df9b25f0e3b2807b155b668e567ca0129d97f7d5271dff3eb4c19438",
+    "version": "26.5.20",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4813558/refined_github-26.5.20.xpi",
+    "sha256": "c1bfc7f2461fdc3a5853b238fe155be6e099c59a45e5a579e5dbc354340f2b55",
     "description": {
       "en-US": "Simplifies the GitHub interface and adds many useful features."
     },
@@ -251,9 +255,9 @@
   {
     "pname": "sidebery",
     "addonId": "{3c078156-979c-498b-8990-85f7987dd929}",
-    "version": "5.4.0",
-    "url": "https://addons.mozilla.org/firefox/downloads/file/4613339/sidebery-5.4.0.xpi",
-    "sha256": "184a3157df4c5b018daff5c63b8bea120f6d34e6f298c0fbed968b092508f599",
+    "version": "5.5.2",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4766841/sidebery-5.5.2.xpi",
+    "sha256": "43e7dd4b8f684e637193d645fbcc94fb182583d24ac9a5b58effc4fb4d9faef2",
     "description": {
       "en-US": "Vertical tabs tree and bookmarks in sidebar with advanced containers configuration, grouping and many other features.",
       "ru": "\u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u0442\u0430\u0431\u0430\u043c\u0438 \u0438 \u0437\u0430\u043a\u043b\u0430\u0434\u043a\u0430\u043c\u0438 \u0432 \u0431\u043e\u043a\u043e\u0432\u043e\u0439 \u043f\u0430\u043d\u0435\u043b\u0438."
@@ -276,9 +280,9 @@
   {
     "pname": "ublock-origin",
     "addonId": "uBlock0@raymondhill.net",
-    "version": "1.69.0",
-    "url": "https://addons.mozilla.org/firefox/downloads/file/4675310/ublock_origin-1.69.0.xpi",
-    "sha256": "785bcde68a25faa8a0949964ec5ffe9bdcb85d3f0ae21c23f607c6c8f91472cf",
+    "version": "1.70.0",
+    "url": "https://addons.mozilla.org/firefox/downloads/file/4721638/ublock_origin-1.70.0.xpi",
+    "sha256": "f2730d2877005763a45d765749892e936f49cae713d28f7aa6ea314454b89cf1",
     "description": {
       "ar": "\u0648\u0623\u062e\u064a\u0631\u0627\u064b, \u0645\u0627\u0646\u0639 \u0627\u0639\u0644\u0627\u0646\u0627\u062a \u0643\u0641\u0648\u0621. \u062e\u0641\u064a\u0641 \u0639\u0644\u0649 \u0627\u0644\u0645\u0639\u0627\u0644\u062c \u0648 \u0627\u0644\u0630\u0627\u0643\u0631\u0629",
       "bg": "\u041d\u0430\u0439-\u043d\u0430\u043a\u0440\u0430\u044f, \u0435\u0444\u0435\u043a\u0442\u0438\u0432\u0435\u043d \u0440\u0435\u043a\u043b\u0430\u043c\u0435\u043d \u0431\u043b\u043e\u043a\u0435\u0440 \u0441 \u043c\u0430\u043b\u043a\u0438 \u0438\u0437\u0438\u0441\u043a\u0432\u0430\u043d\u0438\u044f \u0437\u0430 \u043f\u0440\u043e\u0446\u0435\u0441\u043e\u0440 \u0438 \u043f\u0430\u043c\u0435\u0442.",
