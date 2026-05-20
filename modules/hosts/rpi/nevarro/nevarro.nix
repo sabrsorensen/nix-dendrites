@@ -20,7 +20,6 @@ in
         caddy
         adguardhome
         netbird-server
-        powerdns
       ];
       samAuthorizedKeys = [
         "${inputs.nix-secrets}/ssh-keys/atlas_nevarro.pub"

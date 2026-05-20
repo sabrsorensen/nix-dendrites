@@ -19,7 +19,6 @@ in
       serviceImports = with inputs.self.modules.nixos; [
         caddy
         adguardhome
-        powerdns
       ];
       samAuthorizedKeys = [
         "${inputs.nix-secrets}/ssh-keys/atlas_naboo.pub"
