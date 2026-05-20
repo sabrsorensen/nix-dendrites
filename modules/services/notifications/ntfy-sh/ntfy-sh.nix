@@ -1,6 +1,7 @@
 {
   flake.modules.nixos.ntfy-sh =
   {
+    config,
     ...
   }:
   let

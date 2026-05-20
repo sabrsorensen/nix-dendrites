@@ -1,6 +1,7 @@
 {
   flake.modules.nixos.plex =
   {
+    config,
     pkgs,
     ...
   }:

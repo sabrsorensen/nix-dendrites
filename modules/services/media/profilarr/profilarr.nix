@@ -1,6 +1,7 @@
 {
   flake.modules.nixos.profilarr =
   {
+    config,
     ...
   }:
   let
