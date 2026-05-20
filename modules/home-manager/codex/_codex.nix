@@ -30,6 +30,7 @@
         postBuild = ''
           wrapProgram "$out/bin/codex" \
             ${wrapSecretEnv "GITHUB_NIXOS_MCP_TOKEN" (optionalSecretPath "github_nixos_mcp_token")} \
+            ${wrapSecretEnv "HIGISH_GITHUB_NIXOS_MCP_TOKEN" (optionalSecretPath "higish_github_nixos_mcp_token")} \
             ${wrapSecretEnv "PULUMI_NIXOS_MCP_TOKEN" (optionalSecretPath "pulumi_nixos_mcp_token")} \
             ${wrapSecretEnv "CONTEXT7_API_KEY" (optionalSecretPath "context7_api_key")} \
             ${wrapSecretEnv "POSTMAN_API_KEY" (optionalSecretPath "postman_nixos_mcp_token")} \
@@ -45,7 +46,10 @@
         package = codexWrapped;
         enableMcpIntegration = true;
         settings = {
-          model = "gpt-5.4";
+          model = "gpt-5.3-codex";
+          notice.model_migrations = {
+            "gpt-5.3-codex" = "gpt-5.4";
+          };
           personality = "pragmatic";
 
           mcp_servers = {
@@ -61,6 +65,10 @@
             GitHub = {
               url = "https://api.githubcopilot.com/mcp";
               bearer_token_env_var = "GITHUB_NIXOS_MCP_TOKEN";
+            };
+            HigishGitHub = {
+              url = "https://api.githubcopilot.com/mcp";
+              bearer_token_env_var = "HIGISH_GITHUB_NIXOS_MCP_TOKEN";
             };
             Postman = {
               command = "npx";

@@ -13,6 +13,7 @@
     let
       networkConfig = config.systemConstants.network;
       merge-dynamic-leases = ./merge_dynamic_leases.py;
+      sync-dns-rewrites = ./sync_dns_rewrites.py;
       adguardhome-path = "/var/lib/AdGuardHome";
       python3Bin = "${pkgs.python3.withPackages (ps: [ ps.requests ])}/bin/python3";
       readBuildValue =
@@ -39,7 +40,6 @@
         wantedBy = [ "adguardhome.service" ];
         partOf = [
           "adguardhome.service"
-          "pdns.service"
         ];
         serviceConfig = {
           Type = "oneshot";
@@ -95,7 +95,6 @@
         requires = [ "adguardhome-prepare.service" ];
         after = [
           "adguardhome-prepare.service"
-          "pdns.service"
         ];
         preStart = lib.mkAfter ''
           if [ -f "/run/adguardhome/AdGuardHome.yaml" ]; then
@@ -116,25 +115,58 @@
             sleep 2
           done
 
-          echo "Testing AdGuardHome-PowerDNS integration..."
-          integration_failed=0
-          for domain in "naboo.${localDomain}" "nevarro.${localDomain}" "atlasuponraiden.${localDomain}"; do
-            echo "Testing resolution of $domain..."
-            if ${pkgs.dig}/bin/dig @127.0.0.1 -p 53 "$domain" +short >/dev/null 2>&1; then
-              echo "  ✓ $domain resolved successfully"
-            else
-              echo "  ⚠ WARNING: Failed to resolve $domain (PowerDNS may not be ready yet)"
-              integration_failed=1
-            fi
-          done
+          echo "Syncing managed DNS rewrites from leases and static shortcuts..."
+          AGH_USER_FILE="/run/secrets/adguardhome_user"
+          AGH_PASSWORD_FILE="/run/secrets/adguardhome_password"
+          AGH_DOMAIN="$(cat /run/secrets/adguardhome_domain)"
+          AGH_REWRITES='${builtins.toJSON [
+            {
+              name = "agh-naboo";
+              answer = networkConfig.naboo;
+            }
+            {
+              name = "agh-nevarro";
+              answer = networkConfig.nevarro;
+            }
+            {
+              name = "atlas";
+              answer = networkConfig.atlasuponraiden;
+            }
+            {
+              name = "auth";
+              answer = networkConfig.nevarro;
+            }
+            {
+              name = "mealie";
+              answer = networkConfig.atlasuponraiden;
+            }
+            {
+              name = "netbird";
+              answer = networkConfig.nevarro;
+            }
+            {
+              name = "plex";
+              answer = networkConfig.atlasuponraiden;
+            }
+          ]}'
 
-          if [ $integration_failed -eq 1 ]; then
-            echo "⚠ WARNING: AGH-PDNS integration not fully working yet"
-            echo "  This is normal during startup - PowerDNS may still be initializing"
-            echo "  AdGuardHome will continue to work for external DNS queries"
-          else
-            echo "✓ AGH-PDNS integration working correctly"
-          fi
+          ${python3Bin} ${sync-dns-rewrites} \
+            --base-url "http://127.0.0.1:3003" \
+            --username-file "$AGH_USER_FILE" \
+            --password-file "$AGH_PASSWORD_FILE" \
+            --domain "$AGH_DOMAIN" \
+            --leases-path "${adguardhome-path}/data/leases.json" \
+            --static-rewrites-json "$AGH_REWRITES" \
+            --state-file "${adguardhome-path}/data/nix-managed-rewrites.json"
+
+          echo "Testing AdGuardHome local domain resolution..."
+          for domain in "plex.$AGH_DOMAIN" "netbird.$AGH_DOMAIN" "atlas.$AGH_DOMAIN"; do
+            echo "Testing resolution of $domain..."
+            ${pkgs.dig}/bin/dig @127.0.0.1 -p 53 "$domain" +short >/dev/null 2>&1 || {
+              echo "Failed to resolve $domain"
+              exit 1
+            }
+          done
 
           echo "AdGuardHome startup validation completed successfully"
         '';
@@ -150,9 +182,9 @@
           ExecStart = pkgs.writeShellScript "agh-healthcheck" ''
             ${pkgs.dig}/bin/dig @127.0.0.1 -p 53 google.com +short >/dev/null 2>&1 || exit 1
 
-            for domain in "naboo.${localDomain}" "nevarro.${localDomain}" "atlasuponraiden.${localDomain}"; do
+            for domain in "plex.${localDomain}" "netbird.${localDomain}" "atlas.${localDomain}"; do
               ${pkgs.dig}/bin/dig @127.0.0.1 -p 53 "$domain" +short >/dev/null 2>&1 || {
-                echo "Failed to resolve $domain through AGH-PDNS integration"
+                echo "Failed to resolve managed AdGuard rewrite: $domain"
                 exit 1
               }
             done
@@ -211,7 +243,6 @@
             dns = {
               upstream_mode = "parallel";
               upstream_dns = [
-                "[/*.$AGH_DOMAIN/]127.0.0.1:5335"
                 "[/$AGH_DOMAIN/mail.$AGH_DOMAIN/]bristol.ns.cloudflare.com zod.ns.cloudflare.com"
                 "1.1.1.1"
                 "9.9.9.9"
