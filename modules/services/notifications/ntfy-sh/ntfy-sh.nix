@@ -5,7 +5,7 @@
   }:
   let
     localDomain = readBuildValue "domain.txt";
-  in:
+  in
   {
     services = {
       caddy = {
