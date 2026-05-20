@@ -5,6 +5,9 @@
     ...
   }:
   let
+    readBuildValue =
+      path:
+      builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
     localDomain = readBuildValue "domain.txt";
   in
   {
