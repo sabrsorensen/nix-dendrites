@@ -291,7 +291,7 @@
                 map
                   (domain: {
                     inherit domain;
-                    answer = networkConfig.minecraft_redirect;
+                    answer = networkConfig.atlasuponraiden;
                   })
                   [
                     "geo.hivebedrock.network"
