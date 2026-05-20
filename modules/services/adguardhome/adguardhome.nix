@@ -129,12 +129,20 @@
               answer = networkConfig.nevarro;
             }
             {
-              name = "atlas";
-              answer = networkConfig.atlasuponraiden;
-            }
-            {
               name = "auth";
               answer = networkConfig.nevarro;
+            }
+            {
+              name = "homeassistant";
+              answer = networkConfig.coruscant;
+            }
+            {
+              name = "home-gw";
+              answer = networkConfig.gateway;
+            }
+            {
+              name = "immich";
+              answer = networkConfig.atlasuponraiden;
             }
             {
               name = "mealie";
@@ -145,7 +153,19 @@
               answer = networkConfig.nevarro;
             }
             {
+              name = "ntfy";
+              answer = networkConfig.atlasuponraiden;
+            }
+            {
               name = "plex";
+              answer = networkConfig.atlasuponraiden;
+            }
+            {
+              name = "profilarr";
+              answer = networkConfig.atlasuponraiden;
+            }
+            {
+              name = "scrutiny";
               answer = networkConfig.atlasuponraiden;
             }
           ]}'
