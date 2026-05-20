@@ -13,7 +13,7 @@
     let
       networkConfig = config.systemConstants.network;
       merge-dynamic-leases = ./merge_dynamic_leases.py;
-      sync-dns-rewrites = ./sync_dns_rewrites.py;
+      generate-dns-rewrites = ./generate_dns_rewrites.py;
       adguardhome-path = "/var/lib/AdGuardHome";
       python3Bin = "${pkgs.python3.withPackages (ps: [ ps.requests ])}/bin/python3";
       readBuildValue =
@@ -84,6 +84,91 @@
 
             sed "s/\$AGH_USER/$AGH_USER/g; s/\$AGH_PASSWORD/$AGH_PASSWORD_ESCAPED/g; s/\$AGH_DOMAIN/$AGH_DOMAIN_ESCAPED/g" \
               "${adguardhome-path}/AdGuardHome.yaml" > "/run/adguardhome/AdGuardHome.yaml"
+
+            TEMP_REWRITES="/tmp/adguard-rewrites-$$.json"
+            STATIC_REWRITES='${builtins.toJSON [
+              {
+                name = "agh-naboo";
+                answer = networkConfig.naboo;
+              }
+              {
+                name = "agh-nevarro";
+                answer = networkConfig.nevarro;
+              }
+              {
+                name = "auth";
+                answer = networkConfig.nevarro;
+              }
+              {
+                name = "homeassistant";
+                answer = networkConfig.coruscant;
+              }
+              {
+                name = "home-gw";
+                answer = networkConfig.gateway;
+              }
+              {
+                name = "immich";
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
+                name = "mealie";
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
+                name = "netbird";
+                answer = networkConfig.nevarro;
+              }
+              {
+                name = "ntfy";
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
+                name = "plex";
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
+                name = "profilarr";
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
+                name = "scrutiny";
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
+                name = "geo.hivebedrock.network";
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
+                name = "hivebedrock.network";
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
+                name = "play.inpvp.net";
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
+                name = "mco.lbsg.net";
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
+                name = "play.galaxite.net";
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
+                name = "play.enchanted.gg";
+                answer = networkConfig.atlasuponraiden;
+              }
+            ]}'
+
+            ${python3Bin} ${generate-dns-rewrites} \
+              --domain "$AGH_DOMAIN" \
+              --leases-path "${adguardhome-path}/data/leases.json" \
+              --static-rewrites-json "$STATIC_REWRITES" \
+              --output "$TEMP_REWRITES"
+
+            TEMP_REWRITES="$TEMP_REWRITES" ${pkgs.yq-go}/bin/yq -i '.filtering.rewrites = load(strenv(TEMP_REWRITES))' "/run/adguardhome/AdGuardHome.yaml"
+            rm -f "$TEMP_REWRITES"
             chmod 644 "/run/adguardhome/AdGuardHome.yaml"
           fi
 
@@ -115,72 +200,8 @@
             sleep 2
           done
 
-          echo "Syncing managed DNS rewrites from leases and static shortcuts..."
-          AGH_USER_FILE="/run/secrets/adguardhome_user"
-          AGH_PASSWORD_FILE="/run/secrets/adguardhome_password"
-          AGH_DOMAIN="$(cat /run/secrets/adguardhome_domain)"
-          AGH_REWRITES='${builtins.toJSON [
-            {
-              name = "agh-naboo";
-              answer = networkConfig.naboo;
-            }
-            {
-              name = "agh-nevarro";
-              answer = networkConfig.nevarro;
-            }
-            {
-              name = "auth";
-              answer = networkConfig.nevarro;
-            }
-            {
-              name = "homeassistant";
-              answer = networkConfig.coruscant;
-            }
-            {
-              name = "home-gw";
-              answer = networkConfig.gateway;
-            }
-            {
-              name = "immich";
-              answer = networkConfig.atlasuponraiden;
-            }
-            {
-              name = "mealie";
-              answer = networkConfig.atlasuponraiden;
-            }
-            {
-              name = "netbird";
-              answer = networkConfig.nevarro;
-            }
-            {
-              name = "ntfy";
-              answer = networkConfig.atlasuponraiden;
-            }
-            {
-              name = "plex";
-              answer = networkConfig.atlasuponraiden;
-            }
-            {
-              name = "profilarr";
-              answer = networkConfig.atlasuponraiden;
-            }
-            {
-              name = "scrutiny";
-              answer = networkConfig.atlasuponraiden;
-            }
-          ]}'
-
-          ${python3Bin} ${sync-dns-rewrites} \
-            --base-url "http://127.0.0.1:3003" \
-            --username-file "$AGH_USER_FILE" \
-            --password-file "$AGH_PASSWORD_FILE" \
-            --domain "$AGH_DOMAIN" \
-            --leases-path "${adguardhome-path}/data/leases.json" \
-            --static-rewrites-json "$AGH_REWRITES" \
-            --state-file "${adguardhome-path}/data/nix-managed-rewrites.json"
-
           echo "Testing AdGuardHome local domain resolution..."
-          for domain in "plex.$AGH_DOMAIN" "netbird.$AGH_DOMAIN" "atlas.$AGH_DOMAIN"; do
+          for domain in "plex.${localDomain}" "netbird.${localDomain}" "atlas.${localDomain}"; do
             echo "Testing resolution of $domain..."
             ${pkgs.dig}/bin/dig @127.0.0.1 -p 53 "$domain" +short >/dev/null 2>&1 || {
               echo "Failed to resolve $domain"
