@@ -67,7 +67,7 @@ def main():
         fqdn = name if "." in name else f"{name}.{domain}"
         if fqdn in seen_domains:
             continue
-        rewrites.append({"domain": fqdn, "answer": answer})
+        rewrites.append({"domain": fqdn, "answer": answer, "enabled": True})
         seen_domains.add(fqdn)
 
     for lease in load_leases(args.leases_path):
