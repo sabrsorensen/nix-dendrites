@@ -82,7 +82,7 @@ def main():
         fqdn = f"{hostname}.{domain}"
         if fqdn in seen_domains:
             continue
-        rewrites.append({"domain": fqdn, "answer": ip})
+        rewrites.append({"domain": fqdn, "answer": ip, "enabled": True})
         seen_domains.add(fqdn)
 
     Path(args.output).write_text(json.dumps(rewrites, indent=2) + "\n", encoding="utf-8")
