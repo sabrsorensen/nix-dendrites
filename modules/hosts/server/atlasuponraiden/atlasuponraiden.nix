@@ -31,6 +31,7 @@
       media-server
       scrutiny
       syncthing-server
+      #homeassistant-proxy
     ];
   };
 

@@ -3,8 +3,10 @@
   services.samba = {
     settings = {
       global = {
-        "server string" = "AtlasUponRaiden";
+        "server string" = "AtlasUponRaiden Samba";
+        "server role" = "standalone server";
         "netbios name" = "atlasuponraiden";
+        #"log level" = "3 smb:10 auth:3 smbd:10";
         # note: localhost is the ipv6 localhost ::1
         "hosts allow" = "192.168.1. 127.0.0.1 localhost";
       };
@@ -17,21 +19,17 @@
       };
       "music" = {
         "path" = "/AnomalyRealm/media/music";
-        "public" = "yes";
-        "writable" = "no";
-        "printable" = "no";
+        "browseable" = "yes";
+        "read only" = "no";
+        "guest ok" = "no";
         "valid users" = "sonos";
+        "force user" = "sonos";
       };
     };
   };
 
-  users.groups.sonos = { };
   users.users.sonos = {
-    isNormalUser = false;
     isSystemUser = true;
-    description = "Sonos";
-    group = "sonos";
-    extraGroups = [ ];
-    shell = pkgs.bash;
+    group = "media";
   };
 }

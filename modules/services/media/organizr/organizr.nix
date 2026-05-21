@@ -1,27 +1,42 @@
 {
-  flake.modules.nixos.organizr = {
+  flake.modules.nixos.organizr =
+  {
+    config,
+    lib,
+    ...
+  }:
+  let
+    groupName = "media";
+    localAddr = "127.0.0.1:81";
+    serviceName = "organizr";
+  in
+  {
     services = {
       caddy = {
         virtualHosts."{$DOMAIN}" = {
           extraConfig = ''
-            reverse_proxy /* 127.0.0.1:81
+            reverse_proxy /* ${localAddr}
           '';
         };
       };
     };
-    virtualisation.oci-containers.containers."organizr" = {
+    users.users.${serviceName} = {
+      isSystemUser = true;
+      group = groupName;
+    };
+    virtualisation.oci-containers.containers.${serviceName} = {
       image = "ghcr.io/organizr/organizr";
       autoStart = true;
       environment = {
-        "PGID" = "996";
-        "PUID" = "1000";
+        "PUID" = "${lib.toString config.users.users.${serviceName}.uid}";
+        "PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
       };
       volumes = [
         "/etc/localtime:/etc/localtime:ro"
-        "/opt/organizr/:/config:rw"
+        "/opt/${serviceName}/:/config:rw"
       ];
       ports = [
-        "127.0.0.1:81:80/tcp"
+        "${localAddr}:80/tcp"
       ];
       labels = {
         "com.centurylinklabs.watchtower.enable" = "true";
@@ -30,7 +45,7 @@
       extraOptions = [
         "--dns=192.168.1.3"
         "--dns=192.168.1.4"
-        "--network-alias=organizr"
+        "--network-alias=${serviceName}"
       ];
     };
   };
