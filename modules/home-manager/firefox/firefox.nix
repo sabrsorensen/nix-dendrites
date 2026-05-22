@@ -63,7 +63,7 @@
         }
       ) addonMetadata;
 
-      currHash = "sha256-RuZ0ihlTNu3chVVYd5JZX7xrRl2+jtLmucAKROKFD3s=";
+      currHash = "sha256-b8A+izg5mVb0mcQajzf59c1NxlkrNK9h0xJ0qqTOJEs=";
       cssRepo = pkgs.fetchFromGitHub {
         owner = "MrOtherGuy";
         repo = "firefox-csshacks";

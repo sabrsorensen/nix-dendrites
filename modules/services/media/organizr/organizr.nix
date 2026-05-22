@@ -11,6 +11,10 @@
     serviceName = "organizr";
   in
   {
+    users.users.${serviceName} = {
+      isSystemUser = true;
+      group = groupName;
+    };
     services = {
       caddy = {
         virtualHosts."{$DOMAIN}" = {
@@ -19,10 +23,6 @@
           '';
         };
       };
-    };
-    users.users.${serviceName} = {
-      isSystemUser = true;
-      group = groupName;
     };
     virtualisation.oci-containers.containers.${serviceName} = {
       image = "ghcr.io/organizr/organizr";

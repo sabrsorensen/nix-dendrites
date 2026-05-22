@@ -16,7 +16,7 @@
         wineWow64Packages.stable
 
         # Bottles for easy Wine prefix management
-        bottles
+        #bottles
 
         # Winetricks for easy Windows component installation
         winetricks

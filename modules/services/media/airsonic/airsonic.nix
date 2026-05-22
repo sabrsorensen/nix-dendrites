@@ -6,7 +6,16 @@
     pkgs,
     ...
   }:
+  let
+    groupName = "media";
+    localAddr = "127.0.0.1:4040"
+    serviceName = "airsonic";
+  in
   {
+    users.users.${serviceName} = {
+      isSystemUser = true;
+      group = groupName;
+    };
     environment.systemPackages = with pkgs; [
       ffmpeg
       flac
@@ -15,18 +24,18 @@
     services = {
       caddy = {
         virtualHosts."{$DOMAIN}" = {
-          #redir /airsonic /airsonic/
-          #reverse_proxy /airsonic/* ${config.services.airsonic.listenAddress}:${lib.toString config.services.airsonic.port}
+          #redir /${serviceName} /${serviceName}/
+          #reverse_proxy /${serviceName}/* ${config.services.${serviceName}.listenAddress}:${lib.toString config.services.${serviceName}.port}
           extraConfig = ''
-            redir /airsonic /airsonic/
-            reverse_proxy /airsonic/* 127.0.0.1:4040
+            redir /${serviceName} /${serviceName}/
+            reverse_proxy /${serviceName}/* ${localAddr}
           '';
         };
       };
 
       #airsonic = {
       #  enable = true;
-      #  contextPath = "/airsonic";
+      #  contextPath = "/${serviceName}";
       #  virtualHost = null;
       #  maxMemory = 512;
       #  jvmOptions = [
@@ -41,20 +50,20 @@
       #  ];
       #};
     };
-    virtualisation.oci-containers.containers."airsonic" = {
+    virtualisation.oci-containers.containers.${serviceName} = {
       image = "lscr.io/linuxserver/airsonic-advanced:latest";
       autoStart = true;
       environment = {
-        "PGID" = "978";
-        "PUID" = "1000";
-        "JAVA_OPTS" = "-Xmx256m -Xms256m -Dserver.forward-headers-strategy=framework -Dserver.context-path=/airsonic/";
-        "CONTEXT_PATH" = "/airsonic";
+        "PUID" = "${lib.toString config.users.users.${serviceName}.uid}";
+        "PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
+        "JAVA_OPTS" = "-Xmx256m -Xms256m -Dserver.forward-headers-strategy=framework -Dserver.context-path=/${serviceName}/";
+        "CONTEXT_PATH" = "/${serviceName}";
         "TZ" = "America/Boise";
         "LOG4J_FORMAT_MSG_NO_LOOKUPS" = "true";
       };
       volumes = [
         "/etc/localtime:/etc/localtime:ro"
-        "/opt/airsonic/:/config"
+        "/opt/${serviceName}/:/config"
         "/AnomalyRealm/media/music/ready_to_stream:/media"
         "/AnomalyRealm/media/music/ready_to_stream:/music"
         "/AnomalyRealm/media/music/source_files/Google Music/:/old_google_music"
@@ -62,14 +71,14 @@
         "/AnomalyRealm/media/music/playlists:/playlists"
       ];
       ports = [
-        "127.0.0.1:4040:4040/tcp"
+        "${localAddr}:4040/tcp"
       ];
       labels = {
         "com.centurylinklabs.watchtower.enable" = "true";
       };
       log-driver = "journald";
       extraOptions = [
-        "--network-alias=airsonic"
+        "--network-alias=${serviceName}"
       ];
     };
   };
