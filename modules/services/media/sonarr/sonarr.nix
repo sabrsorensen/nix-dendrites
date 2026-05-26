@@ -6,30 +6,39 @@
     pkgs,
     ...
   }:
+  let
+    bindAddr = "127.0.0.1";
+    groupName = "media";
+    port = 8989;
+    port4k = 8990;
+    localAddr = "${bindAddr}:${lib.toString port}";
+    localAddr4k = "${bindAddr}:${lib.toString port4k}";
+    serviceName = "sonarr";
+  in
   {
     services = {
       caddy = {
         virtualHosts."{$DOMAIN}" = {
           extraConfig = ''
-            redir /sonarr /sonarr/
-            route /sonarr/* {
+            redir /${serviceName} /${serviceName}/
+            route /${serviceName}/* {
               filter {
                 content_type text/html.*
                 search_pattern </body>
-                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/sonarr/aquamarine.css'></body>"
+                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'></body>"
               }
-              reverse_proxy /sonarr/* 127.0.0.1:8989 {
+              reverse_proxy /${serviceName}/* ${localAddr} {
                   header_up -Accept-Encoding
               }
             }
-            redir /sonarr4k /sonarr4k/
-            route /sonarr4k/* {
+            redir /${serviceName}4k /${serviceName}4k/
+            route /${serviceName}4k/* {
               filter {
                 content_type text/html.*
                 search_pattern </body>
-                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/sonarr/aquamarine.css'></body>"
+                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'></body>"
               }
-              reverse_proxy /sonarr4k/* 127.0.0.1:8990 {
+              reverse_proxy /${serviceName}4k/* ${localAddr4k} {
                   header_up -Accept-Encoding
               }
             }
@@ -40,26 +49,26 @@
       sonarr = {
         enable = true;
         openFirewall = true;
-        group = "media";
+        group = groupName;
         settings = {
           server = {
-            urlbase = "/sonarr";
-            port = 8989;
+            urlbase = "/${serviceName}";
+            port = port;
             bindaddress = "127.0.0.1";
           };
         };
       };
     };
 
-    users.users.sonarr.group = "media";
+    users.users.${serviceName}.group = groupName;
     systemd.services.sonarr4k = {
       description = "Sonarr 4K";
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         ExecStart = "${pkgs.sonarr}/bin/Sonarr -nobrowser -data=/var/lib/sonarr4k/";
         Restart = "always";
-        User = "sonarr";
-        Group = "media";
+        User = serviceName;
+        Group = groupName;
       };
     };
   };

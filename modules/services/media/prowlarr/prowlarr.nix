@@ -6,19 +6,25 @@
     pkgs,
     ...
   }:
+  let
+    bindAddr = "127.0.0.1";
+    port = 9696;
+    localAddr = "${bindAddr}:${lib.toString port}";
+    serviceName = "prowlarr";
+  in
   {
     services = {
       caddy = {
         virtualHosts."{$DOMAIN}" = {
           extraConfig = ''
-            redir /prowlarr /prowlarr/
-            route /prowlarr/* {
+            redir /${serviceName} /${serviceName}/
+            route /${serviceName}/* {
               filter {
                 content_type text/html.*
                 search_pattern </body>
-                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/prowlarr/aquamarine.css'></body>"
+                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'></body>"
               }
-              reverse_proxy /prowlarr/* ${config.services.prowlarr.settings.server.bindaddress}:${lib.toString config.services.prowlarr.settings.server.port} {
+              reverse_proxy /${serviceName}/* ${localAddr} {
                 header_up -Accept-Encoding
               }
             }
@@ -31,9 +37,9 @@
         openFirewall = true;
         settings = {
           server = {
-            urlbase = "/prowlarr";
-            port = 9696;
-            bindaddress = "127.0.0.1";
+            urlbase = "/${serviceName}";
+            port = port;
+            bindaddress = bindAddr;
           };
         };
       };

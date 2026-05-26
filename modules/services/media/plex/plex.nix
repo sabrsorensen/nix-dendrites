@@ -2,6 +2,7 @@
   flake.modules.nixos.plex =
   {
     config,
+    lib,
     pkgs,
     ...
   }:
@@ -10,8 +11,23 @@
       path:
       builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
     localDomain = readBuildValue "domain.txt";
+    groupName = "media";
   in
   {
+    users.users = {
+      plex = {
+        isSystemUser = true;
+        group = groupName;
+      };
+      kitana = {
+        isSystemUser = true;
+        group = groupName;
+      };
+      tautulli = {
+        isSystemUser = true;
+        group = groupName;
+      };
+    };
     services = {
       caddy = {
         virtualHosts."{$DOMAIN}" = {
@@ -50,12 +66,11 @@
       autoStart = true;
       environment = {
         "ADVERTISE_IP" = "https://plex.${localDomain}/";
-        "PGID" = "978";
+        "PUID" = "${lib.toString config.users.users.plex.uid}";
+        "PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
+        "PLEX_UID" = "${lib.toString config.users.users.plex.uid}";
+        "PLEX_GID" = "${lib.toString config.users.groups.${groupName}.gid}";
         "PLEX_CLAIM" = "";
-        "PLEX_GID" = "978";
-        "PLEX_UID" = "1000";
-        "PUID" = "1000";
-        "TP_THEME" = "aquamarine";
         "TZ" = "America/Boise";
         "VERSION" = "latest";
       };
@@ -63,7 +78,6 @@
         "/AnomalyRealm/media:/data:rw"
         "/dev/shm/:/transcode:rw"
         "/etc/localtime:/etc/localtime:ro"
-        "/home/sam/src/nix-config/sabrasorMedia/theme.park/docker-mods/plex/root/etc/cont-init.d/98-themepark:/etc/cont-init.d/98-themepark:rw"
         "/opt/plex/:/config:rw"
       ];
       ports = [
@@ -89,10 +103,15 @@
     };
     virtualisation.oci-containers.containers."tautulli" = {
       image = "ghcr.io/sabrsorensen/tautulli-deluge";
+      login = {
+        registry = "ghcr.io";
+        username = "sabrsorensen";
+        passwordFile = config.sops.secrets.ghcr_token.path;
+      };
       autoStart = true;
       environment = {
-        "PGID" = "978";
-        "PUID" = "1000";
+        "PUID" = "${lib.toString config.users.users.tautulli.uid}";
+        "PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
         "TZ" = "America/Boise";
       };
       volumes = [

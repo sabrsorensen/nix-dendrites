@@ -2,6 +2,7 @@
   flake.modules.nixos.profilarr =
   {
     config,
+    lib,
     ...
   }:
   let
@@ -9,41 +10,48 @@
       path:
       builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
     localDomain = readBuildValue "domain.txt";
+    groupName = "media";
+    localAddr = "127.0.0.1:6868";
+    serviceName = "profilarr";
   in
   {
+    users.users.${serviceName} = {
+      isSystemUser = true;
+      group = groupName;
+    };
     services = {
       caddy = {
-        virtualHosts."profilarr.{$DOMAIN}" = {
+        virtualHosts."${serviceName}.{$DOMAIN}" = {
           extraConfig = ''
-            reverse_proxy /* 127.0.0.1:6868
+            reverse_proxy /* ${localAddr}
           '';
         };
       };
     };
-    virtualisation.oci-containers.containers."profilarr" = {
-      #user = "sam";
+    virtualisation.oci-containers.containers.${serviceName} = {
+      user = serviceName;
       image = "ghcr.io/dictionarry-hub/profilarr:latest";
       autoStart = true;
       pull = "newer";
       environment = {
-        "PGID" = "978";
-        "PUID" = "1000";
+        "PUID" = "${lib.toString config.users.users.${serviceName}.uid}";
+        "PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
         "TZ" = "America/Boise";
-        "ORIGIN" = "https://profilarr.${localDomain}/";
+        "ORIGIN" = "https://${serviceName}.${localDomain}/";
       };
       volumes = [
         "/etc/localtime:/etc/localtime:ro"
-        "/opt/profilarr/:/config"
+        "/opt/${serviceName}/:/config"
       ];
       ports = [
-        "127.0.0.1:6868:6868/tcp"
+        "${localAddr}:6868/tcp"
       ];
       labels = {
         "com.centurylinklabs.watchtower.enable" = "true";
       };
       log-driver = "journald";
       extraOptions = [
-        "--network-alias=profilarr"
+        "--network-alias=${serviceName}"
       ];
     };
   };

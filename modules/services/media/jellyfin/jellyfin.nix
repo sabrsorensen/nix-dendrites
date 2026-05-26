@@ -1,12 +1,21 @@
 {
-  flake.modules.nixos.jellyfin = {
-    users.users.jellyfin.group = "media";
+  flake.modules.nixos.jellyfin =
+  {
+    ...
+  }:
+  let
+    groupName = "media";
+    localAddr = "127.0.0.1:8096";
+    serviceName = "jellyfin";
+  in
+  {
+    users.users.jellyfin.group = groupName;
     services = {
       caddy = {
         virtualHosts."{$DOMAIN}" = {
           extraConfig = ''
-            redir /jellyfin /jellyfin/
-            reverse_proxy /jellyfin/* 127.0.0.1:8096
+            redir /${serviceName} /${serviceName}/
+            reverse_proxy /${serviceName}/* ${localAddr}
           '';
         };
       };
@@ -14,7 +23,7 @@
       jellyfin = {
         enable = true;
         openFirewall = true;
-        group = "media";
+        group = groupName;
         #cacheDir
         #configDir
         #dataDir

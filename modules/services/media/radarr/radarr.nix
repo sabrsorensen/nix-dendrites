@@ -6,30 +6,39 @@
     pkgs,
     ...
   }:
+  let
+    bindAddr = "127.0.0.1";
+    groupName = "media";
+    port = 7878;
+    port4k = 7879;
+    localAddr = "${bindAddr}:${lib.toString port}";
+    localAddr4k = "${bindAddr}:${lib.toString port4k}";
+    serviceName = "radarr";
+  in
   {
     services = {
       caddy = {
         virtualHosts."{$DOMAIN}" = {
           extraConfig = ''
-            redir /radarr /radarr/
-            route /radarr/* {
+            redir /${serviceName} /${serviceName}/
+            route /${serviceName}/* {
               filter {
                 content_type text/html.*
                 search_pattern </body>
-                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/radarr/aquamarine.css'></body>"
+                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'></body>"
               }
-              reverse_proxy /radarr/* 127.0.0.1:7878 {
+              reverse_proxy /${serviceName}/* ${localAddr} {
                 header_up -Accept-Encoding
               }
             }
-            redir /radarr4k /radarr4k/
-            route /radarr4k/* {
+            redir /${serviceName}4k /${serviceName}4k/
+            route /${serviceName}4k/* {
               filter {
                 content_type text/html.*
                 search_pattern </body>
-                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/radarr/aquamarine.css'></body>"
+                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'></body>"
               }
-              reverse_proxy /radarr4k/* 127.0.0.1:7879 {
+              reverse_proxy /${serviceName}4k/* ${localAddr4k} {
                 header_up -Accept-Encoding
               }
             }
@@ -40,26 +49,26 @@
       radarr = {
         enable = true;
         openFirewall = true;
-        group = "media";
+        group = groupName;
         settings = {
           server = {
-            urlbase = "/radarr";
-            port = 7878;
-            bindaddress = "127.0.0.1";
+            urlbase = "/${serviceName}";
+            port = port;
+            bindaddress = bindAddr;
           };
         };
       };
     };
 
-    users.users.radarr.group = "media";
+    users.users.${serviceName}.group = groupName;
     systemd.services.radarr4k = {
       description = "Radarr 4K";
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         ExecStart = "${pkgs.radarr}/bin/Radarr -nobrowser -data=/var/lib/radarr4k";
         Restart = "always";
-        User = "radarr";
-        Group = "media";
+        User = serviceName;
+        Group = groupName;
       };
     };
   };

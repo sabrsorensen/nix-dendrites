@@ -4,13 +4,16 @@
     config,
     ...
   }:
+  let
+    serviceName = "gonic";
+  in
   {
     services = {
       caddy = {
         virtualHosts."{$DOMAIN}" = {
           extraConfig = ''
-            redir /gonic /gonic/
-            handle_path /gonic/* {
+            redir /${serviceName} /${serviceName}/
+            handle_path /${serviceName}/* {
               reverse_proxy ${config.services.gonic.settings.listen-addr}
             }
           '';
@@ -33,7 +36,7 @@
           podcast-path = [
             "/AnomalyRealm/media/music/podcasts"
           ];
-          proxy-prefix = "/gonic";
+          proxy-prefix = "/${serviceName}";
         };
       };
     };

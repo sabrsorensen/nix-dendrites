@@ -8,7 +8,7 @@
   }:
   let
     groupName = "media";
-    localAddr = "127.0.0.1:4040"
+    localAddr = "127.0.0.1:4040";
     serviceName = "airsonic";
   in
   {

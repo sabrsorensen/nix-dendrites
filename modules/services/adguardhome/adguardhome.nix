@@ -120,6 +120,10 @@
                 answer = networkConfig.nevarro;
               }
               {
+                name = localDomain;
+                answer = networkConfig.atlasuponraiden;
+              }
+              {
                 name = "ntfy";
                 answer = networkConfig.atlasuponraiden;
               }

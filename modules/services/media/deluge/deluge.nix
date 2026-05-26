@@ -1,19 +1,34 @@
 {
-  flake.modules.nixos.deluge = {
+  flake.modules.nixos.deluge =
+  {
+    config,
+    lib,
+    ...
+  }:
+  let
+    groupName = "media";
+    localAddr = "127.0.0.1:8112";
+    serviceName = "deluge";
+  in
+  {
+    users.users.${serviceName} = {
+      isSystemUser = true;
+      group = groupName;
+    };
     services = {
       caddy = {
         virtualHosts."{$DOMAIN}" = {
           extraConfig = ''
-            redir /deluge /deluge/
-            route /deluge/* {
-              uri strip_prefix /deluge
+            redir /${serviceName} /${serviceName}/
+            route /${serviceName}/* {
+              uri strip_prefix /${serviceName}
               filter {
                 content_type text/html.*
                 search_pattern </head>
-                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/deluge/aquamarine.css'></head>"
+                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'></head>"
               }
-              reverse_proxy 127.0.0.1:8112 {
-                header_up X-Deluge-Base "/deluge"
+              reverse_proxy ${localAddr} {
+                header_up X-Deluge-Base "/${serviceName}"
                 header_down X-Frame-Options SAMEORIGIN
               }
             }
@@ -33,8 +48,8 @@
         ];
         environment = {
           "DELUGE_LOGLEVEL" = "error";
-          "PGID" = "996";
-          "PUID" = "1000";
+          "PUID" = "${lib.toString config.users.users.${serviceName}.uid}";
+          "PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
           "TZ" = "America/Boise";
         };
         extraOptions = [
@@ -56,7 +71,7 @@
         ];
         pull = "newer";
         volumes = [
-          "/opt/deluge:/config"
+          "/opt/${serviceName}:/config"
           "/AnomalyRealm/media/downloads:/data"
           "/AnomalyRealm/media/autoadd:/autoadd"
           "/etc/localtime:/etc/localtime:ro"
@@ -87,7 +102,7 @@
           "media"
         ];
         ports = [
-          "127.0.0.1:8112:8112/tcp"
+          "${localAddr}:8112/tcp"
         ];
         pull = "newer";
         volumes = [
