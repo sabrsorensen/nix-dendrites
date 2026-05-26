@@ -1,9 +1,9 @@
 { self, lib, ... }:
 {
-  services.netbirdProxy.turnForward = {
-    enable = true;
-    externalInterface = "eno1";
-  };
+  #services.netbirdProxy.turnForward = {
+  #  enable = true;
+  #  externalInterface = "eno1";
+  #};
 
   networking = {
     firewall = {

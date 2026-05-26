@@ -19,7 +19,7 @@ in
       serviceImports = with inputs.self.modules.nixos; [
         caddy
         adguardhome
-        netbird-server
+        #netbird-server
       ];
       samAuthorizedKeys = [
         "${inputs.nix-secrets}/ssh-keys/atlas_nevarro.pub"

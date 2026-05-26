@@ -19,7 +19,7 @@
       gonic
       gotify
       jellyfin
-      netbird-proxy
+      #netbird-proxy
       ntfy-sh
       #ombi
       organizr
