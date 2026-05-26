@@ -32,7 +32,7 @@
               "github.com/caddy-dns/cloudflare@v0.2.2"
               "github.com/sjtug/caddy2-filter@v0.0.0-20230306214137-04be952a71e1"
             ];
-            hash = "sha256-7KERaalHfJRRXMqz43508Fv8ECWE8MCmh+28rpvzCBk=";
+            hash = "sha256-/zjToevOlKOwKCLf8WncYE4Nu74/Bnkc1mMA8/cdFcE=";
           };
           enable = true;
           email = "letsencrypt@{$DOMAIN}";
