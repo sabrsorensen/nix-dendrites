@@ -12,7 +12,7 @@
       ssh
       firmware
       cli-tools
-      netbird-client
+      #netbird-client
     ];
   };
 
