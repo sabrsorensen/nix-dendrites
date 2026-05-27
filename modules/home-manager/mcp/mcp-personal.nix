@@ -10,7 +10,7 @@
     in
     {
       home.packages = with pkgs; ([
-        nodejs_25
+        nodejs
       ]);
       programs.mcp = {
         enable = true;
