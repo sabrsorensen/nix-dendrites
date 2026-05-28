@@ -12,7 +12,7 @@ mkDeckyPlugin {
     owner = "bschelst";
     repo = "protondb-decky";
     rev = "main";
-    sha256 = "sha256-MUPcMNHJU6hQMl4r4G3N79AUO2npLI2NZaTJGqIbbQk=";
+    sha256 = "sha256-gXJH16PQNSiOPzWldeqShq0UxT9KUeaygINsNPHWifs=";
   };
 
   hash = "sha256-WJlCk355suOqpHyEse23uglk0XTB33D53CHmOyTS6v0=";

@@ -40,6 +40,7 @@ in
 
   home-manager.users.${shared.steamUser}.imports = [
     inputs.self.modules.homeManager.EmeraldEcho
+    ../_steamdeck/steamdeck-shortcut.nix
   ];
 
   networking.firewall.allowedTCPPorts = [
