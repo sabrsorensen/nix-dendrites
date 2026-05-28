@@ -10,6 +10,7 @@
       caddy = {
         virtualHosts."{$DOMAIN}" = {
           extraConfig = ''
+            import drop_scanners gotify
             redir /gotify /gotify/
             route /gotify/* {
               uri strip_prefix /gotify

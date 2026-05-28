@@ -19,6 +19,7 @@
       caddy = {
         virtualHosts."{$DOMAIN}" = {
           extraConfig = ''
+            import drop_scanners deluge
             redir /${serviceName} /${serviceName}/
             route /${serviceName}/* {
               uri strip_prefix /${serviceName}
@@ -48,8 +49,10 @@
         ];
         environment = {
           "DELUGE_LOGLEVEL" = "error";
-          "PUID" = "${lib.toString config.users.users.${serviceName}.uid}";
-          "PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
+          #"PUID" = "${lib.toString config.users.users.${serviceName}.uid}";
+          #"PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
+          "PUID" = "1000";
+          "PGID" = "996";
           "TZ" = "America/Boise";
         };
         extraOptions = [

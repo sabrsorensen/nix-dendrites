@@ -66,10 +66,10 @@
       autoStart = true;
       environment = {
         "ADVERTISE_IP" = "https://plex.${localDomain}/";
-        "PUID" = "${lib.toString config.users.users.plex.uid}";
-        "PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
-        "PLEX_UID" = "${lib.toString config.users.users.plex.uid}";
-        "PLEX_GID" = "${lib.toString config.users.groups.${groupName}.gid}";
+        "PUID" = "978";
+        "PGID" = "978";
+        "PLEX_UID" = "978";
+        "PLEX_GID" = "978";
         "PLEX_CLAIM" = "";
         "TZ" = "America/Boise";
         "VERSION" = "latest";
@@ -110,8 +110,8 @@
       };
       autoStart = true;
       environment = {
-        "PUID" = "${lib.toString config.users.users.tautulli.uid}";
-        "PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
+        "PUID" = "976";
+        "PGID" = "978";
         "TZ" = "America/Boise";
       };
       volumes = [
