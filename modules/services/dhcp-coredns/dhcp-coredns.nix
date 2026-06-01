@@ -26,6 +26,9 @@
       keaConfPath = "${cfg.stateDir}/kea-dhcp4.conf";
       mergedRecordsPath = "${cfg.stateDir}/records.json";
       zonePath = "${cfg.stateDir}/${localDomain}.zone";
+      dnsListenParts = lib.splitString ":" cfg.dnsListen;
+      dnsPort = lib.last dnsListenParts;
+      authoritativeNameservers = builtins.concatStringsSep " " cfg.authoritativeNameservers;
       staticDnsRecords = builtins.toJSON [
         { hostname = "ns1"; ip = networkConfig.nevarro; }
         { hostname = "ns2"; ip = networkConfig.naboo; }
@@ -48,12 +51,6 @@
       options.services.dhcp-coredns = {
         enable = lib.mkEnableOption "DHCP + CoreDNS local DNS stack";
 
-        backend = lib.mkOption {
-          type = lib.types.enum [ "kea-dhcp4" "isc-dhcpd" ];
-          default = "kea-dhcp4";
-          description = "DHCP backend. `isc-dhcpd` is unsupported on current nixpkgs and will fail with an assertion.";
-        };
-
         interface = lib.mkOption {
           type = lib.types.str;
           default = "end0";
@@ -74,22 +71,23 @@
           default = [ "1.1.1.1" "9.9.9.9" ];
         };
 
+        authoritativeNameservers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [
+            "bristol.ns.cloudflare.com"
+            "zod.ns.cloudflare.com"
+          ];
+          description = "Authoritative resolvers for `${localDomain}` and `mail.${localDomain}`.";
+        };
+
         localDomainApexIp = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = null;
           description = "If set, resolve the root of the local domain to this local IP in CoreDNS.";
         };
-
       };
 
       config = lib.mkIf cfg.enable {
-        assertions = [
-          {
-            assertion = cfg.backend == "kea-dhcp4";
-            message = "services.dhcp-coredns.backend=\"isc-dhcpd\" is not supported: services.dhcpd4 was removed from nixpkgs. Use kea-dhcp4.";
-          }
-        ];
-
         environment.systemPackages = with pkgs; [ jq python3 sops ssh-to-age ];
 
         systemd.tmpfiles.rules = [
@@ -99,7 +97,7 @@
         systemd.services.dhcp-coredns-prepare = {
           description = "Prepare Kea config inputs and CoreDNS zone data";
           wantedBy = [ "multi-user.target" ];
-          before = [ "kea-dhcp4-runtime.service" "coredns.service" ];
+          before = [ "dhcp-coredns-kea.service" "coredns.service" ];
           after = [ "network.target" "local-fs.target" ];
           serviceConfig = {
             Type = "oneshot";
@@ -165,7 +163,7 @@
           '';
         };
 
-        systemd.services.kea-dhcp4-runtime = {
+        systemd.services.dhcp-coredns-kea = {
           description = "Kea DHCP4 server (runtime-generated config)";
           after = [ "dhcp-coredns-prepare.service" "network.target" ];
           requires = [ "dhcp-coredns-prepare.service" ];
@@ -179,14 +177,14 @@
         services.coredns = {
           enable = true;
           config = ''
-            mail.${localDomain}:${builtins.elemAt (lib.splitString ":" cfg.dnsListen) 1} {
+            mail.${localDomain}:${dnsPort} {
               log
               errors
-              forward . bristol.ns.cloudflare.com zod.ns.cloudflare.com
+              forward . ${authoritativeNameservers}
               cache 60
             }
 
-            ${localDomain}:${builtins.elemAt (lib.splitString ":" cfg.dnsListen) 1} {
+            ${localDomain}:${dnsPort} {
               log
               errors
               ${lib.optionalString (cfg.localDomainApexIp != null) ''
@@ -197,7 +195,7 @@
               }
               ''}
               file ${zonePath} ${localDomain}
-              forward . bristol.ns.cloudflare.com zod.ns.cloudflare.com
+              forward . ${authoritativeNameservers}
               cache 60
             }
 
@@ -217,7 +215,7 @@
 
         systemd.services.dhcp-coredns-sync = {
           description = "Sync DHCP leases into CoreDNS records";
-          after = [ "kea-dhcp4-runtime.service" "coredns.service" ];
+          after = [ "dhcp-coredns-kea.service" "coredns.service" ];
           serviceConfig = {
             Type = "oneshot";
           };
