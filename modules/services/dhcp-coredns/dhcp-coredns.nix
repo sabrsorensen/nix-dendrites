@@ -121,6 +121,16 @@
               echo '[]' > "${dynamicLeasePath}"
             fi
 
+            GATEWAY="${networkConfig.gateway}"
+            SUBNET_MASK="${networkConfig.subnet_mask}"
+            SUBNET_CIDR="$(${python3Bin} - <<'PY'
+            import os
+            import ipaddress
+            network = ipaddress.IPv4Network((os.environ["GATEWAY"], os.environ["SUBNET_MASK"]), strict=False)
+            print(str(network))
+            PY
+            )"
+
             ${pkgs.jq}/bin/jq '
               {
                 "Dhcp4": {
@@ -128,7 +138,7 @@
                   "lease-database": { "type": "memfile", "persist": true, "name": "'"${dynamicLeasePath}"'" },
                   "subnet4": [
                     {
-                      "subnet": "'"${networkConfig.network_address}"'/'"${toString networkConfig.cidr}"'",
+                      "subnet": "'"$SUBNET_CIDR"'",
                       "pools": [ { "pool": "'"${networkConfig.dhcp_start}"' - '"${networkConfig.dhcp_end}"'" } ],
                       "option-data": [
                         { "name": "routers", "data": "'"${networkConfig.gateway}"'" },
