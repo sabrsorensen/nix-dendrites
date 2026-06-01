@@ -55,7 +55,7 @@
             else
               null
           )
-          (if pkgs ? nodejs_25 then nodejs_25 else null)
+          (if pkgs ? nodejs then nodejs else null)
         ];
     };
 }

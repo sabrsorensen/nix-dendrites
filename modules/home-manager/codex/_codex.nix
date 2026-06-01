@@ -48,7 +48,7 @@
         settings = {
           model = "gpt-5.3-codex";
           notice.model_migrations = {
-            "gpt-5.3-codex" = "gpt-5.4";
+            "gpt-5.3-codex" = "gpt-5.5";
           };
           personality = "pragmatic";
 
