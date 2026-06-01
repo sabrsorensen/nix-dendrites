@@ -16,6 +16,7 @@
       generate-dns-rewrites = ./generate_dns_rewrites.py;
       adguardhome-path = "/var/lib/AdGuardHome";
       python3Bin = "${pkgs.python3.withPackages (ps: [ ps.requests ])}/bin/python3";
+      dhcpCoreDnsEnabled = lib.hasAttrByPath [ "services" "dhcp-coredns" "enable" ] config && config.services.dhcp-coredns.enable;
       readBuildValue =
         path:
         builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
@@ -294,11 +295,15 @@
             schema_version = 30;
             dns = {
               upstream_mode = "parallel";
-              upstream_dns = [
-                "[/$AGH_DOMAIN/mail.$AGH_DOMAIN/]bristol.ns.cloudflare.com zod.ns.cloudflare.com"
-                "1.1.1.1"
-                "9.9.9.9"
-              ];
+              upstream_dns =
+                if dhcpCoreDnsEnabled then
+                  [ "127.0.0.1:1053" ]
+                else
+                  [
+                    "[/$AGH_DOMAIN/mail.$AGH_DOMAIN/]bristol.ns.cloudflare.com zod.ns.cloudflare.com"
+                    "1.1.1.1"
+                    "9.9.9.9"
+                  ];
               blocked_hosts = [
                 "chat.avatar.ext.hp.com"
               ];

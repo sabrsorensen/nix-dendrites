@@ -19,6 +19,7 @@ in
       serviceImports = with inputs.self.modules.nixos; [
         caddy
         adguardhome
+        dhcp-coredns
       ];
       samAuthorizedKeys = [
         "${inputs.nix-secrets}/ssh-keys/atlas_naboo.pub"
@@ -36,6 +37,20 @@ in
       # Disable problematic sysctl setting from nixos-raspberrypi
       boot.kernel.sysctl = lib.mkForce {
         # Remove vm.mmap_rnd_bits entirely - this kernel doesn't support it
+      };
+
+      services.dhcp-coredns = {
+        enable = true;
+        interface = "end0";
+        localDomainApexIp = inputs.self.lib.rpi.network.atlasuponraiden;
+        upstreamServers = [
+          "1.1.1.1"
+          "9.9.9.9"
+        ];
+        authoritativeNameservers = [
+          "bristol.ns.cloudflare.com"
+          "zod.ns.cloudflare.com"
+        ];
       };
     }
   ];
