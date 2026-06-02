@@ -149,7 +149,7 @@
                       ],
                       "reservations": ((.leases // [])
                         | map(select(.static == true and .ip and .mac)
-                          | { "hw-address": (.mac|ascii_downcase), "ip-address": .ip, "hostname": (.hostname // "") }))
+                          | { "hw-address": (.mac|ascii_downcase), "ip-address": .ip }))
                     }
                   ],
                   "valid-lifetime": 3600,
