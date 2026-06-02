@@ -140,6 +140,7 @@
                   "lease-database": { "type": "memfile", "persist": true, "name": "'"${dynamicLeasePath}"'" },
                   "subnet4": [
                     {
+                      "id": 1,
                       "subnet": "'"$SUBNET_CIDR"'",
                       "pools": [ { "pool": "'"${networkConfig.dhcp_start} - ${networkConfig.dhcp_end}"'" } ],
                       "option-data": [
