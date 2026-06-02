@@ -14,10 +14,14 @@
   {
     services = {
       caddy = {
-        virtualHosts."{$DOMAIN}" = {
+        virtualHosts."mealie.{$DOMAIN}" = {
+          logFormat = ''
+            output stdout
+            format console
+            level DEBUG
+          '';
           extraConfig = ''
-            redir /mealie /mealie/
-            reverse_proxy /mealie/* 127.0.0.1:${lib.toString config.services.mealie.port}
+            reverse_proxy /* 127.0.0.1:${lib.toString config.services.mealie.port}
           '';
         };
       };
@@ -27,10 +31,10 @@
         listenAddress = "127.0.0.1";
         settings = {
           BASE_URL = "https://mealie.${localDomain}";
-          ALLOW_SIGNUP = false;
+          ALLOW_SIGNUP = "false";
         };
-        extraOptions = {};
-        credentialsFile = "";
+        extraOptions = [];
+        credentialsFile = null;
         database.createLocally = true;
       };
     };
