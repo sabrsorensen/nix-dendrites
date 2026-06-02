@@ -22,7 +22,7 @@
       renderZone = ./render_zone.py;
 
       staticLeasesPath = "${cfg.stateDir}/leases.static.json";
-      dynamicLeasePath = "${cfg.stateDir}/kea-leases4.json";
+      dynamicLeasePath = "${cfg.stateDir}/kea-leases4.csv";
       keaConfPath = "${cfg.stateDir}/kea-dhcp4.conf";
       mergedRecordsPath = "${cfg.stateDir}/records.json";
       zonePath = "${cfg.stateDir}/${localDomain}.zone";
@@ -120,7 +120,7 @@
             fi
 
             if [ ! -f "${dynamicLeasePath}" ]; then
-              echo '[]' > "${dynamicLeasePath}"
+              : > "${dynamicLeasePath}"
             fi
 
             export GATEWAY="${networkConfig.gateway}"

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import csv
 import json
 import re
 from pathlib import Path
@@ -49,16 +50,27 @@ def parse_dhcpd_leases(path: Path):
 
 
 def parse_kea_leases(path: Path):
-    data = load_json(path)
-    if not isinstance(data, list):
-        return []
     leases = []
-    for row in data:
+    if not path.exists():
+        return leases
+
+    text = path.read_text(encoding="utf-8", errors="ignore").strip()
+    if not text:
+        return leases
+
+    try:
+        rows = list(csv.DictReader(text.splitlines()))
+    except Exception:
+        return leases
+
+    for row in rows:
         if not isinstance(row, dict):
             continue
-        ip = (row.get("ip-address") or "").strip()
+        if str(row.get("state", "")).strip() not in {"", "0"}:
+            continue
+        ip = (row.get("address") or "").strip()
         hostname = (row.get("hostname") or "").strip()
-        mac = (row.get("hw-address") or "").strip().upper()
+        mac = (row.get("hwaddr") or "").strip().upper()
         if ip and hostname:
             leases.append({"ip": ip, "hostname": hostname, "mac": mac, "static": False})
     return leases
