@@ -42,10 +42,6 @@
               dns cloudflare {$CLOUDFLARE_API_KEY}
               resolvers 1.1.1.1 1.0.0.1 8.8.8.8 8.8.4.4
             }
-            cert_issuer zerossl {
-              dns cloudflare {$CLOUDFLARE_API_KEY}
-              resolvers 1.1.1.1 1.0.0.1 8.8.8.8 8.8.4.4
-            }
             order filter after encode
           '';
           extraConfig = ''
