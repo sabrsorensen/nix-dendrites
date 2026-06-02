@@ -22,7 +22,8 @@
       renderZone = ./render_zone.py;
 
       staticLeasesPath = "${cfg.stateDir}/leases.static.json";
-      dynamicLeasePath = "${cfg.stateDir}/kea-leases4.csv";
+      dynamicLeaseFileName = "kea-leases4.csv";
+      dynamicLeasePath = "${cfg.stateDir}/${dynamicLeaseFileName}";
       keaConfPath = "${cfg.stateDir}/kea-dhcp4.conf";
       mergedRecordsPath = "${cfg.stateDir}/records.json";
       zonePath = "${cfg.stateDir}/${localDomain}.zone";
@@ -137,7 +138,7 @@
               {
                 "Dhcp4": {
                   "interfaces-config": { "interfaces": [ "'"${cfg.interface}"'" ] },
-                  "lease-database": { "type": "memfile", "persist": true, "name": "'"${dynamicLeasePath}"'" },
+                  "lease-database": { "type": "memfile", "persist": true, "name": "'"${dynamicLeaseFileName}"'" },
                   "subnet4": [
                     {
                       "id": 1,
@@ -183,6 +184,7 @@
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
             ExecStart = "${pkgs.kea}/bin/kea-dhcp4 -c ${keaConfPath}";
+            Environment = "KEA_DHCP_DATA_DIR=${cfg.stateDir}";
             RuntimeDirectory = "kea";
             Restart = "on-failure";
           };
