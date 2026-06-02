@@ -26,8 +26,19 @@
       keaConfPath = "${cfg.stateDir}/kea-dhcp4.conf";
       mergedRecordsPath = "${cfg.stateDir}/records.json";
       zonePath = "${cfg.stateDir}/${localDomain}.zone";
-      dnsListenParts = lib.splitString ":" cfg.dnsListen;
-      dnsPort = lib.last dnsListenParts;
+      dnsListenMatch = builtins.match "^(.+):([0-9]+)$" cfg.dnsListen;
+      dnsHostRaw = builtins.elemAt dnsListenMatch 0;
+      dnsHost =
+        if builtins.match "^\\[(.*)\\]$" dnsHostRaw != null then
+          builtins.elemAt (builtins.match "^\\[(.*)\\]$" dnsHostRaw) 0
+        else
+          dnsHostRaw;
+      dnsPort = builtins.elemAt dnsListenMatch 1;
+      dnsBindDirective =
+        if dnsHost == "" || dnsHost == "0.0.0.0" || dnsHost == "::" then
+          ""
+        else
+          "bind ${dnsHost}";
       upstreamServers = builtins.concatStringsSep " " cfg.upstreamServers;
       staticDnsRecords = builtins.toJSON [
         { hostname = "ns1"; ip = networkConfig.nevarro; }
@@ -112,8 +123,8 @@
               echo '[]' > "${dynamicLeasePath}"
             fi
 
-            GATEWAY="${networkConfig.gateway}"
-            SUBNET_MASK="${networkConfig.subnet_mask}"
+            export GATEWAY="${networkConfig.gateway}"
+            export SUBNET_MASK="${networkConfig.subnet_mask}"
             SUBNET_CIDR="$(${python3Bin} - <<'PY'
             import os
             import ipaddress
@@ -200,9 +211,10 @@
               cache 60
             }
 
-            ${cfg.dnsListen} {
+            .:${dnsPort} {
               log
               errors
+              ${lib.optionalString (dnsBindDirective != "") dnsBindDirective}
               hosts {
                 ${networkConfig.gateway} home-gw.${localDomain}
                 fallthrough
