@@ -47,10 +47,6 @@ in
           "1.1.1.1"
           "9.9.9.9"
         ];
-        authoritativeNameservers = [
-          "bristol.ns.cloudflare.com"
-          "zod.ns.cloudflare.com"
-        ];
       };
     }
   ];

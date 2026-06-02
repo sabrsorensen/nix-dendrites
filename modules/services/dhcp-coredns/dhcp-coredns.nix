@@ -28,7 +28,7 @@
       zonePath = "${cfg.stateDir}/${localDomain}.zone";
       dnsListenParts = lib.splitString ":" cfg.dnsListen;
       dnsPort = lib.last dnsListenParts;
-      authoritativeNameservers = builtins.concatStringsSep " " cfg.authoritativeNameservers;
+      upstreamServers = builtins.concatStringsSep " " cfg.upstreamServers;
       staticDnsRecords = builtins.toJSON [
         { hostname = "ns1"; ip = networkConfig.nevarro; }
         { hostname = "ns2"; ip = networkConfig.naboo; }
@@ -69,15 +69,6 @@
         upstreamServers = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = [ "1.1.1.1" "9.9.9.9" ];
-        };
-
-        authoritativeNameservers = lib.mkOption {
-          type = lib.types.listOf lib.types.str;
-          default = [
-            "bristol.ns.cloudflare.com"
-            "zod.ns.cloudflare.com"
-          ];
-          description = "Authoritative resolvers for `${localDomain}` and `mail.${localDomain}`.";
         };
 
         localDomainApexIp = lib.mkOption {
@@ -190,7 +181,7 @@
             mail.${localDomain}:${dnsPort} {
               log
               errors
-              forward . ${authoritativeNameservers}
+              forward . ${upstreamServers}
               cache 60
             }
 
@@ -205,7 +196,7 @@
               }
               ''}
               file ${zonePath} ${localDomain}
-              forward . ${authoritativeNameservers}
+              forward . ${upstreamServers}
               cache 60
             }
 
@@ -217,7 +208,7 @@
                 fallthrough
               }
               file ${zonePath} ${localDomain}
-              forward . ${builtins.concatStringsSep " " cfg.upstreamServers}
+              forward . ${upstreamServers}
               cache 60
             }
           '';
