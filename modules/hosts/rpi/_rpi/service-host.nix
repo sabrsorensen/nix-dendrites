@@ -9,7 +9,6 @@
   serviceImports,
   samAuthorizedKeys,
   nixRemoteAuthorizedKeys,
-  adguardDhcpEnabled,
 }:
 let
   rpi = inputs.self.lib.rpi;
@@ -32,6 +31,4 @@ in
   users.users.nix-remote = lib.mkIf (config ? sops && config.sops.secrets ? hashed_password) {
     openssh.authorizedKeys.keyFiles = nixRemoteAuthorizedKeys;
   };
-
-  services.adguardhome.settings.dhcp.enabled = adguardDhcpEnabled;
 }

@@ -32,7 +32,6 @@ in
         "${inputs.nix-secrets}/ssh-keys/kamino_nevarro_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/zaphod_nevarro_nix.pub"
       ];
-      adguardDhcpEnabled = false;
     })
     {
       # Disable problematic sysctl setting from nixos-raspberrypi

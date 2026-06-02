@@ -31,7 +31,6 @@ in
         "${inputs.nix-secrets}/ssh-keys/kamino_naboo_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/zaphod_naboo_nix.pub"
       ];
-      adguardDhcpEnabled = false;
     })
     {
       # Disable problematic sysctl setting from nixos-raspberrypi
