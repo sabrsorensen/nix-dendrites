@@ -38,7 +38,10 @@
           email = "letsencrypt@{$DOMAIN}";
           environmentFile = config.sops.secrets.caddy_env.path;
           globalConfig = ''
-            acme_dns cloudflare {$CLOUDFLARE_API_KEY}
+            cert_issuer acme {
+              dns cloudflare {$CLOUDFLARE_API_KEY}
+              resolvers 1.1.1.1 1.0.0.1 8.8.8.8 8.8.4.4
+            }
             order filter after encode
           '';
           extraConfig = ''
@@ -70,7 +73,7 @@
           logFormat = ''
             output stdout
             format console
-            level DEBUG
+            level INFO
           '';
         };
 

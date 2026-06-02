@@ -19,6 +19,7 @@ in
       serviceImports = with inputs.self.modules.nixos; [
         caddy
         adguardhome
+        dhcp-coredns
         #netbird-server
       ];
       samAuthorizedKeys = [
@@ -31,12 +32,21 @@ in
         "${inputs.nix-secrets}/ssh-keys/kamino_nevarro_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/zaphod_nevarro_nix.pub"
       ];
-      adguardDhcpEnabled = true;
     })
     {
       # Disable problematic sysctl setting from nixos-raspberrypi
       boot.kernel.sysctl = lib.mkForce {
         # Remove vm.mmap_rnd_bits entirely - this kernel doesn't support it
+      };
+
+      services.dhcp-coredns = {
+        enable = true;
+        interface = "end0";
+        localDomainApexIp = inputs.self.lib.rpi.network.atlasuponraiden;
+        upstreamServers = [
+          "1.1.1.1"
+          "9.9.9.9"
+        ];
       };
     }
   ];

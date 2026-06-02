@@ -12,26 +12,19 @@
     }:
     let
       networkConfig = config.systemConstants.network;
-      merge-dynamic-leases = ./merge_dynamic_leases.py;
-      generate-dns-rewrites = ./generate_dns_rewrites.py;
       adguardhome-path = "/var/lib/AdGuardHome";
-      python3Bin = "${pkgs.python3.withPackages (ps: [ ps.requests ])}/bin/python3";
       readBuildValue =
         path:
         builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
       localDomain = readBuildValue "domain.txt";
     in
     {
-      environment.systemPackages = with pkgs; [
-        python3
-        ssh-to-age
-        yq-go
-      ];
+      environment.systemPackages = with pkgs; [ ssh-to-age ];
 
       imports = [ inputs.self.modules.nixos.dhcp-failover ];
 
       systemd.services.adguardhome-prepare = {
-        description = "Prepare AdGuardHome configuration and DHCP leases";
+        description = "Prepare AdGuardHome configuration";
         before = [ "adguardhome.service" ];
         after = [
           "network.target"
@@ -48,29 +41,9 @@
           RemainAfterExit = true;
         };
         script = ''
-          TEMP_LEASES="/tmp/adguard-leases-$$.json"
           TEMP_AGE_KEY="/tmp/age-key-$$.txt"
 
           ${pkgs.ssh-to-age}/bin/ssh-to-age -private-key < /etc/ssh/ssh_host_ed25519_key > "$TEMP_AGE_KEY"
-
-          if ! SOPS_AGE_KEY_FILE="$TEMP_AGE_KEY" \
-          ${pkgs.sops}/bin/sops --decrypt "${inputs.nix-secrets}/adguardhome/leases.json" > "$TEMP_LEASES" 2>/dev/null; then
-            exit 1
-          fi
-
-          if [ ! -s "$TEMP_LEASES" ]; then
-            echo '{"version": 1, "leases": []}' > "$TEMP_LEASES"
-          fi
-
-          mkdir -p ${adguardhome-path}/data
-
-          if [ -f "${adguardhome-path}/data/leases.json" ]; then
-            ${python3Bin} ${merge-dynamic-leases} "$TEMP_LEASES" ${adguardhome-path}/data/leases.json
-          else
-            cp "$TEMP_LEASES" ${adguardhome-path}/data/leases.json
-          fi
-
-          chmod 644 ${adguardhome-path}/data/leases.json
 
           AGH_USER="$(cat /run/secrets/adguardhome_user)"
           AGH_PASSWORD="$(cat /run/secrets/adguardhome_hashed_password)"
@@ -84,99 +57,10 @@
 
             sed "s/\$AGH_USER/$AGH_USER/g; s/\$AGH_PASSWORD/$AGH_PASSWORD_ESCAPED/g; s/\$AGH_DOMAIN/$AGH_DOMAIN_ESCAPED/g" \
               "${adguardhome-path}/AdGuardHome.yaml" > "/run/adguardhome/AdGuardHome.yaml"
-
-            TEMP_REWRITES="/tmp/adguard-rewrites-$$.json"
-            STATIC_REWRITES='${builtins.toJSON [
-              {
-                name = "agh-naboo";
-                answer = networkConfig.naboo;
-              }
-              {
-                name = "agh-nevarro";
-                answer = networkConfig.nevarro;
-              }
-              {
-                name = "auth";
-                answer = networkConfig.nevarro;
-              }
-              {
-                name = "homeassistant";
-                answer = networkConfig.coruscant;
-              }
-              {
-                name = "home-gw";
-                answer = networkConfig.gateway;
-              }
-              {
-                name = "immich";
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "mealie";
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "netbird";
-                answer = networkConfig.nevarro;
-              }
-              {
-                name = localDomain;
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "ntfy";
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "plex";
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "profilarr";
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "scrutiny";
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "geo.hivebedrock.network";
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "hivebedrock.network";
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "play.inpvp.net";
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "mco.lbsg.net";
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "play.galaxite.net";
-                answer = networkConfig.atlasuponraiden;
-              }
-              {
-                name = "play.enchanted.gg";
-                answer = networkConfig.atlasuponraiden;
-              }
-            ]}'
-
-            ${python3Bin} ${generate-dns-rewrites} \
-              --domain "$AGH_DOMAIN" \
-              --leases-path "${adguardhome-path}/data/leases.json" \
-              --static-rewrites-json "$STATIC_REWRITES" \
-              --output "$TEMP_REWRITES"
-
-            TEMP_REWRITES="$TEMP_REWRITES" ${pkgs.yq-go}/bin/yq -i '.filtering.rewrites = load(strenv(TEMP_REWRITES))' "/run/adguardhome/AdGuardHome.yaml"
-            rm -f "$TEMP_REWRITES"
             chmod 644 "/run/adguardhome/AdGuardHome.yaml"
           fi
 
-          rm -f "$TEMP_LEASES" "$TEMP_AGE_KEY"
+          rm -f "$TEMP_AGE_KEY"
         '';
       };
 
@@ -249,11 +133,7 @@
         };
       };
 
-      networking.firewall.allowedUDPPorts = [
-        53
-        67
-        68
-      ];
+      networking.firewall.allowedUDPPorts = [ 53 ];
 
       services = {
         caddy = {
@@ -261,7 +141,7 @@
             logFormat = ''
               output stdout
               format console
-              level DEBUG
+              level INFO
             '';
             extraConfig = ''
               filter {
@@ -279,7 +159,7 @@
         adguardhome = {
           enable = true;
           openFirewall = true;
-          allowDHCP = true;
+          allowDHCP = false;
           mutableSettings = true;
           host = "127.0.0.1";
           port = 3003;
@@ -294,11 +174,7 @@
             schema_version = 30;
             dns = {
               upstream_mode = "parallel";
-              upstream_dns = [
-                "[/$AGH_DOMAIN/mail.$AGH_DOMAIN/]bristol.ns.cloudflare.com zod.ns.cloudflare.com"
-                "1.1.1.1"
-                "9.9.9.9"
-              ];
+              upstream_dns = [ "127.0.0.1:1053" ];
               blocked_hosts = [
                 "chat.avatar.ext.hp.com"
               ];
