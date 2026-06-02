@@ -29,8 +29,8 @@
       dnsListenMatch = builtins.match "^(.+):([0-9]+)$" cfg.dnsListen;
       dnsHostRaw = builtins.elemAt dnsListenMatch 0;
       dnsHost =
-        if builtins.match "^\\[(.*)\\]$" dnsHostRaw != null then
-          builtins.elemAt (builtins.match "^\\[(.*)\\]$" dnsHostRaw) 0
+        if lib.hasPrefix "[" dnsHostRaw && lib.hasSuffix "]" dnsHostRaw then
+          builtins.substring 1 ((builtins.stringLength dnsHostRaw) - 2) dnsHostRaw
         else
           dnsHostRaw;
       dnsPort = builtins.elemAt dnsListenMatch 1;
