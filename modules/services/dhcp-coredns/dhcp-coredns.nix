@@ -141,7 +141,7 @@
                   "subnet4": [
                     {
                       "subnet": "'"$SUBNET_CIDR"'",
-                      "pools": [ { "pool": "'"${networkConfig.dhcp_start}"' - '"${networkConfig.dhcp_end}"'" } ],
+                      "pools": [ { "pool": "'"${networkConfig.dhcp_start} - ${networkConfig.dhcp_end}"'" } ],
                       "option-data": [
                         { "name": "routers", "data": "'"${networkConfig.gateway}"'" },
                         { "name": "domain-name-servers", "data": "'"${networkConfig.dns_servers}"'" },
