@@ -40,11 +40,11 @@ function piStatus -d "Show comprehensive Pi system status"
     end
 
     # Check services only if they exist
-    if systemctl list-unit-files adguardhome.service >/dev/null 2>&1
-        if systemctl is-active --quiet adguardhome
-            echo "AdGuard: ✅ Running"
+    if systemctl list-unit-files blocky.service >/dev/null 2>&1
+        if systemctl is-active --quiet blocky
+            echo "Blocky: ✅ Running"
         else
-            echo "AdGuard: ❌ Not running"
+            echo "Blocky: ❌ Not running"
         end
     end
 

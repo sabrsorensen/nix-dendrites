@@ -44,8 +44,6 @@
       staticDnsRecords = builtins.toJSON [
         { hostname = "ns1"; ip = networkConfig.nevarro; }
         { hostname = "ns2"; ip = networkConfig.naboo; }
-        { hostname = "agh-naboo"; ip = networkConfig.naboo; }
-        { hostname = "agh-nevarro"; ip = networkConfig.nevarro; }
         { hostname = "atlas"; ip = networkConfig.atlasuponraiden; }
         { hostname = "auth"; ip = networkConfig.nevarro; }
         { hostname = "homeassistant"; ip = networkConfig.coruscant; }
@@ -60,6 +58,8 @@
       ];
     in
     {
+      imports = [ inputs.self.modules.nixos.dhcp-failover ];
+
       options.services.dhcp-coredns = {
         enable = lib.mkEnableOption "DHCP + CoreDNS local DNS stack";
 
@@ -117,7 +117,7 @@
             TEMP_AGE_KEY="/tmp/dhcp-coredns-age-key-$$.txt"
             ${pkgs.ssh-to-age}/bin/ssh-to-age -private-key < /etc/ssh/ssh_host_ed25519_key > "$TEMP_AGE_KEY"
 
-            if ! SOPS_AGE_KEY_FILE="$TEMP_AGE_KEY" ${pkgs.sops}/bin/sops --decrypt "${inputs.nix-secrets}/adguardhome/leases.json" > "${staticLeasesPath}" 2>/dev/null; then
+            if ! SOPS_AGE_KEY_FILE="$TEMP_AGE_KEY" ${pkgs.sops}/bin/sops --decrypt "${inputs.nix-secrets}/leases.json" > "${staticLeasesPath}" 2>/dev/null; then
               echo '{"version":1,"leases":[]}' > "${staticLeasesPath}"
             fi
             rm -f "$TEMP_AGE_KEY"
@@ -272,10 +272,6 @@
         };
 
         networking.firewall.allowedUDPPorts = [ 53 67 68 1053 ];
-
-        services.adguardhome = lib.mkIf (config ? services && config.services ? adguardhome) {
-          settings.dhcp.enabled = lib.mkForce false;
-        };
       };
     };
 }

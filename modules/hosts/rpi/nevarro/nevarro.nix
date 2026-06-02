@@ -17,8 +17,7 @@ in
         "9.9.9.9"
       ];
       serviceImports = with inputs.self.modules.nixos; [
-        caddy
-        adguardhome
+        blocky
         dhcp-coredns
         #netbird-server
       ];
