@@ -64,7 +64,7 @@
               logFormat = ''
                 output stdout
                 format console
-                level DEBUG
+                level INFO
               '';
               extraConfig = ''
                 reverse_proxy https://auth.{$DOMAIN} {
@@ -80,7 +80,7 @@
                   roll_keep_for 720h
                 }
                 format console
-                level DEBUG
+                level INFO
               '';
               extraConfig = ''
                 @management path /management.ManagementService/*

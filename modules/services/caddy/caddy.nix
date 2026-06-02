@@ -73,7 +73,7 @@
           logFormat = ''
             output stdout
             format console
-            level DEBUG
+            level INFO
           '';
         };
 

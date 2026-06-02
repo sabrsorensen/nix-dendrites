@@ -24,7 +24,7 @@
             logFormat = ''
               output stdout
               format console
-              level DEBUG
+              level INFO
             '';
             extraConfig = ''
               import cors https://auth.{$DOMAIN}

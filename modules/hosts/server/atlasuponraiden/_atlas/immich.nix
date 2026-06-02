@@ -22,7 +22,7 @@ in
         logFormat = ''
           output stdout
           format console
-          level DEBUG
+          level INFO
         '';
         extraConfig = ''
           reverse_proxy http://${config.services.immich.host}:${toString config.services.immich.port}

@@ -27,7 +27,7 @@
       nix-index
       caddy
       immich
-      #mealie
+      mealie
       media-server
       scrutiny
       syncthing-server

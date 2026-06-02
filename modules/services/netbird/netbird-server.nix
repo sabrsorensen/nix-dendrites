@@ -142,7 +142,7 @@ in
             logFormat = ''
               output stdout
               format console
-              level DEBUG
+              level INFO
             '';
             extraConfig = ''
               root * ${config.services.netbird.server.dashboard.finalDrv}
