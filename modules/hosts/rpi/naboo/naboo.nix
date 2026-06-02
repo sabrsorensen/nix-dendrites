@@ -42,6 +42,7 @@ in
       services.dhcp-coredns = {
         enable = true;
         interface = "end0";
+        startKeaOnBoot = false;
         localDomainApexIp = inputs.self.lib.rpi.network.atlasuponraiden;
         upstreamServers = [
           "1.1.1.1"

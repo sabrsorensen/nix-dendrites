@@ -2,10 +2,13 @@
   flake.modules.nixos.dhcp-failover =
     {
       config,
+      lib,
       pkgs,
       ...
     }:
     let
+      dhcpCoreDnsEnabled =
+        lib.hasAttrByPath [ "services" "dhcp-coredns" "enable" ] config && config.services.dhcp-coredns.enable;
       readBuildValue =
         path:
         builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
@@ -28,16 +31,15 @@
 
         PEER_IP="${peerConfig.ip}"
         PEER_NAME="${peerConfig.name}"
-        AGH_CONFIG="/var/lib/AdGuardHome/AdGuardHome.yaml"
+        LOCAL_DHCP_UNIT="dhcp-coredns-kea.service"
 
         log() {
             echo "$(date '+%Y-%m-%d %H:%M:%S') [DHCP-Failover] $*"
         }
 
         check_peer_dhcp() {
-            if timeout 5 ${pkgs.curl}/bin/curl -sf \
-               "http://$PEER_IP:3003/control/dhcp/status" 2>/dev/null | \
-               ${pkgs.jq}/bin/jq -e '.enabled == true' >/dev/null 2>&1; then
+            if timeout 5 ${pkgs.nmap}/bin/nmap -Pn -sU -p 67 --host-timeout 4s "$PEER_IP" 2>/dev/null | \
+               ${pkgs.gnugrep}/bin/grep -Eq '67/udp[[:space:]]+(open|open\|filtered)'; then
                 return 0
             else
                 return 1
@@ -55,8 +57,8 @@
         }
 
         get_local_dhcp_status() {
-            if [ -f "$AGH_CONFIG" ]; then
-                ${pkgs.yq-go}/bin/yq eval '.dhcp.enabled // false' "$AGH_CONFIG" 2>/dev/null || echo "false"
+            if systemctl is-active --quiet "$LOCAL_DHCP_UNIT"; then
+                echo "true"
             else
                 echo "false"
             fi
@@ -64,14 +66,12 @@
 
         enable_local_dhcp() {
             log "Enabling local DHCP (peer $PEER_NAME is down)"
-            ${pkgs.yq-go}/bin/yq eval '.dhcp.enabled = true' -i "$AGH_CONFIG"
-            systemctl reload adguardhome || true
+            systemctl start "$LOCAL_DHCP_UNIT"
         }
 
         disable_local_dhcp() {
             log "Disabling local DHCP (peer $PEER_NAME is active)"
-            ${pkgs.yq-go}/bin/yq eval '.dhcp.enabled = false' -i "$AGH_CONFIG"
-            systemctl reload adguardhome || true
+            systemctl stop "$LOCAL_DHCP_UNIT"
         }
 
         if check_peer_dhcp && check_peer_dns_integration; then
@@ -89,14 +89,18 @@
         fi
       '';
     in
-    {
+    lib.mkIf (dhcpCoreDnsEnabled && config.networking.hostName == "Naboo") {
       systemd.services.dhcp-failover = {
         description = "DHCP Failover Monitor";
         after = [
           "network.target"
           "adguardhome.service"
+          "coredns.service"
         ];
-        wants = [ "adguardhome.service" ];
+        wants = [
+          "adguardhome.service"
+          "coredns.service"
+        ];
         serviceConfig = {
           Type = "oneshot";
           User = "root";

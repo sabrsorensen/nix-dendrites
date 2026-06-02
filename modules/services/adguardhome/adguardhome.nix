@@ -173,6 +173,9 @@
               --output "$TEMP_REWRITES"
 
             TEMP_REWRITES="$TEMP_REWRITES" ${pkgs.yq-go}/bin/yq -i '.filtering.rewrites = load(strenv(TEMP_REWRITES))' "/run/adguardhome/AdGuardHome.yaml"
+            ${lib.optionalString dhcpCoreDnsEnabled ''
+              ${pkgs.yq-go}/bin/yq -i '.dhcp.enabled = false' "/run/adguardhome/AdGuardHome.yaml"
+            ''}
             rm -f "$TEMP_REWRITES"
             chmod 644 "/run/adguardhome/AdGuardHome.yaml"
           fi
@@ -280,7 +283,7 @@
         adguardhome = {
           enable = true;
           openFirewall = true;
-          allowDHCP = true;
+          allowDHCP = !dhcpCoreDnsEnabled;
           mutableSettings = true;
           host = "127.0.0.1";
           port = 3003;

@@ -83,6 +83,12 @@
           default = [ "1.1.1.1" "9.9.9.9" ];
         };
 
+        startKeaOnBoot = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Whether the runtime-generated Kea DHCP service should start automatically at boot.";
+        };
+
         localDomainApexIp = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = null;
@@ -181,7 +187,7 @@
           description = "Kea DHCP4 server (runtime-generated config)";
           after = [ "dhcp-coredns-prepare.service" "network.target" ];
           requires = [ "dhcp-coredns-prepare.service" ];
-          wantedBy = [ "multi-user.target" ];
+          wantedBy = lib.optionals cfg.startKeaOnBoot [ "multi-user.target" ];
           serviceConfig = {
             ExecStart = "${pkgs.kea}/bin/kea-dhcp4 -c ${keaConfPath}";
             Environment = "KEA_DHCP_DATA_DIR=${cfg.stateDir}";
