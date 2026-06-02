@@ -39,6 +39,9 @@
           environmentFile = config.sops.secrets.caddy_env.path;
           globalConfig = ''
             acme_dns cloudflare {$CLOUDFLARE_API_KEY}
+            acme {
+              resolvers 1.1.1.1 1.0.0.1 8.8.8.8 8.8.4.4
+            }
             order filter after encode
           '';
           extraConfig = ''
