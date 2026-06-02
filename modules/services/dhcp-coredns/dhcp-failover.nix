@@ -94,11 +94,11 @@
         description = "DHCP Failover Monitor";
         after = [
           "network.target"
-          "adguardhome.service"
+          "blocky.service"
           "coredns.service"
         ];
         wants = [
-          "adguardhome.service"
+          "blocky.service"
           "coredns.service"
         ];
         serviceConfig = {

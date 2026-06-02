@@ -126,11 +126,11 @@ in
 
       echo ""
 
-      if systemctl list-unit-files adguardhome.service >/dev/null 2>&1; then
-        if systemctl is-active --quiet adguardhome; then
-          echo "AdGuard: ✅ Running"
+      if systemctl list-unit-files blocky.service >/dev/null 2>&1; then
+        if systemctl is-active --quiet blocky; then
+          echo "Blocky: ✅ Running"
         else
-          echo "AdGuard: ❌ Not running"
+          echo "Blocky: ❌ Not running"
         fi
       fi
 

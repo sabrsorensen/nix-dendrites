@@ -46,7 +46,7 @@
         package = codexWrapped;
         enableMcpIntegration = true;
         settings = {
-          model = "gpt-5.3-codex";
+          model = "gpt-5.4";
           notice.model_migrations = {
             "gpt-5.3-codex" = "gpt-5.5";
           };
