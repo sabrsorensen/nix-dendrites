@@ -182,6 +182,7 @@
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
             ExecStart = "${pkgs.kea}/bin/kea-dhcp4 -c ${keaConfPath}";
+            RuntimeDirectory = "kea";
             Restart = "on-failure";
           };
         };
