@@ -15,6 +15,7 @@ mkBaseModule {
     samCli
     system-cli
     disko
+    deploy-defaults
     inputs.nix-flatpak.nixosModules.nix-flatpak
     inputs.jovian-nixos.nixosModules.default
     ../_platform/decky/decky-plugins.nix
@@ -39,6 +40,11 @@ mkBaseModule {
 
     users.users.nix-remote = lib.mkIf config.my.host.deploy.enableRemoteUser {
       openssh.authorizedKeys.keyFiles = host.nixRemoteAuthorizedKeys;
+    };
+
+    services.openssh.settings = {
+      PasswordAuthentication = lib.mkForce false;
+      KbdInteractiveAuthentication = lib.mkForce false;
     };
 
     home-manager.users.${host.steamUser}.imports = [
