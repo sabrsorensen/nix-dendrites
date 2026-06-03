@@ -30,6 +30,7 @@
       immich
       mealie
       media-server
+      minecraft-server
       scrutiny
       syncthing-server
       #homeassistant-proxy

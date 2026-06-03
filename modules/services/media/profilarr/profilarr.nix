@@ -27,7 +27,7 @@
       ];
       virtualisation.oci-containers.containers.${serviceName} = {
         user = serviceName;
-        image = "ghcr.io/dictionarry-hub/profilarr:v2.0.7";
+        image = "ghcr.io/dictionarry-hub/profilarr:2.0.7";
         autoStart = true;
         environment = {
           "PUID" = "${lib.toString config.users.users.${serviceName}.uid}";
