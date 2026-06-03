@@ -7,6 +7,7 @@ let
   bootUuid = lib.removeSuffix "\n" (builtins.readFile "${inputs.nix-secrets}/disk/kamino/boot-uuid.txt");
   rootFsUuid = lib.removeSuffix "\n" (builtins.readFile "${inputs.nix-secrets}/disk/kamino/root-fs-uuid.txt");
   rootLuksUuid = lib.removeSuffix "\n" (builtins.readFile "${inputs.nix-secrets}/luks/kamino/root.txt");
+  swapLuksUuid = lib.removeSuffix "\n" (builtins.readFile "${inputs.nix-secrets}/luks/kamino/swap.txt");
   swapUuid = lib.removeSuffix "\n" (builtins.readFile "${inputs.nix-secrets}/disk/kamino/swap-uuid.txt");
   mkWorkstation = import ../_base/workstation.nix;
 in
@@ -26,7 +27,12 @@ mkWorkstation {
         ;
     })
     ./_kamino/network.nix
-    (import ./_kamino/boot.nix { inherit rootLuksUuid; })
+    (import ./_kamino/boot.nix {
+      inherit
+        rootLuksUuid
+        swapLuksUuid
+        ;
+    })
     ./_kamino/desktop.nix
     ./_kamino/packages.nix
     ./_kamino/users/sam.nix

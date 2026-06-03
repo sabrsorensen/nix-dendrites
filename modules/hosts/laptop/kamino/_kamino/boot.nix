@@ -1,4 +1,8 @@
-{ rootLuksUuid, ... }:
+{
+  rootLuksUuid,
+  swapLuksUuid,
+  ...
+}:
 {
   boot.loader.efi.canTouchEfiVariables = true;
   boot.initrd = {
@@ -9,6 +13,10 @@
     kernelModules = [ "dm-crypt" ];
     luks.devices."luks-${rootLuksUuid}" = {
       device = "/dev/disk/by-uuid/${rootLuksUuid}";
+      allowDiscards = true;
+    };
+    luks.devices."luks-${swapLuksUuid}" = {
+      device = "/dev/disk/by-uuid/${swapLuksUuid}";
       allowDiscards = true;
     };
   };
