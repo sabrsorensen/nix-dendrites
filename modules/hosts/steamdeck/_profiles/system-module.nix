@@ -54,6 +54,10 @@ mkBaseModule {
     networking.firewall.allowedUDPPorts = [ 24800 ];
 
     environment.systemPackages = host.systemPackages pkgs;
+    services.flatpak.packages = [
+      "io.github.Geocld.XStreamingDesktop"
+      "io.github.unknownskl.greenlight"
+    ];
 
     programs.kdeconnect.enable = true;
   };

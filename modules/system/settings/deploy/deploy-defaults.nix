@@ -9,9 +9,9 @@
         deploy.localFlakePath = lib.mkDefault "/home/sam/src/nix-dendrites";
         nix.buildMachines = lib.mkDefault [
           {
-            hostName = "nix-atlasuponraiden";
+            hostName = "AtlasNixBuilder";
             systems = config.systemConstants.atlas.supportedSystems;
-            protocol = "ssh";
+            protocol = "ssh-ng";
             maxJobs = config.systemConstants.atlas.maxJobs;
             speedFactor = config.systemConstants.atlas.speedFactor;
             supportedFeatures = config.systemConstants.atlas.systemFeatures;

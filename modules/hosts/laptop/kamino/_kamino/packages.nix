@@ -9,7 +9,7 @@
     hunspell
     hunspellDicts.en_US
     keymapp
-    libreoffice-qt
+    # libreoffice-qt
     lshw
     orca-slicer
     prismlauncher

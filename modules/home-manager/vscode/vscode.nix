@@ -266,11 +266,6 @@
         "vscodevim.vim"
       ];
 
-      copilotExts = [
-        "github.copilot"
-        "github.copilot-chat"
-      ];
-
       gitHubExts = [
         "github.vscode-github-actions"
       ];
@@ -284,7 +279,6 @@
         "tomoki1207.pdf"
       ]
       ++ uiExts
-      ++ copilotExts
       ++ nixExts
       ++ remoteExts;
 
@@ -383,8 +377,6 @@
         "chat.commandCenter.enabled" = true;
         "chat.mcp.gallery.enabled" = true;
         "chat.viewSessions.orientation" = "stacked";
-        "github.copilot.editor.enableCodeActions" = true;
-        "github.copilot.nextEditSuggestions.enabled" = true;
       };
 
       defaultUserSettings = {
