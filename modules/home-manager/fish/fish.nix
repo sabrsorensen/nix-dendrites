@@ -306,12 +306,41 @@
             else
               null;
 
-          # === MAINTENANCE FUNCTIONS (workstation/pi) ===
+          # === MAINTENANCE FUNCTIONS ===
           cleanGenerations =
-            if isWorkstation then
-              "inhibitSleep sudo nix-collect-garbage -d && inhibitSleep sudo nix store gc && inhibitSleep sudo /run/current-system/bin/switch-to-configuration boot"
-            else if isPi || isWsl then
-              "sudo nix-collect-garbage -d && sudo nix store gc && sudo /run/current-system/bin/switch-to-configuration boot"
+            let
+              runCleanCommand =
+                command:
+                if sleepySystem then "inhibitSleep ${command}" else command;
+            in
+            if isWorkstation || isPi || isWsl || hostCfg.roles.server || isDeck then
+              ''
+                echo "Cleaning user profile generations..."
+                nix-collect-garbage -d
+                or return $status
+
+                echo "Cleaning system and root generations..."
+                ${runCleanCommand "sudo nix-collect-garbage -d"}
+                or return $status
+
+                echo "Collecting unused store paths..."
+                ${runCleanCommand "sudo nix store gc"}
+                or return $status
+
+                echo "Optimizing store hard links..."
+                ${runCleanCommand "sudo nix store optimise"}
+                or return $status
+
+                if test -x /run/current-system/bin/switch-to-configuration
+                    if ${if isWsl then "false" else "true"}
+                        echo "Refreshing boot entries..."
+                        ${runCleanCommand "sudo /run/current-system/bin/switch-to-configuration boot"}
+                        or return $status
+                    else
+                        echo "Skipping boot entry refresh on WSL."
+                    end
+                end
+              ''
             else
               null;
 
