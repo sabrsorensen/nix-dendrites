@@ -52,5 +52,10 @@ in
 
   environment.systemPackages = map (name: pkgs.${name}) shared.deckSystemPackages;
 
+  services.flatpak.packages = [
+    "io.github.Geocld.XStreamingDesktop"
+    "io.github.unknownskl.greenlight"
+  ];
+
   programs.kdeconnect.enable = true;
 }

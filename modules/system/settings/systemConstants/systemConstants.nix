@@ -31,7 +31,7 @@ in
             "aarch64-linux"  # Cross-compilation via emulation
             "i686-linux"     # 32-bit compatibility
           ];
-          maxJobs = 32;      # Match actual CPU cores (32)
+          maxJobs = 16;
           speedFactor = 200; # Significantly prefer remote over local cross-compilation
         };
       };

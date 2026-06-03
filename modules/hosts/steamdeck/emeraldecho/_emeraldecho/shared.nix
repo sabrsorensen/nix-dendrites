@@ -31,7 +31,7 @@ in
   ];
 
   deckSystemPackages = [
-    "bitwarden-desktop"
+    #"bitwarden-desktop"
     "deskflow"
     "noson"
     "rclone"
@@ -40,7 +40,7 @@ in
   ];
 
   deckSteamHomePackages = [
-    "bitwarden-desktop"
+    #"bitwarden-desktop"
     "ferdium"
     "noson"
     "p7zip"

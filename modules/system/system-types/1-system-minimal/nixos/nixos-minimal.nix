@@ -70,7 +70,7 @@
           isSystemUser = true;
           description = "Nix remote deploy user";
           group = "nix-remote";
-          home = "/var/empty";
+          home = "/home/nix-remote/";
           shell = pkgs.bash;
           hashedPasswordFile = config.sops.secrets.hashed_password.path;
           openssh.authorizedKeys.keyFiles = [
@@ -79,12 +79,19 @@
       };
       security.sudo.extraRules = lib.optionals enableNixRemote [ remoteDeployRule ];
 
+      programs.ssh.extraConfig = ''
+        Host AtlasNixBuilder
+          HostName AtlasUponRaiden
+          User nix-remote
+          IdentityFile ~/.ssh/nix_atlasuponraiden_id_ed25519
+      '';
+
       nix = {
         buildMachines = [
           {
-            hostName = "nix-atlasuponraiden";
+            hostName = "AtlasNixBuilder";
             systems = config.systemConstants.atlas.supportedSystems;
-            protocol = "ssh";
+            protocol = "ssh-ng";
             maxJobs = config.systemConstants.atlas.maxJobs;
             speedFactor = config.systemConstants.atlas.speedFactor;
             supportedFeatures = config.systemConstants.atlas.systemFeatures;

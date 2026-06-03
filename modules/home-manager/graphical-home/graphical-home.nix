@@ -13,7 +13,7 @@
       ];
 
       home.packages = with pkgs; [
-        bitwarden-desktop
+        #bitwarden-desktop
         clementine
         discord
         ferdium
