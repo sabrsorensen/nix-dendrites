@@ -5,6 +5,7 @@
 }:
 let
   mkServiceHostModule = import ../_rpi/service-host.nix { inherit inputs lib; };
+  staticDnsRecords = inputs.self.lib.localDns.staticRecords;
 in
 {
   flake.modules.nixos.Nevarro = lib.mkMerge [
@@ -38,6 +39,11 @@ in
         # Remove vm.mmap_rnd_bits entirely - this kernel doesn't support it
       };
 
+      my.host.roles = {
+        rpi = true;
+        serviceHost = true;
+      };
+
       services.dhcp-coredns = {
         enable = true;
         interface = "end0";
@@ -46,9 +52,46 @@ in
           "1.1.1.1"
           "9.9.9.9"
         ];
+        staticRecords = staticDnsRecords;
       };
     }
   ];
+
+  flake.lib.hostInventory.Nevarro = inputs.self.lib.mkInventoryHost {
+    ssh = inputs.self.lib.mkInventorySsh {
+      base = inputs.self.lib.mkInventorySshBase {
+        user = "sam";
+        identityFile = "~/.ssh/nevarro_id_ed25519";
+      };
+      nix = inputs.self.lib.mkInventorySshNix {
+        identityFile = "~/.ssh/nix_nevarro_id_ed25519";
+      };
+    };
+    serviceRoles = [
+      "blocky-dns"
+      "dhcp-primary"
+    ];
+    deploy = inputs.self.lib.mkInventoryDeploy {
+      remoteMethod = "secure";
+      secure = inputs.self.lib.mkInventorySecureDeploy {
+        peerName = "Naboo";
+        peerIp = inputs.self.lib.rpi.network.naboo;
+        probeDomains = inputs.self.lib.localDns.secureDeployProbeDomains;
+      };
+    };
+    outputs =
+      inputs.self.lib.mkNixosOutputs {
+        system = "aarch64-linux";
+        name = "nevarro";
+        configuration = "Nevarro";
+      }
+      ++ inputs.self.lib.mkNixosOutputs {
+        system = "aarch64-linux";
+        name = "nevarro-image";
+        configuration = "NevarroImage";
+        buildProduct = "sdImage";
+      };
+  };
 
   flake.nixosConfigurations = inputs.self.lib.mkNixos "aarch64-linux" "Nevarro";
 }

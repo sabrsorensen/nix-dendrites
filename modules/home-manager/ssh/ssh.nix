@@ -2,131 +2,89 @@
   flake.modules.homeManager.ssh =
     {
       config,
+      inventory ? { },
       lib,
-      osConfig,
+      osConfig ? { },
       ...
     }:
     let
-      hostname = osConfig.networking.hostName;
-      readBuildValue =
-        path:
-        builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
-      localDomain = readBuildValue "domain.txt";
-
-      # Hosts where we suppress WSL-related blocks
-      wslSkipHosts = [ "NixOS-WSL" ];
-      nixBlockHosts = [
-        "AtlasUponRaiden"
-        "Kamino"
-        "ZaphodBeeblebrox"
-      ];
-
+      hostCfg =
+        if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
+      hostname = hostCfg.name;
+      localDomain =
+        if osConfig ? systemConstants && osConfig.systemConstants ? domain then
+          osConfig.systemConstants.domain
+        else
+          hostCfg.domain;
+      mkHostname = name: if localDomain != null && localDomain != "" then "${name}.${localDomain}" else name;
       mkBaseBlock =
-        {
-          name,
-          user,
-          identityFile,
-          port ? 22,
-          extraSkips ? [ ],
-          identitiesOnly ? false,
-        }:
-        let
-          skips = [ name ] ++ wslSkipHosts ++ extraSkips;
-        in
-        if !(builtins.elem hostname skips) then
+        name: peer:
+        if name == hostname || !(peer ? ssh && peer.ssh ? base) then
+          null
+        else
           {
             host = name;
-            hostname = "${name}.${localDomain}";
-            port = port;
-            user = user;
-            identityFile = identityFile;
+            hostname = mkHostname name;
+            port = peer.ssh.base.port or 22;
+            user = peer.ssh.base.user;
+            identityFile = peer.ssh.base.identityFile;
           }
-          // lib.optionalAttrs identitiesOnly {
+          // lib.optionalAttrs (peer.ssh.base.identitiesOnly or false) {
             identitiesOnly = true;
-          }
-        else
-          null;
+          };
 
       mkNixBlock =
-        {
-          name,
-          port ? 22,
-        }:
-        if builtins.elem hostname nixBlockHosts then
+        name: peer:
+        if !(hostCfg.ssh.enableNixBlocks && peer ? ssh && peer.ssh ? nix && (peer.ssh.nix.enable or false)) then
+          null
+        else
           {
             host = "nix-${lib.toLower name}";
-            hostname = "${name}.${localDomain}";
-            port = port;
-            user = "nix-remote";
-            identityFile = "~/.ssh/nix_${lib.strings.toLower name}_id_ed25519";
+            hostname = mkHostname name;
+            port = peer.ssh.nix.port or peer.ssh.base.port or 22;
+            user = peer.ssh.nix.user or "nix-remote";
+            identityFile = peer.ssh.nix.identityFile;
             identitiesOnly = true;
-          }
-        else
-          null;
+          };
+
+      peerBlocks = lib.mapAttrs' (name: peer: lib.nameValuePair name (mkBaseBlock name peer)) inventory;
+      nixBlocks =
+        lib.mapAttrs' (
+          name: peer: lib.nameValuePair "nix-${lib.toLower name}" (mkNixBlock name peer)
+        ) inventory;
 
     in
     {
       programs.ssh = {
         enable = true;
         enableDefaultConfig = false;
-        settings = lib.filterAttrs (_: v: v != null) ({
-          "*" = {
-            addKeysToAgent = "yes";
-            forwardAgent = true;
-            compression = true;
-            serverAliveInterval = 0;
-            serverAliveCountMax = 3;
-            hashKnownHosts = false;
-            userKnownHostsFile = "~/.ssh/known_hosts";
-          };
+        settings = lib.filterAttrs (_: v: v != null) (
+          {
+            "*" = {
+              addKeysToAgent = "yes";
+              forwardAgent = true;
+              compression = true;
+              serverAliveInterval = 0;
+              serverAliveCountMax = 3;
+              hashKnownHosts = false;
+              userKnownHostsFile = "~/.ssh/known_hosts";
+            };
 
-          AtlasUponRaiden = mkBaseBlock {
-            name = "AtlasUponRaiden";
-            user = "sam";
-            identityFile = "~/.ssh/atlas_id_ed25519";
-            port = 22;
-            identitiesOnly = true;
-          };
-          nix-atlasuponraiden = mkNixBlock { name = "AtlasUponRaiden"; port = 22; };
-
-          Naboo = mkBaseBlock {
-            name = "Naboo";
-            user = "sam";
-            identityFile = "~/.ssh/naboo_id_ed25519";
-            identitiesOnly = true;
-          };
-          nix-naboo = mkNixBlock { name = "Naboo"; };
-
-          Nevarro = mkBaseBlock {
-            name = "Nevarro";
-            user = "sam";
-            identityFile = "~/.ssh/nevarro_id_ed25519";
-            identitiesOnly = true;
-          };
-          nix-nevarro = mkNixBlock { name = "Nevarro"; };
-
-          EmeraldEcho = mkBaseBlock {
-            name = "EmeraldEcho";
-            user = "sam";
-            port = 22;
-            identityFile = "~/.ssh/emeraldecho_id_ed25519";
-            identitiesOnly = true;
-          };
-          nix-emeraldecho = mkNixBlock { name = "EmeraldEcho"; port = 22; };
-
-          GitHub =
-            if builtins.elem hostname nixBlockHosts then
-              {
-                host = "github.com";
-                hostname = "github.com";
-                user = "git";
-                identityFile = "~/.ssh/github_id_ed25519";
-                identitiesOnly = true;
-              }
-            else
-              null;
-
-        });
+            GitHub =
+              if hostCfg.ssh.enableNixBlocks then
+                {
+                  host = "github.com";
+                  hostname = "github.com";
+                  user = "git";
+                  identityFile = "~/.ssh/github_id_ed25519";
+                  identitiesOnly = true;
+                }
+              else
+                null;
+          }
+          // peerBlocks
+          // nixBlocks
+        );
       };
     };
 }

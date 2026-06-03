@@ -9,28 +9,14 @@
     let
       dhcpCoreDnsEnabled =
         lib.hasAttrByPath [ "services" "dhcp-coredns" "enable" ] config && config.services.dhcp-coredns.enable;
-      readBuildValue =
-        path:
-        builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
-      localDomain = readBuildValue "domain.txt";
-      networkConfig = config.systemConstants.network;
-      peerConfig =
-        if config.networking.hostName == "Naboo" then
-          {
-            ip = networkConfig.nevarro;
-            name = "Nevarro";
-          }
-        else
-          {
-            ip = networkConfig.naboo;
-            name = "Naboo";
-          };
+      cfg = config.services.dhcp-coredns.failover;
+      localDomain = config.systemConstants.domain;
 
       dhcpFailoverScript = pkgs.writeShellScript "dhcp-failover" ''
         set -euo pipefail
 
-        PEER_IP="${peerConfig.ip}"
-        PEER_NAME="${peerConfig.name}"
+        PEER_IP="${cfg.peerIp}"
+        PEER_NAME="${cfg.peerName}"
         LOCAL_DHCP_UNIT="dhcp-coredns-kea.service"
 
         log() {
@@ -47,7 +33,7 @@
         }
 
         check_peer_dns_integration() {
-            for domain in "naboo.${localDomain}" "nevarro.${localDomain}" "atlasuponraiden.${localDomain}"; do
+            for domain in ${lib.concatStringsSep " " (map (domain: "\"${domain}.${localDomain}\"") cfg.probeDomains)}; do
                 if ! timeout 5 ${pkgs.dig}/bin/dig @$PEER_IP -p 53 "$domain" +short >/dev/null 2>&1; then
                     log "WARNING: Peer DNS integration issue - $domain not resolving"
                     return 1
@@ -89,7 +75,30 @@
         fi
       '';
     in
-    lib.mkIf (dhcpCoreDnsEnabled && config.networking.hostName == "Naboo") {
+    {
+      options.services.dhcp-coredns.failover = {
+        enable = lib.mkEnableOption "DHCP failover monitor";
+
+        peerName = lib.mkOption {
+          type = lib.types.str;
+          default = "";
+          description = "Peer hostname for DHCP failover monitoring.";
+        };
+
+        peerIp = lib.mkOption {
+          type = lib.types.str;
+          default = "";
+          description = "Peer IP address for DHCP failover monitoring.";
+        };
+
+        probeDomains = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = "Relative domain names that must resolve on the peer.";
+        };
+      };
+
+      config = lib.mkIf (dhcpCoreDnsEnabled && cfg.enable) {
       systemd.services.dhcp-failover = {
         description = "DHCP Failover Monitor";
         after = [
@@ -116,6 +125,7 @@
           OnUnitActiveSec = "30s";
           Unit = "dhcp-failover.service";
         };
+      };
       };
     };
 }

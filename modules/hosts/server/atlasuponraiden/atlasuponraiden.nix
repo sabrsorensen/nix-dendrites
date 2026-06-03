@@ -19,6 +19,7 @@
       (import ./_atlas/home-manager-config.nix { inherit inputs lib; })
       samba
       ./_atlas/samba.nix
+      deploy-defaults
       system-cli
       systemd-boot
       disko
@@ -33,9 +34,44 @@
       syncthing-server
       #homeassistant-proxy
     ];
+
+    my.host = {
+      roles.server = true;
+      deploy = {
+        canDeployRemotely = true;
+        enableRemoteUser = true;
+        sleepy = false;
+      };
+      ssh.enableNixBlocks = true;
+      syncthing.mode = "system";
+    };
+
+    my.localDns.records = [
+      { hostname = "atlas"; }
+    ];
   };
 
   flake.modules.homeManager.AtlasUponRaiden = import ./_atlas/home-manager.nix { inherit inputs; };
+
+  flake.lib.hostInventory.AtlasUponRaiden = inputs.self.lib.mkInventoryHost {
+    ssh = inputs.self.lib.mkInventorySsh {
+      base = inputs.self.lib.mkInventorySshBase {
+        user = "sam";
+        identityFile = "~/.ssh/atlas_id_ed25519";
+      };
+      nix = inputs.self.lib.mkInventorySshNix {
+        identityFile = "~/.ssh/nix_atlasuponraiden_id_ed25519";
+      };
+    };
+    deploy = inputs.self.lib.mkInventoryDeploy {
+      remoteMethod = "switch";
+    };
+    outputs = inputs.self.lib.mkNixosOutputs {
+      system = "x86_64-linux";
+      name = "atlasuponraiden";
+      configuration = "AtlasUponRaiden";
+    };
+  };
 
   flake.nixosConfigurations = inputs.self.lib.mkNixos "x86_64-linux" "AtlasUponRaiden";
 }

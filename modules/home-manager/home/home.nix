@@ -19,7 +19,7 @@
         syncthing
         tmux
         vim
-      ];
+      ] ++ [ ../context/host-context.nix ];
 
       home.sessionVariables = {
         XDG_CONFIG_HOME = "$HOME/.config";

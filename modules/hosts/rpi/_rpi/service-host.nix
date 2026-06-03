@@ -26,9 +26,12 @@ in
 
   networking = static.networking;
 
+  my.host.address = address;
+  my.host.deploy.enableRemoteUser = true;
+
   users.users.sam.openssh.authorizedKeys.keyFiles = samAuthorizedKeys;
 
-  users.users.nix-remote = lib.mkIf (config ? sops && config.sops.secrets ? hashed_password) {
+  users.users.nix-remote = lib.mkIf config.my.host.deploy.enableRemoteUser {
     openssh.authorizedKeys.keyFiles = nixRemoteAuthorizedKeys;
   };
 }

@@ -4,37 +4,91 @@
   ...
 }:
 let
-  shared = import ./_emeraldecho/shared.nix { inherit inputs; };
-  mkEmeraldSystemModule = import ./_emeraldecho/system-module.nix {
-    inherit inputs lib shared;
+  host = import ./_host/default.nix { inherit inputs; };
+  homeModule = import ../_profiles/home-module.nix { inherit inputs; };
+  mkEmeraldSystemModule = import ../_profiles/system-module.nix {
+    inherit inputs lib host;
   };
-  mkEmeraldBootstrapModule = import ./_emeraldecho/bootstrap-module.nix {
-    inherit inputs lib shared;
+  mkEmeraldBootstrapModule = import ../_profiles/bootstrap-module.nix {
+    inherit inputs lib host;
   };
-  mkEmeraldInstallerModule = import ./_emeraldecho/installer-module.nix {
-    inherit inputs lib shared;
+  mkEmeraldInstallerModule = import ../_profiles/installer-module.nix {
+    inherit inputs lib host;
   };
+  lifecycleModule =
+    variant:
+    if variant.lifecycle == "system" then
+      mkEmeraldSystemModule variant.bootMode
+    else if variant.lifecycle == "bootstrap" then
+      mkEmeraldBootstrapModule variant.bootMode
+    else
+      mkEmeraldInstallerModule variant.bootMode;
 in
 {
-  flake.modules.nixos.EmeraldEcho = mkEmeraldSystemModule "dual";
-  flake.modules.nixos.EmeraldEchoDualBoot = mkEmeraldSystemModule "dual";
-  flake.modules.nixos.EmeraldEchoSingleBoot = mkEmeraldSystemModule "single";
+  flake.modules.nixos = lib.listToAttrs (
+    map (variant: {
+      name = variant.moduleName;
+      value = lifecycleModule variant;
+    }) host.nixosVariants
+  );
 
-  flake.modules.nixos.EmeraldEchoBootstrap = mkEmeraldBootstrapModule "dual";
-  flake.modules.nixos.EmeraldEchoDualBootBootstrap = mkEmeraldBootstrapModule "dual";
-  flake.modules.nixos.EmeraldEchoSingleBootBootstrap = mkEmeraldBootstrapModule "single";
+  flake.modules.homeManager.${host.primaryHostName} = homeModule;
 
-  flake.modules.nixos.EmeraldEchoInstaller = mkEmeraldInstallerModule "dual";
-  flake.modules.nixos.EmeraldEchoDualBootInstaller = mkEmeraldInstallerModule "dual";
-  flake.modules.nixos.EmeraldEchoSingleBootInstaller = mkEmeraldInstallerModule "single";
-
-  flake.modules.homeManager.EmeraldEcho = import ./_emeraldecho/home-module.nix { inherit inputs; };
-
-  flake.homeConfigurations."deck@EmeraldEcho" = import ./_emeraldecho/home-configuration.nix {
-    inherit inputs shared;
+  flake.lib.hostInventory.${host.primaryHostName} = inputs.self.lib.mkInventoryHost {
+    ssh = inputs.self.lib.mkInventorySsh {
+      base = inputs.self.lib.mkInventorySshBase {
+        user = host.steamUser;
+        identityFile = "~/.ssh/emeraldecho_id_ed25519";
+      };
+      nix = inputs.self.lib.mkInventorySshNix {
+        identityFile = "~/.ssh/nix_emeraldecho_id_ed25519";
+      };
+    };
+    deploy = inputs.self.lib.mkInventoryDeploy {
+      remoteMethod = "build-then-switch";
+    };
+    dnsConfigurations = map (variant: variant.moduleName) (
+      builtins.filter (variant: variant.lifecycle == "system") host.nixosVariants
+    );
+    outputs =
+      lib.concatMap
+        (
+          variant:
+          lib.optionals variant.includeInChecks (
+            inputs.self.lib.mkNixosOutputs {
+              system = "x86_64-linux";
+              name = variant.outputName;
+              configuration = variant.moduleName;
+              buildProduct = variant.buildProduct;
+            }
+          )
+          ++ lib.optionals variant.includeInPackages (
+            inputs.self.lib.mkNixosOutputs {
+              collections = [ "packages" ];
+              system = "x86_64-linux";
+              name = variant.outputName;
+              configuration = variant.moduleName;
+              buildProduct = variant.buildProduct;
+            }
+          )
+        )
+        host.nixosVariants
+      ++ inputs.self.lib.mkHomeOutputs {
+        collections = [
+          "checks"
+          "packages"
+        ];
+        system = "x86_64-linux";
+        name = "home-deck-emeraldecho";
+        configuration = host.homeConfigurationName;
+      };
   };
 
-  flake.nixosConfigurations = import ./_emeraldecho/nixos-configurations.nix {
-    inherit inputs lib;
+  flake.homeConfigurations = import ../_profiles/home-configuration.nix {
+    inherit inputs host;
+  };
+
+  flake.nixosConfigurations = import ../_profiles/nixos-configurations.nix {
+    inherit inputs lib host;
   };
 }

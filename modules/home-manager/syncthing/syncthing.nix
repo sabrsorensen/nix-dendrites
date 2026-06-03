@@ -4,25 +4,17 @@
       config,
       lib,
       pkgs,
-      osConfig,
-      inputs,
+      osConfig ? { },
       ...
     }:
     let
-      hostName = osConfig.networking.hostName;
-
-      # Desktop/laptop hosts that should use Home Manager syncthing
-      desktopHosts = [ "Kamino" "ZaphodBeeblebrox" "EmeraldEcho" ];
-
-      # Server/headless hosts that should use NixOS syncthing-server
-      serverHosts = [ "AtlasUponRaiden" ];
-
-      # Disabled hosts (RPis, WSL) that don't need syncthing
-      disabledHosts = [ "Naboo" "Nevarro" ];
-
-      shouldEnable = builtins.elem hostName desktopHosts;
-      isSteamDeck = hostName == "EmeraldEcho";
-      shouldHaveTray = builtins.elem hostName [ "Kamino" "ZaphodBeeblebrox" ];
+      hostCfg =
+        if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
+      hostName = hostCfg.name;
+      isSteamDeck = hostCfg.roles.steamdeck;
+      shouldEnable = hostCfg.syncthing.mode == "home";
+      shouldWarnServer = hostCfg.syncthing.mode == "system";
+      shouldHaveTray = hostCfg.syncthing.hasTray;
 
       allDevices = config.my.syncthing.devices;
       allFolders = config.my.syncthing.folders;
@@ -48,13 +40,9 @@
       # Show a warning if enabled on a host that should use system service
       config = lib.mkMerge [
         {
-          warnings = lib.optionals (config.my.syncthing.enable) (
-            (lib.optional (builtins.elem hostName serverHosts)
-              "Syncthing enabled via Home Manager on ${hostName}, but this server host should use the NixOS syncthing-server module for always-on operation.")
-            ++
-            (lib.optional (builtins.elem hostName disabledHosts)
-              "Syncthing enabled via Home Manager on ${hostName}, but syncthing is currently disabled for RPi/WSL hosts.")
-          );
+          warnings = lib.optionals (config.my.syncthing.enable && shouldWarnServer) [
+            "Syncthing enabled via Home Manager on ${hostName}, but this host declares system-managed Syncthing."
+          ];
         }
         (lib.mkIf (config.my.syncthing.enable && shouldEnable) {
         services.syncthing = {

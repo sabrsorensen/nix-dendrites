@@ -8,6 +8,7 @@
   let
     groupName = "media";
     localAddr = "127.0.0.1:81";
+    mediaCfg = config.my.media;
     serviceName = "organizr";
   in
   {
@@ -15,15 +16,7 @@
       isSystemUser = true;
       group = groupName;
     };
-    services = {
-      caddy = {
-        virtualHosts."{$DOMAIN}" = {
-          extraConfig = ''
-            reverse_proxy /* ${localAddr}
-          '';
-        };
-      };
-    };
+    my.media.caddy.apexBackend = lib.mkDefault localAddr;
     virtualisation.oci-containers.containers.${serviceName} = {
       image = "ghcr.io/organizr/organizr";
       autoStart = true;
@@ -33,7 +26,7 @@
       };
       volumes = [
         "/etc/localtime:/etc/localtime:ro"
-        "/opt/${serviceName}/:/config:rw"
+        "${mediaCfg.configRoot}/${serviceName}:/config:rw"
       ];
       ports = [
         "${localAddr}:80/tcp"
@@ -42,11 +35,9 @@
         "com.centurylinklabs.watchtower.enable" = "true";
       };
       log-driver = "journald";
-      extraOptions = [
-        "--dns=192.168.1.3"
-        "--dns=192.168.1.4"
-        "--network-alias=${serviceName}"
-      ];
+      extraOptions =
+        map (dnsServer: "--dns=${dnsServer}") mediaCfg.dnsServers
+        ++ [ "--network-alias=${serviceName}" ];
     };
   };
 }

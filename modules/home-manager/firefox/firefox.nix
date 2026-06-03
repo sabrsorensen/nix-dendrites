@@ -63,15 +63,13 @@
         }
       ) addonMetadata;
 
-      currHash = "sha256-GQxxJGWNfOP/wPLPhukyZKbPV59DlPjRo16IG0miXio=";
+      currHash = "sha256-EouTytS0ji/R7AfPsjhwGaMONmlxVpXCJIyPNpC7tOs=";
       cssRepo = pkgs.fetchFromGitHub {
         owner = "MrOtherGuy";
         repo = "firefox-csshacks";
         rev = "master";
         hash = currHash;
       };
-      readCss = path: builtins.readFile (cssRepo + "/${path}");
-
       username = config.home.username;
       userChromePath = "${config.xdg.configHome}/mozilla/firefox/${username}/chrome";
 
@@ -85,7 +83,7 @@
       homeFileAttrs = lib.listToAttrs (
         map (path: {
           name = "${userChromePath}/${path}";
-          value.text = readCss path;
+          value.source = cssRepo + "/${path}";
         }) cssFiles
       );
     in

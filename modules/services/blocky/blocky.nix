@@ -9,10 +9,7 @@
     }:
     let
       networkConfig = config.systemConstants.network;
-      readBuildValue =
-        path:
-        builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
-      localDomain = readBuildValue "domain.txt";
+      localDomain = config.systemConstants.domain;
     in
     {
       services.blocky = {

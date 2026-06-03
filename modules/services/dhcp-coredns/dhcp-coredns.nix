@@ -12,10 +12,10 @@
     }:
     let
       cfg = config.services.dhcp-coredns;
+      publishedDnsRecords = config.my.localDns.publishedRecords;
+      zoneStaticRecords = cfg.staticRecords ++ publishedDnsRecords;
       networkConfig = config.systemConstants.network;
-
-      readBuildValue = path: builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
-      localDomain = readBuildValue "domain.txt";
+      localDomain = config.systemConstants.domain;
 
       python3Bin = "${pkgs.python3}/bin/python3";
       collectLeases = ./collect_leases.py;
@@ -41,21 +41,7 @@
         else
           "bind ${dnsHost}";
       upstreamServers = builtins.concatStringsSep " " cfg.upstreamServers;
-      staticDnsRecords = builtins.toJSON [
-        { hostname = "ns1"; ip = networkConfig.nevarro; }
-        { hostname = "ns2"; ip = networkConfig.naboo; }
-        { hostname = "atlas"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "auth"; ip = networkConfig.nevarro; }
-        { hostname = "homeassistant"; ip = networkConfig.coruscant; }
-        { hostname = "home-gw"; ip = networkConfig.gateway; }
-        { hostname = "immich"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "mealie"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "netbird"; ip = networkConfig.nevarro; }
-        { hostname = "ntfy"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "plex"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "profilarr"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "scrutiny"; ip = networkConfig.atlasuponraiden; }
-      ];
+      staticDnsRecords = builtins.toJSON zoneStaticRecords;
     in
     {
       imports = [ inputs.self.modules.nixos.dhcp-failover ];
@@ -83,6 +69,23 @@
           default = [ "1.1.1.1" "9.9.9.9" ];
         };
 
+        staticRecords = lib.mkOption {
+          type = lib.types.listOf (
+            lib.types.submodule {
+              options = {
+                hostname = lib.mkOption {
+                  type = lib.types.str;
+                };
+                ip = lib.mkOption {
+                  type = lib.types.str;
+                };
+              };
+            }
+          );
+          default = [ ];
+          description = "Static DNS records rendered into the local CoreDNS zone.";
+        };
+
         startKeaOnBoot = lib.mkOption {
           type = lib.types.bool;
           default = true;
@@ -97,6 +100,16 @@
       };
 
       config = lib.mkIf cfg.enable {
+        assertions = [
+          {
+            assertion =
+              builtins.length (
+                lib.unique (map (record: record.hostname) zoneStaticRecords)
+              ) == builtins.length zoneStaticRecords;
+            message = "services.dhcp-coredns static/published DNS records contain duplicate hostnames.";
+          }
+        ];
+
         environment.systemPackages = with pkgs; [ jq python3 sops ssh-to-age ];
 
         systemd.tmpfiles.rules = [

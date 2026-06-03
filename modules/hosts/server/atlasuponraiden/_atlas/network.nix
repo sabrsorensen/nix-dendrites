@@ -1,4 +1,8 @@
-{ self, lib, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 {
   #services.netbirdProxy.turnForward = {
   #  enable = true;
@@ -19,4 +23,6 @@
     networkmanager.enable = true;
     useDHCP = lib.mkDefault true;
   };
+
+  my.host.address = config.systemConstants.network.atlasuponraiden;
 }

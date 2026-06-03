@@ -1,5 +1,5 @@
 {
-  flake.modules.nixos.organizr = {
+  flake.modules.nixos.minecraft = {
     virtualisation.oci-containers.containers."mc-bc" = {
       image = "pugmatt/bedrock-connect";
       volumes = [

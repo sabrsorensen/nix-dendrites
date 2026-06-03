@@ -13,9 +13,8 @@
       ...
     }:
     let
-      isWsl = config.wsl.enable or false;
       hasHashedPasswordSecret = config ? sops && config.sops.secrets ? hashed_password;
-      enableNixRemote = !isWsl && hasHashedPasswordSecret;
+      enableNixRemote = config.my.host.deploy.enableRemoteUser && hasHashedPasswordSecret;
       remoteDeployRule = {
         users = [ "nix-remote" ];
         commands = [
@@ -43,6 +42,11 @@
       };
     in
     {
+      imports = [
+        inputs.self.modules.generic.systemConstants
+        ../../../settings/host-context/host-context.nix
+      ];
+
       nixpkgs.overlays = [
         (final: _prev: {
           unstable = import inputs.nixpkgs-unstable {
@@ -56,6 +60,7 @@
       console.keyMap = "dvorak";
 
       boot = {
+        zfs.forceImportRoot = false;
         tmp = {
           useTmpfs = true;
           cleanOnBoot = true;
@@ -80,18 +85,8 @@
       security.sudo.extraRules = lib.optionals enableNixRemote [ remoteDeployRule ];
 
       nix = {
-        buildMachines = [
-          {
-            hostName = "nix-atlasuponraiden";
-            systems = config.systemConstants.atlas.supportedSystems;
-            protocol = "ssh";
-            maxJobs = config.systemConstants.atlas.maxJobs;
-            speedFactor = config.systemConstants.atlas.speedFactor;
-            supportedFeatures = config.systemConstants.atlas.systemFeatures;
-            mandatoryFeatures = [ ];  # Remove mandatory requirement temporarily
-          }
-        ];
-        distributedBuilds = true;
+        buildMachines = config.my.host.nix.buildMachines;
+        distributedBuilds = config.my.host.nix.buildMachines != [ ];
         extraOptions = ''
           warn-dirty = false
         ''
@@ -148,12 +143,5 @@
         vim
         wget
       ];
-
-      programs.nh = {
-        enable = true;
-        clean.enable = true;
-        clean.extraArgs = "--keep-since 4d --keep 3";
-        flake = "/home/sam/src/nix-dendrites";
-      };
     };
 }

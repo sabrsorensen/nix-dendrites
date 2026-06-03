@@ -3,6 +3,6 @@
   imports = with inputs.self.modules.homeManager; [
     firefox
     vscode
-    ../_steamdeck/steamdeck-home.nix
+    ../_platform/steamdeck/steamdeck-home.nix
   ];
 }

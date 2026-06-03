@@ -8,35 +8,33 @@
   let
     groupName = "media";
     localAddr = "127.0.0.1:8112";
+    mediaCfg = config.my.media;
     serviceName = "deluge";
+    delugeIdentity = lib.attrByPath [ serviceName ] null mediaCfg.containerIdentities;
   in
   {
     users.users.${serviceName} = {
       isSystemUser = true;
       group = groupName;
     };
-    services = {
-      caddy = {
-        virtualHosts."{$DOMAIN}" = {
-          extraConfig = ''
-            import drop_scanners deluge
-            redir /${serviceName} /${serviceName}/
-            route /${serviceName}/* {
-              uri strip_prefix /${serviceName}
-              filter {
-                content_type text/html.*
-                search_pattern </head>
-                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'></head>"
-              }
-              reverse_proxy ${localAddr} {
-                header_up X-Deluge-Base "/${serviceName}"
-                header_down X-Frame-Options SAMEORIGIN
-              }
-            }
-          '';
-        };
-      };
-    };
+    my.media.caddy.apexRoutes = [
+      ''
+        import drop_scanners deluge
+        redir /${serviceName} /${serviceName}/
+        route /${serviceName}/* {
+          uri strip_prefix /${serviceName}
+          filter {
+            content_type text/html.*
+            search_pattern </head>
+            replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'></head>"
+          }
+          reverse_proxy ${localAddr} {
+            header_up X-Deluge-Base "/${serviceName}"
+            header_down X-Frame-Options SAMEORIGIN
+          }
+        }
+      ''
+    ];
     virtualisation.oci-containers.containers = {
       deluge = {
         autoStart = true;
@@ -49,11 +47,11 @@
         ];
         environment = {
           "DELUGE_LOGLEVEL" = "error";
-          #"PUID" = "${lib.toString config.users.users.${serviceName}.uid}";
-          #"PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
-          "PUID" = "1000";
-          "PGID" = "996";
-          "TZ" = "America/Boise";
+          "PUID" =
+            if delugeIdentity != null then delugeIdentity.uid else "${lib.toString config.users.users.${serviceName}.uid}";
+          "PGID" =
+            if delugeIdentity != null then delugeIdentity.gid else "${lib.toString config.users.groups.${groupName}.gid}";
+          "TZ" = config.time.timeZone;
         };
         extraOptions = [
           "--health-cmd=curl --fail http://localhost:8112 || exit 1"
@@ -72,11 +70,10 @@
         ];
         ports = [
         ];
-        pull = "newer";
         volumes = [
-          "/opt/${serviceName}:/config"
-          "/AnomalyRealm/media/downloads:/data"
-          "/AnomalyRealm/media/autoadd:/autoadd"
+          "${mediaCfg.configRoot}/${serviceName}:/config"
+          "${mediaCfg.dataRoot}/downloads:/data"
+          "${mediaCfg.dataRoot}/autoadd:/autoadd"
           "/etc/localtime:/etc/localtime:ro"
         ];
       };
@@ -96,21 +93,20 @@
         extraOptions = [
           "--network-alias=gluetun"
         ];
-        image = "ghcr.io/qdm12/gluetun:latest";
+        image = "ghcr.io/qdm12/gluetun:v3.41.1";
         labels = {
           "com.centurylinklabs.watchtower.enable" = "true";
         };
         log-driver = "journald";
         networks = [
-          "media"
+          mediaCfg.podmanNetwork
         ];
         ports = [
           "${localAddr}:8112/tcp"
         ];
-        pull = "newer";
         volumes = [
-          "/opt/gluetun:/gluetun:rw"
-          "/opt/gluetun/tmp:/tmp/gluetun:rw"
+          "${mediaCfg.configRoot}/gluetun:/gluetun:rw"
+          "${mediaCfg.configRoot}/gluetun/tmp:/tmp/gluetun:rw"
         ];
       };
     };

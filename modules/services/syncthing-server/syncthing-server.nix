@@ -39,19 +39,17 @@
 
       config = lib.mkIf config.my.syncthing.enable {
         # System service configuration - runs at boot, independent of user login
+        my.caddy.apexRoutes = [
+          ''
+            redir /syncthing /syncthing/
+            handle_path /syncthing/* {
+              reverse_proxy http://127.0.0.1:8384 {
+                header_up Host {upstream_hostport}
+              }
+            }
+          ''
+        ];
         services = {
-          caddy = {
-            virtualHosts."{$DOMAIN}" = {
-              extraConfig = ''
-                redir /syncthing /syncthing/
-                handle_path /syncthing/* {
-                  reverse_proxy http://127.0.0.1:8384 {
-                    header_up Host {upstream_hostport}
-                  }
-                }
-              '';
-            };
-          };
           syncthing = {
             enable = true;
             user = config.my.syncthing.serverUser;

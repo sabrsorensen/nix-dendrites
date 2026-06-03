@@ -8,11 +8,7 @@
 }:
 let
   sopsKeyPath = "${config.home.homeDirectory}/.ssh/sops_ed25519";
-  hostname = osConfig.networking.hostName;
-  isSteamDeck = builtins.elem hostname [
-    "EmeraldEcho"
-    "EmeraldEchoDualBoot"
-  ];
+  isSteamDeck = osConfig.my.platform.steamdeck.enable or false;
   xrDriverRuntimeLibs = pkgs.lib.makeLibraryPath (
     with pkgs;
     [

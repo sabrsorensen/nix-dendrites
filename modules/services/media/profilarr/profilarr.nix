@@ -6,12 +6,10 @@
     ...
   }:
   let
-    readBuildValue =
-      path:
-      builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
-    localDomain = readBuildValue "domain.txt";
+    localDomain = config.systemConstants.domain;
     groupName = "media";
     localAddr = "127.0.0.1:6868";
+    mediaCfg = config.my.media;
     serviceName = "profilarr";
   in
   {
@@ -19,29 +17,27 @@
       isSystemUser = true;
       group = groupName;
     };
-    services = {
-      caddy = {
-        virtualHosts."${serviceName}.{$DOMAIN}" = {
-          extraConfig = ''
-            reverse_proxy /* ${localAddr}
-          '';
-        };
-      };
-    };
+    my.localDns.records = [
+      { hostname = serviceName; }
+    ];
+    my.media.caddy.virtualHosts."${serviceName}.{$DOMAIN}" = [
+      ''
+        reverse_proxy /* ${localAddr}
+      ''
+    ];
     virtualisation.oci-containers.containers.${serviceName} = {
       user = serviceName;
-      image = "ghcr.io/dictionarry-hub/profilarr:latest";
+      image = "ghcr.io/dictionarry-hub/profilarr:v2.0.7";
       autoStart = true;
-      pull = "newer";
       environment = {
         "PUID" = "${lib.toString config.users.users.${serviceName}.uid}";
         "PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
-        "TZ" = "America/Boise";
+        "TZ" = config.time.timeZone;
         "ORIGIN" = "https://${serviceName}.${localDomain}/";
       };
       volumes = [
         "/etc/localtime:/etc/localtime:ro"
-        "/opt/${serviceName}/:/config"
+        "${mediaCfg.configRoot}/${serviceName}:/config"
       ];
       ports = [
         "${localAddr}:6868/tcp"

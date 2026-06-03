@@ -4,16 +4,12 @@
     ...
   }:
   {
-    services = {
-      caddy = {
-        virtualHosts."homeassistant.{$DOMAIN}" = {
-          extraConfig = ''
-            reverse_proxy https://homeassistant.{$DOMAIN} {
-              header_up Host {host}
-            }
-          '';
-        };
-      };
-    };
+    my.caddy.virtualHosts."homeassistant.{$DOMAIN}".routes = [
+      ''
+        reverse_proxy https://homeassistant.{$DOMAIN} {
+          header_up Host {host}
+        }
+      ''
+    ];
   };
 }

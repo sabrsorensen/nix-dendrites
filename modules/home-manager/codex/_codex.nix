@@ -47,10 +47,18 @@
         enableMcpIntegration = true;
         settings = {
           model = "gpt-5.4";
+          model_reasoning_effort = "medium";
           notice.model_migrations = {
             "gpt-5.3-codex" = "gpt-5.5";
+            "gpt-5.4" = "gpt-5.5";
           };
           personality = "pragmatic";
+          projects."/home/ssorensen/src/nix-dendrites" = {
+            trust_level = "trusted";
+          };
+          tui.model_availability_nux = {
+            "gpt-5.5" = 1;
+          };
 
           mcp_servers = {
             Atlassian = {

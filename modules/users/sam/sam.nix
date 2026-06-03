@@ -20,10 +20,12 @@ let
 in
 {
   flake.modules = lib.mkMerge [
-    (self.factory.user username true)
+    (self.lib.factory.user username true)
     {
-      nixos."${username}" = {
-        imports =
+      nixos."${username}" =
+        { ... }:
+        {
+          imports =
           (with inputs.self.modules.nixos; [
             virtualisation
           ])
@@ -31,17 +33,20 @@ in
             "${inputs.nix-secrets}/modules/system-secrets-private.nix"
           ];
 
-        users.users."${username}" = {
-          description = lib.strings.toUpper (lib.strings.substring 0 1 username) + lib.strings.substring 1 (-1) username;
-          group = username;
+          users.users."${username}" = {
+            description = lib.strings.toUpper (lib.strings.substring 0 1 username) + lib.strings.substring 1 (-1) username;
+            group = username;
+          };
+          programs.fish.enable = true;
         };
-        programs.fish.enable = true;
-      };
     }
 
     {
       nixos.samCli =
-        { pkgs, ... }:
+        {
+          pkgs,
+          ...
+        }:
         {
           imports = [
             "${inputs.nix-secrets}/modules/system-secrets-private.nix"

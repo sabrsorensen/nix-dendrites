@@ -6,10 +6,59 @@
   flake.modules.nixos.caddy =
     {
       config,
+      lib,
       pkgs,
       ...
     }:
+    let
+      caddyCfg = config.my.caddy;
+      renderRoutes =
+        routes:
+        lib.concatStringsSep "\n" (lib.filter (route: route != "") routes);
+      renderedVirtualHosts = lib.mapAttrs (
+        _: hostCfg:
+        lib.optionalAttrs (hostCfg.routes != [ ] || hostCfg.logFormat != null) (
+          lib.optionalAttrs (hostCfg.logFormat != null) {
+            logFormat = hostCfg.logFormat;
+          }
+          // lib.optionalAttrs (hostCfg.routes != [ ]) {
+            extraConfig = renderRoutes hostCfg.routes;
+          }
+        )
+      ) (lib.filterAttrs (_: hostCfg: hostCfg.routes != [ ] || hostCfg.logFormat != null) caddyCfg.virtualHosts);
+    in
     {
+      options.my.caddy = {
+        apexRoutes = lib.mkOption {
+          type = lib.types.listOf lib.types.lines;
+          default = [ ];
+          description = "Route fragments appended to the apex {$DOMAIN} Caddy site.";
+        };
+
+        virtualHosts = lib.mkOption {
+          type = lib.types.attrsOf (
+            lib.types.submodule {
+              options = {
+                routes = lib.mkOption {
+                  type = lib.types.listOf lib.types.lines;
+                  default = [ ];
+                  description = "Caddy route fragments for this virtual host.";
+                };
+
+                logFormat = lib.mkOption {
+                  type = lib.types.nullOr lib.types.lines;
+                  default = null;
+                  description = "Optional logFormat block for this virtual host.";
+                };
+              };
+            }
+          );
+          default = { };
+          description = "Declarative Caddy virtual host fragments keyed by hostname.";
+        };
+      };
+
+      config = {
       sops.secrets = {
         caddy_env = {
           owner = "caddy";
@@ -20,6 +69,14 @@
           key = "";
         };
       };
+
+      services.caddy.virtualHosts =
+        lib.optionalAttrs (caddyCfg.apexRoutes != [ ]) {
+          "{$DOMAIN}" = {
+            extraConfig = lib.mkAfter (renderRoutes caddyCfg.apexRoutes);
+          };
+        }
+        // renderedVirtualHosts;
 
       networking.firewall.allowedTCPPorts = [
         80
@@ -374,6 +431,7 @@
             log_info "unban completed ip=$ip deleted_rules=$deleted"
           '';
         };
+      };
       };
     };
 }

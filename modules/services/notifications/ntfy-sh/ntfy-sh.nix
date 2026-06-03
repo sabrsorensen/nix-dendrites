@@ -5,31 +5,28 @@
     ...
   }:
   let
-    readBuildValue =
-      path:
-      builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
-    localDomain = readBuildValue "domain.txt";
+    localDomain = config.systemConstants.domain;
   in
   {
-    services = {
-      caddy = {
-        virtualHosts."ntfy.{$DOMAIN}" = {
-          extraConfig = ''
-            reverse_proxy /* 127.0.0.1:6839
-          '';
-        };
-      };
+    my.localDns.records = [
+      { hostname = "ntfy"; }
+    ];
 
-      ntfy-sh = {
-        enable = true;
-        settings = {
-          base-url = "https://ntfy.${localDomain}";
-          listen-http = ":6839";
-          #cache-file = ""
-          behind-proxy = true;
-          enable-login = true;
-          require-login = true;
-        };
+    my.caddy.virtualHosts."ntfy.{$DOMAIN}".routes = [
+      ''
+        reverse_proxy /* 127.0.0.1:6839
+      ''
+    ];
+
+    services.ntfy-sh = {
+      enable = true;
+      settings = {
+        base-url = "https://ntfy.${localDomain}";
+        listen-http = ":6839";
+        #cache-file = ""
+        behind-proxy = true;
+        enable-login = true;
+        require-login = true;
       };
     };
   };

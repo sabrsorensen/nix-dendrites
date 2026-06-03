@@ -7,11 +7,11 @@
     ...
   }:
   let
-    readBuildValue =
-      path:
-      builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
-    localDomain = readBuildValue "domain.txt";
+    localDomain = config.systemConstants.domain;
     groupName = "media";
+    mediaCfg = config.my.media;
+    plexIdentity = lib.attrByPath [ "plex" ] null mediaCfg.containerIdentities;
+    tautulliIdentity = lib.attrByPath [ "tautulli" ] null mediaCfg.containerIdentities;
   in
   {
     users.users = {
@@ -28,57 +28,56 @@
         group = groupName;
       };
     };
-    services = {
-      caddy = {
-        virtualHosts."{$DOMAIN}" = {
-          extraConfig = ''
-            redir /tautulli /tautulli/
-            route /tautulli/* {
-              filter {
-                content_type text/html.*
-                search_pattern </head>
-                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/tautulli/aquamarine.css'></head>"
-              }
-              reverse_proxy /tautulli/* 127.0.0.1:8181 {
-                header_up -Accept-Encoding
-              }
-            }
-            redir /kitana /kitana/
-            reverse_proxy /kitana/* 127.0.0.1:31337
-          '';
-        };
-        virtualHosts."plex.{$DOMAIN}" = {
-          extraConfig = ''
-            filter {
-              content_type text/html.*
-              search_pattern </head>
-              replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/plex/aquamarine.css'></head>"
-            }
-            reverse_proxy /* 127.0.0.1:32400 {
-              header_up -Accept-Encoding
-            }
-          '';
-        };
-      };
-    };
+    my.localDns.records = [
+      { hostname = "plex"; }
+    ];
+    my.media.caddy.apexRoutes = [
+      ''
+        redir /tautulli /tautulli/
+        route /tautulli/* {
+          filter {
+            content_type text/html.*
+            search_pattern </head>
+            replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/tautulli/aquamarine.css'></head>"
+          }
+          reverse_proxy /tautulli/* 127.0.0.1:8181 {
+            header_up -Accept-Encoding
+          }
+        }
+        redir /kitana /kitana/
+        reverse_proxy /kitana/* 127.0.0.1:31337
+      ''
+    ];
+    my.media.caddy.virtualHosts."plex.{$DOMAIN}" = [
+      ''
+        filter {
+          content_type text/html.*
+          search_pattern </head>
+          replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/plex/aquamarine.css'></head>"
+        }
+        reverse_proxy /* 127.0.0.1:32400 {
+          header_up -Accept-Encoding
+        }
+      ''
+    ];
     virtualisation.oci-containers.containers."plex" = {
-      image = "lscr.io/linuxserver/plex:latest";
+      image = "lscr.io/linuxserver/plex:1.43.2.10687-563d026ea-ls307";
       autoStart = true;
       environment = {
         "ADVERTISE_IP" = "https://plex.${localDomain}/";
-        "PUID" = "978";
-        "PGID" = "978";
-        "PLEX_UID" = "978";
-        "PLEX_GID" = "978";
+        "PUID" = if plexIdentity != null then plexIdentity.uid else "978";
+        "PGID" = if plexIdentity != null then plexIdentity.gid else "978";
+        "PLEX_UID" = if plexIdentity != null then plexIdentity.uid else "978";
+        "PLEX_GID" = if plexIdentity != null then plexIdentity.gid else "978";
         "PLEX_CLAIM" = "";
-        "TZ" = "America/Boise";
-        "VERSION" = "latest";
+        "TZ" = config.time.timeZone;
+        "VERSION" = "docker";
       };
       volumes = [
-        "/AnomalyRealm/media:/data:rw"
+        "${mediaCfg.dataRoot}:/data:rw"
         "/dev/shm/:/transcode:rw"
         "/etc/localtime:/etc/localtime:ro"
-        "/opt/plex/:/config:rw"
+        "${mediaCfg.configRoot}/plex:/config:rw"
       ];
       ports = [
         "1900:1900/udp"
@@ -110,14 +109,14 @@
       };
       autoStart = true;
       environment = {
-        "PUID" = "976";
-        "PGID" = "978";
-        "TZ" = "America/Boise";
+        "PUID" = if tautulliIdentity != null then tautulliIdentity.uid else "976";
+        "PGID" = if tautulliIdentity != null then tautulliIdentity.gid else "978";
+        "TZ" = config.time.timeZone;
       };
       volumes = [
         "/etc/localtime:/etc/localtime:ro"
-        "/opt/plex/Library/Application Support/Plex Media Server/Logs/:/plex_logs:rw"
-        "/opt/tautulli:/config:rw"
+        "${mediaCfg.configRoot}/plex/Library/Application Support/Plex Media Server/Logs/:/plex_logs:rw"
+        "${mediaCfg.configRoot}/tautulli:/config:rw"
       ];
       ports = [
         "127.0.0.1:8181:8181/tcp"
@@ -135,7 +134,7 @@
       autoStart = true;
       volumes = [
         "/etc/localtime:/etc/localtime:ro"
-        "/opt/kitana:/app/data:rw"
+        "${mediaCfg.configRoot}/kitana:/app/data:rw"
       ];
       ports = [
         "127.0.0.1:31337:31337/tcp"

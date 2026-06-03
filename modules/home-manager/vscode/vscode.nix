@@ -2,14 +2,22 @@
   flake.modules.homeManager.vscode =
     {
       config,
+      inventory ? { },
       lib,
       osConfig ? null,
       pkgs,
       ...
     }:
     let
-      isWsl = (osConfig != null) && (osConfig.wsl.enable or false);
-      hostname = osConfig.networking.hostName;
+      remotePlatformSettings = lib.mapAttrs' (
+        name: peer:
+        lib.nameValuePair name (
+          if peer ? platform then
+            peer.platform
+          else
+            "linux"
+        )
+      ) (lib.filterAttrs (_: peer: peer ? ssh && peer.ssh ? base) inventory);
       context7ApiKeyPath =
         if config.sops.secrets ? context7_api_key then config.sops.secrets.context7_api_key.path else null;
 
@@ -334,11 +342,7 @@
           };
         };
         "remote.SSH.experimental.chat" = false;
-        "remote.SSH.remotePlatform" = {
-          "Omnius" = "linux";
-          "AtlasUponRaiden" = "linux";
-          "EmeraldEcho" = "linux";
-        };
+        "remote.SSH.remotePlatform" = remotePlatformSettings;
         "remote.SSH.showLoginTerminal" = false;
         "remote.SSH.useLocalServer" = true;
         "settingsSync.keybindingsPerPlatform" = false;
@@ -472,31 +476,9 @@
         "terminal.integrated.copyOnSelection" = true;
         "terminal.integrated.cursorBlinking" = true;
         "terminal.integrated.defaultProfile.linux" = "fish";
-        "terminal.integrated.defaultProfile.windows" = "NixOS (WSL)";
         "terminal.integrated.enableVisualBell" = true;
         "terminal.integrated.fontFamily" = "CaskaydiaCove Nerd Font Mono";
         "terminal.integrated.fontLigatures.enabled" = true;
-        "terminal.integrated.profiles.windows" = {
-          "PowerShell" = {
-            "source" = "PowerShell";
-            "icon" = "terminal-powershell";
-          };
-          "Command Prompt" = {
-            "path" = [
-              "\${env =windir}\\Sysnative\\cmd.exe"
-              "\${env =windir}\\System32\\cmd.exe"
-            ];
-            "args" = [ ];
-            "icon" = "terminal-cmd";
-          };
-          "NixOS (WSL)" = {
-            "path" = "C =\\windows\\System32\\wsl.exe";
-            "args" = [
-              "-d"
-              "NixOS"
-            ];
-          };
-        };
         "vim.autoindent" = true;
         "vim.foldfix" = true;
         "vim.handleKeys" = {
@@ -533,10 +515,11 @@
 
       higiSettings = {
         "extensions.verifySignature" = false; # NixOS WSL remote server signing issue
-        "chatgpt.runCodexInWindowsSubsystemForLinux" = true;
         "snyk.advanced.cliPath" = "C:\\Users\\ssorensen\\AppData\\Local\\snyk\\vscode-cli\\snyk-win.exe";
         "snyk.securityAtInception.autoConfigureSnykMcpServer" = true;
         "snyk.securityAtInception.executionFrequency" = "On Code Generation";
+      } // lib.optionalAttrs config.my.vscode.higi.runCodexInWsl {
+        "chatgpt.runCodexInWindowsSubsystemForLinux" = true;
       };
 
       nixSettings = {
@@ -551,10 +534,67 @@
           "editor.formatOnType" = true;
         };
       };
+
+      windowsTerminalSettings = {
+        "terminal.integrated.defaultProfile.windows" = "NixOS (WSL)";
+        "terminal.integrated.profiles.windows" = {
+          "PowerShell" = {
+            "source" = "PowerShell";
+            "icon" = "terminal-powershell";
+          };
+          "Command Prompt" = {
+            "path" = [
+              "\${env =windir}\\Sysnative\\cmd.exe"
+              "\${env =windir}\\System32\\cmd.exe"
+            ];
+            "args" = [ ];
+            "icon" = "terminal-cmd";
+          };
+          "NixOS (WSL)" = {
+            "path" = "C =\\windows\\System32\\wsl.exe";
+            "args" = [
+              "-d"
+              "NixOS"
+            ];
+          };
+        };
+      };
     in
     {
-      home.packages = lib.optionals (!isWsl) [ pkgs.dotnetCorePackages.sdk_10_0-bin ];
-      programs.vscode = {
+      options.my.vscode = {
+        installLocalDotnetSdk = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Whether to install a local .NET SDK alongside the configured VS Code environment.";
+        };
+
+        profiles = {
+          higiLlp = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Whether to expose the Higi LLP VS Code profile.";
+          };
+
+          python = lib.mkOption {
+            type = lib.types.bool;
+            default = true;
+            description = "Whether to expose the Python VS Code profile.";
+          };
+
+          stm32 = lib.mkOption {
+            type = lib.types.bool;
+            default = true;
+            description = "Whether to expose the STM32 VS Code profile.";
+          };
+        };
+
+        higi.runCodexInWsl = lib.mkEnableOption "Run Codex from inside WSL for the Higi LLP profile";
+
+        windowsInterop.enable = lib.mkEnableOption "Windows terminal integration for VS Code profiles";
+      };
+
+      config.home.packages = lib.optionals config.my.vscode.installLocalDotnetSdk [ pkgs.dotnetCorePackages.sdk_10_0-bin ];
+      config.programs.vscode = {
         enable = true;
         #mutableExtsDir = true; # mutually exclusive with profiles
         #package = lib.mkDefault (pkgs.vscode.fhsWithPackages (_: [ patched-openssh ]);
@@ -595,7 +635,10 @@
               #  };
               #};
             };
-            userSettings = defaultProfileOnlySettings // defaultUserSettings;
+            userSettings =
+              defaultProfileOnlySettings
+              // defaultUserSettings
+              // lib.optionalAttrs config.my.vscode.windowsInterop.enable windowsTerminalSettings;
             extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
               defaultExts
               ++ pythonExts
@@ -616,7 +659,7 @@
           #  languageSnippets = { };
           #  userSettings = dotnetSettings // defaultUserSettings;
           #};
-          Higi_LLP = if builtins.elem hostname [ "NixOS-WSL" ] then {
+          Higi_LLP = if config.my.vscode.profiles.higiLlp then {
             extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
               higiExts
               ++ pythonExts
@@ -719,7 +762,7 @@
           #  } // defaultUserSettings;
           #};
 
-          Python = if !builtins.elem hostname [ "NixOS-WSL"] then {
+          Python = if config.my.vscode.profiles.python then {
             extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
               defaultExts
               ++ pythonExts
@@ -744,7 +787,7 @@
           #  languageSnippets = { };
           #  userSettings = dotnetSettings // defaultUserSettings;
           #};
-          STM32 = if !builtins.elem hostname ["NixOS-WSL"] then {
+          STM32 = if config.my.vscode.profiles.stm32 then {
             extensions =
               pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
                 defaultExts ++ [

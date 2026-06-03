@@ -1,12 +1,12 @@
 {
   flake.modules.nixos.sonarr =
   {
-    config,
     lib,
     pkgs,
     ...
   }:
   let
+  arr = import ../_arr/lib.nix { inherit lib; };
     bindAddr = "127.0.0.1";
     groupName = "media";
     port = 8989;
@@ -16,60 +16,34 @@
     serviceName = "sonarr";
   in
   {
-    services = {
-      caddy = {
-        virtualHosts."{$DOMAIN}" = {
-          extraConfig = ''
-            redir /${serviceName} /${serviceName}/
-            route /${serviceName}/* {
-              filter {
-                content_type text/html.*
-                search_pattern </body>
-                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'></body>"
-              }
-              reverse_proxy /${serviceName}/* ${localAddr} {
-                  header_up -Accept-Encoding
-              }
-            }
-            redir /${serviceName}4k /${serviceName}4k/
-            route /${serviceName}4k/* {
-              filter {
-                content_type text/html.*
-                search_pattern </body>
-                replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'></body>"
-              }
-              reverse_proxy /${serviceName}4k/* ${localAddr4k} {
-                  header_up -Accept-Encoding
-              }
-            }
-          '';
-        };
-      };
+    my.media.caddy.apexRoutes = [
+      (arr.mkThemeParkRoute {
+        inherit localAddr serviceName;
+      })
+      (arr.mkThemeParkRoute {
+        inherit serviceName;
+        localAddr = localAddr4k;
+        pathSuffix = "4k";
+      })
+    ];
 
-      sonarr = {
-        enable = true;
-        openFirewall = true;
-        group = groupName;
-        settings = {
-          server = {
-            urlbase = "/${serviceName}";
-            port = port;
-            bindaddress = "127.0.0.1";
-          };
-        };
+    services.sonarr = {
+      enable = true;
+      openFirewall = false;
+      group = groupName;
+      settings.server = {
+        urlbase = "/${serviceName}";
+        port = port;
+        bindaddress = "127.0.0.1";
       };
     };
 
     users.users.${serviceName}.group = groupName;
-    systemd.services.sonarr4k = {
+    systemd.services.sonarr4k = arr.mkManagedService {
       description = "Sonarr 4K";
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        ExecStart = "${pkgs.sonarr}/bin/Sonarr -nobrowser -data=/var/lib/sonarr4k/";
-        Restart = "always";
-        User = serviceName;
-        Group = groupName;
-      };
+      execStart = "${pkgs.sonarr}/bin/Sonarr -nobrowser -data=/var/lib/sonarr4k/";
+      user = serviceName;
+      group = groupName;
     };
   };
 }

@@ -58,124 +58,127 @@
           ];
         };
 
-        services = {
-          caddy = {
-            virtualHosts."auth.{$DOMAIN}" = {
-              logFormat = ''
-                output stdout
-                format console
-                level INFO
-              '';
-              extraConfig = ''
+        my.caddy.virtualHosts = {
+          "auth.{$DOMAIN}" = {
+            logFormat = ''
+              output stdout
+              format console
+              level INFO
+            '';
+            routes = [
+              ''
                 reverse_proxy https://auth.{$DOMAIN} {
                   header_up Host {host}
                 }
-              '';
-            };
-            virtualHosts."netbird.{$DOMAIN}" = {
-              logFormat = ''
-                output file /var/log/caddy/netbird-proxy.log {
-                  roll_size 10mb
-                  roll_keep 5
-                  roll_keep_for 720h
-                }
-                format console
-                level INFO
-              '';
-              extraConfig = ''
+              ''
+            ];
+          };
+
+          "netbird.{$DOMAIN}" = {
+            logFormat = ''
+              output file /var/log/caddy/netbird-proxy.log {
+                roll_size 10mb
+                roll_keep 5
+                roll_keep_for 720h
+              }
+              format console
+              level INFO
+            '';
+            routes = [
+              ''
                 @management path /management.ManagementService/*
                 @signal path /signalexchange.SignalExchange/*
                 @ws_mgmt path /ws-proxy/management/*
                 @ws_signal path /ws-proxy/signal/*
                 @relay path /relay*
 
-            handle @management {
-              reverse_proxy https://netbird.{$DOMAIN} {
-                transport http {
-                  versions 2 1.1
-                  read_timeout 0
-                  write_timeout 0
-                  dial_timeout 30s
+                handle @management {
+                  reverse_proxy https://netbird.{$DOMAIN} {
+                    transport http {
+                      versions 2 1.1
+                      read_timeout 0
+                      write_timeout 0
+                      dial_timeout 30s
+                    }
+                    header_up X-Forwarded-For {remote_host}
+                    header_up X-Forwarded-Proto {scheme}
+                    header_up X-Real-IP {remote_host}
+                    header_up Host netbird.{$DOMAIN}
+                    flush_interval -1
+                  }
                 }
-                header_up X-Forwarded-For {remote_host}
-                header_up X-Forwarded-Proto {scheme}
-                header_up X-Real-IP {remote_host}
-                header_up Host netbird.{$DOMAIN}
-                flush_interval -1
-              }
-            }
 
-            handle @signal {
-              reverse_proxy https://netbird.{$DOMAIN} {
-                transport http {
-                  versions 2 1.1
-                  read_timeout 0
-                  write_timeout 0
-                  dial_timeout 30s
+                handle @signal {
+                  reverse_proxy https://netbird.{$DOMAIN} {
+                    transport http {
+                      versions 2 1.1
+                      read_timeout 0
+                      write_timeout 0
+                      dial_timeout 30s
+                    }
+                    header_up X-Forwarded-For {remote_host}
+                    header_up X-Forwarded-Proto {scheme}
+                    header_up X-Real-IP {remote_host}
+                    header_up Host netbird.{$DOMAIN}
+                    flush_interval -1
+                  }
                 }
-                header_up X-Forwarded-For {remote_host}
-                header_up X-Forwarded-Proto {scheme}
-                header_up X-Real-IP {remote_host}
-                header_up Host netbird.{$DOMAIN}
-                flush_interval -1
-              }
-            }
 
-            handle @ws_mgmt {
-              reverse_proxy https://netbird.{$DOMAIN} {
-                transport http {
-                  versions 2 1.1
+                handle @ws_mgmt {
+                  reverse_proxy https://netbird.{$DOMAIN} {
+                    transport http {
+                      versions 2 1.1
+                    }
+                    header_up X-Forwarded-For {remote_host}
+                    header_up X-Forwarded-Proto {scheme}
+                    header_up X-Real-IP {remote_host}
+                    header_up Host netbird.{$DOMAIN}
+                    flush_interval -1
+                  }
                 }
-                header_up X-Forwarded-For {remote_host}
-                header_up X-Forwarded-Proto {scheme}
-                header_up X-Real-IP {remote_host}
-                header_up Host netbird.{$DOMAIN}
-                flush_interval -1
-              }
-            }
 
-            handle @ws_signal {
-              reverse_proxy https://netbird.{$DOMAIN} {
-                transport http {
-                  versions 2 1.1
+                handle @ws_signal {
+                  reverse_proxy https://netbird.{$DOMAIN} {
+                    transport http {
+                      versions 2 1.1
+                    }
+                    header_up X-Forwarded-For {remote_host}
+                    header_up X-Forwarded-Proto {scheme}
+                    header_up X-Real-IP {remote_host}
+                    header_up Host netbird.{$DOMAIN}
+                    flush_interval -1
+                  }
                 }
-                header_up X-Forwarded-For {remote_host}
-                header_up X-Forwarded-Proto {scheme}
-                header_up X-Real-IP {remote_host}
-                header_up Host netbird.{$DOMAIN}
-                flush_interval -1
-              }
-            }
 
-            handle @relay {
-              reverse_proxy https://netbird.{$DOMAIN} {
-                transport http {
-                  versions 2 1.1
-                  read_timeout 0
-                  write_timeout 0
-                  dial_timeout 30s
+                handle @relay {
+                  reverse_proxy https://netbird.{$DOMAIN} {
+                    transport http {
+                      versions 2 1.1
+                      read_timeout 0
+                      write_timeout 0
+                      dial_timeout 30s
+                    }
+                    header_up X-Forwarded-For {remote_host}
+                    header_up X-Forwarded-Proto {scheme}
+                    header_up X-Real-IP {remote_host}
+                    header_up Host netbird.{$DOMAIN}
+                    flush_interval -1
+                  }
                 }
-                header_up X-Forwarded-For {remote_host}
-                header_up X-Forwarded-Proto {scheme}
-                header_up X-Real-IP {remote_host}
-                header_up Host netbird.{$DOMAIN}
-                flush_interval -1
-              }
-            }
 
-            handle {
-              reverse_proxy https://netbird.{$DOMAIN} {
-                transport http {
-                  versions 2 1.1
+                handle {
+                  reverse_proxy https://netbird.{$DOMAIN} {
+                    transport http {
+                      versions 2 1.1
+                    }
+                    header_up X-Forwarded-For {remote_host}
+                    header_up X-Forwarded-Proto {scheme}
+                    header_up X-Real-IP {remote_host}
+                    header_up Host netbird.{$DOMAIN}
+                  }
                 }
-                header_up X-Forwarded-For {remote_host}
-                header_up X-Forwarded-Proto {scheme}
-                header_up X-Real-IP {remote_host}
-                header_up Host netbird.{$DOMAIN}
-              }
-            }
-              '';
-            };
+              ''
+            ];
           };
         };
       };

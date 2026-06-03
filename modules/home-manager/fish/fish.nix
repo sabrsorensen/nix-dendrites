@@ -2,54 +2,70 @@
   flake.modules.homeManager.fish =
     {
       config,
+      inventory ? { },
       lib,
-      osConfig,
+      osConfig ? { },
       pkgs,
       ...
     }:
     let
-      hostname = osConfig.networking.hostName;
-      # Simplified host detection
-      hostType =
-        if
-          builtins.elem hostname [
-            "Kamino"
-            "ZaphodBeeblebrox"
-            "NixOS-WSL"
-          ]
-        then
-          "workstation"
-        else if
-          builtins.elem hostname [
-            "Naboo"
-            "Nevarro"
-          ]
-        then
-          "pi"
-        else if builtins.elem hostname [ "EmeraldEcho" ] then
-          "deck"
-        else if builtins.elem hostname [ "AtlasUponRaiden" ] then
-          "server"
-        else
-          "unknown";
-
-      nixFlakePath = "~/src/nix-dendrites/";
+      hostCfg =
+        if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
+      nixFlakePath = if hostCfg.deploy ? localFlakePath then hostCfg.deploy.localFlakePath else null;
 
       # Feature flags based on host type
-      isWorkstation = hostType == "workstation";
-      isPi = hostType == "pi";
-      isDeck = hostType == "deck";
-      isServer = hostType == "server";
-      isAtlas = hostname == "AtlasUponRaiden";
-      isWsl = hostname == "NixOS-WSL";
-      sleepySystem = builtins.elem hostname [
-        "EmeraldEcho"
-        "Kamino"
-        "ZaphodBeeblebrox"
-      ];
+      isWorkstation = hostCfg.roles.workstation;
+      isPi = hostCfg.roles.rpi;
+      isDeck = hostCfg.roles.steamdeck;
+      isWsl = hostCfg.roles.wsl;
+      sleepySystem = hostCfg.deploy.sleepy;
 
-      hasNixFlake = isWorkstation || isServer;
-      canDeployRemotely = (isWorkstation || isServer) && !isWsl;
+      hasNixFlake = nixFlakePath != null;
+      canDeployRemotely = hostCfg.deploy.canDeployRemotely && hasNixFlake;
+      secureDeployRoleUnits = {
+        "blocky-dns" = [
+          "blocky"
+          "coredns"
+        ];
+        "dhcp-primary" = [ "dhcp-coredns-kea" ];
+        "dhcp-standby" = [ "dhcp-failover.timer" ];
+      };
+      expandServiceRoles =
+        roles:
+        lib.unique (lib.concatLists (map (role: secureDeployRoleUnits.${role} or [ ]) roles));
+      secureDeployConfigCases = lib.concatStrings (
+        lib.mapAttrsToList (
+          name: peer:
+          if peer ? deploy && peer.deploy ? secure then
+            let
+              secureCfg = peer.deploy.secure;
+              peerCfg = inventory.${secureCfg.peerName} or { };
+              renderedSecureCfg = secureCfg // {
+                peerServices = expandServiceRoles (peerCfg.serviceRoles or [ ]);
+                targetServices = expandServiceRoles (peer.serviceRoles or [ ]);
+              };
+            in
+            ''
+              case ${name}
+                  printf '%s\n' '${builtins.toJSON renderedSecureCfg}'
+            ''
+          else
+            ""
+        ) inventory
+      );
+      remoteDeployMethod =
+        let
+          cases = lib.concatStrings (
+            lib.mapAttrsToList (
+              name: peer:
+              lib.optionalString (peer ? deploy && peer.deploy ? remoteMethod) ''
+            case ${name}
+                echo ${peer.deploy.remoteMethod}
+              ''
+            ) inventory
+          );
+        in
+        "switch $argv[1]\n${cases}    case '*'\n        echo switch\nend";
       mkNhSwitchRemote =
         {
           upgrade ? false,
@@ -92,7 +108,7 @@
             or return $status
 
             if command -sq notify-send
-                notify-send "EmeraldEcho build complete" "Turn on $target_host. Deployment will continue after it responds to ping."
+                notify-send "Steam Deck build complete" "Turn on $target_host. Deployment will continue after it responds to ping."
             end
 
             echo "Build completed for $target_host."
@@ -149,6 +165,7 @@
 
           # Load secure-deploy function (available on all deployment-capable hosts)
           ${lib.optionalString canDeployRemotely ''
+            set -gx DENDRITIC_FLAKE_PATH ${lib.escapeShellArg nixFlakePath}
             source ${./functions/secure-deploy.fish}
           ''}
 
@@ -181,7 +198,7 @@
 
           # === WORKSTATION FUNCTIONS (development/testing) ===
           fetchFfAddons =
-            if isWorkstation then
+            if isWorkstation && hasNixFlake then
               "python3 ${nixFlakePath}/modules/home-manager/firefox/fetch_firefox_addons.py ${nixFlakePath}/modules/home-manager/firefox/firefox_addons.json"
             else
               null;
@@ -211,16 +228,28 @@
           nhSwitchUpgradeRemote = mkNhSwitchRemote { upgrade = true; };
           nhBuildThenSwitchRemote = mkNhBuildThenSwitchRemote { };
           nhBuildThenSwitchUpgradeRemote = mkNhBuildThenSwitchRemote { upgrade = true; };
+          remoteDeployMethod = if canDeployRemotely then remoteDeployMethod else null;
+          secureDeployConfig =
+            if canDeployRemotely then
+              ''
+                switch $argv[1]
+                ${secureDeployConfigCases}    case '*'
+                        return 1
+                end
+              ''
+            else
+              null;
 
           nhsr =
             if canDeployRemotely then
               ''
-                if test "$argv[1]" = "Naboo" -o "$argv[1]" = "Nevarro"
-                    secure-deploy $argv
-                else if test "$argv[1]" = "EmeraldEcho"
-                    nhBuildThenSwitchRemote $argv
-                else
-                    nhSwitchRemote $argv
+                switch (remoteDeployMethod $argv[1])
+                    case secure
+                        secure-deploy $argv
+                    case build-then-switch
+                        nhBuildThenSwitchRemote $argv
+                    case '*'
+                        nhSwitchRemote $argv
                 end
               ''
             else
@@ -228,12 +257,13 @@
           nhsur =
             if canDeployRemotely then
               ''
-                if test "$argv[1]" = "Naboo" -o "$argv[1]" = "Nevarro"
-                    secure-deploy --upgrade $argv
-                else if test "$argv[1]" = "EmeraldEcho"
-                    nhBuildThenSwitchUpgradeRemote $argv
-                else
-                    nhSwitchUpgradeRemote $argv
+                switch (remoteDeployMethod $argv[1])
+                    case secure
+                        secure-deploy --upgrade $argv
+                    case build-then-switch
+                        nhBuildThenSwitchUpgradeRemote $argv
+                    case '*'
+                        nhSwitchUpgradeRemote $argv
                 end
               ''
             else
@@ -243,8 +273,8 @@
           secureDeployChecked =
             if canDeployRemotely then
               ''
-                if test "$argv[1]" = "EmeraldEcho"
-                    echo "Use nhsur for EmeraldEcho deployment"
+                if test (remoteDeployMethod $argv[1]) = "build-then-switch"
+                    echo "Use nhsur for Steam Deck deployment"
                     return 1
                 else
                     secure-deploy --upgrade $argv

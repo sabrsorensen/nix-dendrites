@@ -4,6 +4,28 @@
   pkgs,
   ...
 }:
+let
+  enableZenbookSpeaker = pkgs.writeShellScript "enable-zenbook-speaker" ''
+    set -eu
+
+    for _attempt in $(seq 1 20); do
+      for dev in /dev/snd/hwC*D0; do
+        if [ -e "$dev" ]; then
+          ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x500 0x1b
+          ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x477 0x4a4b
+          ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x500 0xf
+          ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x477 0x74
+          exit 0
+        fi
+      done
+
+      sleep 1
+    done
+
+    echo "No HDA codec device found under /dev/snd/hwC*D0" >&2
+    exit 1
+  '';
+in
 {
   nixpkgs.hostPlatform = "x86_64-linux";
   # Hardware modules needed for boot
@@ -62,11 +84,15 @@
   systemd.services.enable-zenbook-speaker = {
     description = "Enable ASUS ZenBook ALC294 speakers";
     wantedBy = [ "multi-user.target" ];
-    after = [ "sound.target" ];
+    wants = [ "systemd-udev-settle.service" ];
+    after = [
+      "systemd-udev-settle.service"
+      "sound.target"
+    ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.bash}/bin/bash -c 'for dev in /dev/snd/hwC*D0; do if [ -e \"$dev\" ]; then ${pkgs.alsa-tools}/bin/hda-verb \"$dev\" 0x20 0x500 0x1b && ${pkgs.alsa-tools}/bin/hda-verb \"$dev\" 0x20 0x477 0x4a4b && ${pkgs.alsa-tools}/bin/hda-verb \"$dev\" 0x20 0x500 0xf && ${pkgs.alsa-tools}/bin/hda-verb \"$dev\" 0x20 0x477 0x74; fi; done'";
+      ExecStart = enableZenbookSpeaker;
     };
   };
 }
