@@ -33,8 +33,9 @@ function secure-deploy --description "Remote deployment script with safety check
         return 1
     end
 
-    set lock_host "nix-(string lower $target_host)"
-    set nh_target_host (string lower $target_host)
+    set target_host_lower (string lower $target_host)
+    set lock_host "nix-$target_host_lower"
+    set nh_target_host $target_host_lower
     set peer_ip (printf '%s\n' "$config_json" | jq -r '.peerIp')
     set peer_name (printf '%s\n' "$config_json" | jq -r '.peerName')
     set local_domains (printf '%s\n' "$config_json" | jq -r '.probeDomains[]')
@@ -73,7 +74,7 @@ function secure-deploy --description "Remote deployment script with safety check
     # Check peer service health for the current deployment topology
     set peer_service_cmd (__secure_deploy_service_cmd $peer_services)
     if test -n "$peer_service_cmd"
-        if not ssh nix-(string lower $peer_name) "$peer_service_cmd" 2>/dev/null
+        if not ssh "nix-"(string lower $peer_name) "$peer_service_cmd" 2>/dev/null
             echo "❌ ERROR: $peer_name is not healthy for safe deployment!"
             echo "   Expected active services: "(string join ", " $peer_services)
             functions -e __secure_deploy_service_cmd
@@ -94,7 +95,7 @@ function secure-deploy --description "Remote deployment script with safety check
         __secure_deploy_cleanup_lock
     end
 
-    if ssh nix-(string lower $peer_name) "test -f $lock_file" 2>/dev/null
+    if ssh "nix-"(string lower $peer_name) "test -f $lock_file" 2>/dev/null
         echo "❌ ERROR: Deployment already in progress on $peer_name!"
         echo "   Lock file exists: $lock_file"
         functions -e __secure_deploy_cleanup_lock __secure_deploy_cleanup_on_signal __secure_deploy_cleanup_on_exit

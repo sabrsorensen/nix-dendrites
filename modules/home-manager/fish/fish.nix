@@ -70,10 +70,12 @@
         }:
         if canDeployRemotely then
           let
-            targetHost = "nix-(string lower $argv[1])";
             upgradeFlag = if upgrade then "--update" else "";
           in
-          "inhibitSleep nh os switch ${nixFlakePath} -H $argv[1] --target-host ${targetHost} ${upgradeFlag} --keep-going $argv[2..-1]"
+          ''
+            set target_host_lower (string lower $argv[1])
+            inhibitSleep nh os switch ${nixFlakePath} -H $argv[1] --target-host "nix-$target_host_lower" ${upgradeFlag} --keep-going $argv[2..-1]
+          ''
         else
           null;
       mkNhBuildThenSwitchRemote =
@@ -283,7 +285,10 @@
           # Quick unsafe deployment for emergencies (bypasses safety checks)
           nhsur_unsafe =
             if canDeployRemotely then
-              "inhibitSleep nh os switch ${nixFlakePath} -H $argv[1] --target-host nix-(string lower $argv[1]) --update --keep-going $argv[2..-1]"
+              ''
+                set target_host_lower (string lower $argv[1])
+                inhibitSleep nh os switch ${nixFlakePath} -H $argv[1] --target-host "nix-$target_host_lower" --update --keep-going $argv[2..-1]
+              ''
             else
               null;
 
