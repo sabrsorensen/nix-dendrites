@@ -42,11 +42,6 @@ mkBaseModule {
       openssh.authorizedKeys.keyFiles = host.nixRemoteAuthorizedKeys;
     };
 
-    services.openssh.settings = {
-      PasswordAuthentication = lib.mkForce false;
-      KbdInteractiveAuthentication = lib.mkForce false;
-    };
-
     home-manager.users.${host.steamUser}.imports = [
       inputs.self.modules.homeManager.${host.primaryHostName}
       ../_platform/steamdeck/steamdeck-shortcut.nix

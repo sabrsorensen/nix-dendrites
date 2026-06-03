@@ -15,9 +15,6 @@
     let
       hasHashedPasswordSecret = config ? sops && config.sops.secrets ? hashed_password;
       enableNixRemote = config.my.host.deploy.enableRemoteUser && hasHashedPasswordSecret;
-      hasAtlasNixBuilder = builtins.any (
-        machine: (machine.hostName or null) == "AtlasNixBuilder"
-      ) config.my.host.nix.buildMachines;
       remoteDeployRule = {
         users = [ "nix-remote" ];
         commands = [
@@ -86,12 +83,6 @@
         };
       };
       security.sudo.extraRules = lib.optionals enableNixRemote [ remoteDeployRule ];
-      programs.ssh.extraConfig = ''
-        Host AtlasNixBuilder
-          HostName AtlasUponRaiden
-          User nix-remote
-          IdentityFile ~/.ssh/nix_atlasuponraiden_id_ed25519
-      '';
 
       nix = {
         buildMachines = config.my.host.nix.buildMachines;
@@ -116,7 +107,7 @@
             "https://nix-gaming.cachix.org"
             "https://jovian-experiments.cachix.org"
             "https://cache.thalheim.io"
-          ] ++ lib.optionals hasAtlasNixBuilder [ "ssh-ng://AtlasNixBuilder" ];
+          ];
           extra-trusted-public-keys = [
             "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
             "jovian-experiments.cachix.org-1:lwPS3KgK5sJlI2B9KBY4VpbWNGbAjCcKVkUyqfzVrJE="

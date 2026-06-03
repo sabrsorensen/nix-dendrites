@@ -118,6 +118,8 @@ mkBaseModule {
     security.sudo.wheelNeedsPassword = false;
 
     services.openssh.settings = {
+      PasswordAuthentication = lib.mkForce true;
+      KbdInteractiveAuthentication = lib.mkForce false;
       PermitRootLogin = lib.mkForce "yes";
       PermitEmptyPasswords = "yes";
     };

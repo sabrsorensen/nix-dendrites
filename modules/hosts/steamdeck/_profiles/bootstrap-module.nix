@@ -27,6 +27,11 @@ mkBaseModule {
     ../_platform/steamdeck/steamdeck-system.nix
   ];
   extraConfig = {
+    services.openssh.settings = {
+      PasswordAuthentication = lib.mkForce true;
+      KbdInteractiveAuthentication = lib.mkForce false;
+    };
+
     users.users.${host.steamUser} = {
       isNormalUser = true;
       extraGroups = host.steamUserExtraGroups;
