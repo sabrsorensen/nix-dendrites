@@ -42,21 +42,20 @@
         wsl = lib.mkEnableOption "WSL host role";
       };
 
-      deploy =
-        {
-          canDeployRemotely = lib.mkEnableOption "remote deployment commands for this host";
-          sleepy = lib.mkEnableOption "sleep inhibition for long-running local operations";
-        }
-        // lib.optionalAttrs includeDeployEnableRemoteUser {
-          enableRemoteUser = lib.mkEnableOption "nix-remote deployment user on this host";
-        }
-        // lib.optionalAttrs includeDeployLocalFlakePath {
-          localFlakePath = lib.mkOption {
-            type = lib.types.nullOr lib.types.str;
-            default = null;
-            description = "Local flake path used by deployment helpers on this host.";
-          };
+      deploy = {
+        canDeployRemotely = lib.mkEnableOption "remote deployment commands for this host";
+        sleepy = lib.mkEnableOption "sleep inhibition for long-running local operations";
+      }
+      // lib.optionalAttrs includeDeployEnableRemoteUser {
+        enableRemoteUser = lib.mkEnableOption "nix-remote deployment user on this host";
+      }
+      // lib.optionalAttrs includeDeployLocalFlakePath {
+        localFlakePath = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          description = "Local flake path used by deployment helpers on this host.";
         };
+      };
 
       syncthing = {
         mode = lib.mkOption {

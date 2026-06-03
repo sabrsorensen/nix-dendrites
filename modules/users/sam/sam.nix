@@ -26,15 +26,16 @@ in
         { ... }:
         {
           imports =
-          (with inputs.self.modules.nixos; [
-            virtualisation
-          ])
-          ++ [
-            "${inputs.nix-secrets}/modules/system-secrets-private.nix"
-          ];
+            (with inputs.self.modules.nixos; [
+              virtualisation
+            ])
+            ++ [
+              "${inputs.nix-secrets}/modules/system-secrets-private.nix"
+            ];
 
           users.users."${username}" = {
-            description = lib.strings.toUpper (lib.strings.substring 0 1 username) + lib.strings.substring 1 (-1) username;
+            description =
+              lib.strings.toUpper (lib.strings.substring 0 1 username) + lib.strings.substring 1 (-1) username;
             group = username;
           };
           programs.fish.enable = true;
@@ -56,7 +57,11 @@ in
           users.users."${username}" = {
             isNormalUser = true;
             home = "/home/${username}";
-            extraGroups = [ "media" "podman" "wheel" ];
+            extraGroups = [
+              "media"
+              "podman"
+              "wheel"
+            ];
             shell = pkgs.bash;
             group = username;
           };

@@ -36,10 +36,7 @@
           dnsHostRaw;
       dnsPort = builtins.elemAt dnsListenMatch 1;
       dnsBindDirective =
-        if dnsHost == "" || dnsHost == "0.0.0.0" || dnsHost == "::" then
-          ""
-        else
-          "bind ${dnsHost}";
+        if dnsHost == "" || dnsHost == "0.0.0.0" || dnsHost == "::" then "" else "bind ${dnsHost}";
       upstreamServers = builtins.concatStringsSep " " cfg.upstreamServers;
       staticDnsRecords = builtins.toJSON zoneStaticRecords;
     in
@@ -66,7 +63,10 @@
 
         upstreamServers = lib.mkOption {
           type = lib.types.listOf lib.types.str;
-          default = [ "1.1.1.1" "9.9.9.9" ];
+          default = [
+            "1.1.1.1"
+            "9.9.9.9"
+          ];
         };
 
         staticRecords = lib.mkOption {
@@ -103,14 +103,18 @@
         assertions = [
           {
             assertion =
-              builtins.length (
-                lib.unique (map (record: record.hostname) zoneStaticRecords)
-              ) == builtins.length zoneStaticRecords;
+              builtins.length (lib.unique (map (record: record.hostname) zoneStaticRecords))
+              == builtins.length zoneStaticRecords;
             message = "services.dhcp-coredns static/published DNS records contain duplicate hostnames.";
           }
         ];
 
-        environment.systemPackages = with pkgs; [ jq python3 sops ssh-to-age ];
+        environment.systemPackages = with pkgs; [
+          jq
+          python3
+          sops
+          ssh-to-age
+        ];
 
         systemd.tmpfiles.rules = [
           "d ${cfg.stateDir} 0755 root root -"
@@ -119,8 +123,14 @@
         systemd.services.dhcp-coredns-prepare = {
           description = "Prepare Kea config inputs and CoreDNS zone data";
           wantedBy = [ "multi-user.target" ];
-          before = [ "dhcp-coredns-kea.service" "coredns.service" ];
-          after = [ "network.target" "local-fs.target" ];
+          before = [
+            "dhcp-coredns-kea.service"
+            "coredns.service"
+          ];
+          after = [
+            "network.target"
+            "local-fs.target"
+          ];
           serviceConfig = {
             Type = "oneshot";
           };
@@ -198,7 +208,10 @@
 
         systemd.services.dhcp-coredns-kea = {
           description = "Kea DHCP4 server (runtime-generated config)";
-          after = [ "dhcp-coredns-prepare.service" "network.target" ];
+          after = [
+            "dhcp-coredns-prepare.service"
+            "network.target"
+          ];
           requires = [ "dhcp-coredns-prepare.service" ];
           wantedBy = lib.optionals cfg.startKeaOnBoot [ "multi-user.target" ];
           serviceConfig = {
@@ -223,11 +236,11 @@
               log
               errors
               ${lib.optionalString (cfg.localDomainApexIp != null) ''
-              hosts {
-                ${cfg.localDomainApexIp} ${localDomain}
-                ${cfg.localDomainApexIp} @
-                fallthrough
-              }
+                hosts {
+                  ${cfg.localDomainApexIp} ${localDomain}
+                  ${cfg.localDomainApexIp} @
+                  fallthrough
+                }
               ''}
               file ${zonePath} ${localDomain}
               forward . ${upstreamServers}
@@ -251,7 +264,10 @@
 
         systemd.services.dhcp-coredns-sync = {
           description = "Sync DHCP leases into CoreDNS records";
-          after = [ "dhcp-coredns-kea.service" "coredns.service" ];
+          after = [
+            "dhcp-coredns-kea.service"
+            "coredns.service"
+          ];
           serviceConfig = {
             Type = "oneshot";
           };
@@ -284,7 +300,12 @@
           };
         };
 
-        networking.firewall.allowedUDPPorts = [ 53 67 68 1053 ];
+        networking.firewall.allowedUDPPorts = [
+          53
+          67
+          68
+          1053
+        ];
       };
     };
 }

@@ -19,7 +19,8 @@
       image = "itzg/minecraft-server";
       environment = {
         "EULA" = "TRUE";
-        "PLUGINS" = "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot
+        "PLUGINS" =
+          "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot
     https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
     ";
         "SERVER_NAME" = "Hendoboom Zone";

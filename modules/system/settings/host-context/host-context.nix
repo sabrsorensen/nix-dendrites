@@ -11,7 +11,10 @@ in
     nameDefault = config.networking.hostName;
     nameDescription = "Canonical host name for shared module behavior.";
     domainDefault =
-      if config ? systemConstants && config.systemConstants ? domain then config.systemConstants.domain else null;
+      if config ? systemConstants && config.systemConstants ? domain then
+        config.systemConstants.domain
+      else
+        null;
     domainDescription = "Local domain associated with this host.";
     includeAddress = true;
     includeDeployEnableRemoteUser = true;
@@ -65,11 +68,7 @@ in
       record:
       record
       // {
-        ip =
-          if record.ip != null then
-            record.ip
-          else
-            config.my.host.address;
+        ip = if record.ip != null then record.ip else config.my.host.address;
       }
     ) config.my.localDns.records;
   };

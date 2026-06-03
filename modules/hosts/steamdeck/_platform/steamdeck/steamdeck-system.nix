@@ -45,8 +45,8 @@
       max-jobs = "auto";
     };
 
-  # The Deck has limited internal storage, so prefer a smaller retained Nix
-  # footprint than the shared workstation defaults.
+    # The Deck has limited internal storage, so prefer a smaller retained Nix
+    # footprint than the shared workstation defaults.
     programs.nh.clean.extraArgs = lib.mkForce "--keep-since 2d --keep 2";
     nix = {
       settings = {
@@ -99,7 +99,7 @@
       FONTCONFIG_FILE = "/run/current-system/sw/etc/fonts/fonts.conf";
     };
 
-  # Might be useful for CJK fonts outside of Steam?
+    # Might be useful for CJK fonts outside of Steam?
     fonts = {
       fontconfig.enable = true;
       packages = with pkgs; [
@@ -135,7 +135,7 @@
 
     system.stateVersion = "26.05";
 
-  # Disable drkonqi crash handler to prevent Qt6-related boot slowdowns
+    # Disable drkonqi crash handler to prevent Qt6-related boot slowdowns
     systemd.services."drkonqi-coredump-launcher@" = {
       enable = false;
     };

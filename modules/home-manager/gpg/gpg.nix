@@ -15,8 +15,7 @@
       #   Examples: signing-personal.asc, signing-singularityci.asc
       gpgFiles = builtins.attrNames (builtins.readDir gpgKeysDir);
       ascFiles = builtins.filter (name: lib.hasSuffix ".asc" name) gpgFiles;
-      hostCfg =
-        if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
+      hostCfg = if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
     in
     {
       # Clean stale keyboxd/GPG lock files before gpg-agent starts.

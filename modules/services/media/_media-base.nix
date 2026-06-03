@@ -5,9 +5,11 @@
 }:
 let
   mediaCfg = config.my.media;
-  apexRoutes = mediaCfg.caddy.apexRoutes ++ lib.optional (mediaCfg.caddy.apexBackend != null) ''
-    reverse_proxy /* ${mediaCfg.caddy.apexBackend}
-  '';
+  apexRoutes =
+    mediaCfg.caddy.apexRoutes
+    ++ lib.optional (mediaCfg.caddy.apexBackend != null) ''
+      reverse_proxy /* ${mediaCfg.caddy.apexBackend}
+    '';
 in
 {
   options.my.media = {

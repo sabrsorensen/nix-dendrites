@@ -51,28 +51,26 @@ in
       builtins.filter (variant: variant.lifecycle == "system") host.nixosVariants
     );
     outputs =
-      lib.concatMap
-        (
-          variant:
-          lib.optionals variant.includeInChecks (
-            inputs.self.lib.mkNixosOutputs {
-              system = "x86_64-linux";
-              name = variant.outputName;
-              configuration = variant.moduleName;
-              buildProduct = variant.buildProduct;
-            }
-          )
-          ++ lib.optionals variant.includeInPackages (
-            inputs.self.lib.mkNixosOutputs {
-              collections = [ "packages" ];
-              system = "x86_64-linux";
-              name = variant.outputName;
-              configuration = variant.moduleName;
-              buildProduct = variant.buildProduct;
-            }
-          )
+      lib.concatMap (
+        variant:
+        lib.optionals variant.includeInChecks (
+          inputs.self.lib.mkNixosOutputs {
+            system = "x86_64-linux";
+            name = variant.outputName;
+            configuration = variant.moduleName;
+            buildProduct = variant.buildProduct;
+          }
         )
-        host.nixosVariants
+        ++ lib.optionals variant.includeInPackages (
+          inputs.self.lib.mkNixosOutputs {
+            collections = [ "packages" ];
+            system = "x86_64-linux";
+            name = variant.outputName;
+            configuration = variant.moduleName;
+            buildProduct = variant.buildProduct;
+          }
+        )
+      ) host.nixosVariants
       ++ inputs.self.lib.mkHomeOutputs {
         collections = [
           "checks"

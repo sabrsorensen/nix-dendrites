@@ -5,7 +5,7 @@
 let
   localDomain = config.systemConstants.domain;
 in
-  {
+{
   my.localDns.records = [
     { hostname = "immich"; }
   ];

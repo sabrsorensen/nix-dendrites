@@ -28,9 +28,11 @@
               name = descriptor.name;
               value = resolveDescriptor descriptor;
             })
-            (builtins.filter (
-              descriptor: descriptor.collection == collection && descriptor.system == system
-            ) descriptors)
+            (
+              builtins.filter (
+                descriptor: descriptor.collection == collection && descriptor.system == system
+              ) descriptors
+            )
         );
     in
     {

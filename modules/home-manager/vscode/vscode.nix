@@ -10,13 +10,7 @@
     }:
     let
       remotePlatformSettings = lib.mapAttrs' (
-        name: peer:
-        lib.nameValuePair name (
-          if peer ? platform then
-            peer.platform
-          else
-            "linux"
-        )
+        name: peer: lib.nameValuePair name (if peer ? platform then peer.platform else "linux")
       ) (lib.filterAttrs (_: peer: peer ? ssh && peer.ssh ? base) inventory);
       context7ApiKeyPath =
         if config.sops.secrets ? context7_api_key then config.sops.secrets.context7_api_key.path else null;
@@ -510,7 +504,8 @@
         "snyk.advanced.cliPath" = "C:\\Users\\ssorensen\\AppData\\Local\\snyk\\vscode-cli\\snyk-win.exe";
         "snyk.securityAtInception.autoConfigureSnykMcpServer" = true;
         "snyk.securityAtInception.executionFrequency" = "On Code Generation";
-      } // lib.optionalAttrs config.my.vscode.higi.runCodexInWsl {
+      }
+      // lib.optionalAttrs config.my.vscode.higi.runCodexInWsl {
         "chatgpt.runCodexInWindowsSubsystemForLinux" = true;
       };
 
@@ -585,7 +580,9 @@
         windowsInterop.enable = lib.mkEnableOption "Windows terminal integration for VS Code profiles";
       };
 
-      config.home.packages = lib.optionals config.my.vscode.installLocalDotnetSdk [ pkgs.dotnetCorePackages.sdk_10_0-bin ];
+      config.home.packages = lib.optionals config.my.vscode.installLocalDotnetSdk [
+        pkgs.dotnetCorePackages.sdk_10_0-bin
+      ];
       config.programs.vscode = {
         enable = true;
         #mutableExtsDir = true; # mutually exclusive with profiles
@@ -651,21 +648,25 @@
           #  languageSnippets = { };
           #  userSettings = dotnetSettings // defaultUserSettings;
           #};
-          Higi_LLP = if config.my.vscode.profiles.higiLlp then {
-            extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
-              higiExts
-              ++ pythonExts
-              ++ sqlExts
-              ++ gitHubExts
-              ++ defaultExts
-              ++ [
-              ]
-            );
-            keybindings = defaultKeyBindings ++ [ ];
-            languageSnippets = { };
-            userSettings = defaultUserSettings // higiSettings // { };
-            enableMcpIntegration = true;
-          } else {};
+          Higi_LLP =
+            if config.my.vscode.profiles.higiLlp then
+              {
+                extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
+                  higiExts
+                  ++ pythonExts
+                  ++ sqlExts
+                  ++ gitHubExts
+                  ++ defaultExts
+                  ++ [
+                  ]
+                );
+                keybindings = defaultKeyBindings ++ [ ];
+                languageSnippets = { };
+                userSettings = defaultUserSettings // higiSettings // { };
+                enableMcpIntegration = true;
+              }
+            else
+              { };
           Nix = {
             extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
               defaultExts
@@ -754,18 +755,22 @@
           #  } // defaultUserSettings;
           #};
 
-          Python = if config.my.vscode.profiles.python then {
-            extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
-              defaultExts
-              ++ pythonExts
-              ++ [
-              ]
-            );
-            keybindings = defaultKeyBindings ++ [ ];
-            languageSnippets = { };
-            userSettings = pythonSettings // defaultUserSettings;
-            enableMcpIntegration = true;
-          } else { };
+          Python =
+            if config.my.vscode.profiles.python then
+              {
+                extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
+                  defaultExts
+                  ++ pythonExts
+                  ++ [
+                  ]
+                );
+                keybindings = defaultKeyBindings ++ [ ];
+                languageSnippets = { };
+                userSettings = pythonSettings // defaultUserSettings;
+                enableMcpIntegration = true;
+              }
+            else
+              { };
           #StardewValley = {
           #  extensions =
           #    cSharpExts ++
@@ -779,19 +784,23 @@
           #  languageSnippets = { };
           #  userSettings = dotnetSettings // defaultUserSettings;
           #};
-          STM32 = if config.my.vscode.profiles.stm32 then {
-            extensions =
-              pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
-                defaultExts ++ [
-                  "ms-vscode.cpptools"
-                  "ms-vscode.cpptools-extension-pack"
-                  "platformio.platformio-ide"
-                ]
-              );
-            keybindings = defaultKeyBindings ++ [];
-            languageSnippets = { };
-            userSettings = defaultUserSettings;
-          } else {};
+          STM32 =
+            if config.my.vscode.profiles.stm32 then
+              {
+                extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
+                  defaultExts
+                  ++ [
+                    "ms-vscode.cpptools"
+                    "ms-vscode.cpptools-extension-pack"
+                    "platformio.platformio-ide"
+                  ]
+                );
+                keybindings = defaultKeyBindings ++ [ ];
+                languageSnippets = { };
+                userSettings = defaultUserSettings;
+              }
+            else
+              { };
         };
       };
     };

@@ -8,15 +8,15 @@
       ...
     }:
     let
-      hostCfg =
-        if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
+      hostCfg = if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
       hostname = hostCfg.name;
       localDomain =
         if osConfig ? systemConstants && osConfig.systemConstants ? domain then
           osConfig.systemConstants.domain
         else
           hostCfg.domain;
-      mkHostname = name: if localDomain != null && localDomain != "" then "${name}.${localDomain}" else name;
+      mkHostname =
+        name: if localDomain != null && localDomain != "" then "${name}.${localDomain}" else name;
       mkBaseBlock =
         name: peer:
         if name == hostname || !(peer ? ssh && peer.ssh ? base) then
@@ -35,7 +35,9 @@
 
       mkNixBlock =
         name: peer:
-        if !(hostCfg.ssh.enableNixBlocks && peer ? ssh && peer.ssh ? nix && (peer.ssh.nix.enable or false)) then
+        if
+          !(hostCfg.ssh.enableNixBlocks && peer ? ssh && peer.ssh ? nix && (peer.ssh.nix.enable or false))
+        then
           null
         else
           {
@@ -48,10 +50,9 @@
           };
 
       peerBlocks = lib.mapAttrs' (name: peer: lib.nameValuePair name (mkBaseBlock name peer)) inventory;
-      nixBlocks =
-        lib.mapAttrs' (
-          name: peer: lib.nameValuePair "nix-${lib.toLower name}" (mkNixBlock name peer)
-        ) inventory;
+      nixBlocks = lib.mapAttrs' (
+        name: peer: lib.nameValuePair "nix-${lib.toLower name}" (mkNixBlock name peer)
+      ) inventory;
 
     in
     {

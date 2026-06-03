@@ -14,27 +14,33 @@ let
         descriptor:
         descriptor.kind == "nixos"
         && descriptor.collection == "checks"
-        && descriptor.buildAttrPath == [
-          "config"
-          "system"
-          "build"
-          "toplevel"
-        ]
+        &&
+          descriptor.buildAttrPath == [
+            "config"
+            "system"
+            "build"
+            "toplevel"
+          ]
       ) (host.outputs or [ ])
     );
   inventoryNixosConfigurations = lib.unique (
     builtins.concatMap (
-      host:
-      if host ? dnsConfigurations then
-        host.dnsConfigurations
-      else
-        defaultDnsConfigurationsFor host
+      host: if host ? dnsConfigurations then host.dnsConfigurations else defaultDnsConfigurationsFor host
     ) (builtins.attrValues hostInventory)
   );
   infraRecords = [
-    { hostname = "ns1"; ip = network.nevarro; }
-    { hostname = "ns2"; ip = network.naboo; }
-    { hostname = "home-gw"; ip = network.gateway; }
+    {
+      hostname = "ns1";
+      ip = network.nevarro;
+    }
+    {
+      hostname = "ns2";
+      ip = network.naboo;
+    }
+    {
+      hostname = "home-gw";
+      ip = network.gateway;
+    }
   ];
 in
 {
@@ -52,14 +58,11 @@ in
         ) configurations
       );
 
-    inventoryPublishedRecords =
-      inputs.self.lib.localDns.publishedRecordsFromConfigurations inventoryNixosConfigurations;
+    inventoryPublishedRecords = inputs.self.lib.localDns.publishedRecordsFromConfigurations inventoryNixosConfigurations;
 
     staticRecords = infraRecords ++ inputs.self.lib.localDns.inventoryPublishedRecords;
 
-    secureDeployProbeDomains = map (
-      hostname: "${hostname}.${domain}"
-    ) [
+    secureDeployProbeDomains = map (hostname: "${hostname}.${domain}") [
       "naboo"
       "nevarro"
       "atlasuponraiden"

@@ -7,7 +7,8 @@
     }:
     let
       cfg = config.services.netbirdProxy.turnForward;
-      targetHost = if cfg.targetHost == null then config.systemConstants.network.nevarro else cfg.targetHost;
+      targetHost =
+        if cfg.targetHost == null then config.systemConstants.network.nevarro else cfg.targetHost;
     in
     {
       options.services.netbirdProxy.turnForward = {

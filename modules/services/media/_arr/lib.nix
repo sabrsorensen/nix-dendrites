@@ -24,22 +24,25 @@ let
       }
     '';
 
-  mkManagedService = {
-    description,
-    execStart,
-    user,
-    group,
-    extraServiceConfig ? { },
-  }: {
-    inherit description;
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      ExecStart = execStart;
-      Restart = "always";
-      User = user;
-      Group = group;
-    } // extraServiceConfig;
-  };
+  mkManagedService =
+    {
+      description,
+      execStart,
+      user,
+      group,
+      extraServiceConfig ? { },
+    }:
+    {
+      inherit description;
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        ExecStart = execStart;
+        Restart = "always";
+        User = user;
+        Group = group;
+      }
+      // extraServiceConfig;
+    };
 in
 {
   inherit mkThemeParkRoute mkManagedService;

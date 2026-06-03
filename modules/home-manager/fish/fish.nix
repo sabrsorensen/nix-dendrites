@@ -9,8 +9,7 @@
       ...
     }:
     let
-      hostCfg =
-        if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
+      hostCfg = if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
       nixFlakePath = if hostCfg.deploy ? localFlakePath then hostCfg.deploy.localFlakePath else null;
 
       # Feature flags based on host type
@@ -31,8 +30,7 @@
         "dhcp-standby" = [ "dhcp-failover.timer" ];
       };
       expandServiceRoles =
-        roles:
-        lib.unique (lib.concatLists (map (role: secureDeployRoleUnits.${role} or [ ]) roles));
+        roles: lib.unique (lib.concatLists (map (role: secureDeployRoleUnits.${role} or [ ]) roles));
       secureDeployConfigCases = lib.concatStrings (
         lib.mapAttrsToList (
           name: peer:
@@ -59,8 +57,8 @@
             lib.mapAttrsToList (
               name: peer:
               lib.optionalString (peer ? deploy && peer.deploy ? remoteMethod) ''
-            case ${name}
-                echo ${peer.deploy.remoteMethod}
+                case ${name}
+                    echo ${peer.deploy.remoteMethod}
               ''
             ) inventory
           );
@@ -134,7 +132,6 @@
         jq
         lolcat
       ];
-
 
       programs.fish = {
         enable = true;

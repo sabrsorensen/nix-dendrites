@@ -61,7 +61,14 @@
         system,
       }:
       {
-        inherit buildAttrPath collection configuration kind name system;
+        inherit
+          buildAttrPath
+          collection
+          configuration
+          kind
+          name
+          system
+          ;
       };
 
     mkNixosOutput =
@@ -73,7 +80,12 @@
         buildProduct ? "toplevel",
       }:
       inputs.self.lib.mkHostOutput {
-        inherit collection configuration name system;
+        inherit
+          collection
+          configuration
+          name
+          system
+          ;
         kind = "nixos";
         buildAttrPath = [
           "config"
@@ -94,7 +106,13 @@
       map (
         collection:
         inputs.self.lib.mkNixosOutput {
-          inherit collection configuration name system buildProduct;
+          inherit
+            collection
+            configuration
+            name
+            system
+            buildProduct
+            ;
         }
       ) collections;
 
@@ -107,7 +125,13 @@
         buildAttrPath ? [ "activationPackage" ],
       }:
       inputs.self.lib.mkHostOutput {
-        inherit buildAttrPath collection configuration name system;
+        inherit
+          buildAttrPath
+          collection
+          configuration
+          name
+          system
+          ;
         kind = "home";
       };
 
@@ -122,7 +146,13 @@
       map (
         collection:
         inputs.self.lib.mkHomeOutput {
-          inherit collection configuration name system buildAttrPath;
+          inherit
+            collection
+            configuration
+            name
+            system
+            buildAttrPath
+            ;
         }
       ) collections;
 
@@ -195,7 +225,9 @@
       // (lib.optionalAttrs (deploy != null) { inherit deploy; })
       // (lib.optionalAttrs (platform != null) { inherit platform; })
       // (lib.optionalAttrs (serviceRoles != [ ]) { inherit serviceRoles; })
-      // { inherit outputs; };
+      // {
+        inherit outputs;
+      };
 
     mkNixos = system: name: {
       ${name} = inputs.nixpkgs.lib.nixosSystem {
@@ -217,16 +249,13 @@
           hostContext = args.hostContext or null;
           extraSpecialArgs = args.extraSpecialArgs or { };
           extraConfig =
-            args.extraConfig
-            or (
+            args.extraConfig or (
               {
                 ...
               }:
               { }
             );
-          baseModules =
-            args.modules
-            or [ inputs.self.modules.homeManager.${name} ];
+          baseModules = args.modules or [ inputs.self.modules.homeManager.${name} ];
           hostDefaults =
             if hostContext == null then
               [ ]
@@ -257,7 +286,8 @@
             };
             extraSpecialArgs = {
               inventory = inputs.self.lib.hostInventory;
-            } // extraSpecialArgs;
+            }
+            // extraSpecialArgs;
             modules =
               lib.optionals (inputs ? determinate) [
                 inputs.determinate.homeManagerModules.default
