@@ -1,7 +1,17 @@
-{ luksUuid, ... }:
+{ rootLuksUuid, ... }:
 {
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.luks.devices."luks-${luksUuid}".device = "/dev/disk/by-uuid/${luksUuid}";
+  boot.initrd = {
+    availableKernelModules = [
+      "dm-crypt"
+      "dm-mod"
+    ];
+    kernelModules = [ "dm-crypt" ];
+    luks.devices."luks-${rootLuksUuid}" = {
+      device = "/dev/disk/by-uuid/${rootLuksUuid}";
+      allowDiscards = true;
+    };
+  };
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   nix.buildMachines = [ ];

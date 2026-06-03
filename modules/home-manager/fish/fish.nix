@@ -11,6 +11,20 @@
     let
       hostCfg = if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
       nixFlakePath = if hostCfg.deploy ? localFlakePath then hostCfg.deploy.localFlakePath else null;
+      localDomain =
+        if osConfig ? systemConstants && osConfig.systemConstants ? domain then
+          osConfig.systemConstants.domain
+        else
+          hostCfg.domain;
+      pingTargetFallback =
+        if localDomain != null && localDomain != "" then
+          ''
+            set ping_host "$target_host.${localDomain}"
+          ''
+        else
+          ''
+            set ping_host "$target_host"
+          '';
 
       # Feature flags based on host type
       isWorkstation = hostCfg.roles.workstation;
@@ -96,11 +110,11 @@
 
             set target_host_lower (string lower $target_host)
             set switch_target_host "nix-$target_host_lower"
-            set ping_host (ssh -G $target_host 2>/dev/null | string match -r "^hostname " | string replace "hostname " "")
+            ${pingTargetFallback}
+            set ssh_ping_host (ssh -G $target_host 2>/dev/null | string match -r "^[Hh]ostname " | string replace -r "^[Hh]ostname " "")
 
-            if test -z "$ping_host"
-                echo "Failed to resolve ping target for $target_host from SSH config"
-                return 1
+            if test -n "$ssh_ping_host"
+                set ping_host $ssh_ping_host
             end
 
             echo "🔨 Building $target_host locally before waiting for it to come online..."

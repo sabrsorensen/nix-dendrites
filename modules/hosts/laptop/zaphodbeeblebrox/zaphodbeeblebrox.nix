@@ -4,6 +4,7 @@
   ...
 }:
 let
+  rootLuksUuid = lib.removeSuffix "\n" (builtins.readFile "${inputs.nix-secrets}/luks/zaphod/root.txt");
   mkWorkstation = import ../_base/workstation.nix;
 in
 mkWorkstation {
@@ -23,7 +24,7 @@ mkWorkstation {
   extraImports = with inputs.self.modules.nixos; [
     sam
     ./_zaphod/hardware.nix
-    ./_zaphod/filesystem.nix
+    ({ lib, ... }: import ./_zaphod/filesystem.nix { inherit lib rootLuksUuid; })
     ./_zaphod/network.nix
     ./_zaphod/users/sam.nix
     system-desktop
