@@ -12,6 +12,7 @@
     }:
     let
       serviceName = "ankerctl";
+      imageName = "ankerctl:fork";
       host = "127.0.0.1";
       port = 4470;
       localAddr = "${host}:${toString port}";
@@ -129,6 +130,7 @@
 
       virtualisation.oci-containers.containers.${serviceName} = {
         autoStart = true;
+        image = imageName;
         imageFile = image;
         environment = {
           "ANKERCTL_LOG_DIR" = "/logs";
