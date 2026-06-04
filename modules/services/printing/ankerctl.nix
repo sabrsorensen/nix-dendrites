@@ -24,7 +24,7 @@
       src = pkgs.fetchFromGitHub {
         owner = "sabrsorensen";
         repo = "ankermake-m5-protocol";
-        rev = "ed176a36f3e5aecf83dfb4f39b4c369d6bf519c9";
+        rev = "ed176a303259f160cd2c13c60a427be1ce2c205d";
         hash = "sha256-n7q48rIrpGjX/0ro+ej4U7RkLprqzhVUDeQaTp1JILg=";
       };
       hasAnkerctlEnv =
