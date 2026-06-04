@@ -5,6 +5,7 @@
   homeModule,
   extraImports ? [ ],
   extraHostConfig ? { },
+  primaryInteractiveUser,
   sshIdentityFile,
   nixIdentityFile,
 }:
@@ -14,9 +15,11 @@
     {
       imports = extraImports ++ [
         inputs.self.modules.nixos.deploy-defaults
+        extraHostConfig
       ];
 
       my.host = {
+        inherit primaryInteractiveUser;
         roles = {
           workstation = true;
           desktop = true;
@@ -32,15 +35,14 @@
           hasTray = true;
         };
       };
-    }
-    // extraHostConfig;
+    };
 
   flake.modules.homeManager.${systemName} = homeModule;
 
   flake.lib.hostInventory.${systemName} = inputs.self.lib.mkInventoryHost {
     ssh = inputs.self.lib.mkInventorySsh {
       base = inputs.self.lib.mkInventorySshBase {
-        user = "sam";
+        user = primaryInteractiveUser;
         identityFile = sshIdentityFile;
       };
       nix = inputs.self.lib.mkInventorySshNix {

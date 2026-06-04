@@ -23,19 +23,19 @@
       nugetConfigPath = "${nugetConfigDir}/NuGet.Config";
     in
     {
-      imports =
-        (with inputs.self.modules.homeManager; [
+      imports = (
+        with inputs.self.modules.homeManager;
+        [
           home
-          sam-git
+          sam-home-base
+          sam-home-work-private
           sam-work-secrets
           vscode
           mcp
           mcp-work
           codex
-        ])
-        ++ [
-          "${inputs.nix-work-secrets}/modules/sam-secrets-private.nix"
-        ];
+        ]
+      );
 
       my.vscode = {
         installLocalDotnetSdk = lib.mkDefault true;
@@ -45,9 +45,6 @@
           stm32 = lib.mkDefault true;
         };
       };
-
-      home.username = lib.mkDefault "sam";
-      home.homeDirectory = lib.mkDefault "/home/sam";
 
       home.packages =
         with pkgs;

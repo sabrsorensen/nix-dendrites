@@ -211,8 +211,35 @@
       }
       // lib.optionalAttrs (secure != null) { inherit secure; };
 
+    mkInventoryBuilder =
+      {
+        alias,
+        targetHost,
+        identityFile,
+        systems,
+        maxJobs,
+        speedFactor,
+        supportedFeatures,
+        mandatoryFeatures ? [ ],
+        user ? "nix-remote",
+      }:
+      {
+        inherit
+          alias
+          targetHost
+          identityFile
+          mandatoryFeatures
+          maxJobs
+          speedFactor
+          supportedFeatures
+          systems
+          user
+          ;
+      };
+
     mkInventoryHost =
       {
+        builder ? null,
         dnsConfigurations ? null,
         deploy ? null,
         outputs ? [ ],
@@ -220,7 +247,8 @@
         serviceRoles ? [ ],
         ssh ? null,
       }:
-      (lib.optionalAttrs (ssh != null) { inherit ssh; })
+      (lib.optionalAttrs (builder != null) { inherit builder; })
+      // (lib.optionalAttrs (ssh != null) { inherit ssh; })
       // (lib.optionalAttrs (dnsConfigurations != null) { inherit dnsConfigurations; })
       // (lib.optionalAttrs (deploy != null) { inherit deploy; })
       // (lib.optionalAttrs (platform != null) { inherit platform; })
@@ -344,7 +372,7 @@
             extraConfig ? { },
           }:
           {
-            imports = extraImports;
+            imports = extraImports ++ [ extraConfig ];
 
             networking = {
               hostName = hostName;
@@ -360,8 +388,7 @@
               };
               inherit nameservers;
             };
-          }
-          // extraConfig;
+          };
 
         mkImageModule =
           hostName:

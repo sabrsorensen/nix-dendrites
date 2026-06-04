@@ -13,6 +13,8 @@ let
   mkBaseModule = import ./base-module.nix { inherit host; };
   system = pkgs.stdenv.hostPlatform.system;
   isDualBoot = bootMode == "dual";
+  steamUser = host.users.steam.name;
+  installerUser = host.users.installer.name;
   diskConfigFile =
     if isDualBoot then "steamdeck-dualboot-disk-config.nix" else "steamdeck-singleboot-disk-config.nix";
   diskConfigPath =
@@ -31,7 +33,7 @@ mkBaseModule {
     (inputs.nixpkgs + "/nixos/modules/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix")
     ../../../system/settings/host-context/host-context.nix
     (import ../_platform/steamdeck/steamdeck-hw-config.nix bootMode)
-    (import ../_platform/steamdeck/steamdeck-steam.nix { steamUser = host.steamUser; })
+    (import ../_platform/steamdeck/steamdeck-steam.nix { inherit steamUser; })
     ../_platform/steamdeck/steamdeck-system.nix
   ];
   extraConfig = {
@@ -40,12 +42,12 @@ mkBaseModule {
     networking.hostName = lib.mkForce "jovian-installer";
 
     users.users.nixos.enable = lib.mkForce false;
-    services.displayManager.autoLogin.user = lib.mkForce host.installerUser;
+    services.displayManager.autoLogin.user = lib.mkForce installerUser;
     jovian = {
       decky-loader.enable = lib.mkForce false;
       steam = {
         autoStart = lib.mkForce false;
-        user = lib.mkForce host.installerUser;
+        user = lib.mkForce installerUser;
         desktopSession = lib.mkForce null;
       };
     };
@@ -100,10 +102,10 @@ mkBaseModule {
       ];
     };
 
-    users.users.${host.installerUser} = {
+    users.users.${installerUser} = {
       isNormalUser = true;
       description = "Steam Deck Installer User";
-      extraGroups = host.steamUserExtraGroups;
+      extraGroups = host.users.steam.extraGroups;
       password = "jovian";
       shell = pkgs.bash;
     }
@@ -111,7 +113,7 @@ mkBaseModule {
       uid = 1000;
     };
 
-    users.groups.${host.installerUser} = lib.optionalAttrs isDualBoot {
+    users.groups.${installerUser} = lib.optionalAttrs isDualBoot {
       gid = 1000;
     };
 

@@ -1,11 +1,14 @@
 { config, pkgs, ... }:
+let
+  username = config.my.host.primaryInteractiveUser;
+in
 {
-  users.groups.${config.my.wslUsername} = { };
-  users.users.${config.my.wslUsername} = {
+  users.groups.${username} = { };
+  users.users.${username} = {
     isNormalUser = true;
-    home = "/home/${config.my.wslUsername}";
+    home = "/home/${username}";
     extraGroups = [ "wheel" ];
     shell = pkgs.bash;
-    group = config.my.wslUsername;
+    group = username;
   };
 }

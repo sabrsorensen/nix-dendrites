@@ -7,5 +7,4 @@
 
   # Enable server-mode syncthing
   my.syncthing.enable = true;
-  my.syncthing.serverUser = "sam";
 }

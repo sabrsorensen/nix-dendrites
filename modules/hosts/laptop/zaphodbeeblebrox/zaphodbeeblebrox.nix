@@ -4,7 +4,10 @@
   ...
 }:
 let
-  rootLuksUuid = lib.removeSuffix "\n" (builtins.readFile "${inputs.nix-secrets}/luks/zaphod/root.txt");
+  primaryInteractiveUser = "sam";
+  rootLuksUuid = lib.removeSuffix "\n" (
+    builtins.readFile "${inputs.nix-secrets}/luks/zaphod/root.txt"
+  );
   mkWorkstation = import ../_base/workstation.nix;
 in
 mkWorkstation {
@@ -39,12 +42,15 @@ mkWorkstation {
     xserver
   ];
   extraHostConfig = {
+    my.host.primaryInteractiveUser = primaryInteractiveUser;
+
     home-manager.users.sam = {
       imports = [
         inputs.self.modules.homeManager.ZaphodBeeblebrox
       ];
     };
   };
+  primaryInteractiveUser = primaryInteractiveUser;
   sshIdentityFile = "~/.ssh/zaphod_id_ed25519";
   nixIdentityFile = "~/.ssh/nix_zaphodbeeblebrox_id_ed25519";
 }

@@ -8,7 +8,7 @@
   extraConfig ? { },
 }:
 {
-  imports = extraImports;
+  imports = extraImports ++ [ extraConfig ];
 
   networking.hostName = host.primaryHostName;
   my.host = host.context;
@@ -18,4 +18,3 @@
     inherit bootMode lifecycle;
   };
 }
-// extraConfig

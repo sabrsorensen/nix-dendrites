@@ -1,35 +1,38 @@
 {
+  inputs,
   ...
 }:
 {
   flake.modules.nixos."deploy-builder-defaults" =
-    { config, lib, ... }:
+    { lib, ... }:
     let
-      atlasBuilderHost = "AtlasNixBuilder";
-      atlasBuilderTarget = "AtlasUponRaiden";
-      atlasBuilderUser = "nix-remote";
-      atlasBuilderIdentity = "~/.ssh/nix_atlasuponraiden_id_ed25519";
+      builders = builtins.filter (builder: builder != null) (
+        map (host: host.builder or null) (builtins.attrValues inputs.self.lib.hostInventory)
+      );
+      buildMachines = map (builder: {
+        hostName = builder.alias;
+        protocol = "ssh-ng";
+        inherit (builder)
+          mandatoryFeatures
+          maxJobs
+          speedFactor
+          supportedFeatures
+          systems
+          ;
+      }) builders;
+      builderSshConfig = lib.concatMapStrings (builder: ''
+        Host ${builder.alias}
+          HostName ${builder.targetHost}
+          User ${builder.user}
+          IdentityFile ${builder.identityFile}
+      '') builders;
+      builderSubstituters = map (builder: "ssh-ng://${builder.alias}") builders;
     in
     {
-      my.host.nix.buildMachines = lib.mkDefault [
-        {
-          hostName = atlasBuilderHost;
-          systems = config.systemConstants.atlas.supportedSystems;
-          protocol = "ssh-ng";
-          maxJobs = config.systemConstants.atlas.maxJobs;
-          speedFactor = config.systemConstants.atlas.speedFactor;
-          supportedFeatures = config.systemConstants.atlas.systemFeatures;
-          mandatoryFeatures = [ ];
-        }
-      ];
+      my.host.nix.buildMachines = lib.mkDefault buildMachines;
 
-      programs.ssh.extraConfig = lib.mkAfter ''
-        Host ${atlasBuilderHost}
-          HostName ${atlasBuilderTarget}
-          User ${atlasBuilderUser}
-          IdentityFile ${atlasBuilderIdentity}
-      '';
+      programs.ssh.extraConfig = lib.mkAfter builderSshConfig;
 
-      nix.settings.extra-substituters = lib.mkAfter [ "ssh-ng://${atlasBuilderHost}" ];
+      nix.settings.extra-substituters = lib.mkAfter builderSubstituters;
     };
 }

@@ -11,6 +11,7 @@
     let
       hostCfg = if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
       nixFlakePath = if hostCfg.deploy ? localFlakePath then hostCfg.deploy.localFlakePath else null;
+      deployLocalUser = if hostCfg.deploy ? localUser then hostCfg.deploy.localUser else null;
       localDomain =
         if osConfig ? systemConstants && osConfig.systemConstants ? domain then
           osConfig.systemConstants.domain
@@ -206,7 +207,11 @@
             echo "🔒 Inhibiting sleep for: $argv"
             # Set the terminal title to show the actual command
             echo -ne "\033]0;$argv\007"
-            systemd-inhibit --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=sam --why=nixos-rebuild --mode=block $argv
+            set inhibit_user ${lib.escapeShellArg (if deployLocalUser != null then deployLocalUser else "")}
+            if test -z "$inhibit_user"
+                set inhibit_user $USER
+            end
+            systemd-inhibit --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who="$inhibit_user" --why=nixos-rebuild --mode=block $argv
           '';
 
           # === WORKSTATION FUNCTIONS (development/testing) ===
@@ -235,6 +240,10 @@
             else
               null;
           nhsu = if hasNixFlake then "nhSwitchUpgrade" else null;
+          vscodeSyncWindows = if isWsl then "vscode-sync-windows" else null;
+          vsw = if isWsl then "vscodeSyncWindows" else null;
+          vscodeSyncWindowsExtensions = if isWsl then "vscode-sync-windows --install-extensions" else null;
+          vswe = if isWsl then "vscodeSyncWindowsExtensions" else null;
 
           # Remote deployment functions - only on workstations
           nhSwitchRemote = mkNhSwitchRemote { };
@@ -309,9 +318,7 @@
           # === MAINTENANCE FUNCTIONS ===
           cleanGenerations =
             let
-              runCleanCommand =
-                command:
-                if sleepySystem then "inhibitSleep ${command}" else command;
+              runCleanCommand = command: if sleepySystem then "inhibitSleep ${command}" else command;
             in
             if isWorkstation || isPi || isWsl || hostCfg.roles.server || isDeck then
               ''

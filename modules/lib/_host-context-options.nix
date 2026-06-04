@@ -32,10 +32,17 @@
       };
     }
     // {
+      primaryInteractiveUser = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Primary human user for this host's interactive login and host-edge user defaults.";
+      };
+
       roles = {
         workstation = lib.mkEnableOption "workstation host role";
         desktop = lib.mkEnableOption "desktop host role";
         server = lib.mkEnableOption "server host role";
+        builder = lib.mkEnableOption "build machine host role";
         rpi = lib.mkEnableOption "Raspberry Pi host role";
         serviceHost = lib.mkEnableOption "service-host role";
         steamdeck = lib.mkEnableOption "Steam Deck host role";
@@ -50,6 +57,18 @@
         enableRemoteUser = lib.mkEnableOption "nix-remote deployment user on this host";
       }
       // lib.optionalAttrs includeDeployLocalFlakePath {
+        localUser = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          description = "Local user that owns the flake checkout used for self-deploy workflows.";
+        };
+
+        repoName = lib.mkOption {
+          type = lib.types.str;
+          default = "nix-dendrites";
+          description = "Repository directory name used for local self-deploy workflows.";
+        };
+
         localFlakePath = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = null;

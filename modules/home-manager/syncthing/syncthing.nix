@@ -14,6 +14,7 @@
       shouldEnable = hostCfg.syncthing.mode == "home";
       shouldWarnServer = hostCfg.syncthing.mode == "system";
       shouldHaveTray = hostCfg.syncthing.hasTray;
+      syncthingCommonOptions = import ../../../lib/syncthing-common-options.nix;
 
       allDevices = config.my.syncthing.devices;
       allFolders = config.my.syncthing.folders;
@@ -60,18 +61,7 @@
               #  theme = "black";
               #  user = config.home.username;
               #};
-              options = {
-                localAnnounceEnabled = true;
-                urAccepted = -1;
-                # Disable QUIC to work around quic-go v0.56.0 TLS bug
-                # that causes "crypto/tls bug: where's my session ticket?" panics
-                connectionPriorityQuicLan = 0;
-                connectionPriorityQuicWan = 0;
-                # Force TCP-only mode to completely avoid QUIC
-                listenAddresses = [ "tcp://:22000" ];
-                # Disable crash reporting to avoid startup delays
-                crashReportingEnabled = false;
-              };
+              options = syncthingCommonOptions;
             };
             tray = {
               enable = shouldHaveTray;

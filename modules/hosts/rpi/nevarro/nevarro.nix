@@ -4,6 +4,7 @@
   ...
 }:
 let
+  primaryInteractiveUser = "sam";
   mkServiceHostModule = import ../_rpi/service-host.nix { inherit inputs lib; };
   staticDnsRecords = inputs.self.lib.localDns.staticRecords;
 in
@@ -39,9 +40,12 @@ in
         # Remove vm.mmap_rnd_bits entirely - this kernel doesn't support it
       };
 
-      my.host.roles = {
-        rpi = true;
-        serviceHost = true;
+      my.host = {
+        inherit primaryInteractiveUser;
+        roles = {
+          rpi = true;
+          serviceHost = true;
+        };
       };
 
       services.dhcp-coredns = {
@@ -60,7 +64,7 @@ in
   flake.lib.hostInventory.Nevarro = inputs.self.lib.mkInventoryHost {
     ssh = inputs.self.lib.mkInventorySsh {
       base = inputs.self.lib.mkInventorySshBase {
-        user = "sam";
+        user = primaryInteractiveUser;
         identityFile = "~/.ssh/nevarro_id_ed25519";
       };
       nix = inputs.self.lib.mkInventorySshNix {

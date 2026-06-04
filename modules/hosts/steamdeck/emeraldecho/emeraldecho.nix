@@ -37,7 +37,7 @@ in
   flake.lib.hostInventory.${host.primaryHostName} = inputs.self.lib.mkInventoryHost {
     ssh = inputs.self.lib.mkInventorySsh {
       base = inputs.self.lib.mkInventorySshBase {
-        user = host.steamUser;
+        user = host.users.steam.name;
         identityFile = "~/.ssh/emeraldecho_id_ed25519";
       };
       nix = inputs.self.lib.mkInventorySshNix {

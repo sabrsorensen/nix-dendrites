@@ -8,6 +8,7 @@ bootMode:
 let
   mkBaseModule = import ./base-module.nix { inherit host; };
   isDualBoot = bootMode == "dual";
+  steamUser = host.users.steam.name;
 in
 mkBaseModule {
   inherit bootMode;
@@ -23,7 +24,7 @@ mkBaseModule {
     inputs.nix-flatpak.nixosModules.nix-flatpak
     inputs.jovian-nixos.nixosModules.default
     (import ../_platform/steamdeck/steamdeck-hw-config.nix bootMode)
-    (import ../_platform/steamdeck/steamdeck-steam.nix { steamUser = host.steamUser; })
+    (import ../_platform/steamdeck/steamdeck-steam.nix { inherit steamUser; })
     ../_platform/steamdeck/steamdeck-system.nix
   ];
   extraConfig = {
@@ -32,9 +33,9 @@ mkBaseModule {
       KbdInteractiveAuthentication = lib.mkForce false;
     };
 
-    users.users.${host.steamUser} = {
+    users.users.${steamUser} = {
       isNormalUser = true;
-      extraGroups = host.steamUserExtraGroups;
+      extraGroups = host.users.steam.extraGroups;
       hashedPasswordFile = lib.mkForce null;
       initialPassword = "jovian";
     }
@@ -42,13 +43,13 @@ mkBaseModule {
       uid = lib.mkForce 1000;
     };
 
-    users.groups.${host.steamUser} = lib.optionalAttrs isDualBoot {
+    users.groups.${steamUser} = lib.optionalAttrs isDualBoot {
       gid = lib.mkForce 1000;
     };
 
-    home-manager.users.${host.steamUser} = {
-      home.username = host.steamUser;
-      home.homeDirectory = "/home/${host.steamUser}";
+    home-manager.users.${steamUser} = {
+      home.username = steamUser;
+      home.homeDirectory = "/home/${steamUser}";
       home.stateVersion = "26.05";
       imports = [ ../_platform/steamdeck/steamdeck-shortcut.nix ];
     };

@@ -3,6 +3,9 @@
   lib,
   ...
 }:
+let
+  primaryInteractiveUser = "sam";
+in
 {
   flake.modules.nixos.AtlasUponRaiden = {
     imports = with inputs.self.modules.nixos; [
@@ -27,17 +30,23 @@
       cross-compile
       nix-index
       caddy
+      ankerctl
       immich
       mealie
       media-server
       minecraft-server
+      demlo
       scrutiny
       syncthing-server
       #homeassistant-proxy
     ];
 
     my.host = {
-      roles.server = true;
+      inherit primaryInteractiveUser;
+      roles = {
+        server = true;
+        builder = true;
+      };
       deploy = {
         canDeployRemotely = true;
         enableRemoteUser = true;
@@ -55,9 +64,18 @@
   flake.modules.homeManager.AtlasUponRaiden = import ./_atlas/home-manager.nix { inherit inputs; };
 
   flake.lib.hostInventory.AtlasUponRaiden = inputs.self.lib.mkInventoryHost {
+    builder = inputs.self.lib.mkInventoryBuilder {
+      alias = "AtlasNixBuilder";
+      targetHost = "AtlasUponRaiden";
+      identityFile = "~/.ssh/nix_atlasuponraiden_id_ed25519";
+      systems = inputs.self.lib.site.atlas.supportedSystems;
+      maxJobs = inputs.self.lib.site.atlas.maxJobs;
+      speedFactor = inputs.self.lib.site.atlas.speedFactor;
+      supportedFeatures = inputs.self.lib.site.atlas.systemFeatures;
+    };
     ssh = inputs.self.lib.mkInventorySsh {
       base = inputs.self.lib.mkInventorySshBase {
-        user = "sam";
+        user = primaryInteractiveUser;
         identityFile = "~/.ssh/atlas_id_ed25519";
       };
       nix = inputs.self.lib.mkInventorySshNix {

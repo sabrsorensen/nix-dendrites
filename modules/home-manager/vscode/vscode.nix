@@ -4,547 +4,22 @@
       config,
       inventory ? { },
       lib,
-      osConfig ? null,
       pkgs,
       ...
     }:
     let
-      remotePlatformSettings = lib.mapAttrs' (
-        name: peer: lib.nameValuePair name (if peer ? platform then peer.platform else "linux")
-      ) (lib.filterAttrs (_: peer: peer ? ssh && peer.ssh ? base) inventory);
-      context7ApiKeyPath =
-        if config.sops.secrets ? context7_api_key then config.sops.secrets.context7_api_key.path else null;
-
-      githubMcpTokenPath =
-        if config.sops.secrets ? github_nixos_mcp_token then
-          config.sops.secrets.github_nixos_mcp_token.path
-        else
-          null;
-
-      patched-openssh = pkgs.openssh.overrideAttrs (prev: {
-        patches = (prev.patches or [ ]) ++ [ ./openssh-nocheckcfg.patch ];
-      });
-
-      patchDesktopItems =
-        items:
-        lib.map (
-          i:
-          if i.meta.name == "code-url-handler.desktop" then
-            i.overrideAttrs (
-              final: prev: {
-                text = lib.strings.replaceStrings [ "StartupWMClass=Code\n" ] [ "" ] prev.text;
-              }
-            )
-          else
-            i
-        ) items;
-
-      partyowl84-vscode = pkgs.vscode-partyowl84.overrideAttrs (prev: {
-        buildInputs = (prev.buildInputs or [ ]) ++ [ patched-openssh ];
-        desktopItems = patchDesktopItems prev.desktopItems;
-      });
-
-      synthwave-blues-vscode = pkgs.vscode-synthwave-blues.overrideAttrs (prev: {
-        buildInputs = (prev.buildInputs or [ ]) ++ [ patched-openssh ];
-        desktopItems = patchDesktopItems prev.desktopItems;
-      });
-
-      synthwave-84-vscode = pkgs.vscode-synthwave-84.overrideAttrs (prev: {
-        buildInputs = (prev.buildInputs or [ ]) ++ [ patched-openssh ];
-        desktopItems = patchDesktopItems prev.desktopItems;
-      });
-
-      selectedBakedTheme = "partyowl84";
-      #selectedBakedTheme = "synthwave-blues";
-      #selectedBakedTheme = "synthwave-84";
-
-      bakedVscodeByName =
-        name:
-        {
-          "partyowl84" = partyowl84-vscode;
-          "synthwave-blues" = synthwave-blues-vscode;
-          "synthwave-84" = synthwave-84-vscode;
-        }
-        .${name} or partyowl84-vscode;
-      baseVscode = bakedVscodeByName selectedBakedTheme;
-      vscodeWrapped = pkgs.symlinkJoin {
-        pname = baseVscode.pname;
-        version = baseVscode.version;
-        name = baseVscode.name;
-        paths = [ baseVscode ];
-        nativeBuildInputs = [ pkgs.makeWrapper ];
-        postBuild = ''
-          if [ -f "$out/bin/code" ]; then
-            wrapProgram "$out/bin/code" \
-              ${
-                lib.optionalString (
-                  githubMcpTokenPath != null
-                ) "--run 'export GITHUB_NIXOS_MCP_TOKEN=\"$(cat ${githubMcpTokenPath})\"'"
-              } \
-              ${lib.optionalString (
-                context7ApiKeyPath != null
-              ) "--run 'export CONTEXT7_API_KEY=\"$(cat ${context7ApiKeyPath})\"'"}
-          fi
-          if [ -f "$out/bin/code-url-handler" ]; then
-            wrapProgram "$out/bin/code-url-handler" \
-              ${
-                lib.optionalString (
-                  githubMcpTokenPath != null
-                ) "--run 'export GITHUB_NIXOS_MCP_TOKEN=\"$(cat ${githubMcpTokenPath})\"'"
-              } \
-              ${lib.optionalString (
-                context7ApiKeyPath != null
-              ) "--run 'export CONTEXT7_API_KEY=\"$(cat ${context7ApiKeyPath})\"'"}
-          fi
-        '';
+      vscodePackageConfig = import ../../../lib/vscode-package.nix {
+        inherit config lib pkgs;
       };
-
-      bakedThemeSettings =
-        {
-          "partyowl84" = {
-            "partyowl84.brightness" = 1;
-            "partyowl84.disableGlow" = false;
-            "workbench.colorTheme" = "Party Owl '84";
-            "workbench.preferredDarkColorTheme" = "Party Owl '84";
-            "editor.tokenColorCustomizations" = {
-              "[Party Owl '84]" = {
-                "textMateRules" = [
-                  {
-                    "scope" = [
-                      "entity.other.attribute-name.nix"
-                      "meta.attribute-key.nix"
-                      "variable.other.object.nix"
-                      "variable.other.object.parameter.nix"
-                      "variable.other.object.property.nix"
-                      "variable.parameter.function.nix"
-                      "variable.parameter.nix"
-                    ];
-                    "settings" = {
-                      "foreground" = "#C5E478";
-                      "fontStyle" = "italic";
-                    };
-                  }
-                  {
-                    "scope" = [
-                      "variable.interpolation"
-                      "variable.other.normal.shell.nix"
-                    ];
-                    "settings" = {
-                      "foreground" = "#ec5f67";
-                    };
-                  }
-                  {
-                    "scope" = [
-                      "variable.language.special"
-                      "variable.language.special.shell.nix"
-                      "variable.parameter.positional.shell.nix"
-                    ];
-                    "settings" = {
-                      "foreground" = "#8EACE3";
-                    };
-                  }
-                ];
-              };
-            };
-          };
-          "synthwave-blues" = {
-            "synthwave84blues.brightness" = 1;
-            "synthwave84blues.disableGlow" = false;
-            "workbench.colorTheme" = "Synthwave Blues";
-            "workbench.preferredDarkColorTheme" = "Synthwave Blues";
-            "editor.tokenColorCustomizations" = {
-              "[Synthwave Blues]" = {
-                "textMateRules" = [
-                  {
-                    "scope" = [
-                      "entity.other.attribute-name.nix"
-                      "meta.attribute-key.nix"
-                      "variable.other.object.nix"
-                      "variable.other.object.parameter.nix"
-                      "variable.other.object.property.nix"
-                      "variable.parameter.function.nix"
-                      "variable.parameter.nix"
-                    ];
-                    "settings" = {
-                      "foreground" = "#C5E478";
-                      "fontStyle" = "italic";
-                    };
-                  }
-                  {
-                    "scope" = [
-                      "variable.interpolation"
-                      "variable.other.normal.shell.nix"
-                    ];
-                    "settings" = {
-                      "foreground" = "#ec5f67";
-                    };
-                  }
-                  {
-                    "scope" = [
-                      "variable.language.special"
-                      "variable.language.special.shell.nix"
-                      "variable.parameter.positional.shell.nix"
-                    ];
-                    "settings" = {
-                      "foreground" = "#8EACE3";
-                    };
-                  }
-                ];
-              };
-            };
-          };
-          "synthwave-84" = {
-            "synthwave84.brightness" = 1;
-            "synthwave84.disableGlow" = false;
-            "workbench.colorTheme" = "SynthWave 84";
-            "workbench.preferredDarkColorTheme" = "SynthWave 84";
-            "editor.tokenColorCustomizations" = {
-              "[SynthWave 84]" = {
-                "textMateRules" = [
-                  {
-                    "scope" = [
-                      "entity.other.attribute-name.nix"
-                      "meta.attribute-key.nix"
-                      "variable.other.object.nix"
-                      "variable.other.object.parameter.nix"
-                      "variable.other.object.property.nix"
-                      "variable.parameter.function.nix"
-                      "variable.parameter.nix"
-                    ];
-                    "settings" = {
-                      "foreground" = "#C5E478";
-                      "fontStyle" = "italic";
-                    };
-                  }
-                  {
-                    "scope" = [
-                      "variable.interpolation"
-                      "variable.other.normal.shell.nix"
-                    ];
-                    "settings" = {
-                      "foreground" = "#ec5f67";
-                    };
-                  }
-                  {
-                    "scope" = [
-                      "variable.language.special"
-                      "variable.language.special.shell.nix"
-                      "variable.parameter.positional.shell.nix"
-                    ];
-                    "settings" = {
-                      "foreground" = "#8EACE3";
-                    };
-                  }
-                ];
-              };
-            };
-          };
-        }
-        .${selectedBakedTheme} or { };
-
-      remoteExts = [
-        "ms-vscode.remote-explorer"
-        "ms-vscode-remote.remote-containers"
-        "ms-vscode-remote.remote-ssh"
-        "ms-vscode-remote.remote-ssh-edit"
-        "ms-vscode-remote.remote-wsl"
-      ];
-
-      uiExts = [
-        "esbenp.prettier-vscode"
-        "evondev.indent-rainbow-palettes"
-        "oderwat.indent-rainbow"
-        "rimuruchan.vscode-fix-checksums-next"
-        "sabrsorensen.party-owl-84"
-        "sabrsorensen.synthwave-blues"
-        "vscodevim.vim"
-      ];
-
-      gitHubExts = [
-        "github.vscode-github-actions"
-      ];
-
-      defaultExts = [
-        "docker.docker"
-        "github.vscode-github-actions"
-        "humao.rest-client"
-        "ms-azuretools.vscode-containers"
-        "redhat.vscode-yaml"
-        "tomoki1207.pdf"
-      ]
-      ++ uiExts
-      ++ nixExts
-      ++ remoteExts;
-
-      higiExts = [
-        "openai.chatgpt"
-        "snyk-security.snyk-vulnerability-scanner"
-      ]
-      ++ pulumiExts;
-
-      nixExts = [
-        "jeff-hykin.better-nix-syntax"
-        "LiemLB.nix-flakes"
-      ];
-
-      pulumiExts = [
-        "pulumi.pulumi-vscode-tools"
-      ];
-
-      pythonExts = [
-        "ms-python.debugpy"
-        "ms-python.python"
-        "ms-python.vscode-pylance"
-      ];
-
-      cSharpExts = with pkgs.vscode-extensions; [
-        ms-dotnettools.csharp
-        ms-dotnettools.csdevkit
-        ms-dotnettools.vscode-dotnet-runtime
-        patcx.vscode-nuget-gallery
-      ];
-
-      sqlExts = [
-        "ms-mssql.mssql"
-        "ms-ossdata.vscode-pgsql"
-      ];
-
-      defaultKeyBindings = [
-        {
-          "key" = "shift+[ArrowRight]";
-          "command" = "workbench.action.nextEditor";
-        }
-        {
-          "key" = "shift+[ArrowLeft]";
-          "command" = "workbench.action.previousEditor";
-        }
-      ];
-
-      defaultProfileOnlySettings = {
-        "extensions.supportUntrustedWorkspaces" = {
-          "sabrsorensen.party-owl-84" = {
-            "supported" = true;
-          };
-          "vscodevim.vim" = {
-            "supported" = true;
-          };
-        };
-        "remote.SSH.experimental.chat" = false;
-        "remote.SSH.remotePlatform" = remotePlatformSettings;
-        "remote.SSH.showLoginTerminal" = false;
-        "remote.SSH.useLocalServer" = true;
-        "settingsSync.keybindingsPerPlatform" = false;
-        "settingsSync.ignoredSettings" = [ "*" ];
-        "telemetry.telemetryLevel" = "off";
-        "vim.insertModeKeyBindings" = [
-          {
-            "before" = [
-              "j"
-              "j"
-            ];
-            "after" = [ "<Esc>" ];
-          }
-        ];
-        "vim.normalModeKeyBindings" = [
-          {
-            "before" = [ "0" ];
-            "after" = [ "^" ];
-          }
-        ];
-        "vim.visualModeKeyBindingsNonRecursive" = [
-          {
-            "before" = [ ">" ];
-            "commands" = [ "editor.action.indentLines" ];
-          }
-          {
-            "before" = [ "<" ];
-            "commands" = [ "editor.action.outdentLines" ];
-          }
-        ];
-        "window.newWindowDimensions" = "maximized";
-        "window.newWindowProfile" = "Default";
-        "window.restoreWindows" = "none";
-      };
-
-      copilotSettings = {
-        "chat.agent.enabled" = true;
-        "chat.commandCenter.enabled" = true;
-        "chat.mcp.gallery.enabled" = true;
-        "chat.viewSessions.orientation" = "stacked";
-      };
-
-      defaultUserSettings = {
-        "[dockercompose]" = {
-          "editor.autoIndent" = "advanced";
-          "editor.defaultFormatter" = "redhat.vscode-yaml";
-          "editor.insertSpaces" = true;
-          "editor.quickSuggestions" = {
-            "comments" = false;
-            "other" = true;
-            "strings" = true;
-          };
-          "editor.tabSize" = 2;
-        };
-        "[github-actions-workflow]" = {
-          "editor.defaultFormatter" = "redhat.vscode-yaml";
-        };
-        "[json]" = {
-          "editor.defaultFormatter" = "esbenp.prettier-vscode";
-        };
-        "[jsonc]" = {
-          "editor.defaultFormatter" = "vscode.json-language-features";
-        };
-        "accessibility.signals.terminalBell" = {
-          "sound" = "on";
-        };
-        "debug.toolBarLocation" = "commandCenter";
-        "diffEditor.ignoreTrimWhitespace" = false;
-        "docker.extension.enableComposeLanguageServer" = true;
-        "editor.acceptSuggestionOnCommitCharacter" = false;
-        "editor.acceptSuggestionOnEnter" = "smart";
-        "editor.bracketPairColorization.enabled" = true;
-        "editor.cursorSurroundingLines" = 10;
-        "editor.fontFamily" = "CaskaydiaCove Nerd Font Mono";
-        "editor.fontLigatures" = true;
-        "editor.formatOnSave" = true;
-        "editor.guides.bracketPairs" = "active";
-        "editor.guides.bracketPairsHorizontal" = true;
-        "editor.parameterHints.cycle" = true;
-        "editor.quickSuggestions" = {
-          "other" = "inline";
-          "comments" = false;
-          "strings" = false;
-        };
-        "editor.renderControlCharacters" = true;
-        "editor.renderWhitespace" = "boundary";
-        "editor.suggest.localityBonus" = true;
-        "editor.suggest.shareSuggestSelections" = true;
-        "editor.tabCompletion" = "on";
-        "explorer.confirmDelete" = false;
-        "explorer.openEditors.visible" = 10;
-        "extensions.closeExtensionDetailsOnViewChange" = true;
-        "files.exclude" = {
-          "**/.vs" = true;
-          "**/TestResults" = true;
-          "**/bin" = true;
-          "**/obj" = true;
-        };
-        "files.trimFinalNewlines" = true;
-        "files.trimTrailingWhitespace" = true;
-        "git.autofetch" = true;
-        "git.blame.editorDecoration.enabled" = true;
-        "git.confirmSync" = false;
-        "git.enableCommitSigning" = true;
-        "git.fetchOnPull" = true;
-        "python.analysis.autoImportCompletions" = true;
-        "python.analysis.autoSearchPaths" = true;
-        "python.analysis.completeFunctionParens" = true;
-        "python.analysis.diagnosticSeverityOverrides" = {
-          "reportMissingParameterType" = "warning";
-          "reportUnknownArgumentType" = "warning";
-          "reportUnknownMemberType" = "warning";
-          "reportUnknownParameterType" = "warning";
-          "reportUnknownVariableType" = "warning";
-        };
-        "python.analysis.indexing" = true;
-        "python.analysis.typeCheckingMode" = "strict";
-        "python.analysis.useLibraryCodeForTypes" = true;
-        "python.languageServer" = "Pylance";
-        "redhat.telemetry.enabled" = false;
-        "remote.env" = {
-          "NODE_EXTRA_CA_CERTS" = "/etc/ssl/certs/ca-bundle.crt";
-        };
-        "remote.extensionKind" = {
-          "oderwat.indent-rainbow" = [ "ui" ];
-        };
-        "search.showLineNumbers" = true;
-        "search.smartCase" = true;
-        "terminal.integrated.copyOnSelection" = true;
-        "terminal.integrated.cursorBlinking" = true;
-        "terminal.integrated.defaultProfile.linux" = "fish";
-        "terminal.integrated.enableVisualBell" = true;
-        "terminal.integrated.fontFamily" = "CaskaydiaCove Nerd Font Mono";
-        "terminal.integrated.fontLigatures.enabled" = true;
-        "vim.autoindent" = true;
-        "vim.foldfix" = true;
-        "vim.handleKeys" = {
-          "<C-a>" = false;
-          "<C-b>" = false;
-          "<C-c>" = false;
-          "<C-e>" = false;
-          "<C-f>" = false;
-          "<C-j>" = false;
-          "<C-k>" = false;
-          "<C-p>" = false;
-          "<C-v>" = true;
-        };
-        "vim.highlightedyank.enable" = true;
-        "vim.hlsearch" = true;
-        "vim.ignorecase" = true;
-        "vim.incsearch" = true;
-        "vim.smartcase" = true;
-        "vim.sneak" = true;
-        "vim.surround" = true;
-        "vim.useCtrlKeys" = true;
-        "vim.useSystemClipboard" = false;
-        "window.commandCenter" = true;
-        "workbench.editor.highlightModifiedTabs" = true;
-        "workbench.editor.revealIfOpen" = true;
-      }
-      // bakedThemeSettings
-      // copilotSettings;
-
-      dotnetSettings = {
-        "dotnetAcquisitionExtension.sharedExistingDotnetPath" = "/run/current-system/sw/bin/dotnet";
-        "dotnetAcquisitionExtension.allowInvalidPaths" = true;
-      };
-
-      higiSettings = {
-        "extensions.verifySignature" = false; # NixOS WSL remote server signing issue
-        "snyk.advanced.cliPath" = "C:\\Users\\ssorensen\\AppData\\Local\\snyk\\vscode-cli\\snyk-win.exe";
-        "snyk.securityAtInception.autoConfigureSnykMcpServer" = true;
-        "snyk.securityAtInception.executionFrequency" = "On Code Generation";
-      }
-      // lib.optionalAttrs config.my.vscode.higi.runCodexInWsl {
-        "chatgpt.runCodexInWindowsSubsystemForLinux" = true;
-      };
-
-      nixSettings = {
-        "[nix]" = {
-          "editor.tabSize" = 2;
-          "editor.indentSize" = "tabSize";
-        };
-      };
-
-      pythonSettings = {
-        "[python]" = {
-          "editor.formatOnType" = true;
-        };
-      };
-
-      windowsTerminalSettings = {
-        "terminal.integrated.defaultProfile.windows" = "NixOS (WSL)";
-        "terminal.integrated.profiles.windows" = {
-          "PowerShell" = {
-            "source" = "PowerShell";
-            "icon" = "terminal-powershell";
-          };
-          "Command Prompt" = {
-            "path" = [
-              "\${env =windir}\\Sysnative\\cmd.exe"
-              "\${env =windir}\\System32\\cmd.exe"
-            ];
-            "args" = [ ];
-            "icon" = "terminal-cmd";
-          };
-          "NixOS (WSL)" = {
-            "path" = "C =\\windows\\System32\\wsl.exe";
-            "args" = [
-              "-d"
-              "NixOS"
-            ];
-          };
-        };
+      vscodeData = import ../../../lib/vscode-config-data.nix {
+        inherit
+          config
+          inventory
+          lib
+          pkgs
+          ;
+        selectedBakedTheme = vscodePackageConfig.selectedBakedTheme;
+        vscodePackage = vscodePackageConfig.package;
       };
     in
     {
@@ -588,13 +63,13 @@
         #mutableExtsDir = true; # mutually exclusive with profiles
         #package = lib.mkDefault (pkgs.vscode.fhsWithPackages (_: [ patched-openssh ]);
         # To use a different baked version, set:
-        package = vscodeWrapped;
+        package = vscodePackageConfig.package;
         #package = bakedVscodeByName "synthwave-blues";
         profiles = {
           default = {
             enableExtensionUpdateCheck = true;
             enableUpdateCheck = true;
-            keybindings = defaultKeyBindings ++ [
+            keybindings = vscodeData.defaultKeyBindings ++ [
               #{
               #  "key" = "ctrl+alt+f";
               #  "command" = "editor.action.insertSnippet";
@@ -625,12 +100,12 @@
               #};
             };
             userSettings =
-              defaultProfileOnlySettings
-              // defaultUserSettings
-              // lib.optionalAttrs config.my.vscode.windowsInterop.enable windowsTerminalSettings;
-            extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
-              defaultExts
-              ++ pythonExts
+              vscodeData.defaultProfileOnlySettings
+              // vscodeData.defaultUserSettings
+              // lib.optionalAttrs config.my.vscode.windowsInterop.enable vscodeData.windowsTerminalSettings;
+            extensions = vscodeData.mkExtensions (
+              vscodeData.defaultExts
+              ++ vscodeData.pythonExts
               ++ [
                 "bmalehorn.vscode-fish"
               ]
@@ -651,32 +126,32 @@
           Higi_LLP =
             if config.my.vscode.profiles.higiLlp then
               {
-                extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
-                  higiExts
-                  ++ pythonExts
-                  ++ sqlExts
-                  ++ gitHubExts
-                  ++ defaultExts
+                extensions = vscodeData.mkExtensions (
+                  vscodeData.higiExts
+                  ++ vscodeData.pythonExts
+                  ++ vscodeData.sqlExts
+                  ++ vscodeData.gitHubExts
+                  ++ vscodeData.defaultExts
                   ++ [
                   ]
                 );
-                keybindings = defaultKeyBindings ++ [ ];
+                keybindings = vscodeData.defaultKeyBindings ++ [ ];
                 languageSnippets = { };
-                userSettings = defaultUserSettings // higiSettings // { };
+                userSettings = vscodeData.defaultUserSettings // vscodeData.higiSettings // { };
                 enableMcpIntegration = true;
               }
             else
               { };
           Nix = {
-            extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
-              defaultExts
-              ++ pythonExts
+            extensions = vscodeData.mkExtensions (
+              vscodeData.defaultExts
+              ++ vscodeData.pythonExts
               ++ [
                 "bmalehorn.vscode-fish"
                 "signageos.signageos-vscode-sops"
               ]
             );
-            keybindings = defaultKeyBindings ++ [ ];
+            keybindings = vscodeData.defaultKeyBindings ++ [ ];
             languageSnippets = {
               nix = {
                 buildFirefoxXpiAddon = {
@@ -720,7 +195,8 @@
                 };
               };
             };
-            userSettings = nixSettings // pythonSettings // defaultUserSettings;
+            userSettings =
+              vscodeData.nixSettings // vscodeData.pythonSettings // vscodeData.defaultUserSettings;
             enableMcpIntegration = true;
           };
 
@@ -758,15 +234,15 @@
           Python =
             if config.my.vscode.profiles.python then
               {
-                extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
-                  defaultExts
-                  ++ pythonExts
+                extensions = vscodeData.mkExtensions (
+                  vscodeData.defaultExts
+                  ++ vscodeData.pythonExts
                   ++ [
                   ]
                 );
-                keybindings = defaultKeyBindings ++ [ ];
+                keybindings = vscodeData.defaultKeyBindings ++ [ ];
                 languageSnippets = { };
-                userSettings = pythonSettings // defaultUserSettings;
+                userSettings = vscodeData.pythonSettings // vscodeData.defaultUserSettings;
                 enableMcpIntegration = true;
               }
             else
@@ -787,17 +263,17 @@
           STM32 =
             if config.my.vscode.profiles.stm32 then
               {
-                extensions = pkgs.nix4vscode.forVscodeVersion vscodeWrapped.version (
-                  defaultExts
+                extensions = vscodeData.mkExtensions (
+                  vscodeData.defaultExts
                   ++ [
                     "ms-vscode.cpptools"
                     "ms-vscode.cpptools-extension-pack"
                     "platformio.platformio-ide"
                   ]
                 );
-                keybindings = defaultKeyBindings ++ [ ];
+                keybindings = vscodeData.defaultKeyBindings ++ [ ];
                 languageSnippets = { };
-                userSettings = defaultUserSettings;
+                userSettings = vscodeData.defaultUserSettings;
               }
             else
               { };

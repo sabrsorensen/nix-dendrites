@@ -13,28 +13,50 @@
     let
       system = pkgs.stdenv.hostPlatform.system;
       codexPackage = inputs.codex-nix.packages.${system}.default;
+      secretWrapArgsFromSpecs = import ../../../lib/secret-wrap-args.nix { inherit lib; };
       optionalSecretPath =
         name:
         if (config ? sops) && builtins.hasAttr name config.sops.secrets then
           config.sops.secrets.${name}.path
         else
           null;
-      wrapSecretEnv =
-        envName: secretPath:
-        lib.optionalString (secretPath != null) "--run 'export ${envName}=\"$(cat ${secretPath})\"'";
+      codexSecretWrapArgs = secretWrapArgsFromSpecs [
+        {
+          envName = "GITHUB_NIXOS_MCP_TOKEN";
+          secretPath = optionalSecretPath "github_nixos_mcp_token";
+        }
+        {
+          envName = "HIGISH_GITHUB_NIXOS_MCP_TOKEN";
+          secretPath = optionalSecretPath "higish_github_nixos_mcp_token";
+        }
+        {
+          envName = "PULUMI_NIXOS_MCP_TOKEN";
+          secretPath = optionalSecretPath "pulumi_nixos_mcp_token";
+        }
+        {
+          envName = "CONTEXT7_API_KEY";
+          secretPath = optionalSecretPath "context7_api_key";
+        }
+        {
+          envName = "POSTMAN_API_KEY";
+          secretPath = optionalSecretPath "postman_nixos_mcp_token";
+        }
+        {
+          envName = "SNYK_TOKEN";
+          secretPath = optionalSecretPath "snyk_nixos_mcp_token";
+        }
+      ];
+      renderedCodexSecretWrapArgs = lib.optionalString (codexSecretWrapArgs != [ ]) ''
+                \
+        ${lib.concatStringsSep " \\\n            " codexSecretWrapArgs}
+      '';
       codexWrapped = pkgs.symlinkJoin {
         name = "codex-wrapped";
         paths = [ codexPackage ];
         version = codexPackage.version;
         nativeBuildInputs = [ pkgs.makeWrapper ];
         postBuild = ''
-          wrapProgram "$out/bin/codex" \
-            ${wrapSecretEnv "GITHUB_NIXOS_MCP_TOKEN" (optionalSecretPath "github_nixos_mcp_token")} \
-            ${wrapSecretEnv "HIGISH_GITHUB_NIXOS_MCP_TOKEN" (optionalSecretPath "higish_github_nixos_mcp_token")} \
-            ${wrapSecretEnv "PULUMI_NIXOS_MCP_TOKEN" (optionalSecretPath "pulumi_nixos_mcp_token")} \
-            ${wrapSecretEnv "CONTEXT7_API_KEY" (optionalSecretPath "context7_api_key")} \
-            ${wrapSecretEnv "POSTMAN_API_KEY" (optionalSecretPath "postman_nixos_mcp_token")} \
-            ${wrapSecretEnv "SNYK_TOKEN" (optionalSecretPath "snyk_nixos_mcp_token")}
+          wrapProgram "$out/bin/codex"${renderedCodexSecretWrapArgs}
         '';
       };
     in

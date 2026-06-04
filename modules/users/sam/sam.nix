@@ -7,16 +7,6 @@
 
 let
   username = "sam";
-  userImports = with inputs.self.modules.homeManager; [
-    sam-git
-    sam-secrets
-  ];
-  homeImports = [ inputs.self.modules.homeManager.home ];
-  graphicalImports = [ inputs.self.modules.homeManager."graphical-home" ];
-  privateImports = [
-    "${inputs.nix-secrets}/modules/sam-syncthing-universal.nix"
-    "${inputs.nix-secrets}/modules/sam-secrets-private.nix"
-  ];
 in
 {
   flake.modules = lib.mkMerge [
@@ -25,20 +15,11 @@ in
       nixos."${username}" =
         { ... }:
         {
-          imports =
-            (with inputs.self.modules.nixos; [
-              virtualisation
-            ])
-            ++ [
-              "${inputs.nix-secrets}/modules/system-secrets-private.nix"
-            ];
-
-          users.users."${username}" = {
-            description =
-              lib.strings.toUpper (lib.strings.substring 0 1 username) + lib.strings.substring 1 (-1) username;
-            group = username;
-          };
-          programs.fish.enable = true;
+          imports = with inputs.self.modules.nixos; [
+            sam-system-base
+            sam-system-private
+            virtualisation
+          ];
         };
     }
 
@@ -49,8 +30,9 @@ in
           ...
         }:
         {
-          imports = [
-            "${inputs.nix-secrets}/modules/system-secrets-private.nix"
+          imports = with inputs.self.modules.nixos; [
+            sam-system-base
+            sam-system-private
           ];
 
           users.groups."${username}" = { };
@@ -80,9 +62,11 @@ in
       homeManager."${username}" =
         { ... }:
         {
-          imports = userImports ++ graphicalImports ++ privateImports;
-          home.username = lib.mkDefault "sam";
-          home.homeDirectory = lib.mkDefault "/home/sam";
+          imports = with inputs.self.modules.homeManager; [
+            sam-home-base
+            sam-home-graphical
+            sam-home-private
+          ];
         };
     }
 
@@ -90,9 +74,11 @@ in
       homeManager.samCli =
         { ... }:
         {
-          imports = userImports ++ homeImports ++ privateImports;
-          home.username = lib.mkDefault "sam";
-          home.homeDirectory = lib.mkDefault "/home/sam";
+          imports = with inputs.self.modules.homeManager; [
+            home
+            sam-home-base
+            sam-home-private
+          ];
         };
     }
   ];

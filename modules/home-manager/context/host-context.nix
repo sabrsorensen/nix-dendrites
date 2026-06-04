@@ -7,5 +7,6 @@ in
     nameDefault = "standalone";
     nameDescription = "Canonical host name for shared Home Manager behavior.";
     domainDescription = "Local domain associated with this host context.";
+    includeDeployLocalFlakePath = true;
   };
 }

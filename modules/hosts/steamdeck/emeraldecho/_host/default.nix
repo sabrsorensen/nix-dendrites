@@ -8,6 +8,7 @@ in
 {
   inherit root;
   context = {
+    primaryInteractiveUser = "sam";
     roles.steamdeck = true;
     deploy = {
       canDeployRemotely = false;

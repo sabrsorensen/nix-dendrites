@@ -23,14 +23,13 @@
           null
         else
           {
-            host = name;
-            hostname = mkHostname name;
-            port = peer.ssh.base.port or 22;
-            user = peer.ssh.base.user;
-            identityFile = peer.ssh.base.identityFile;
+            HostName = mkHostname name;
+            Port = peer.ssh.base.port or 22;
+            User = peer.ssh.base.user;
+            IdentityFile = peer.ssh.base.identityFile;
           }
           // lib.optionalAttrs (peer.ssh.base.identitiesOnly or false) {
-            identitiesOnly = true;
+            IdentitiesOnly = true;
           };
 
       mkNixBlock =
@@ -41,18 +40,31 @@
           null
         else
           {
-            host = "nix-${lib.toLower name}";
-            hostname = mkHostname name;
-            port = peer.ssh.nix.port or peer.ssh.base.port or 22;
-            user = peer.ssh.nix.user or "nix-remote";
-            identityFile = peer.ssh.nix.identityFile;
-            identitiesOnly = true;
+            HostName = mkHostname name;
+            Port = peer.ssh.nix.port or peer.ssh.base.port or 22;
+            User = peer.ssh.nix.user or "nix-remote";
+            IdentityFile = peer.ssh.nix.identityFile;
+            IdentitiesOnly = true;
+          };
+
+      mkBuilderBlock =
+        peer:
+        if !(peer ? builder) then
+          null
+        else
+          {
+            HostName = peer.builder.targetHost;
+            User = peer.builder.user;
+            IdentityFile = peer.builder.identityFile;
           };
 
       peerBlocks = lib.mapAttrs' (name: peer: lib.nameValuePair name (mkBaseBlock name peer)) inventory;
       nixBlocks = lib.mapAttrs' (
         name: peer: lib.nameValuePair "nix-${lib.toLower name}" (mkNixBlock name peer)
       ) inventory;
+      builderBlocks = lib.mapAttrs' (
+        _name: peer: lib.nameValuePair peer.builder.alias (mkBuilderBlock peer)
+      ) (lib.filterAttrs (_name: peer: peer ? builder) inventory);
 
     in
     {
@@ -62,29 +74,29 @@
         settings = lib.filterAttrs (_: v: v != null) (
           {
             "*" = {
-              addKeysToAgent = "yes";
-              forwardAgent = true;
-              compression = true;
-              serverAliveInterval = 0;
-              serverAliveCountMax = 3;
-              hashKnownHosts = false;
-              userKnownHostsFile = "~/.ssh/known_hosts";
+              AddKeysToAgent = "yes";
+              ForwardAgent = true;
+              Compression = true;
+              ServerAliveInterval = 0;
+              ServerAliveCountMax = 3;
+              HashKnownHosts = false;
+              UserKnownHostsFile = "~/.ssh/known_hosts";
             };
 
             GitHub =
               if hostCfg.ssh.enableNixBlocks then
                 {
-                  host = "github.com";
-                  hostname = "github.com";
-                  user = "git";
-                  identityFile = "~/.ssh/github_id_ed25519";
-                  identitiesOnly = true;
+                  HostName = "github.com";
+                  User = "git";
+                  IdentityFile = "~/.ssh/github_id_ed25519";
+                  IdentitiesOnly = true;
                 }
               else
                 null;
           }
           // peerBlocks
           // nixBlocks
+          // builderBlocks
         );
       };
     };

@@ -14,6 +14,10 @@
       url = "path:./steamdeck-packages";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    demlo = {
+      url = "github:sabrsorensen/demlo/v3.8.1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
     disko = {
       url = "github:nix-community/disko";

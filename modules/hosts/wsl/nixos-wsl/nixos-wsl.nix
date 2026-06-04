@@ -13,6 +13,7 @@
     ];
 
     my.host = {
+      primaryInteractiveUser = lib.mkDefault "sam";
       roles = {
         workstation = true;
         wsl = true;
