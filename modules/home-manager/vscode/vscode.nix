@@ -180,17 +180,15 @@
                 };
               };
               json = {
-                AdGuardHomeStaticLease = {
-                  prefix = [ "lease" ];
-                  description = "AdGuard Home static lease";
+                DhcpReservation = {
+                  prefix = [ "reservation" ];
+                  description = "Kea/CoreDNS DHCP reservation";
                   body = [
                     "{"
-                    "  \"expires\": \"\","
                     "  \"ip\": \"192.168.1.$0\","
                     "  \"hostname\": \"$2\","
-                    "  \"mac\": \"$1\","
-                    "  \"static\": true"
-                    "},"
+                    "  \"mac\": \"$1\""
+                    "}"
                   ];
                 };
               };

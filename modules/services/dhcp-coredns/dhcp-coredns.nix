@@ -141,12 +141,12 @@
             ${pkgs.ssh-to-age}/bin/ssh-to-age -private-key < /etc/ssh/ssh_host_ed25519_key > "$TEMP_AGE_KEY"
 
             if ! SOPS_AGE_KEY_FILE="$TEMP_AGE_KEY" ${pkgs.sops}/bin/sops --decrypt "${inputs.nix-secrets}/leases.json" > "${staticLeasesPath}" 2>/dev/null; then
-              echo '{"version":1,"leases":[]}' > "${staticLeasesPath}"
+              echo '{"version":1,"reservations":[]}' > "${staticLeasesPath}"
             fi
             rm -f "$TEMP_AGE_KEY"
 
             if [ ! -s "${staticLeasesPath}" ]; then
-              echo '{"version":1,"leases":[]}' > "${staticLeasesPath}"
+              echo '{"version":1,"reservations":[]}' > "${staticLeasesPath}"
             fi
 
             if [ ! -f "${dynamicLeasePath}" ]; then
@@ -178,9 +178,12 @@
                         { "name": "domain-name-servers", "data": "'"${networkConfig.dns_servers}"'" },
                         { "name": "domain-name", "data": "'"${localDomain}"'" }
                       ],
-                      "reservations": ((.leases // [])
-                        | map(select(.static == true and .ip and .mac)
+                      "reservations": (((.reservations // [])
+                        | map(select(.ip and .mac)
                           | { "hw-address": (.mac|ascii_downcase), "ip-address": .ip }))
+                        + ((.leases // [])
+                          | map(select(.static == true and .ip and .mac)
+                            | { "hw-address": (.mac|ascii_downcase), "ip-address": .ip })))
                     }
                   ],
                   "valid-lifetime": 3600,
