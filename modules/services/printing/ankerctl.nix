@@ -27,8 +27,7 @@
         rev = "ed176a303259f160cd2c13c60a427be1ce2c205d";
         hash = "sha256-n7q48rIrpGjX/0ro+ej4U7RkLprqzhVUDeQaTp1JILg=";
       };
-      hasAnkerctlEnv =
-        builtins.pathExists "${inputs.nix-secrets}/env_files/ankerctl.env";
+      hasAnkerctlEnv = builtins.pathExists "${inputs.nix-secrets}/env_files/ankerctl.env";
       python = pkgs.python3.override {
         packageOverrides = final: prev: {
           tinyec = final.buildPythonPackage rec {

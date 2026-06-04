@@ -1,11 +1,11 @@
 {
   flake.modules.nixos.ssh =
-    { ... }:
+    { lib, ... }:
     {
       services.openssh = {
         enable = true;
         openFirewall = true;
-        allowSFTP = false;
+        allowSFTP = lib.mkDefault false;
         settings = {
           PasswordAuthentication = true;
           PermitRootLogin = "no";

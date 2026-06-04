@@ -59,6 +59,8 @@ in
     my.localDns.records = [
       { hostname = "atlas"; }
     ];
+
+    services.openssh.allowSFTP = true;
   };
 
   flake.modules.homeManager.AtlasUponRaiden = import ./_atlas/home-manager.nix { inherit inputs; };

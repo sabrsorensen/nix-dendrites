@@ -116,7 +116,7 @@
     services.openssh = {
       enable = true;
       settings = {
-        PasswordAuthentication = false;
+        PasswordAuthentication = lib.mkImageMediaOverride false;
         KbdInteractiveAuthentication = false;
         PermitRootLogin = "no";
       };
