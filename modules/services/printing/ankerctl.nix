@@ -29,17 +29,21 @@
       };
       hasAnkerctlEnv =
         builtins.pathExists "${inputs.nix-secrets}/env_files/ankerctl.env";
-      tinyec = pkgs.python3Packages.buildPythonPackage rec {
-        pname = "tinyec";
-        version = "0.4.0";
-        pyproject = false;
-        src = pkgs.python3Packages.fetchPypi {
-          inherit pname version;
-          hash = "sha256-sDZKqzua9jK2TyTq+uDI5WzGS0hFZIdSYQ9I8qsFR6M=";
+      python = pkgs.python3.override {
+        packageOverrides = final: prev: {
+          tinyec = final.buildPythonPackage rec {
+            pname = "tinyec";
+            version = "0.4.0";
+            format = "setuptools";
+            src = final.fetchPypi {
+              inherit pname version;
+              hash = "sha256-sDZKqzua9jK2TyTq+uDI5WzGS0hFZIdSYQ9I8qsFR6M=";
+            };
+            pythonImportsCheck = [ "tinyec" ];
+          };
         };
-        pythonImportsCheck = [ "tinyec" ];
       };
-      pythonEnv = pkgs.python3.withPackages (
+      pythonEnv = python.withPackages (
         ps: with ps; [
           click
           crcmod
@@ -51,9 +55,8 @@
           requests
           rich
           tqdm
-          user-agents
-        ] ++ [
           tinyec
+          user-agents
         ]
       );
       appTree = pkgs.stdenvNoCC.mkDerivation {
