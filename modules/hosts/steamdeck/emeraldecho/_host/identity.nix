@@ -31,6 +31,7 @@
     nixRemote = {
       authorizedKeys = [
         "${inputs.nix-secrets}/ssh-keys/atlas_emeraldecho_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/kamino_emeraldecho_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/zaphod_emeraldecho_nix.pub"
       ];
     };
