@@ -98,8 +98,8 @@
             ssl \
             static \
             web \
-            ${entrypoint} \
             "$out/app/"
+          cp ${entrypoint} "$out/app/ankerctl-entrypoint.sh"
         '';
       };
       image = pkgs.dockerTools.buildLayeredImage {
