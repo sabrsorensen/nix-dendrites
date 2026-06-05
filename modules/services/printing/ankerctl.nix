@@ -17,9 +17,9 @@
       port = 4470;
       localAddr = "${host}:${toString port}";
       subdomain = serviceName;
-      dataDir = "/var/lib/ankerctl/config";
-      capturesDir = "/var/lib/ankerctl/captures";
-      logsDir = "/var/lib/ankerctl/logs";
+      dataDir = "/opt/ankerctl/config";
+      capturesDir = "/opt/ankerctl/captures";
+      logsDir = "/opt/ankerctl/logs";
       ankerctlEnvSecret = "ankerctl-env";
       src = pkgs.fetchFromGitHub {
         owner = "sabrsorensen";
@@ -109,6 +109,9 @@
 
       my.caddy.virtualHosts."${subdomain}.{$DOMAIN}".routes = [
         ''
+          basic_auth /* {
+              sorenssa {$ANKERCTL_PASSWORD}
+          }
           reverse_proxy /* ${localAddr}
         ''
       ];
