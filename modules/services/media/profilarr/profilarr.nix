@@ -12,12 +12,16 @@
       localAddr = "127.0.0.1:6868";
       mediaCfg = config.my.media;
       serviceName = "profilarr";
-      containerIdentity = lib.attrByPath [
-        serviceName
-      ] {
-        uid = 2105;
-        gid = 2096;
-      } mediaCfg.containerIdentities;
+      containerIdentity =
+        lib.attrByPath
+          [
+            serviceName
+          ]
+          {
+            uid = 2105;
+            gid = 2096;
+          }
+          mediaCfg.containerIdentities;
     in
     {
       users.users.${serviceName} = {

@@ -11,12 +11,16 @@
       localAddr = "127.0.0.1:81";
       mediaCfg = config.my.media;
       serviceName = "organizr";
-      containerIdentity = lib.attrByPath [
-        serviceName
-      ] {
-        uid = 2103;
-        gid = 2096;
-      } mediaCfg.containerIdentities;
+      containerIdentity =
+        lib.attrByPath
+          [
+            serviceName
+          ]
+          {
+            uid = 2103;
+            gid = 2096;
+          }
+          mediaCfg.containerIdentities;
     in
     {
       users.users.${serviceName} = {

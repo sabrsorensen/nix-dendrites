@@ -46,7 +46,6 @@
           APPRISE_ADMIN = "y";
           APPRISE_STATEFUL_MODE = "simple";
           APPRISE_WORKER_COUNT = "1";
-          APPRISE_BASE_URL = "/apprise";
           PUID = lib.toString config.users.users.${serviceName}.uid;
           PGID = lib.toString config.users.groups.${serviceName}.gid;
           TZ = config.time.timeZone;

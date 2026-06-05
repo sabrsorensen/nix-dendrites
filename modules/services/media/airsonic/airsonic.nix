@@ -12,12 +12,16 @@
       localAddr = "127.0.0.1:4040";
       mediaCfg = config.my.media;
       serviceName = "airsonic";
-      containerIdentity = lib.attrByPath [
-        serviceName
-      ] {
-        uid = 2101;
-        gid = 2096;
-      } mediaCfg.containerIdentities;
+      containerIdentity =
+        lib.attrByPath
+          [
+            serviceName
+          ]
+          {
+            uid = 2101;
+            gid = 2096;
+          }
+          mediaCfg.containerIdentities;
     in
     {
       users.users.${serviceName} = {
