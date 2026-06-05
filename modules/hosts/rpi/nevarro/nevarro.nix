@@ -24,14 +24,14 @@ in
         #netbird-server
       ];
       samAuthorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas_nevarro.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino_nevarro.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphod_nevarro.pub"
+        "${inputs.nix-secrets}/ssh-keys/atlas/nevarro.pub"
+        "${inputs.nix-secrets}/ssh-keys/kamino/nevarro.pub"
+        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/nevarro.pub"
       ];
       nixRemoteAuthorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas_nevarro_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino_nevarro_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphod_nevarro_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/atlas/nevarro_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/kamino/nevarro_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/nevarro_nix.pub"
       ];
     })
     {

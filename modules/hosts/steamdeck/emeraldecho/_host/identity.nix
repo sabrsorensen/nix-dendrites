@@ -17,10 +17,9 @@
       ];
 
       authorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas_emeraldecho.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino_emeraldecho.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphod_emeraldecho.pub"
-        "${inputs.nix-secrets}/ssh-keys/wsl_emeraldecho.pub"
+        "${inputs.nix-secrets}/ssh-keys/atlas/emeraldecho.pub"
+        "${inputs.nix-secrets}/ssh-keys/kamino/emeraldecho.pub"
+        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/emeraldecho.pub"
       ];
     };
 
@@ -30,9 +29,9 @@
 
     nixRemote = {
       authorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas_emeraldecho_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino_emeraldecho_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphod_emeraldecho_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/atlas/emeraldecho_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/kamino/emeraldecho_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/emeraldecho_nix.pub"
       ];
     };
   };

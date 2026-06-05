@@ -23,14 +23,14 @@ in
         dhcp-coredns
       ];
       samAuthorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas_naboo.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino_naboo.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphod_naboo.pub"
+        "${inputs.nix-secrets}/ssh-keys/atlas/naboo.pub"
+        "${inputs.nix-secrets}/ssh-keys/kamino/naboo.pub"
+        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/naboo.pub"
       ];
       nixRemoteAuthorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas_naboo_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino_naboo_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphod_naboo_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/atlas/naboo_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/kamino/naboo_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/naboo_nix.pub"
       ];
     })
     {

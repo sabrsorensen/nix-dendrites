@@ -78,7 +78,7 @@ in
     ssh = inputs.self.lib.mkInventorySsh {
       base = inputs.self.lib.mkInventorySshBase {
         user = primaryInteractiveUser;
-        identityFile = "~/.ssh/atlas_id_ed25519";
+        identityFile = "~/.ssh/atlasuponraiden_id_ed25519";
       };
       nix = inputs.self.lib.mkInventorySshNix {
         identityFile = "~/.ssh/nix_atlasuponraiden_id_ed25519";
