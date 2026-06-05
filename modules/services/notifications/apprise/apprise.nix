@@ -40,13 +40,13 @@
       ];
 
       virtualisation.oci-containers.containers.${serviceName} = {
-        image = "docker.io/caronc/apprise-api:1.3.3";
+        image = "ghcr.io/caronc/apprise:1.5.0";
         autoStart = true;
         environment = {
           APPRISE_ADMIN = "y";
-          APPRISE_DEFAULT_CONFIG_ID = "ankerctl";
           APPRISE_STATEFUL_MODE = "simple";
           APPRISE_WORKER_COUNT = "1";
+          APPRISE_BASE_URL = "/apprise";
           PUID = lib.toString config.users.users.${serviceName}.uid;
           PGID = lib.toString config.users.groups.${serviceName}.gid;
           TZ = config.time.timeZone;
