@@ -30,6 +30,7 @@ in
       cross-compile
       nix-index
       caddy
+      apprise
       ankerctl
       immich
       mealie
