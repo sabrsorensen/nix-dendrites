@@ -7,17 +7,25 @@
       ...
     }:
     let
+      toInt = value: if builtins.isInt value then value else builtins.fromJSON value;
       localDomain = config.systemConstants.domain;
       groupName = "media";
       mediaCfg = config.my.media;
-      plexIdentity = lib.attrByPath [ "plex" ] null mediaCfg.containerIdentities;
-      tautulliIdentity = lib.attrByPath [ "tautulli" ] null mediaCfg.containerIdentities;
+      plexIdentity = lib.attrByPath [ "plex" ] {
+        uid = 2104;
+        gid = 2096;
+      } mediaCfg.containerIdentities;
+      tautulliIdentity = lib.attrByPath [ "tautulli" ] {
+        uid = 2106;
+        gid = 2096;
+      } mediaCfg.containerIdentities;
     in
     {
       users.users = {
         plex = {
           isSystemUser = true;
           group = groupName;
+          uid = toInt plexIdentity.uid;
         };
         kitana = {
           isSystemUser = true;
@@ -26,6 +34,7 @@
         tautulli = {
           isSystemUser = true;
           group = groupName;
+          uid = toInt tautulliIdentity.uid;
         };
       };
       my.localDns.records = [
@@ -65,10 +74,10 @@
         autoStart = true;
         environment = {
           "ADVERTISE_IP" = "https://plex.${localDomain}/";
-          "PUID" = if plexIdentity != null then plexIdentity.uid else "978";
-          "PGID" = if plexIdentity != null then plexIdentity.gid else "978";
-          "PLEX_UID" = if plexIdentity != null then plexIdentity.uid else "978";
-          "PLEX_GID" = if plexIdentity != null then plexIdentity.gid else "978";
+          "PUID" = lib.toString config.users.users.plex.uid;
+          "PGID" = lib.toString config.users.groups.${groupName}.gid;
+          "PLEX_UID" = lib.toString config.users.users.plex.uid;
+          "PLEX_GID" = lib.toString config.users.groups.${groupName}.gid;
           "PLEX_CLAIM" = "";
           "TZ" = config.time.timeZone;
           "VERSION" = "docker";
@@ -109,8 +118,8 @@
         };
         autoStart = true;
         environment = {
-          "PUID" = if tautulliIdentity != null then tautulliIdentity.uid else "976";
-          "PGID" = if tautulliIdentity != null then tautulliIdentity.gid else "978";
+          "PUID" = lib.toString config.users.users.tautulli.uid;
+          "PGID" = lib.toString config.users.groups.${groupName}.gid;
           "TZ" = config.time.timeZone;
         };
         volumes = [

@@ -6,16 +6,21 @@
       ...
     }:
     let
+      toInt = value: if builtins.isInt value then value else builtins.fromJSON value;
       groupName = "media";
       localAddr = "127.0.0.1:8112";
       mediaCfg = config.my.media;
       serviceName = "deluge";
-      delugeIdentity = lib.attrByPath [ serviceName ] null mediaCfg.containerIdentities;
+      delugeIdentity = lib.attrByPath [ serviceName ] {
+        uid = 2102;
+        gid = 2096;
+      } mediaCfg.containerIdentities;
     in
     {
       users.users.${serviceName} = {
         isSystemUser = true;
         group = groupName;
+        uid = toInt delugeIdentity.uid;
       };
       my.media.caddy.apexRoutes = [
         ''
@@ -47,16 +52,8 @@
           ];
           environment = {
             "DELUGE_LOGLEVEL" = "error";
-            "PUID" =
-              if delugeIdentity != null then
-                delugeIdentity.uid
-              else
-                "${lib.toString config.users.users.${serviceName}.uid}";
-            "PGID" =
-              if delugeIdentity != null then
-                delugeIdentity.gid
-              else
-                "${lib.toString config.users.groups.${groupName}.gid}";
+            "PUID" = lib.toString config.users.users.${serviceName}.uid;
+            "PGID" = lib.toString config.users.groups.${groupName}.gid;
             "TZ" = config.time.timeZone;
           };
           extraOptions = [

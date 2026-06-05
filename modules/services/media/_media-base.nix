@@ -42,19 +42,19 @@ in
         lib.types.submodule {
           options = {
             uid = lib.mkOption {
-              type = lib.types.str;
-              description = "Container UID for a media workload.";
+              type = lib.types.either lib.types.int lib.types.str;
+              description = "Pinned UID for both the host service account and container runtime env.";
             };
 
             gid = lib.mkOption {
-              type = lib.types.str;
-              description = "Container GID for a media workload.";
+              type = lib.types.either lib.types.int lib.types.str;
+              description = "Pinned GID used by the corresponding media workload.";
             };
           };
         }
       );
       default = { };
-      description = "Host-specific container UID/GID overrides for media services.";
+      description = "Host-specific UID/GID assignments used as the source of truth for media workloads.";
     };
 
     caddy = {

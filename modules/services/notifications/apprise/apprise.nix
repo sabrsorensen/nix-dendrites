@@ -6,29 +6,31 @@
       ...
     }:
     let
+      containerUid = 2200;
+      containerGid = 2200;
       localAddr = "127.0.0.1:8000";
       serviceName = "apprise";
       dataDir = "/opt/apprise/config";
       attachDir = "/opt/apprise/attach";
     in
     {
-      users.groups.${serviceName} = { };
+      users.groups.${serviceName}.gid = containerGid;
       users.users.${serviceName} = {
         isSystemUser = true;
         group = serviceName;
+        uid = containerUid;
       };
 
-      my.caddy.apexRoutes = [
+      my.localDns.records = [
+        { hostname = serviceName; }
+      ];
+
+      my.caddy.virtualHosts."${serviceName}.{$DOMAIN}".routes = [
         ''
-          import drop_scanners ${serviceName}
-          redir /${serviceName} /${serviceName}/
-          route /${serviceName}/* {
-            basic_auth * {
+          basic_auth /* {
               sorenssa {$APPRISE_PASSWORD}
-            }
-            uri strip_prefix /${serviceName}
-            reverse_proxy ${localAddr}
           }
+          reverse_proxy /* ${localAddr}
         ''
       ];
 

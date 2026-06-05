@@ -12,6 +12,18 @@
       ...
     }:
     {
+      assertions =
+        let
+          identities = builtins.attrValues config.my.media.containerIdentities;
+          uids = map (identity: identity.uid) identities;
+        in
+        [
+          {
+            assertion = lib.length uids == lib.length (lib.unique uids);
+            message = "my.media.containerIdentities must assign a unique UID to each service.";
+          }
+        ];
+
       imports = [
         ./_media-base.nix
       ]
@@ -44,17 +56,29 @@
         ];
         podmanNetwork = lib.mkDefault "media";
         containerIdentities = {
+          airsonic = lib.mkDefault {
+            uid = 2101;
+            gid = 2096;
+          };
           deluge = lib.mkDefault {
-            uid = "1000";
-            gid = "996";
+            uid = 2102;
+            gid = 2096;
+          };
+          organizr = lib.mkDefault {
+            uid = 2103;
+            gid = 2096;
           };
           plex = lib.mkDefault {
-            uid = "978";
-            gid = "978";
+            uid = 2104;
+            gid = 2096;
+          };
+          profilarr = lib.mkDefault {
+            uid = 2105;
+            gid = 2096;
           };
           tautulli = lib.mkDefault {
-            uid = "976";
-            gid = "978";
+            uid = 2106;
+            gid = 2096;
           };
         };
       };
@@ -72,7 +96,7 @@
         # Ensure this runs before any containers needing the network
         wantedBy = [ "multi-user.target" ];
       };
-      users.groups.media = { };
+      users.groups.media.gid = lib.mkDefault 2096;
 
     };
 }

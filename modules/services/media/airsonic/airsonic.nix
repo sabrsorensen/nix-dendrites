@@ -7,15 +7,23 @@
       ...
     }:
     let
+      toInt = value: if builtins.isInt value then value else builtins.fromJSON value;
       groupName = "media";
       localAddr = "127.0.0.1:4040";
       mediaCfg = config.my.media;
       serviceName = "airsonic";
+      containerIdentity = lib.attrByPath [
+        serviceName
+      ] {
+        uid = 2101;
+        gid = 2096;
+      } mediaCfg.containerIdentities;
     in
     {
       users.users.${serviceName} = {
         isSystemUser = true;
         group = groupName;
+        uid = toInt containerIdentity.uid;
       };
       environment.systemPackages = with pkgs; [
         ffmpeg
@@ -48,8 +56,8 @@
         image = "lscr.io/linuxserver/airsonic-advanced:11.1.4-ls183";
         autoStart = true;
         environment = {
-          "PUID" = "${lib.toString config.users.users.${serviceName}.uid}";
-          "PGID" = "${lib.toString config.users.groups.${groupName}.gid}";
+          "PUID" = lib.toString config.users.users.${serviceName}.uid;
+          "PGID" = lib.toString config.users.groups.${groupName}.gid;
           "JAVA_OPTS" =
             "-Xmx256m -Xms256m -Dserver.forward-headers-strategy=framework -Dserver.context-path=/${serviceName}/";
           "CONTEXT_PATH" = "/${serviceName}";
