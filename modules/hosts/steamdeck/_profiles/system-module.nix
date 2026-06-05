@@ -7,6 +7,7 @@ bootMode:
 { config, pkgs, ... }:
 let
   mkBaseModule = import ./base-module.nix { inherit host; };
+  mkSecretsSshKeyFiles = inputs.self.lib.mkSecretsSshKeyFiles;
   steamUser = host.users.steam.name;
 in
 mkBaseModule {
@@ -34,13 +35,13 @@ mkBaseModule {
       extraGroups = host.users.steam.extraGroups;
       uid = lib.mkForce 1000;
       hashedPasswordFile = config.sops.secrets.hashed_password.path;
-      openssh.authorizedKeys.keyFiles = host.users.steam.authorizedKeys;
+      openssh.authorizedKeys.keyFiles = mkSecretsSshKeyFiles host.users.steam.authorizedKeyPaths;
     };
 
     users.groups.${steamUser}.gid = lib.mkForce 1000;
 
     users.users.nix-remote = lib.mkIf config.my.host.deploy.enableRemoteUser {
-      openssh.authorizedKeys.keyFiles = host.users.nixRemote.authorizedKeys;
+      openssh.authorizedKeys.keyFiles = mkSecretsSshKeyFiles host.users.nixRemote.authorizedKeyPaths;
     };
 
     home-manager.users.${steamUser}.imports = [

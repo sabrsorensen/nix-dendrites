@@ -22,15 +22,15 @@ in
         blocky
         dhcp-coredns
       ];
-      samAuthorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas/naboo.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino/naboo.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/naboo.pub"
+      samAuthorizedKeyPaths = [
+        "atlasuponraiden/naboo"
+        "kamino/naboo"
+        "zaphodbeeblebrox/naboo"
       ];
-      nixRemoteAuthorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas/naboo_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino/naboo_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/naboo_nix.pub"
+      nixRemoteAuthorizedKeyPaths = [
+        "atlasuponraiden/naboo_nix"
+        "kamino/naboo_nix"
+        "zaphodbeeblebrox/naboo_nix"
       ];
     })
     {

@@ -23,15 +23,15 @@ in
         dhcp-coredns
         #netbird-server
       ];
-      samAuthorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas/nevarro.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino/nevarro.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/nevarro.pub"
+      samAuthorizedKeyPaths = [
+        "atlasuponraiden/nevarro"
+        "kamino/nevarro"
+        "zaphodbeeblebrox/nevarro"
       ];
-      nixRemoteAuthorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas/nevarro_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino/nevarro_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/nevarro_nix.pub"
+      nixRemoteAuthorizedKeyPaths = [
+        "atlasuponraiden/nevarro_nix"
+        "kamino/nevarro_nix"
+        "zaphodbeeblebrox/nevarro_nix"
       ];
     })
     {

@@ -16,10 +16,10 @@
         "video"
       ];
 
-      authorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas/emeraldecho.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino/emeraldecho.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/emeraldecho.pub"
+      authorizedKeyPaths = [
+        "atlasuponraiden/emeraldecho"
+        "kamino/emeraldecho"
+        "zaphodbeeblebrox/emeraldecho"
       ];
     };
 
@@ -28,10 +28,10 @@
     };
 
     nixRemote = {
-      authorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas/emeraldecho_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino/emeraldecho_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/emeraldecho_nix.pub"
+      authorizedKeyPaths = [
+        "atlasuponraiden/emeraldecho_nix"
+        "kamino/emeraldecho_nix"
+        "zaphodbeeblebrox/emeraldecho_nix"
       ];
     };
   };

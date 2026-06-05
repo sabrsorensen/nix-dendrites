@@ -78,8 +78,6 @@
           home = "/home/nix-remote/";
           shell = pkgs.bash;
           hashedPasswordFile = config.sops.secrets.hashed_password.path;
-          openssh.authorizedKeys.keyFiles = [
-          ];
         };
       };
       security.sudo.extraRules = lib.optionals enableNixRemote [ remoteDeployRule ];

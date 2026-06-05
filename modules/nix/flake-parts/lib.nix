@@ -51,6 +51,9 @@
       roles:
       lib.unique (lib.concatLists (map (role: inputs.self.lib.serviceRoleUnits.${role} or [ ]) roles));
 
+    mkSecretsSshKeyFiles =
+      keyPaths: map (keyPath: "${inputs.nix-secrets}/ssh-keys/${keyPath}.pub") keyPaths;
+
     mkHostOutput =
       {
         buildAttrPath,
