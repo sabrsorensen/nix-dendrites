@@ -8,6 +8,7 @@ import argparse
 import os
 
 extensions = [
+    "adnauseam",
     "bitwarden-password-manager",
     "cloud-2-butt-plus",
     "dark-mode-webextension",
@@ -26,7 +27,9 @@ extensions = [
     "return-youtube-dislikes",
     "sidebery",
     "sticky-window-containers",
-    "ublock-origin",
+    "trackmenot",
+    #"ublock-origin",
+    "whatcampaign"
 ]
 
 # Base URL for the Mozilla Add-ons API
@@ -34,16 +37,16 @@ AMO_API_BASE = "https://addons.mozilla.org/api/v5/addons/addon/"
 
 def main():
     parser = argparse.ArgumentParser(description="Fetch Firefox addon metadata and save to JSON")
-    parser.add_argument("output", nargs="?", default="firefox_addons.json", 
+    parser.add_argument("output", nargs="?", default="firefox_addons.json",
                        help="Output file path (default: firefox_addons.json)")
-    
+
     args = parser.parse_args()
-    
+
     # Create output directory if it doesn't exist
     output_dir = os.path.dirname(args.output)
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    
+
     # Fetch metadata for each extension
     extension_metadata = []
     for extension in extensions:
