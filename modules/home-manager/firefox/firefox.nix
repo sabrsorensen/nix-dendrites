@@ -7,11 +7,33 @@
       ...
     }:
     let
-      # Load metadata for dynamic extensions from the pre-fetched file
-      addonMetadata = builtins.fromJSON (builtins.readFile ./firefox_addons.json);
+      ryceeAddonAttrByPname = {
+        adnauseam = "adnauseam";
+        "bitwarden-password-manager" = "bitwarden";
+        "dark-mode-webextension" = "dark-mode-webextension";
+        decentraleyes = "decentraleyes";
+        "multi-account-containers" = "multi-account-containers";
+        "old-reddit-redirect" = "old-reddit-redirect";
+        "plasma-integration" = "plasma-integration";
+        "privacy-badger17" = "privacy-badger";
+        "privacy-possum" = "privacy-possum";
+        "reddit-enhancement-suite" = "reddit-enhancement-suite";
+        "refined-github-" = "refined-github";
+        "return-youtube-dislikes" = "return-youtube-dislikes";
+        sidebery = "sidebery";
+      };
 
-      # Function to build a Firefox XPI add-on
-      buildFirefoxXpiAddon =
+      customAddonPnames = [
+        "fast-tab-switcher"
+        "herp-derp-for-youtube"
+        "pixel-punk-dynamic-theme"
+        "recipe-filter"
+        "sticky-window-containers"
+        "trackmenot"
+        "whatcampaign"
+      ];
+
+      buildMozillaXpiAddon =
         {
           stdenv ? pkgs.stdenv,
           fetchurl ? pkgs.fetchurl,
@@ -23,12 +45,8 @@
           meta,
           ...
         }:
-        let
-          # Substitute pname if it matches "cloud-2-butt-plus"
-          adjustedPname = if pname == "cloud-2-butt-plus" then "cloud-to-butt-plus" else pname;
-        in
         stdenv.mkDerivation {
-          name = "${adjustedPname}-${version}";
+          name = "${pname}-${version}";
 
           inherit meta;
 
@@ -46,22 +64,18 @@
           '';
         };
 
-      # Generate derivations for dynamic extensions
-      dynamicAddons = map (
-        addon:
-        buildFirefoxXpiAddon {
-          pname = addon.pname;
-          version = addon.version; # Pass the version field
-          addonId = addon.addonId;
-          url = addon.url;
-          sha256 = addon.sha256;
-          meta = {
-            homepage = addon.homepage;
-            description = addon.description;
-            license = addon.license;
-          };
-        }
-      ) addonMetadata;
+      ryceeAddons =
+        let
+          firefoxAddons = pkgs.nur.repos.rycee.firefox-addons;
+        in
+        map (pname: builtins.getAttr ryceeAddonAttrByPname.${pname} firefoxAddons) (
+          builtins.attrNames ryceeAddonAttrByPname
+        );
+
+      customAddonSet = pkgs.callPackage ./_custom_firefox_addons.nix {
+        inherit buildMozillaXpiAddon;
+      };
+      customAddons = map (pname: builtins.getAttr pname customAddonSet) customAddonPnames;
 
       currHash = "sha256-EouTytS0ji/R7AfPsjhwGaMONmlxVpXCJIyPNpC7tOs=";
       cssRepo = pkgs.fetchFromGitHub {
@@ -197,7 +211,7 @@
             #  id = 1;
             #};
           };
-          extensions.packages = dynamicAddons;
+          extensions.packages = ryceeAddons ++ customAddons;
           isDefault = true;
           name = username;
           settings = {

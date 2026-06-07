@@ -14,7 +14,7 @@
       home = inputs.self.lib.mkIfPersistence config {
         persistence."/persistent" = {
           directories = [
-            ".mozilla/firefox"
+            ".config/mozilla/firefox"
           ]
           ++ lib.optionals (lib.elem pkgs.google-chrome config.home.packages) [
             ".config/Google-Chrome"

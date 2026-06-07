@@ -215,9 +215,20 @@
           '';
 
           # === WORKSTATION FUNCTIONS (development/testing) ===
-          fetchFfAddons =
+          updateFirefoxCustomAddons =
             if isWorkstation && hasNixFlake then
-              "python3 ${nixFlakePath}/modules/home-manager/firefox/fetch_firefox_addons.py ${nixFlakePath}/modules/home-manager/firefox/firefox_addons.json"
+              ''
+                nix-shell -E 'let
+                  flake = builtins.getFlake "${nixFlakePath}";
+                  pkgs = import flake.inputs.nixpkgs {
+                    system = builtins.currentSystem;
+                    overlays = [ flake.inputs.nur.overlays.default flake.outputs.overlays.default ];
+                    config.allowUnfree = true;
+                  };
+                in pkgs.mkShell {
+                  buildInputs = [ pkgs.nur.repos.rycee.mozilla-addons-to-nix ];
+                }' --run 'mozilla-addons-to-nix ${nixFlakePath}/modules/home-manager/firefox/_custom_firefox_addons.json ${nixFlakePath}/modules/home-manager/firefox/_custom_firefox_addons.nix'
+              ''
             else
               null;
 
