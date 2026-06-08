@@ -216,29 +216,35 @@
 
     mkInventoryBuilder =
       {
-        alias,
-        targetHost,
-        identityFile,
+        hostName,
         systems,
         maxJobs,
         speedFactor,
         supportedFeatures,
         mandatoryFeatures ? [ ],
-        user ? "nix-remote",
+        protocol ? "ssh-ng",
+        publicHostKey ? null,
+        sshKey ? null,
+        sshUser ? "nix-remote",
+        alias ? null,
       }:
-      {
-        inherit
-          alias
-          targetHost
-          identityFile
-          mandatoryFeatures
-          maxJobs
-          speedFactor
-          supportedFeatures
-          systems
-          user
-          ;
-      };
+      (
+        {
+          inherit
+            hostName
+            mandatoryFeatures
+            maxJobs
+            protocol
+            publicHostKey
+            sshKey
+            sshUser
+            speedFactor
+            supportedFeatures
+            systems
+            ;
+        }
+        // lib.optionalAttrs (alias != null) { inherit alias; }
+      );
 
     mkInventoryHost =
       {

@@ -9,29 +9,29 @@
       builders = builtins.filter (builder: builder != null) (
         map (host: host.builder or null) (builtins.attrValues inputs.self.lib.hostInventory)
       );
-      buildMachines = map (builder: {
-        hostName = builder.alias;
-        protocol = "ssh-ng";
-        inherit (builder)
-          mandatoryFeatures
-          maxJobs
-          speedFactor
-          supportedFeatures
-          systems
-          ;
-      }) builders;
-      builderSshConfig = lib.concatMapStrings (builder: ''
-        Host ${builder.alias}
-          HostName ${builder.targetHost}
-          User ${builder.user}
-          IdentityFile ${builder.identityFile}
-      '') builders;
-      builderSubstituters = map (builder: "ssh-ng://${builder.alias}") builders;
+      buildMachines = map (builder: builtins.removeAttrs builder [ "alias" ]) builders;
+      mkBuilderSubstituter =
+        builder:
+        let
+          protocol = builder.protocol or "ssh-ng";
+          authority =
+            "${lib.optionalString (builder.sshUser != null) "${builder.sshUser}@"}${builder.hostName}";
+          query =
+            builtins.filter (part: part != null) [
+              (if builder.sshKey != null then "ssh-key=${builder.sshKey}" else null)
+              (
+                if builder.publicHostKey != null then
+                  "base64-ssh-public-host-key=${builder.publicHostKey}"
+                else
+                  null
+              )
+            ];
+        in
+        "${protocol}://${authority}${lib.optionalString (query != [ ]) "?${lib.concatStringsSep "&" query}"}";
+      builderSubstituters = map mkBuilderSubstituter builders;
     in
     {
       my.host.nix.buildMachines = lib.mkDefault buildMachines;
-
-      programs.ssh.extraConfig = lib.mkAfter builderSshConfig;
 
       nix.settings.extra-substituters = lib.mkAfter builderSubstituters;
     };

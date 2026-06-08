@@ -68,9 +68,8 @@ in
 
   flake.lib.hostInventory.AtlasUponRaiden = inputs.self.lib.mkInventoryHost {
     builder = inputs.self.lib.mkInventoryBuilder {
-      alias = "AtlasNixBuilder";
-      targetHost = "AtlasUponRaiden";
-      identityFile = "~/.ssh/nix_atlasuponraiden_id_ed25519";
+      hostName = "AtlasUponRaiden";
+      sshKey = "/root/.ssh/nix_atlasuponraiden_id_ed25519";
       systems = inputs.self.lib.site.atlas.supportedSystems;
       maxJobs = inputs.self.lib.site.atlas.maxJobs;
       speedFactor = inputs.self.lib.site.atlas.speedFactor;

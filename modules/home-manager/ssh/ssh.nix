@@ -47,24 +47,10 @@
             IdentitiesOnly = true;
           };
 
-      mkBuilderBlock =
-        peer:
-        if !(peer ? builder) then
-          null
-        else
-          {
-            HostName = peer.builder.targetHost;
-            User = peer.builder.user;
-            IdentityFile = peer.builder.identityFile;
-          };
-
       peerBlocks = lib.mapAttrs' (name: peer: lib.nameValuePair name (mkBaseBlock name peer)) inventory;
       nixBlocks = lib.mapAttrs' (
         name: peer: lib.nameValuePair "nix-${lib.toLower name}" (mkNixBlock name peer)
       ) inventory;
-      builderBlocks = lib.mapAttrs' (
-        _name: peer: lib.nameValuePair peer.builder.alias (mkBuilderBlock peer)
-      ) (lib.filterAttrs (_name: peer: peer ? builder) inventory);
 
     in
     {
@@ -96,7 +82,6 @@
           }
           // peerBlocks
           // nixBlocks
-          // builderBlocks
         );
       };
     };
