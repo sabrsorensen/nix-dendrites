@@ -9,6 +9,7 @@
           ci = "commit -p -v";
           ai = "add -p -v";
           br = "branch";
+          sync-develop = "!git switch develop && git fetch upstream && git merge --ff-only upstream/develop && git push origin develop";
           lg = "log --graph --all --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative";
           di = "diff --color-words";
           alias = "!git config --list | grep 'alias\\.' | sed 's/alias\\.\\([^=]*\\)=\\(.*\\)/\\1\\\t => \\2/' | sort";
