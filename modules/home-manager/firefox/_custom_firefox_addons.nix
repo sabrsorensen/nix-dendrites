@@ -87,27 +87,6 @@
       platforms = platforms.all;
     };
   };
-  "trackmenot" = buildMozillaXpiAddon {
-    pname = "trackmenot";
-    version = "0.10.46";
-    addonId = "trackmenot@mrl.nyu.edu";
-    url = "https://addons.mozilla.org/firefox/downloads/file/3438065/trackmenot-0.10.46.xpi";
-    sha256 = "f5ed9cd2432543e22213ee0e79bc66941fc6802a357a6ae9cca2dcbe8e4d124c";
-    meta = with lib; {
-      homepage = "http://cs.nyu.edu/trackmenot/";
-      description = "An artware browser add-on to protect privacy in web-search. By issuing randomized queries to common search-engines, TrackMeNot obfuscates your search profile and registers your discontent with surreptitious tracking.";
-      license = licenses.gpl2;
-      mozPermissions = [
-        "tabs"
-        "cookies"
-        "https://*/*"
-        "http://*/*"
-        "webNavigation"
-        "storage"
-      ];
-      platforms = platforms.all;
-    };
-  };
   "whatcampaign" = buildMozillaXpiAddon {
     pname = "whatcampaign";
     version = "1.0.9";

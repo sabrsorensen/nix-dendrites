@@ -2,6 +2,7 @@
   flake.modules.homeManager.firefox =
     {
       config,
+      inputs,
       lib,
       pkgs,
       ...
@@ -29,7 +30,6 @@
         "pixel-punk-dynamic-theme"
         "recipe-filter"
         "sticky-window-containers"
-        "trackmenot"
         "whatcampaign"
       ];
 
@@ -77,13 +77,7 @@
       };
       customAddons = map (pname: builtins.getAttr pname customAddonSet) customAddonPnames;
 
-      currHash = "sha256-EouTytS0ji/R7AfPsjhwGaMONmlxVpXCJIyPNpC7tOs=";
-      cssRepo = pkgs.fetchFromGitHub {
-        owner = "MrOtherGuy";
-        repo = "firefox-csshacks";
-        rev = "master";
-        hash = currHash;
-      };
+      cssRepo = inputs.firefox-csshacks;
       username = config.home.username;
       userChromePath = "${config.xdg.configHome}/mozilla/firefox/${username}/chrome";
 
