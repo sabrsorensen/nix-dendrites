@@ -4,8 +4,9 @@
 }:
 {
   flake.modules.nixos."deploy-builder-defaults" =
-    { lib, ... }:
+    { config, lib, ... }:
     let
+      enableBuilderDefaults = !(config.my.host.roles.wsl or false);
       builders = builtins.filter (builder: builder != null) (
         map (host: host.builder or null) (builtins.attrValues inputs.self.lib.hostInventory)
       );
@@ -32,7 +33,7 @@
         }";
       builderSubstituters = map mkBuilderSubstituter builders;
     in
-    {
+    lib.mkIf enableBuilderDefaults {
       my.host.nix.buildMachines = lib.mkDefault buildMachines;
 
       nix.settings.extra-substituters = lib.mkAfter builderSubstituters;
