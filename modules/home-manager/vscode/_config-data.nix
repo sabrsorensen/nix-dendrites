@@ -8,8 +8,8 @@
   ...
 }:
 let
-  themeData = import ./vscode-theme-data.nix { inherit selectedBakedTheme; };
-  sharedConfig = import ./vscode-shared-config.nix {
+  themeData = import ./_theme-data.nix { inherit selectedBakedTheme; };
+  sharedConfig = import ./_shared-config.nix {
     inherit
       inventory
       lib
@@ -18,7 +18,7 @@ let
       ;
     themeSettings = themeData.bakedThemeSettings;
   };
-  profileData = import ./vscode-profile-data.nix {
+  profileData = import ./_profile-data.nix {
     inherit config pkgs;
   };
 in

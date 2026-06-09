@@ -14,20 +14,22 @@
         builder:
         let
           protocol = builder.protocol or "ssh-ng";
-          authority =
-            "${lib.optionalString (builder.sshUser != null) "${builder.sshUser}@"}${builder.hostName}";
-          query =
-            builtins.filter (part: part != null) [
-              (if builder.sshKey != null then "ssh-key=${builder.sshKey}" else null)
-              (
-                if builder.publicHostKey != null then
-                  "base64-ssh-public-host-key=${builder.publicHostKey}"
-                else
-                  null
-              )
-            ];
+          authority = "${
+            lib.optionalString (builder.sshUser != null) "${builder.sshUser}@"
+          }${builder.hostName}";
+          query = builtins.filter (part: part != null) [
+            (if builder.sshKey != null then "ssh-key=${builder.sshKey}" else null)
+            (
+              if builder.publicHostKey != null then
+                "base64-ssh-public-host-key=${builder.publicHostKey}"
+              else
+                null
+            )
+          ];
         in
-        "${protocol}://${authority}${lib.optionalString (query != [ ]) "?${lib.concatStringsSep "&" query}"}";
+        "${protocol}://${authority}${
+          lib.optionalString (query != [ ]) "?${lib.concatStringsSep "&" query}"
+        }";
       builderSubstituters = map mkBuilderSubstituter builders;
     in
     {

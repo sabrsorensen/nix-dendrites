@@ -5,7 +5,7 @@
   ...
 }:
 let
-  secretWrapArgsFromSpecs = import ./secret-wrap-args.nix { inherit lib; };
+  secretWrapArgsFromSpecs = import ../../../lib/secret-wrap-args.nix { inherit lib; };
   context7ApiKeyPath =
     if config.sops.secrets ? context7_api_key then config.sops.secrets.context7_api_key.path else null;
 
@@ -32,7 +32,7 @@ let
   '';
 
   patched-openssh = pkgs.openssh.overrideAttrs (prev: {
-    patches = (prev.patches or [ ]) ++ [ ../modules/home-manager/vscode/openssh-nocheckcfg.patch ];
+    patches = (prev.patches or [ ]) ++ [ ./openssh-nocheckcfg.patch ];
   });
 
   patchDesktopItems =
