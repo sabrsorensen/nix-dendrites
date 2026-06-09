@@ -188,8 +188,6 @@
                     "eclipse-cdt.memory-inspector"
                     "eclipse-cdt.serial-monitor"
                     "ms-vscode.cmake-tools"
-                    "ms-vscode.cpptools"
-                    "ms-vscode.cpptools-extension-pack"
                     "platformio.platformio-ide"
                     "stmicroelectronics.stm32-vscode-extension"
                     "stmicroelectronics.stm32cube-ide-build-analyzer"
@@ -208,7 +206,10 @@
                 );
                 keybindings = vscodeData.defaultKeyBindings ++ [ ];
                 languageSnippets = { };
-                userSettings = vscodeData.defaultUserSettings;
+                userSettings = vscodeData.defaultUserSettings // {
+                  "stm32cube-ide-core.configuration.productSTM32CubeMX.executablePath" = "/etc/profiles/per-user/sam/bin/stm32cubemx";
+                  "stm32cube-ide-core.enableTelemetry" = false;
+                };
               }
             else
               { };

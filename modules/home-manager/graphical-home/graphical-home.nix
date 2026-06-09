@@ -22,6 +22,7 @@
         plex-desktop
         rclone
         signal-desktop
+        stm32cubemx
         vlc
       ];
     };
