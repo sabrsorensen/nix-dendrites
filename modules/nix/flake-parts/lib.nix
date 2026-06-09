@@ -33,7 +33,7 @@
             "aarch64-linux"
             "i686-linux"
           ];
-          maxJobs = 16;
+          maxJobs = 4;
           speedFactor = 200;
         };
       };
