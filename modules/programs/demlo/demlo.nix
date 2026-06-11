@@ -9,5 +9,5 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  imports = lib.optional (inputs ? demlo) ./_demlo.nix;
+  imports = lib.optional (inputs ? demlo) ./_demlo.nix ++ [ ./_demlo-home.nix ];
 }

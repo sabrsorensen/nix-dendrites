@@ -19,6 +19,20 @@
         pkgs.dotnetCorePackages.sdk_10_0-bin
         pkgs.dotnetCorePackages.sdk_11_0-bin
       ];
+      azureDevOpsExtension =
+        if pkgs ? azure-cli && pkgs.azure-cli ? extensions && pkgs.azure-cli.extensions ? azure-devops then
+          pkgs.azure-cli.extensions.azure-devops.overrideAttrs (old: {
+            propagatedBuildInputs = (old.propagatedBuildInputs or [ ]) ++ [ pkgs.python3Packages.keyring ];
+          })
+        else
+          null;
+      azureCliWithDevOps =
+        if pkgs ? azure-cli && azureDevOpsExtension != null then
+          pkgs.azure-cli.withExtensions [ azureDevOpsExtension ]
+        else if pkgs ? azure-cli then
+          pkgs.azure-cli
+        else
+          null;
       nugetConfigDir = "${config.home.homeDirectory}/.nuget/NuGet";
       nugetConfigPath = "${nugetConfigDir}/NuGet.Config";
     in
@@ -51,7 +65,7 @@
         lib.filter (pkg: pkg != null) [
           git
           dotnetCombined
-          (if pkgs ? azure-cli then azure-cli else null)
+          azureCliWithDevOps
           (if pkgs ? pulumi then pulumi else null)
           (if pkgs ? spec-kit then spec-kit else null)
           (

@@ -42,6 +42,10 @@
           secretPath = optionalSecretPath "postman_nixos_mcp_token";
         }
         {
+          envName = "PERSONAL_ACCESS_TOKEN";
+          secretPath = optionalSecretPath "azdo_nixos_mcp_token";
+        }
+        {
           envName = "SNYK_TOKEN";
           secretPath = optionalSecretPath "snyk_nixos_mcp_token";
         }
@@ -78,6 +82,12 @@
           projects."/home/ssorensen/src/nix-dendrites" = {
             trust_level = "trusted";
           };
+          projects."/home/ssorensen/src/" = {
+            trust_level = "trusted";
+          };
+          projects."/home/ssorensen/higi/" = {
+            trust_level = "trusted";
+          };
           tui.model_availability_nux = {
             "gpt-5.5" = 1;
           };
@@ -85,6 +95,18 @@
           mcp_servers = {
             Atlassian = {
               url = "https://mcp.atlassian.com/v1/mcp";
+            };
+            AZDOLocal = {
+              command = "npx";
+              args = [
+                "-y"
+                "@azure-devops/mcp@next"
+                "higicore"
+                "--authentication"
+                "pat"
+              ];
+              env_vars = [ "PERSONAL_ACCESS_TOKEN" ];
+              startup_timeout_sec = 300;
             };
             Context7 = {
               url = "https://mcp.context7.com/mcp";
