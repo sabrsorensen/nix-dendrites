@@ -207,7 +207,8 @@
                 keybindings = vscodeData.defaultKeyBindings ++ [ ];
                 languageSnippets = { };
                 userSettings = vscodeData.defaultUserSettings // {
-                  "stm32cube-ide-core.configuration.productSTM32CubeMX.executablePath" = "/etc/profiles/per-user/sam/bin/stm32cubemx";
+                  "stm32cube-ide-core.configuration.productSTM32CubeMX.executablePath" =
+                    "/etc/profiles/per-user/sam/bin/stm32cubemx";
                   "stm32cube-ide-core.enableTelemetry" = false;
                 };
               }
