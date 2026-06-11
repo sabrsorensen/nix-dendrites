@@ -67,7 +67,6 @@
           dotnetCombined
           azureCliWithDevOps
           (if pkgs ? pulumi then pulumi else null)
-          (if pkgs ? spec-kit then spec-kit else null)
           (
             if pkgs ? uv then
               uv
