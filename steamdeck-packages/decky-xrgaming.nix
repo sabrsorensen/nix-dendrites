@@ -23,7 +23,8 @@ let
       reason = "Do not fail if LD_LIBRARY_PATH is already absent in the copied environment.";
       old = ''del env_copy["LD_LIBRARY_PATH"]'';
       new = ''env_copy.pop("LD_LIBRARY_PATH", None)'';
-      expectedCount = 1;
+      minCount = 1;
+      maxCount = 2;
     }
     {
       kind = "literal";
@@ -204,20 +205,23 @@ mkDeckyPlugin {
         if patch["kind"] == "literal":
             old = patch["old"]
             count = text.count(old)
-            expected_count = patch.get("expectedCount", 1)
-            if count != expected_count:
+            min_count = patch.get("minCount", patch.get("expectedCount", 1))
+            max_count = patch.get("maxCount", patch.get("expectedCount", 1))
+            if count < min_count or count > max_count:
                 print(f'unexpected match count: {patch["reason"]}', file=sys.stderr)
-                print(f'expected {expected_count}, found {count}', file=sys.stderr)
+                print(f'expected between {min_count} and {max_count}, found {count}', file=sys.stderr)
                 print(old, file=sys.stderr)
                 sys.exit(1)
-            text = text.replace(old, patch["new"], expected_count)
+            if count != 0:
+                text = text.replace(old, patch["new"], count)
             continue
 
-        expected_count = patch.get("expectedCount", 1)
-        text, count = re.subn(patch["pattern"], patch["replacement"], text, count=expected_count)
-        if count != expected_count:
+        min_count = patch.get("minCount", patch.get("expectedCount", 1))
+        max_count = patch.get("maxCount", patch.get("expectedCount", 1))
+        text, count = re.subn(patch["pattern"], patch["replacement"], text, count=max_count)
+        if count < min_count or count > max_count:
             print(f'failed to apply patch: {patch["reason"]}', file=sys.stderr)
-            print(f'expected {expected_count}, found {count}', file=sys.stderr)
+            print(f'expected between {min_count} and {max_count}, found {count}', file=sys.stderr)
             sys.exit(1)
 
     path.write_text(text, encoding="utf-8")
