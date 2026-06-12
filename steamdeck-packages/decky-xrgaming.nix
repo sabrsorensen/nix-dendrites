@@ -35,13 +35,6 @@ let
     }
     {
       kind = "regex";
-      reason = "Avoid the hard-coded /run/user/1000 systemd user bus path.";
-      pattern = ''XDG_RUNTIME_DIR=/run/user/1000(?: DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus)? systemctl --user is-active xr-driver'';
-      replacement = xrGamingDriverStatusCommand;
-      expectedCount = 1;
-    }
-    {
-      kind = "regex";
       reason = "Replace Decky's helper with a NixOS-safe user-service probe.";
       pattern = ''ipc\.is_driver_running\(as_user=decky\.DECKY_USER\)'';
       replacement = ''
