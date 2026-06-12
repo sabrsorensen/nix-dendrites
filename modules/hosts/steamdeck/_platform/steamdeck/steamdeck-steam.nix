@@ -49,4 +49,11 @@
       hidapi
     ];
   };
+
+  systemd.user.services.gamescope-session = {
+    # Jovian manages this as a dependency-driven session unit that refuses
+    # manual start/stop, so don't let switch activation try to bounce it.
+    restartIfChanged = lib.mkForce false;
+    stopIfChanged = lib.mkForce false;
+  };
 }
