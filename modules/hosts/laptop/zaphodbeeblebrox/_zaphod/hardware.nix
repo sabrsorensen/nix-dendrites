@@ -10,8 +10,39 @@ let
 
     shopt -s nullglob
 
+    find_realtek_alc294_devices() {
+      local codec_path
+      for codec_path in /proc/asound/card*/codec#*; do
+        [ -r "$codec_path" ] || continue
+        if ! grep -q "Codec: Realtek ALC294" "$codec_path"; then
+          continue
+        fi
+
+        case "$codec_path" in
+          /proc/asound/card*/codec#*)
+            local card=''${codec_path#/proc/asound/card}
+            card=''${card%%/*}
+            local codec=''${codec_path##*codec#}
+            printf '/dev/snd/hwC%sD%s\n' "$card" "$codec"
+            ;;
+        esac
+      done
+    }
+
     for _attempt in $(seq 1 20); do
-      for dev in /dev/snd/hwC*D*; do
+      devices=()
+
+      while IFS= read -r dev; do
+        [ -n "$dev" ] && devices+=("$dev")
+      done < <(find_realtek_alc294_devices)
+
+      if [ "''${#devices[@]}" -eq 0 ]; then
+        for dev in /dev/snd/hwC*D*; do
+          devices+=("$dev")
+        done
+      fi
+
+      for dev in "''${devices[@]}"; do
         if ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x500 0x1b \
           && ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x477 0x4a4b \
           && ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x500 0xf \
@@ -23,7 +54,7 @@ let
       sleep 1
     done
 
-    echo "No compatible HDA codec device found under /dev/snd/hwC*D*" >&2
+    echo "No compatible ALC294 HDA codec device found" >&2
     exit 1
   '';
 in
