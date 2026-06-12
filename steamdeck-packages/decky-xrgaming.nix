@@ -32,23 +32,48 @@ mkDeckyPlugin {
   buildInputs = with pkgs; [ wayland ];
 
   preConfigure = ''
-    sed -i 's/del env_copy\["LD_LIBRARY_PATH"\]/env_copy.pop("LD_LIBRARY_PATH", None)/' main.py
-    sed -i "s|\\['su', '-l', '-c',|['${pkgs.shadow}/bin/su', '-l', '-c',|" main.py
-    sed -i "s|XDG_RUNTIME_DIR=/run/user/1000 systemctl --user is-active xr-driver|XDG_RUNTIME_DIR=/run/user/\\$(${pkgs.coreutils}/bin/id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(${pkgs.coreutils}/bin/id -u)/bus ${pkgs.systemd}/bin/systemctl --user is-active xr-driver|" main.py
-    sed -i "/ipc\\.is_driver_running(as_user=decky\\.DECKY_USER)/c\\
-        try:\\
-            subprocess.check_output([\\
-                '${pkgs.shadow}/bin/su', '-l', '-c',\\
-                'XDG_RUNTIME_DIR=/run/user/\\$(${pkgs.coreutils}/bin/id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(${pkgs.coreutils}/bin/id -u)/bus ${pkgs.systemd}/bin/systemctl --user is-active xr-driver',\\
-                decky.DECKY_USER,\\
-            ], stderr=subprocess.STDOUT)\\
-            return True\\
-        except subprocess.CalledProcessError as exc:\\
-            decky.logger.error(f\\\"Error checking driver status {exc.output}\\\")\\
-            return False\\
-        except FileNotFoundError as exc:\\
-            decky.logger.error(f\\\"Error checking driver status {exc}\\\")\\
-            return False" main.py
+    python3 - <<'PY'
+    import pathlib
+    import re
+    import sys
+
+    path = pathlib.Path("main.py")
+    text = path.read_text(encoding="utf-8")
+
+    replacements = {
+        'del env_copy["LD_LIBRARY_PATH"]': 'env_copy.pop("LD_LIBRARY_PATH", None)',
+        "['su', '-l', '-c',": "['${pkgs.shadow}/bin/su', '-l', '-c',",
+        'XDG_RUNTIME_DIR=/run/user/1000 systemctl --user is-active xr-driver':
+            'XDG_RUNTIME_DIR=/run/user/\\$(id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(id -u)/bus ${pkgs.systemd}/bin/systemctl --user is-active xr-driver',
+    }
+
+    for old, new in replacements.items():
+        if old not in text:
+            print(f"missing expected text: {old}", file=sys.stderr)
+            sys.exit(1)
+        text = text.replace(old, new)
+
+    pattern = r'ipc\.is_driver_running\(as_user=decky\.DECKY_USER\)'
+    replacement = """try:
+            subprocess.check_output([
+                '${pkgs.shadow}/bin/su', '-l', '-c',
+                'XDG_RUNTIME_DIR=/run/user/\\$(id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(id -u)/bus ${pkgs.systemd}/bin/systemctl --user is-active xr-driver',
+                decky.DECKY_USER,
+            ], stderr=subprocess.STDOUT)
+            return True
+        except subprocess.CalledProcessError as exc:
+            decky.logger.error(f\\"Error checking driver status {exc.output}\\")
+            return False
+        except FileNotFoundError as exc:
+            decky.logger.error(f\\"Error checking driver status {exc}\\")
+            return False"""
+    text, count = re.subn(pattern, replacement, text, count=1)
+    if count != 1:
+        print("failed to patch driver status check", file=sys.stderr)
+        sys.exit(1)
+
+    path.write_text(text, encoding="utf-8")
+    PY
 
     if [ -f .gitmodules ]; then
       export HOME=$TMPDIR
