@@ -8,13 +8,14 @@ let
   enableZenbookSpeaker = pkgs.writeShellScript "enable-zenbook-speaker" ''
     set -eu
 
+    shopt -s nullglob
+
     for _attempt in $(seq 1 20); do
-      for dev in /dev/snd/hwC*D0; do
-        if [ -e "$dev" ]; then
-          ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x500 0x1b
-          ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x477 0x4a4b
-          ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x500 0xf
-          ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x477 0x74
+      for dev in /dev/snd/hwC*D*; do
+        if ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x500 0x1b \
+          && ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x477 0x4a4b \
+          && ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x500 0xf \
+          && ${pkgs.alsa-tools}/bin/hda-verb "$dev" 0x20 0x477 0x74; then
           exit 0
         fi
       done
@@ -22,7 +23,7 @@ let
       sleep 1
     done
 
-    echo "No HDA codec device found under /dev/snd/hwC*D0" >&2
+    echo "No compatible HDA codec device found under /dev/snd/hwC*D*" >&2
     exit 1
   '';
 in
@@ -84,7 +85,10 @@ in
   systemd.services.enable-zenbook-speaker = {
     description = "Enable ASUS ZenBook ALC294 speakers";
     wantedBy = [ "multi-user.target" ];
-    wants = [ "systemd-udev-settle.service" ];
+    wants = [
+      "enable-zenbook-speaker-resume.service"
+      "systemd-udev-settle.service"
+    ];
     after = [
       "systemd-udev-settle.service"
       "sound.target"
@@ -93,6 +97,28 @@ in
       Type = "oneshot";
       RemainAfterExit = true;
       ExecStart = enableZenbookSpeaker;
+    };
+  };
+
+  systemd.services.enable-zenbook-speaker-resume = {
+    description = "Re-enable ASUS ZenBook ALC294 speakers after resume";
+    wants = [ "enable-zenbook-speaker.service" ];
+    wantedBy = [
+      "suspend.target"
+      "hibernate.target"
+      "hybrid-sleep.target"
+      "suspend-then-hibernate.target"
+    ];
+    after = [
+      "suspend.target"
+      "hibernate.target"
+      "hybrid-sleep.target"
+      "suspend-then-hibernate.target"
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStartPre = "${pkgs.coreutils}/bin/sleep 5";
+      ExecStart = "${config.systemd.package}/bin/systemctl restart enable-zenbook-speaker.service";
     };
   };
 }
