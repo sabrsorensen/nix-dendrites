@@ -21,6 +21,11 @@ in
     };
   };
 }
+#
+# The optional imports below are host escape hatches for SteamOS-specific
+# compatibility work. Keep them separate from the inventory metadata above so it
+# stays obvious which parts are declarative fleet state and which parts exist to
+# bridge an unmanaged base OS.
 // import ./identity.nix { inherit inputs; }
 // import ./packages.nix
 // import ./runtime.nix

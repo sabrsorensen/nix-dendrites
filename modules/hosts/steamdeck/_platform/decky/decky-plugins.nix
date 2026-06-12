@@ -25,9 +25,10 @@ in
   };
 
   config = mkIf (cfg.enable && cfg.plugins != { }) {
-    # Pre-create plugin directories and symlinks
+    # Bridge declarative Nix packages into Decky's mutable on-disk plugin
+    # directory before the upstream loader starts.
     systemd.services.decky-loader-plugins = {
-      description = "Setup Decky Loader plugins";
+      description = "Stage declarative Decky Loader plugins";
       before = [ "decky-loader.service" ];
       wantedBy = [ "decky-loader.service" ];
       serviceConfig = {
@@ -62,7 +63,7 @@ in
       '';
     };
 
-    # Override the decky-loader service to depend on plugin setup
+    # The upstream service expects plugins to already exist in its state dir.
     systemd.services.decky-loader = {
       after = [ "decky-loader-plugins.service" ];
       wants = [ "decky-loader-plugins.service" ];

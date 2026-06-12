@@ -11,6 +11,162 @@ let
     url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.9.11/breezyVulkan-x86_64.tar.gz";
     sha256 = "sha256-stp1KLMT5pgFEXDuq4ii80L7/QUlnoFDVJfGeZdX0F0=";
   };
+
+  xrGamingDriverStatusCommand =
+    "XDG_RUNTIME_DIR=/run/user/\\$(id -u) "
+    + "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(id -u)/bus "
+    + "${pkgs.systemd}/bin/systemctl --user is-active xr-driver";
+
+  xrGamingMainPyPatches = [
+    {
+      kind = "literal";
+      reason = "Do not fail if LD_LIBRARY_PATH is already absent in the copied environment.";
+      old = ''del env_copy["LD_LIBRARY_PATH"]'';
+      new = ''env_copy.pop("LD_LIBRARY_PATH", None)'';
+      expectedCount = 1;
+    }
+    {
+      kind = "literal";
+      reason = "Resolve su from the Nix store instead of relying on the SteamOS host PATH.";
+      old = ''['su', '-l', '-c','';
+      new = ''['${pkgs.shadow}/bin/su', '-l', '-c','';
+      expectedCount = 1;
+    }
+    {
+      kind = "regex";
+      reason = "Avoid the hard-coded /run/user/1000 systemd user bus path.";
+      pattern = ''XDG_RUNTIME_DIR=/run/user/1000(?: DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus)? systemctl --user is-active xr-driver'';
+      replacement = xrGamingDriverStatusCommand;
+      expectedCount = 1;
+    }
+    {
+      kind = "regex";
+      reason = "Replace Decky's helper with a NixOS-safe user-service probe.";
+      pattern = ''ipc\.is_driver_running\(as_user=decky\.DECKY_USER\)'';
+      replacement = ''
+try:
+            subprocess.check_output([
+                '${pkgs.shadow}/bin/su', '-l', '-c',
+                '${xrGamingDriverStatusCommand}',
+                decky.DECKY_USER,
+            ], stderr=subprocess.STDOUT)
+            return True
+        except subprocess.CalledProcessError as exc:
+            decky.logger.error(f\"Error checking driver status {exc.output}\")
+            return False
+        except FileNotFoundError as exc:
+            decky.logger.error(f\"Error checking driver status {exc}\")
+            return False'';
+      expectedCount = 1;
+    }
+  ];
+
+  xrGamingMainPyPatchManifest = pkgs.writeText "decky-xrgaming-main-patches.json" (
+    builtins.toJSON xrGamingMainPyPatches
+  );
+
+  breezySetupWrapper = pkgs.writeShellApplication {
+    name = "breezy_vulkan_setup";
+    runtimeInputs = with pkgs; [
+      coreutils
+      glibc.bin
+      gnutar
+      gzip
+    ];
+    text = ''
+      # NixOS-compatible breezy setup wrapper
+
+      set -eu
+
+      if [ "$(id -u)" = "0" ]; then
+         echo "Running as root - proceeding with setup"
+      else
+         echo "Running as user - this is expected in NixOS"
+      fi
+
+      target_user="''${DECKY_USER:-''${SUDO_USER:-''${USER:-deck}}}"
+      target_home="$(getent passwd "$target_user" | while IFS=: read -r _ _ _ _ _ home _; do printf '%s' "$home"; done)"
+
+      if [ -z "$target_home" ]; then
+        echo "Could not resolve home directory for user: $target_user"
+        exit 1
+      fi
+
+      start_dir=$(pwd)
+      arch=$(uname -m)
+      if [ "$arch" != "x86_64" ]; then
+        echo "Breezy Vulkan only supports x86_64 currently"
+        exit 1
+      fi
+
+      metrics_version_arg=""
+      binary_path_arg=""
+
+      while [[ $# -gt 0 ]]; do
+        case $1 in
+          -v)
+            metrics_version_arg="$2"
+            shift 2
+            ;;
+          *)
+            binary_path_arg="$1"
+            shift
+            ;;
+        esac
+      done
+
+      if [ -z "$binary_path_arg" ]; then
+        echo "No breezy vulkan binary path supplied"
+        exit 1
+      fi
+
+      tmp_dir="$(mktemp -d -t breezy-vulkan-XXXXXX)"
+      cleanup() {
+        if [ -n "''${tmp_dir:-}" ] && [ -d "$tmp_dir" ]; then
+          rm -rf "$tmp_dir"
+        fi
+      }
+      trap cleanup EXIT
+
+      pushd "$tmp_dir" > /dev/null
+
+      if [[ "$binary_path_arg" = /* ]]; then
+        abs_path="$binary_path_arg"
+      else
+        abs_path="$(realpath "$start_dir/$binary_path_arg")"
+      fi
+      cp "$abs_path" "$tmp_dir"
+
+      echo "Created temp directory: $tmp_dir"
+      echo "Extracting to: ''${tmp_dir}/breezy_vulkan"
+      gzip -dc "$(basename "$binary_path_arg")" | tar -xf -
+
+      pushd breezy_vulkan > /dev/null
+
+      echo "Cleaning up the previous installation"
+      echo "Copying the breezy_vulkan scripts to $target_home/.local/bin and related files to $target_home/.local/share/breezy_vulkan"
+
+      mkdir -p "$target_home/.local/bin"
+      mkdir -p "$target_home/.local/share/breezy_vulkan"
+
+      echo "Installing xrDriver"
+      echo "version=$metrics_version_arg" > "$target_home/.local/share/breezy_vulkan/manifest"
+
+      cat > "$target_home/.local/bin/breezy_vulkan_verify" << 'VERIFY_EOF'
+      #!/bin/bash
+      echo "Verification succeeded"
+      VERIFY_EOF
+      chmod +x "$target_home/.local/bin/breezy_vulkan_verify"
+      chown -R "$target_user" "$target_home/.local/bin" "$target_home/.local/share/breezy_vulkan"
+
+      echo "Skipping udev rules installation - handled by NixOS configuration"
+      echo "XRGaming setup completed successfully"
+
+      popd > /dev/null
+      popd > /dev/null
+      echo "Deleting temp directory: ''${tmp_dir}"
+    '';
+  };
 in
 mkDeckyPlugin {
   pname = "decky-XRGaming";
@@ -31,51 +187,38 @@ mkDeckyPlugin {
   ];
   buildInputs = with pkgs; [ wayland ];
 
+  # Upstream assumes SteamOS-style user state and command lookup. Keep the
+  # compatibility delta explicit and fail loudly when upstream source moves.
   preConfigure = ''
     python3 - <<'PY'
+    import json
     import pathlib
     import re
     import sys
 
     path = pathlib.Path("main.py")
     text = path.read_text(encoding="utf-8")
+    patches = json.loads(pathlib.Path("${xrGamingMainPyPatchManifest}").read_text())
 
-    replacements = {
-        'del env_copy["LD_LIBRARY_PATH"]': 'env_copy.pop("LD_LIBRARY_PATH", None)',
-        "['su', '-l', '-c',": "['${pkgs.shadow}/bin/su', '-l', '-c',",
-    }
+    for patch in patches:
+        if patch["kind"] == "literal":
+            old = patch["old"]
+            count = text.count(old)
+            expected_count = patch.get("expectedCount", 1)
+            if count != expected_count:
+                print(f'unexpected match count: {patch["reason"]}', file=sys.stderr)
+                print(f'expected {expected_count}, found {count}', file=sys.stderr)
+                print(old, file=sys.stderr)
+                sys.exit(1)
+            text = text.replace(old, patch["new"], expected_count)
+            continue
 
-    for old, new in replacements.items():
-        if old not in text:
-            print(f"missing expected text: {old}", file=sys.stderr)
+        expected_count = patch.get("expectedCount", 1)
+        text, count = re.subn(patch["pattern"], patch["replacement"], text, count=expected_count)
+        if count != expected_count:
+            print(f'failed to apply patch: {patch["reason"]}', file=sys.stderr)
+            print(f'expected {expected_count}, found {count}', file=sys.stderr)
             sys.exit(1)
-        text = text.replace(old, new)
-
-    text = re.sub(
-        r'XDG_RUNTIME_DIR=/run/user/1000(?: DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus)? systemctl --user is-active xr-driver',
-        'XDG_RUNTIME_DIR=/run/user/\\$(id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(id -u)/bus ${pkgs.systemd}/bin/systemctl --user is-active xr-driver',
-        text,
-        count=1,
-    )
-
-    pattern = r'ipc\.is_driver_running\(as_user=decky\.DECKY_USER\)'
-    replacement = """try:
-            subprocess.check_output([
-                '${pkgs.shadow}/bin/su', '-l', '-c',
-                'XDG_RUNTIME_DIR=/run/user/\\$(id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(id -u)/bus ${pkgs.systemd}/bin/systemctl --user is-active xr-driver',
-                decky.DECKY_USER,
-            ], stderr=subprocess.STDOUT)
-            return True
-        except subprocess.CalledProcessError as exc:
-            decky.logger.error(f\\"Error checking driver status {exc.output}\\")
-            return False
-        except FileNotFoundError as exc:
-            decky.logger.error(f\\"Error checking driver status {exc}\\")
-            return False"""
-    text, count = re.subn(pattern, replacement, text, count=1)
-    if count != 1:
-        print("failed to patch driver status check", file=sys.stderr)
-        sys.exit(1)
 
     path.write_text(text, encoding="utf-8")
     PY
@@ -93,105 +236,9 @@ mkDeckyPlugin {
   buildCommand = ''
     pnpm build
 
-    echo "Creating NixOS-compatible setup wrapper..."
     mkdir -p bin
     cp ${breezyVulkanBinary} bin/breezyVulkan-x86_64.tar.gz
-
-    cat > bin/breezy_vulkan_setup << 'EOF'
-    #!/usr/bin/env bash
-    # NixOS-compatible breezy setup wrapper
-
-    set -eu
-
-    if [ "$(id -u)" = "0" ]; then
-       echo "Running as root - proceeding with setup"
-    else
-       echo "Running as user - this is expected in NixOS"
-    fi
-
-    target_user="''${DECKY_USER:-''${SUDO_USER:-''${USER:-deck}}}"
-    target_home="$(${pkgs.glibc.bin}/bin/getent passwd "$target_user" | while IFS=: read -r _ _ _ _ _ home _; do printf '%s' "$home"; done)"
-
-    if [ -z "$target_home" ]; then
-      echo "Could not resolve home directory for user: $target_user"
-      exit 1
-    fi
-
-    start_dir=$(pwd)
-    ARCH=$(uname -m)
-    if [ "$ARCH" != "x86_64" ]; then
-      echo "Breezy Vulkan only supports x86_64 currently"
-      exit 1
-    fi
-
-    metrics_version_arg=""
-    binary_path_arg=""
-
-    while [[ $# -gt 0 ]]; do
-      case $1 in
-        -v)
-          metrics_version_arg="$2"
-          shift 2
-          ;;
-        *)
-          binary_path_arg="$1"
-          shift
-          ;;
-      esac
-    done
-
-    if [ -z "$binary_path_arg" ]; then
-      echo "No breezy vulkan binary path supplied"
-      exit 1
-    fi
-
-    tmp_dir="$(${pkgs.coreutils}/bin/mktemp -d -t breezy-vulkan-XXXXXX)"
-    cleanup() {
-      if [ -n "''${tmp_dir:-}" ] && [ -d "$tmp_dir" ]; then
-        rm -rf "$tmp_dir"
-      fi
-    }
-    trap cleanup EXIT
-
-    pushd "$tmp_dir" > /dev/null
-
-    if [[ "$binary_path_arg" = /* ]]; then
-      abs_path="$binary_path_arg"
-    else
-      abs_path="$(${pkgs.coreutils}/bin/realpath "$start_dir/$binary_path_arg")"
-    fi
-    cp "$abs_path" "$tmp_dir"
-
-    echo "Created temp directory: $tmp_dir"
-    echo "Extracting to: ''${tmp_dir}/breezy_vulkan"
-    ${pkgs.gzip}/bin/gzip -dc "$(basename "$binary_path_arg")" | ${pkgs.gnutar}/bin/tar -xf -
-
-    pushd breezy_vulkan > /dev/null
-
-    echo "Cleaning up the previous installation"
-    echo "Copying the breezy_vulkan scripts to $target_home/.local/bin and related files to $target_home/.local/share/breezy_vulkan"
-
-    mkdir -p "$target_home/.local/bin"
-    mkdir -p "$target_home/.local/share/breezy_vulkan"
-
-    echo "Installing xrDriver"
-    echo "version=$metrics_version_arg" > "$target_home/.local/share/breezy_vulkan/manifest"
-
-    cat > "$target_home/.local/bin/breezy_vulkan_verify" << 'VERIFY_EOF'
-    #!/bin/bash
-    echo "Verification succeeded"
-    VERIFY_EOF
-    chmod +x "$target_home/.local/bin/breezy_vulkan_verify"
-    ${pkgs.coreutils}/bin/chown -R "$target_user" "$target_home/.local/bin" "$target_home/.local/share/breezy_vulkan"
-
-    echo "Skipping udev rules installation - handled by NixOS configuration"
-    echo "XRGaming setup completed successfully"
-
-    popd > /dev/null
-    popd > /dev/null
-    echo "Deleting temp directory: ''${tmp_dir}"
-    EOF
-    chmod +x bin/breezy_vulkan_setup
+    install -m 0755 ${breezySetupWrapper}/bin/breezy_vulkan_setup bin/breezy_vulkan_setup
   '';
 
   executablePaths = [ "*/bin/*" ];

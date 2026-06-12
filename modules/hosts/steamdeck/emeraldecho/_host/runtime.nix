@@ -1,4 +1,8 @@
 {
+  # SteamOS escape hatch:
+  # Home Manager can reconcile the `deck` user environment, but the immutable
+  # base OS still owns `/etc` and mount activation. This script only patches in
+  # the extra Steam library mount that the host needs.
   setupSteamLibraryMount = ''
     if command -v steamos-readonly >/dev/null 2>&1; then
       echo "Checking Steam library mount setup..."
