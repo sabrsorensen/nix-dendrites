@@ -25,12 +25,45 @@ let
     valueType;
 
   deckyLoaderPackage = pkgs.decky-loader.overridePythonAttrs (old: {
-    patches = (old.patches or [ ]) ++ [ ./decky-loader-paths.patch ];
     postPatch = (old.postPatch or "") + ''
-      substituteInPlace backend/decky_loader/localplatform/localplatformlinux.py \
-        --replace-fail '@systemctl@' '${pkgs.systemd}/bin/systemctl'
-      substituteInPlace backend/decky_loader/helpers.py \
-        --replace-fail '@python3@' '${pkgs.python3}/bin/python3'
+      python3 - <<'PY'
+      import pathlib
+      import sys
+
+      files = {
+          "backend/decky_loader/localplatform/localplatformlinux.py": [
+              (
+                  'env: ENV | None = {"LD_LIBRARY_PATH": ""}',
+                  'env: ENV | None = {"LD_LIBRARY_PATH": "", "PATH": os.environ.get("PATH", "")}',
+              ),
+              ('["systemctl", "is-active", service_name]', '["${pkgs.systemd}/bin/systemctl", "is-active", service_name]'),
+              ('["systemctl", "daemon-reload"]', '["${pkgs.systemd}/bin/systemctl", "daemon-reload"]'),
+              ('["systemctl", "restart", service_name]', '["${pkgs.systemd}/bin/systemctl", "restart", service_name]'),
+              ('["systemctl", "stop", service_name]', '["${pkgs.systemd}/bin/systemctl", "stop", service_name]'),
+              ('["systemctl", "start", service_name]', '["${pkgs.systemd}/bin/systemctl", "start", service_name]'),
+          ],
+          "backend/decky_loader/helpers.py": [
+              (
+                  '["python3" if localplatform.ON_LINUX else "python", "-c",',
+                  '["${pkgs.python3}/bin/python3" if localplatform.ON_LINUX else "python", "-c",',
+              ),
+              (
+                  'env={} if localplatform.ON_LINUX else None',
+                  'env={"PATH": os.environ.get("PATH", "")} if localplatform.ON_LINUX else None',
+              ),
+          ],
+      }
+
+      for file_name, replacements in files.items():
+          path = pathlib.Path(file_name)
+          text = path.read_text(encoding="utf-8")
+          for old, new in replacements:
+              if old not in text:
+                  print(f"missing expected text in {file_name}: {old}", file=sys.stderr)
+                  sys.exit(1)
+              text = text.replace(old, new)
+          path.write_text(text, encoding="utf-8")
+      PY
     '';
   });
 
