@@ -43,8 +43,6 @@ mkDeckyPlugin {
     replacements = {
         'del env_copy["LD_LIBRARY_PATH"]': 'env_copy.pop("LD_LIBRARY_PATH", None)',
         "['su', '-l', '-c',": "['${pkgs.shadow}/bin/su', '-l', '-c',",
-        'XDG_RUNTIME_DIR=/run/user/1000 systemctl --user is-active xr-driver':
-            'XDG_RUNTIME_DIR=/run/user/\\$(id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(id -u)/bus ${pkgs.systemd}/bin/systemctl --user is-active xr-driver',
     }
 
     for old, new in replacements.items():
@@ -52,6 +50,13 @@ mkDeckyPlugin {
             print(f"missing expected text: {old}", file=sys.stderr)
             sys.exit(1)
         text = text.replace(old, new)
+
+    text = re.sub(
+        r'XDG_RUNTIME_DIR=/run/user/1000(?: DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus)? systemctl --user is-active xr-driver',
+        'XDG_RUNTIME_DIR=/run/user/\\$(id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(id -u)/bus ${pkgs.systemd}/bin/systemctl --user is-active xr-driver',
+        text,
+        count=1,
+    )
 
     pattern = r'ipc\.is_driver_running\(as_user=decky\.DECKY_USER\)'
     replacement = """try:
