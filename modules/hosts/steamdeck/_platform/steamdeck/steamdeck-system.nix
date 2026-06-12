@@ -34,6 +34,12 @@
       ];
       max-jobs = "auto";
     };
+    nix.gc = {
+      automatic = true;
+      dates = "daily";
+      options = "--delete-older-than 7d";
+      persistent = true;
+    };
 
     # The Deck has limited internal storage, so prefer a smaller retained Nix
     # footprint than the shared workstation defaults.
