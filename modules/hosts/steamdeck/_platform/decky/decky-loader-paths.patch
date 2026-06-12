@@ -1,0 +1,64 @@
+diff --git a/backend/decky_loader/helpers.py b/backend/decky_loader/helpers.py
+index 88f7307..9f8cf41 100644
+--- a/backend/decky_loader/helpers.py
++++ b/backend/decky_loader/helpers.py
+@@ -94,9 +94,9 @@ user_agent = f"Decky/{get_loader_version()} (https://decky.xyz)"
+ def get_system_pythonpaths() -> list[str]:
+     try:
+         # run as normal normal user if on linux to also include user python paths
+-        proc = subprocess.run(["python3" if localplatform.ON_LINUX else "python", "-c", "import sys; print('\\n'.join(x for x in sys.path if x))"],
++        proc = subprocess.run(["@python3@" if localplatform.ON_LINUX else "python", "-c", "import sys; print('\\n'.join(x for x in sys.path if x))"],
+         # TODO make this less insane
+-                              capture_output=True, user=localplatform.localplatform._get_user_id() if localplatform.ON_LINUX else None, env={} if localplatform.ON_LINUX else None) # pyright: ignore [reportPrivateUsage]
++                              capture_output=True, user=localplatform.localplatform._get_user_id() if localplatform.ON_LINUX else None, env={"PATH": os.environ.get("PATH", "")} if localplatform.ON_LINUX else None) # pyright: ignore [reportPrivateUsage]
+         
+         proc.check_returncode()
+ 
+diff --git a/backend/decky_loader/localplatform/localplatformlinux.py b/backend/decky_loader/localplatform/localplatformlinux.py
+index 28a30e6..f008b38 100644
+--- a/backend/decky_loader/localplatform/localplatformlinux.py
++++ b/backend/decky_loader/localplatform/localplatformlinux.py
+@@ -11,7 +11,7 @@ logger = logging.getLogger("localplatform")
+ # subprocess._ENV
+ ENV = Mapping[str, str]
+ ProcessIO = int | IO[Any] | None
+-async def run(args: list[str], stdin: ProcessIO = DEVNULL, stdout: ProcessIO = PIPE, stderr: ProcessIO = PIPE, env: ENV | None = {"LD_LIBRARY_PATH": ""}) -> tuple[Process, bytes | None, bytes | None]:
++async def run(args: list[str], stdin: ProcessIO = DEVNULL, stdout: ProcessIO = PIPE, stderr: ProcessIO = PIPE, env: ENV | None = {"LD_LIBRARY_PATH": "", "PATH": os.environ.get("PATH", "")}) -> tuple[Process, bytes | None, bytes | None]:
+     proc = await create_subprocess_exec(args[0], *(args[1:]), stdin=stdin, stdout=stdout, stderr=stderr, env=env)
+     proc_stdout, proc_stderr = await proc.communicate()
+     return (proc, proc_stdout, proc_stderr)
+@@ -138,13 +138,13 @@ def setuid(user : UserType = UserType.HOST_USER):
+         raise Exception("Unknown user type")
+ 
+ async def service_active(service_name : str) -> bool:
+-    res, _, _ = await run(["systemctl", "is-active", service_name], stdout=DEVNULL, stderr=DEVNULL)
++    res, _, _ = await run(["@systemctl@", "is-active", service_name], stdout=DEVNULL, stderr=DEVNULL)
+     return res.returncode == 0
+ 
+ async def service_restart(service_name : str, block : bool = True) -> bool:
+-    await run(["systemctl", "daemon-reload"])
++    await run(["@systemctl@", "daemon-reload"])
+     logger.info("Systemd reload done.")
+-    cmd = ["systemctl", "restart", service_name]
++    cmd = ["@systemctl@", "restart", service_name]
+ 
+     if not block:
+         cmd.append("--no-block")
+@@ -157,13 +157,13 @@ async def service_stop(service_name : str) -> bool:
+         # Service isn't running. pretend we stopped it
+         return True
+ 
+-    cmd = ["systemctl", "stop", service_name]
++    cmd = ["@systemctl@", "stop", service_name]
+     res, _, _ = await run(cmd, stdout=PIPE, stderr=STDOUT)
+     return res.returncode == 0
+ 
+ async def service_start(service_name : str) -> bool:
+     if await service_active(service_name):
+         # Service is running. pretend we started it
+         return True
+ 
+-    cmd = ["systemctl", "start", service_name]
++    cmd = ["@systemctl@", "start", service_name]
+     res, _, _ = await run(cmd, stdout=PIPE, stderr=STDOUT)
+     return res.returncode == 0

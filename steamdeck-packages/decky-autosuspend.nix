@@ -25,15 +25,6 @@ mkDeckyPlugin {
   '';
 
   buildMessage = "Building AutoSuspend frontend...";
-  buildCommand = ''
-    pnpm config set auto-install-peers true
-    pnpm install --no-frozen-lockfile || {
-      echo "Standard install failed, trying with legacy peer deps..."
-      rm -rf node_modules
-      pnpm install --no-frozen-lockfile --legacy-peer-deps
-    }
-    pnpm build
-  '';
 
   meta = with lib; {
     description = "Automatically suspend Steam Deck on low power";

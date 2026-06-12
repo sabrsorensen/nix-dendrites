@@ -87,10 +87,10 @@
           projects."/home/ssorensen/src/nix-dendrites" = {
             trust_level = "trusted";
           };
-          projects."/home/ssorensen/src/" = {
+          projects."/home/ssorensen/src/*" = {
             trust_level = "trusted";
           };
-          projects."/home/ssorensen/higi/" = {
+          projects."/home/ssorensen/higi/*" = {
             trust_level = "trusted";
           };
           tui.model_availability_nux = {

@@ -25,16 +25,12 @@ let
     valueType;
 
   deckyLoaderPackage = pkgs.decky-loader.overridePythonAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./decky-loader-paths.patch ];
     postPatch = (old.postPatch or "") + ''
       substituteInPlace backend/decky_loader/localplatform/localplatformlinux.py \
-        --replace-fail 'env: ENV | None = {"LD_LIBRARY_PATH": ""}' \
-                       'env: ENV | None = {"LD_LIBRARY_PATH": "", "PATH": os.environ.get("PATH", "")}' \
-        --replace-warn '"systemctl"' '"${pkgs.systemd}/bin/systemctl"'
-
+        --replace-fail '@systemctl@' '${pkgs.systemd}/bin/systemctl'
       substituteInPlace backend/decky_loader/helpers.py \
-        --replace-fail 'env={} if localplatform.ON_LINUX else None' \
-                       'env={"PATH": os.environ.get("PATH", "")} if localplatform.ON_LINUX else None' \
-        --replace-warn '"python3"' '"${pkgs.python3}/bin/python3"'
+        --replace-fail '@python3@' '${pkgs.python3}/bin/python3'
     '';
   });
 

@@ -33,13 +33,13 @@ mkDeckyPlugin {
 
   preConfigure = ''
     sed -i 's/del env_copy\["LD_LIBRARY_PATH"\]/env_copy.pop("LD_LIBRARY_PATH", None)/' main.py
-    sed -i "s|\\['su', '-l', '-c',|['/run/current-system/sw/bin/su', '-l', '-c',|" main.py
-    sed -i "s|XDG_RUNTIME_DIR=/run/user/1000 systemctl --user is-active xr-driver|XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /run/current-system/sw/bin/systemctl --user is-active xr-driver|" main.py
+    sed -i "s|\\['su', '-l', '-c',|['${pkgs.shadow}/bin/su', '-l', '-c',|" main.py
+    sed -i "s|XDG_RUNTIME_DIR=/run/user/1000 systemctl --user is-active xr-driver|XDG_RUNTIME_DIR=/run/user/\\$(${pkgs.coreutils}/bin/id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(${pkgs.coreutils}/bin/id -u)/bus ${pkgs.systemd}/bin/systemctl --user is-active xr-driver|" main.py
     sed -i "/ipc\\.is_driver_running(as_user=decky\\.DECKY_USER)/c\\
         try:\\
             subprocess.check_output([\\
-                '/run/current-system/sw/bin/su', '-l', '-c',\\
-                'XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /run/current-system/sw/bin/systemctl --user is-active xr-driver',\\
+                '${pkgs.shadow}/bin/su', '-l', '-c',\\
+                'XDG_RUNTIME_DIR=/run/user/\\$(${pkgs.coreutils}/bin/id -u) DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(${pkgs.coreutils}/bin/id -u)/bus ${pkgs.systemd}/bin/systemctl --user is-active xr-driver',\\
                 decky.DECKY_USER,\\
             ], stderr=subprocess.STDOUT)\\
             return True\\
@@ -71,7 +71,7 @@ mkDeckyPlugin {
     #!/usr/bin/env bash
     # NixOS-compatible breezy setup wrapper
 
-    set -e
+    set -eu
 
     if [ "$(id -u)" = "0" ]; then
        echo "Running as root - proceeding with setup"
@@ -79,8 +79,8 @@ mkDeckyPlugin {
        echo "Running as user - this is expected in NixOS"
     fi
 
-    target_user="''${USER:-sam}"
-    target_home="$(/run/current-system/sw/bin/getent passwd "$target_user" | while IFS=: read -r _ _ _ _ _ home _; do printf '%s' "$home"; done)"
+    target_user="''${DECKY_USER:-''${SUDO_USER:-''${USER:-deck}}}"
+    target_home="$(${pkgs.glibc.bin}/bin/getent passwd "$target_user" | while IFS=: read -r _ _ _ _ _ home _; do printf '%s' "$home"; done)"
 
     if [ -z "$target_home" ]; then
       echo "Could not resolve home directory for user: $target_user"
@@ -115,19 +115,26 @@ mkDeckyPlugin {
       exit 1
     fi
 
-    tmp_dir=$(mktemp -d -t breezy-vulkan-XXXXXX)
-    pushd $tmp_dir > /dev/null
+    tmp_dir="$(${pkgs.coreutils}/bin/mktemp -d -t breezy-vulkan-XXXXXX)"
+    cleanup() {
+      if [ -n "''${tmp_dir:-}" ] && [ -d "$tmp_dir" ]; then
+        rm -rf "$tmp_dir"
+      fi
+    }
+    trap cleanup EXIT
+
+    pushd "$tmp_dir" > /dev/null
 
     if [[ "$binary_path_arg" = /* ]]; then
       abs_path="$binary_path_arg"
     else
-      abs_path=$(realpath "$start_dir/$binary_path_arg")
+      abs_path="$(${pkgs.coreutils}/bin/realpath "$start_dir/$binary_path_arg")"
     fi
-    cp $abs_path $tmp_dir
+    cp "$abs_path" "$tmp_dir"
 
     echo "Created temp directory: $tmp_dir"
     echo "Extracting to: ''${tmp_dir}/breezy_vulkan"
-    /run/current-system/sw/bin/gzip -dc "$(basename "$binary_path_arg")" | /run/current-system/sw/bin/tar -xf -
+    ${pkgs.gzip}/bin/gzip -dc "$(basename "$binary_path_arg")" | ${pkgs.gnutar}/bin/tar -xf -
 
     pushd breezy_vulkan > /dev/null
 
@@ -145,7 +152,7 @@ mkDeckyPlugin {
     echo "Verification succeeded"
     VERIFY_EOF
     chmod +x "$target_home/.local/bin/breezy_vulkan_verify"
-    /run/current-system/sw/bin/chown -R "$target_user" "$target_home/.local/bin" "$target_home/.local/share/breezy_vulkan"
+    ${pkgs.coreutils}/bin/chown -R "$target_user" "$target_home/.local/bin" "$target_home/.local/share/breezy_vulkan"
 
     echo "Skipping udev rules installation - handled by NixOS configuration"
     echo "XRGaming setup completed successfully"
@@ -153,7 +160,6 @@ mkDeckyPlugin {
     popd > /dev/null
     popd > /dev/null
     echo "Deleting temp directory: ''${tmp_dir}"
-    rm -rf $tmp_dir
     EOF
     chmod +x bin/breezy_vulkan_setup
   '';
