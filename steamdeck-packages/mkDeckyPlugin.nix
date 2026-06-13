@@ -20,6 +20,7 @@
   patches ? [ ],
   prePatch ? null,
   postPatch ? null,
+  sourceReplacementScript ? null,
   preConfigure ? null,
   postConfigure ? null,
   preBuild ? null,
@@ -65,11 +66,16 @@ stdenv.mkDerivation rec {
   inherit
     prePatch
     postPatch
-    preConfigure
     postConfigure
     preBuild
     postBuild
     ;
+
+  preConfigure =
+    lib.optionalString (sourceReplacementScript != null) ''
+      ${python3}/bin/python3 ${sourceReplacementScript}
+    ''
+    + lib.optionalString (preConfigure != null) preConfigure;
 
   buildPhase = ''
     runHook preBuild

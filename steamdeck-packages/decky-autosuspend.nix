@@ -2,8 +2,24 @@
   lib,
   fetchFromGitHub,
   mkDeckyPlugin,
+  pkgs,
 }:
 
+let
+  sourceReplacementScript = import ../lib/write-source-replacement-script.nix { inherit pkgs; } {
+    scriptName = "decky-autosuspend-lockfile";
+    defaultFile = "pnpm-lock.yaml";
+    replacements = [
+      {
+        kind = "regex";
+        reason = "Normalize the lockfile version to the format expected by fetchPnpmDeps.";
+        pattern = ''lockfileVersion: .*'';
+        replacement = ''lockfileVersion: "6.0"'';
+        expectedCount = 1;
+      }
+    ];
+  };
+in
 mkDeckyPlugin {
   pname = "decky-autosuspend";
   version = "2.2.0";
@@ -16,14 +32,7 @@ mkDeckyPlugin {
   };
 
   hash = "sha256-HNkAGz7I+JDa1n/eTsDy1CDYMCpI831Q+7TB9Nq8qeI=";
-
-  prePatch = ''
-    if [ -f pnpm-lock.yaml ]; then
-      echo "Fixing pnpm lockfile version..."
-      sed -i 's/lockfileVersion: .*/lockfileVersion: "6.0"/' pnpm-lock.yaml
-    fi
-  '';
-
+  sourceReplacementScript = sourceReplacementScript;
   buildMessage = "Building AutoSuspend frontend...";
 
   meta = with lib; {

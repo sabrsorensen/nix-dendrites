@@ -32,6 +32,7 @@
       isPi = hostCfg.roles.rpi;
       isDeck = hostCfg.roles.steamdeck;
       isWsl = hostCfg.roles.wsl;
+      hasPodman = osConfig ? virtualisation && osConfig.virtualisation ? podman && (osConfig.virtualisation.podman.enable or false);
       sleepySystem = hostCfg.deploy.sleepy;
 
       hasNixFlake = nixFlakePath != null;
@@ -378,6 +379,148 @@
           # === WSL-SPECIFIC FUNCTIONS ===
           choco = if isWsl then "choco.exe $argv" else null;
           wsl = if isWsl then "wsl.exe $argv" else null;
+
+          # === PODMAN / OCI CONTAINER FUNCTIONS ===
+          podmanSystem = if hasPodman then "sudo podman $argv" else null;
+          pds = if hasPodman then "podmanSystem" else null;
+
+          podmanSystemPs =
+            if hasPodman then
+              "sudo podman ps --format 'table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.RunningFor}}'"
+            else
+              null;
+          podmanSystemPsAll =
+            if hasPodman then
+              "sudo podman ps -a --format 'table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.RunningFor}}'"
+            else
+              null;
+          podmanUserPs =
+            if hasPodman then
+              "podman ps --format 'table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.RunningFor}}'"
+            else
+              null;
+          podmanUserPsAll =
+            if hasPodman then
+              "podman ps -a --format 'table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.RunningFor}}'"
+            else
+              null;
+
+          pps = if hasPodman then "podmanSystemPs" else null;
+          ppsa = if hasPodman then "podmanSystemPsAll" else null;
+          ppu = if hasPodman then "podmanUserPs" else null;
+          ppua = if hasPodman then "podmanUserPsAll" else null;
+          dps = if hasPodman then "podmanSystemPsAll" else null;
+
+          podmanUnitName =
+            if hasPodman then
+              ''
+                set name $argv[1]
+                if test -z "$name"
+                    return 1
+                end
+
+                if string match -q 'podman-*.service' -- "$name"
+                    echo "$name"
+                else if string match -q '*.service' -- "$name"
+                    echo "podman-"(string replace -r '\.service$' "" -- "$name")".service"
+                else
+                    echo "podman-$name.service"
+                end
+              ''
+            else
+              null;
+
+          podmanContainerName =
+            if hasPodman then
+              ''
+                set unit (podmanUnitName $argv[1])
+                or return 1
+                string replace -r '^podman-(.*)\.service$' '$1' -- "$unit"
+              ''
+            else
+              null;
+
+          podmanServices =
+            if hasPodman then
+              "systemctl list-units --type=service --all 'podman-*.service'"
+            else
+              null;
+          pcs = if hasPodman then "podmanServices" else null;
+
+          podmanServiceStatus =
+            if hasPodman then
+              ''
+                for name in $argv
+                    set unit (podmanUnitName $name)
+                    or return 1
+                    sudo systemctl status $unit
+                end
+              ''
+            else
+              null;
+          podmanServiceLogs =
+            if hasPodman then
+              ''
+                for name in $argv
+                    set unit (podmanUnitName $name)
+                    or return 1
+                    sudo journalctl -u $unit -f
+                end
+              ''
+            else
+              null;
+          podmanServicePull =
+            if hasPodman then
+              ''
+                if test (count $argv) -eq 0
+                    echo "Usage: podmanServicePull <container|service> [...]"
+                    return 1
+                end
+
+                for name in $argv
+                    set container (podmanContainerName $name)
+                    or return 1
+                    set image (sudo podman inspect --format '{{.ImageName}}' $container 2>/dev/null)
+                    if test -z "$image"
+                        echo "No existing rootful container found for $name" >&2
+                        return 1
+                    end
+
+                    echo "Pulling $image"
+                    sudo podman pull $image
+                    or return $status
+                end
+              ''
+            else
+              null;
+          podmanServiceUp =
+            if hasPodman then
+              ''
+                if test (count $argv) -eq 0
+                    echo "Usage: podmanServiceUp <container|service> [...]"
+                    return 1
+                end
+
+                for name in $argv
+                    set unit (podmanUnitName $name)
+                    or return 1
+                    if sudo systemctl is-active --quiet $unit
+                        sudo systemctl restart $unit
+                    else
+                        sudo systemctl start $unit
+                    end
+                    or return $status
+                end
+              ''
+            else
+              null;
+
+          pcss = if hasPodman then "podmanServiceStatus" else null;
+          pcsl = if hasPodman then "podmanServiceLogs" else null;
+          pcp = if hasPodman then "podmanServicePull" else null;
+          pcu = if hasPodman then "podmanServiceUp" else null;
+          dcp = if hasPodman then "podmanServicePull" else null;
+          dcu = if hasPodman then "podmanServiceUp" else null;
         };
       };
     };

@@ -7,7 +7,8 @@
         openFirewall = true;
         allowSFTP = lib.mkDefault false;
         settings = {
-          PasswordAuthentication = true;
+          PasswordAuthentication = lib.mkDefault false;
+          KbdInteractiveAuthentication = lib.mkDefault false;
           PermitRootLogin = "no";
         };
       };

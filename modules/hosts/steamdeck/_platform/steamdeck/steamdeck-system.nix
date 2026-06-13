@@ -44,6 +44,7 @@
         keep-outputs = lib.mkForce false;
       };
     };
+    programs.nix-ld.enable = lib.mkForce false;
 
     services.displayManager.sddm.enable = true;
     services.desktopManager.plasma6.enable = true;

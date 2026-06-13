@@ -66,12 +66,26 @@
       entrypoint = pkgs.writeShellScript "ankerctl-entrypoint.sh" ''
         set -eu
 
+        ensure_path_ownership() {
+          path="$1"
+
+          if [ ! -d "$path" ]; then
+            return 0
+          fi
+
+          mismatched_path="$(${pkgs.findutils}/bin/find "$path" -xdev \( ! -uid ${toString containerUid} -o ! -gid ${toString containerGid} \) -print -quit)"
+          if [ -z "$mismatched_path" ]; then
+            return 0
+          fi
+
+          echo "Repairing ankerctl ownership under $path..."
+          ${pkgs.findutils}/bin/find "$path" -xdev \( ! -uid ${toString containerUid} -o ! -gid ${toString containerGid} \) \
+            -exec ${pkgs.coreutils}/bin/chown ${toString containerUid}:${toString containerGid} '{}' +
+        }
+
         if [ "$(${pkgs.coreutils}/bin/id -u)" -eq 0 ]; then
           for path in ${containerConfigDir} /captures /logs; do
-            if [ -d "$path" ]; then
-              echo "Fixing ownership under $path for ankerctl..."
-              ${pkgs.coreutils}/bin/chown -R ${toString containerUid}:${toString containerGid} "$path"
-            fi
+            ensure_path_ownership "$path"
           done
 
           exec ${pkgs.util-linux}/bin/setpriv \
@@ -111,6 +125,7 @@
           pkgs.cacert
           pkgs.coreutils
           pkgs.ffmpeg
+          pkgs.findutils
           pkgs.util-linux
           pythonEnv
         ];
@@ -160,9 +175,9 @@
       ];
 
       systemd.tmpfiles.rules = [
-        "d ${dataDir} 0750 root root -"
-        "d ${capturesDir} 0750 root root -"
-        "d ${logsDir} 0750 root root -"
+        "d ${dataDir} 0750 ${toString containerUid} ${toString containerGid} -"
+        "d ${capturesDir} 0750 ${toString containerUid} ${toString containerGid} -"
+        "d ${logsDir} 0750 ${toString containerUid} ${toString containerGid} -"
       ];
 
       sops.secrets = lib.optionalAttrs hasAnkerctlEnv {

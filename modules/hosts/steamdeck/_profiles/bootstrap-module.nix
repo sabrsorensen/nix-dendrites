@@ -9,6 +9,14 @@ let
   mkBaseModule = import ./base-module.nix { inherit host; };
   isDualBoot = bootMode == "dual";
   steamUser = host.users.steam.name;
+  returnToGamingEntry = {
+    name = "Return to Gaming Mode";
+    exec = "qdbus org.kde.Shutdown /Shutdown logout";
+    icon = "steam";
+    terminal = false;
+    categories = [ "System" ];
+    comment = "Logout and return to Steam";
+  };
 in
 mkBaseModule {
   inherit bootMode;
@@ -51,7 +59,17 @@ mkBaseModule {
       home.username = steamUser;
       home.homeDirectory = "/home/${steamUser}";
       home.stateVersion = "26.05";
-      imports = [ ../_platform/steamdeck/steamdeck-shortcut.nix ];
+      xdg.desktopEntries.return-to-gaming = returnToGamingEntry;
+      home.file."Desktop/return-to-gaming.desktop".text = ''
+        [Desktop Entry]
+        Name=${returnToGamingEntry.name}
+        Exec=${returnToGamingEntry.exec}
+        Icon=${returnToGamingEntry.icon}
+        Terminal=${if returnToGamingEntry.terminal then "true" else "false"}
+        Type=Application
+        Categories=${builtins.concatStringsSep ";" returnToGamingEntry.categories};
+        Comment=${returnToGamingEntry.comment}
+      '';
     };
   };
 }

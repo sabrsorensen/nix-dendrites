@@ -2,8 +2,24 @@
   lib,
   fetchFromGitHub,
   mkDeckyPlugin,
+  pkgs,
 }:
 
+let
+  sourceReplacementScript = import ../lib/write-source-replacement-script.nix { inherit pkgs; } {
+    scriptName = "decky-free-loader-import-path";
+    defaultFile = "main.py";
+    replacements = [
+      {
+        kind = "literal";
+        reason = "Resolve the plugin-local import path without assuming Decky's mutable plugins directory layout.";
+        old = ''sys.path.append(os.path.abspath("../plugins/free-loader"))'';
+        new = ''sys.path.append(os.path.dirname(os.path.abspath(__file__)))'';
+        expectedCount = 1;
+      }
+    ];
+  };
+in
 mkDeckyPlugin {
   pname = "decky-free-loader";
   version = "unstable";
@@ -18,10 +34,7 @@ mkDeckyPlugin {
   hash = "sha256-JiZYfSiDUEXSZ0Vwv/B/+twXm/fHOr6uQMeFc/FCKPI=";
   buildMessage = "Building Free Loader frontend...";
   executablePaths = [ "*/bin/*" ];
-  extraInstall = ''
-    echo "Fixing Free Loader plugin import path for NixOS..."
-    sed -i 's|sys\.path\.append(os\.path\.abspath("\.\.\/plugins\/free-loader"))|sys.path.append(os.path.dirname(os.path.abspath(__file__)))|' $out/main.py
-  '';
+  sourceReplacementScript = sourceReplacementScript;
 
   meta = with lib; {
     description = "Notifications for free games on Steam, GOG, and Epic Games";

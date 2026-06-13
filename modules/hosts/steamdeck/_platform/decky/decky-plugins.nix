@@ -37,8 +37,11 @@ in
         RemainAfterExit = true;
       };
       script = ''
+        primary_group="$(id -gn ${cfg.user})"
+
         # Create plugins directory
         mkdir -p ${cfg.stateDir}/plugins
+        chown ${cfg.user}:"$primary_group" ${cfg.stateDir} ${cfg.stateDir}/plugins
 
         # Remove old versions of plugins we're about to install
         ${lib.concatStrings (
@@ -55,11 +58,9 @@ in
           lib.mapAttrsToList (name: plugin: ''
             echo "Installing plugin: ${name}"
             ln -sf ${plugin} ${cfg.stateDir}/plugins/${name}
+            chown -h ${cfg.user}:"$primary_group" ${cfg.stateDir}/plugins/${name}
           '') cfg.plugins
         )}
-
-        # Set ownership (query user's primary group dynamically)
-        chown -R ${cfg.user}:$(id -gn ${cfg.user}) ${cfg.stateDir}
       '';
     };
 

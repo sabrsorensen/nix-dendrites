@@ -15,13 +15,15 @@ in
     (self.lib.factory.user username true)
     {
       nixos."${username}" =
-        { ... }:
+        { lib, ... }:
         {
           imports = with inputs.self.modules.nixos; [
             sam-system-base
             sam-system-private
             virtualisation
           ];
+
+          users.users."${username}".extraGroups = lib.mkAfter [ "podman" ];
         };
     }
 

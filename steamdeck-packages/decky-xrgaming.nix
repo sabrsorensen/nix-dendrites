@@ -7,7 +7,8 @@
 }:
 
 let
-  breezyVulkanBinary = fetchurl {
+  writeSourceReplacementScript = import ../lib/write-source-replacement-script.nix { inherit pkgs; };
+  breezyVulkanPayload = fetchurl {
     url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.9.11/breezyVulkan-x86_64.tar.gz";
     sha256 = "sha256-stp1KLMT5pgFEXDuq4ii80L7/QUlnoFDVJfGeZdX0F0=";
   };
@@ -55,9 +56,25 @@ try:
     }
   ];
 
-  xrGamingMainPyPatchManifest = pkgs.writeText "decky-xrgaming-main-patches.json" (
-    builtins.toJSON xrGamingMainPyPatches
-  );
+  xrGamingMainPyPatchScript = writeSourceReplacementScript {
+    scriptName = "decky-xrgaming-main-patches";
+    defaultFile = "main.py";
+    replacements = xrGamingMainPyPatches;
+  };
+
+  xrGamingBootstrapSubmodules = pkgs.writeShellScript "decky-xrgaming-bootstrap-submodules" ''
+    set -eu
+
+    if [ ! -f .gitmodules ]; then
+      exit 0
+    fi
+
+    export HOME="$TMPDIR"
+    git init
+    git add .
+    git -c user.email="builder@nixos" -c user.name="Nix Builder" commit -m "temp"
+    git submodule update --init --recursive
+  '';
 
   breezySetupWrapper = pkgs.writeShellApplication {
     name = "breezy_vulkan_setup";
@@ -161,6 +178,14 @@ try:
       echo "Deleting temp directory: ''${tmp_dir}"
     '';
   };
+
+  xrGamingBundleRuntimeAssets = pkgs.writeShellScript "decky-xrgaming-bundle-runtime-assets" ''
+    set -eu
+
+    mkdir -p bin
+    cp ${breezyVulkanPayload} bin/breezyVulkan-x86_64.tar.gz
+    install -m 0755 ${breezySetupWrapper}/bin/breezy_vulkan_setup bin/breezy_vulkan_setup
+  '';
 in
 mkDeckyPlugin {
   pname = "decky-XRGaming";
@@ -183,59 +208,14 @@ mkDeckyPlugin {
 
   # Upstream assumes SteamOS-style user state and command lookup. Keep the
   # compatibility delta explicit and fail loudly when upstream source moves.
+  sourceReplacementScript = xrGamingMainPyPatchScript;
   preConfigure = ''
-    python3 - <<'PY'
-    import json
-    import pathlib
-    import re
-    import sys
-
-    path = pathlib.Path("main.py")
-    text = path.read_text(encoding="utf-8")
-    patches = json.loads(pathlib.Path("${xrGamingMainPyPatchManifest}").read_text())
-
-    for patch in patches:
-        if patch["kind"] == "literal":
-            old = patch["old"]
-            count = text.count(old)
-            min_count = patch.get("minCount", patch.get("expectedCount", 1))
-            max_count = patch.get("maxCount", patch.get("expectedCount", 1))
-            if count < min_count or count > max_count:
-                print(f'unexpected match count: {patch["reason"]}', file=sys.stderr)
-                print(f'expected between {min_count} and {max_count}, found {count}', file=sys.stderr)
-                print(old, file=sys.stderr)
-                sys.exit(1)
-            if count != 0:
-                text = text.replace(old, patch["new"], count)
-            continue
-
-        min_count = patch.get("minCount", patch.get("expectedCount", 1))
-        max_count = patch.get("maxCount", patch.get("expectedCount", 1))
-        text, count = re.subn(patch["pattern"], patch["replacement"], text, count=max_count)
-        if count < min_count or count > max_count:
-            print(f'failed to apply patch: {patch["reason"]}', file=sys.stderr)
-            print(f'expected between {min_count} and {max_count}, found {count}', file=sys.stderr)
-            sys.exit(1)
-
-    path.write_text(text, encoding="utf-8")
-    PY
-
-    if [ -f .gitmodules ]; then
-      export HOME=$TMPDIR
-      git init
-      git add .
-      git -c user.email="builder@nixos" -c user.name="Nix Builder" commit -m "temp"
-      git submodule update --init --recursive
-    fi
+    ${xrGamingBootstrapSubmodules}
   '';
 
   buildMessage = "Building XRGaming plugin frontend...";
-  buildCommand = ''
-    pnpm build
-
-    mkdir -p bin
-    cp ${breezyVulkanBinary} bin/breezyVulkan-x86_64.tar.gz
-    install -m 0755 ${breezySetupWrapper}/bin/breezy_vulkan_setup bin/breezy_vulkan_setup
+  postBuild = ''
+    ${xrGamingBundleRuntimeAssets}
   '';
 
   executablePaths = [ "*/bin/*" ];

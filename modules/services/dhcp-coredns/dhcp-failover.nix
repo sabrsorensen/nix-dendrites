@@ -12,6 +12,7 @@
         && config.services.dhcp-coredns.enable;
       cfg = config.services.dhcp-coredns.failover;
       localDomain = config.systemConstants.domain;
+      systemctl = "${config.systemd.package}/bin/systemctl";
 
       dhcpFailoverScript = pkgs.writeShellScript "dhcp-failover" ''
         set -euo pipefail
@@ -46,7 +47,7 @@
         }
 
         get_local_dhcp_status() {
-            if systemctl is-active --quiet "$LOCAL_DHCP_UNIT"; then
+            if ${systemctl} is-active --quiet "$LOCAL_DHCP_UNIT"; then
                 echo "true"
             else
                 echo "false"
@@ -55,12 +56,12 @@
 
         enable_local_dhcp() {
             log "Enabling local DHCP (peer $PEER_NAME is down)"
-            systemctl start "$LOCAL_DHCP_UNIT"
+            ${systemctl} start "$LOCAL_DHCP_UNIT"
         }
 
         disable_local_dhcp() {
             log "Disabling local DHCP (peer $PEER_NAME is active)"
-            systemctl stop "$LOCAL_DHCP_UNIT"
+            ${systemctl} stop "$LOCAL_DHCP_UNIT"
         }
 
         if check_peer_dhcp && check_peer_dns_integration; then

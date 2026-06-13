@@ -2,8 +2,7 @@
   lib,
   fetchFromGitHub,
   mkDeckyPlugin,
-  python3,
-  writeText,
+  pkgs,
   themeConfig ? null,
   callPackage ? null,
 }:
@@ -12,31 +11,35 @@ let
   cssThemeConfigBuilder =
     if callPackage != null then callPackage ./css-theme-config-simple.nix { } else null;
 
-  patchScript = writeText "decky-css-loader-nixos-fix.py" ''
-    #!/usr/bin/env python3
-    import pathlib
-
-    target = pathlib.Path("css_utils.py")
-
-    if not target.exists():
-        print("css_utils.py not found; skipping NixOS compatibility patch")
-        raise SystemExit(0)
-
-    content = target.read_text(encoding="utf-8")
-    original = content
-
-    if "import shutil" not in content:
-        content = content.replace("import os", "import os\nimport shutil", 1)
-
-    content = content.replace("os.symlink(", "shutil.copy2(")
-    content = content.replace("os.link(", "shutil.copy2(")
-
-    if content != original:
-        target.write_text(content, encoding="utf-8")
-        print("Patched css_utils.py for copy-based theme installation")
-    else:
-        print("css_utils.py already compatible; no patch applied")
-  '';
+  patchScript = import ../lib/write-source-replacement-script.nix { inherit pkgs; } {
+    scriptName = "decky-css-loader-nixos-fix";
+    defaultFile = "css_utils.py";
+    replacements = [
+      {
+        kind = "literal";
+        reason = "Ensure shutil is imported for copy-based theme installation.";
+        old = "import os";
+        new = "import os\nimport shutil";
+        expectedCount = 1;
+      }
+      {
+        kind = "literal";
+        reason = "Use copy-based theme installation instead of symlinks.";
+        old = "os.symlink(";
+        new = "shutil.copy2(";
+        minCount = 0;
+        maxCount = 1;
+      }
+      {
+        kind = "literal";
+        reason = "Use copy-based theme installation instead of hard links.";
+        old = "os.link(";
+        new = "shutil.copy2(";
+        minCount = 0;
+        maxCount = 1;
+      }
+    ];
+  };
 
   mkCssLoader =
     {
@@ -57,9 +60,7 @@ let
       postPatch = ''
         cp ${./patches/decky-css-loader-main.py} main.py
       '';
-      preConfigure = ''
-        python3 ${patchScript}
-      '';
+      sourceReplacementScript = patchScript;
       extraInstall = lib.optionalString (themeConfig != null) ''
         cp ${themeConfig} $out/nix-css-themes.json
       '';

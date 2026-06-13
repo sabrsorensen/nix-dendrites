@@ -9,6 +9,14 @@
 let
   sopsKeyPath = "${config.home.homeDirectory}/.ssh/sops_ed25519";
   isSteamDeck = osConfig.my.platform.steamdeck.enable or false;
+  returnToGamingEntry = {
+    name = "Return to Gaming Mode";
+    exec = "qdbus org.kde.Shutdown /Shutdown logout";
+    icon = "steam";
+    terminal = false;
+    categories = [ "System" ];
+    comment = "Logout and return to Steam";
+  };
   xrDriverRuntimeLibs = pkgs.lib.makeLibraryPath (
     with pkgs;
     [
@@ -103,6 +111,20 @@ in
     ".local/share/gamescope/reshade/Shaders/.keep".text = "";
     ".local/share/gamescope/reshade/Textures/.keep".text = "";
     ".local/share/breezy_vulkan/.keep".text = "";
+    "Desktop/return-to-gaming.desktop".text = ''
+      [Desktop Entry]
+      Name=${returnToGamingEntry.name}
+      Exec=${returnToGamingEntry.exec}
+      Icon=${returnToGamingEntry.icon}
+      Terminal=${if returnToGamingEntry.terminal then "true" else "false"}
+      Type=Application
+      Categories=${builtins.concatStringsSep ";" returnToGamingEntry.categories};
+      Comment=${returnToGamingEntry.comment}
+    '';
+  };
+
+  xdg.desktopEntries = lib.mkIf isSteamDeck {
+    return-to-gaming = returnToGamingEntry;
   };
 
   systemd.user.services.xr-driver = lib.mkIf isSteamDeck {

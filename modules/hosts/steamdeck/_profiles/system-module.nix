@@ -46,7 +46,6 @@ mkBaseModule {
 
     home-manager.users.${steamUser}.imports = [
       inputs.self.modules.homeManager.${host.primaryHostName}
-      ../_platform/steamdeck/steamdeck-shortcut.nix
     ];
 
     networking.firewall.allowedTCPPorts = [

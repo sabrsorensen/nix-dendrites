@@ -16,6 +16,7 @@
 
       virtualisation.podman = {
         enable = true;
+        dockerCompat = true;
         # Create the default bridge network for podman
         defaultNetwork.settings.dns_enabled = true;
       };

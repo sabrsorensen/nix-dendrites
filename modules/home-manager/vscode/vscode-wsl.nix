@@ -22,6 +22,9 @@
         "snippets"
         "profiles"
       ];
+      managedPathsFile = pkgs.writeText "vscode-managed-paths.txt" (
+        lib.concatStringsSep "\n" managedPaths + "\n"
+      );
       targetUserDirOverride = cfg.targetUserDir or "";
       allExtensions = lib.flatten (
         lib.mapAttrsToList (_name: profile: profile.extensions) vscodeCfg.profiles
@@ -40,85 +43,104 @@
       extensionIdsFile = pkgs.writeText "vscode-extension-ids.txt" (
         lib.concatStringsSep "\n" extensionIds + "\n"
       );
-      syncScript = pkgs.writeShellScriptBin "vscode-sync-windows" ''
-        set -eu
+      syncScript = pkgs.writeShellApplication {
+        name = "vscode-sync-windows";
+        runtimeInputs = with pkgs; [
+          coreutils
+          findutils
+          gnused
+        ];
+        text = ''
+          set -eu
 
-        install_extensions=0
-        if [ "''${1:-}" = "--install-extensions" ]; then
-          install_extensions=1
-          shift
-        fi
-
-        if [ "$#" -ne 0 ]; then
-          echo "Usage: vscode-sync-windows [--install-extensions]" >&2
-          exit 1
-        fi
-
-        resolve_windows_user_dir() {
-          if [ -n ${lib.escapeShellArg targetUserDirOverride} ]; then
-            printf '%s\n' ${lib.escapeShellArg targetUserDirOverride}
-            return 0
+          install_extensions=0
+          if [ "''${1:-}" = "--install-extensions" ]; then
+            install_extensions=1
+            shift
           fi
 
-          if ! command -v cmd.exe >/dev/null 2>&1 || ! command -v wslpath >/dev/null 2>&1; then
-            return 1
+          if [ "$#" -ne 0 ]; then
+            echo "Usage: vscode-sync-windows [--install-extensions]" >&2
+            exit 1
           fi
 
-          appdata_win="$(cmd.exe /d /c echo %APPDATA% | tr -d '\r')"
-          if [ -z "$appdata_win" ]; then
-            return 1
-          fi
-
-          wslpath -u "$appdata_win/Code/User"
-        }
-
-        sync_tree() {
-          src="$1"
-          dst="$2"
-
-          mkdir -p "$dst"
-
-          for path in ${lib.escapeShellArgs managedPaths}; do
-            rm -rf "$dst/$path"
-            if [ -e "$src/$path" ]; then
-              cp -RL "$src/$path" "$dst/$path"
+          resolve_windows_user_dir() {
+            if [ -n ${lib.escapeShellArg targetUserDirOverride} ]; then
+              printf '%s\n' ${lib.escapeShellArg targetUserDirOverride}
+              return 0
             fi
-          done
-        }
 
-        install_windows_extensions() {
-          if ! command -v cmd.exe >/dev/null 2>&1 || ! command -v where.exe >/dev/null 2>&1; then
-            echo "cmd.exe not found; skipping extension install." >&2
-            return 0
-          fi
-
-          if ! where.exe code.cmd >/dev/null 2>&1; then
-            echo "code.cmd not found on the Windows PATH; skipping extension install." >&2
-            return 0
-          fi
-
-          while IFS= read -r extension_id; do
-            if [ -n "$extension_id" ]; then
-              cmd.exe /d /c code.cmd --install-extension "$extension_id" --force >/dev/null
+            if ! command -v cmd.exe >/dev/null 2>&1 || ! command -v wslpath >/dev/null 2>&1; then
+              return 1
             fi
-          done < ${extensionIdsFile}
-        }
 
-        windows_user_dir="$(resolve_windows_user_dir || true)"
-        if [ -z "$windows_user_dir" ]; then
-          echo "Unable to resolve Windows VS Code User directory; skipping sync." >&2
-          exit 0
-        fi
+            appdata_win="$(cmd.exe /d /c echo %APPDATA% | tr -d '\r')"
+            if [ -z "$appdata_win" ]; then
+              return 1
+            fi
 
-        mkdir -p ${lib.escapeShellArg exportRoot}
-        cp ${lib.escapeShellArg extensionIdsFile} ${lib.escapeShellArg "${exportRoot}/extensions.txt"}
-        sync_tree ${lib.escapeShellArg linuxUserDir} ${lib.escapeShellArg exportUserDir}
-        sync_tree ${lib.escapeShellArg exportUserDir} "$windows_user_dir"
+            wslpath -u "$appdata_win/Code/User"
+          }
 
-        if [ "$install_extensions" -eq 1 ]; then
-          install_windows_extensions
-        fi
-      '';
+          sync_managed_path() {
+            src_root="$1"
+            dst_root="$2"
+            rel_path="$3"
+
+            rm -rf "$dst_root/$rel_path"
+            if [ -e "$src_root/$rel_path" ]; then
+              mkdir -p "$dst_root/$(dirname "$rel_path")"
+              cp -RL "$src_root/$rel_path" "$dst_root/$rel_path"
+            fi
+          }
+
+          sync_tree() {
+            src_root="$1"
+            dst_root="$2"
+
+            mkdir -p "$dst_root"
+
+            while IFS= read -r rel_path; do
+              if [ -n "$rel_path" ]; then
+                sync_managed_path "$src_root" "$dst_root" "$rel_path"
+              fi
+            done < ${managedPathsFile}
+          }
+
+          install_windows_extensions() {
+            if ! command -v cmd.exe >/dev/null 2>&1 || ! command -v where.exe >/dev/null 2>&1; then
+              echo "cmd.exe not found; skipping extension install." >&2
+              return 0
+            fi
+
+            if ! where.exe code.cmd >/dev/null 2>&1; then
+              echo "code.cmd not found on the Windows PATH; skipping extension install." >&2
+              return 0
+            fi
+
+            while IFS= read -r extension_id; do
+              if [ -n "$extension_id" ]; then
+                cmd.exe /d /c code.cmd --install-extension "$extension_id" --force >/dev/null
+              fi
+            done < ${extensionIdsFile}
+          }
+
+          windows_user_dir="$(resolve_windows_user_dir || true)"
+          if [ -z "$windows_user_dir" ]; then
+            echo "Unable to resolve Windows VS Code User directory; skipping sync." >&2
+            exit 0
+          fi
+
+          mkdir -p ${lib.escapeShellArg exportRoot}
+          cp ${lib.escapeShellArg extensionIdsFile} ${lib.escapeShellArg "${exportRoot}/extensions.txt"}
+          sync_tree ${lib.escapeShellArg linuxUserDir} ${lib.escapeShellArg exportUserDir}
+          sync_tree ${lib.escapeShellArg exportUserDir} "$windows_user_dir"
+
+          if [ "$install_extensions" -eq 1 ]; then
+            install_windows_extensions
+          fi
+        '';
+      };
     in
     {
       options.my.vscode.windowsInterop = {

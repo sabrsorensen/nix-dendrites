@@ -9,6 +9,7 @@
 }:
 let
   cfg = config.jovian.decky-loader;
+  writeSourceReplacementScript = import ../../../../../lib/write-source-replacement-script.nix { inherit pkgs; };
   systemctlActions = [
     "is-active"
     "daemon-reload"
@@ -30,6 +31,43 @@ let
       );
     in
     valueType;
+  deckyLoaderRuntimeLibraries = with pkgs; [
+    stdenv.cc.cc
+    glibc
+    zlib
+    openssl
+    libgcc
+  ];
+  deckyLoaderServiceLibraryPath = lib.makeLibraryPath (
+    with pkgs;
+    [
+      glibc
+      stdenv.cc.cc.lib
+      zlib
+      openssl
+    ]
+  );
+  deckyLoaderServiceEnvironment = {
+    LD_LIBRARY_PATH = deckyLoaderServiceLibraryPath;
+    # Third-party plugins commonly discover user services over D-Bus.
+    DBUS_SESSION_BUS_ADDRESS = "unix:path=/run/user/${
+      toString config.users.users.${config.jovian.steam.user}.uid
+    }/bus";
+    DBUS_SYSTEM_BUS_ADDRESS = "unix:path=/run/dbus/system_bus_socket";
+  };
+  deckyLoaderExtraPackages = with pkgs; [
+    coreutils
+    hidapi
+    psmisc
+    python3
+    steam-run
+    systemd
+  ];
+  deckyLoaderExtraPythonPackages =
+    pythonPackages: with pythonPackages; [
+      click # KDE Connect plugin
+      vdf # SteamGridDB plugin
+    ];
 
   deckyLoaderCompatibilityReplacements = [
     {
@@ -77,45 +115,17 @@ let
     }
   ];
 
-  deckyLoaderCompatibilityManifest = pkgs.writeText "decky-loader-compatibility.json" (
-    builtins.toJSON deckyLoaderCompatibilityReplacements
-  );
+  deckyLoaderCompatibilityPatchScript = writeSourceReplacementScript {
+    scriptName = "decky-loader-compatibility";
+    replacements = deckyLoaderCompatibilityReplacements;
+  };
 
   # Jovian packages Decky for NixOS, but upstream Decky still assumes a mutable
   # host PATH and unqualified tool names. Keep the local bridge small and list
   # each exact source rewrite explicitly so future rebases fail loudly.
   deckyLoaderPackage = pkgs.decky-loader.overridePythonAttrs (old: {
     postPatch = (old.postPatch or "") + ''
-      python3 - <<'PY'
-      import json
-      import pathlib
-      import sys
-
-      replacements = json.loads(pathlib.Path("${deckyLoaderCompatibilityManifest}").read_text())
-
-      grouped = {}
-      for replacement in replacements:
-          grouped.setdefault(replacement["file"], []).append(replacement)
-
-      for file_name, file_replacements in grouped.items():
-          path = pathlib.Path(file_name)
-          text = path.read_text(encoding="utf-8")
-          for replacement in file_replacements:
-              old = replacement["old"]
-              new = replacement["new"]
-              count = text.count(old)
-              expected_count = replacement.get("expectedCount", 1)
-              if count != expected_count:
-                  print(
-                      f"unexpected match count in {file_name}: {replacement['reason']}",
-                      file=sys.stderr,
-                  )
-                  print(f"expected {expected_count}, found {count}", file=sys.stderr)
-                  print(old, file=sys.stderr)
-                  sys.exit(1)
-              text = text.replace(old, new, expected_count)
-          path.write_text(text, encoding="utf-8")
-      PY
+      ${pkgs.python3}/bin/python3 ${deckyLoaderCompatibilityPatchScript}
     '';
   });
 
@@ -205,13 +215,7 @@ in
     # Several third-party Decky plugins still ship dynamically linked helper
     # binaries that are not packaged for NixOS.
     programs.nix-ld.enable = true;
-    programs.nix-ld.libraries = with pkgs; [
-      stdenv.cc.cc
-      glibc
-      zlib
-      openssl
-      libgcc
-    ];
+    programs.nix-ld.libraries = deckyLoaderRuntimeLibraries;
 
     # Jovian owns the service shape; this module only layers compatibility and
     # declarative plugin packaging on top.
@@ -219,19 +223,8 @@ in
       enable = true;
       package = deckyLoaderPackage;
       user = lib.mkDefault steamUser;
-      extraPackages = with pkgs; [
-        coreutils
-        hidapi
-        psmisc
-        python3
-        steam-run
-        systemd
-      ];
-      extraPythonPackages =
-        pythonPackages: with pythonPackages; [
-          click # KDE Connect plugin
-          vdf # SteamGridDB plugin
-        ];
+      extraPackages = deckyLoaderExtraPackages;
+      extraPythonPackages = deckyLoaderExtraPythonPackages;
     };
 
     # Decky integrates with Steam's embedded browser and expects this toggle to
@@ -249,23 +242,7 @@ in
     # Keep runtime library injection minimal. Loader compatibility fixes should
     # live in the packaged Decky override above whenever possible.
     systemd.services.decky-loader = lib.mkIf config.jovian.decky-loader.enable {
-      environment = {
-        # Minimal LD_LIBRARY_PATH with only essential libraries for decky-loader itself
-        LD_LIBRARY_PATH = lib.makeLibraryPath (
-          with pkgs;
-          [
-            glibc
-            stdenv.cc.cc.lib
-            zlib
-            openssl
-          ]
-        );
-        # Third-party plugins commonly discover user services over D-Bus.
-        DBUS_SESSION_BUS_ADDRESS = "unix:path=/run/user/${
-          toString config.users.users.${config.jovian.steam.user}.uid
-        }/bus";
-        DBUS_SYSTEM_BUS_ADDRESS = "unix:path=/run/dbus/system_bus_socket";
-      };
+      environment = deckyLoaderServiceEnvironment;
     };
 
     systemd.services.decky-settings-seed = lib.mkIf (cfg.enable && cfg.seededSettings != { }) {

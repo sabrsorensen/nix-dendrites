@@ -4,56 +4,79 @@
   # base OS still owns `/etc` and mount activation. This script only patches in
   # the extra Steam library mount that the host needs.
   setupSteamLibraryMount = ''
+    FSTAB_ENTRY="/dev/disk/by-partlabel/jovian /srv/steam-library btrfs subvol=@steam,compress=zstd,noatime 0 0"
+    MOUNT_POINT="/srv/steam-library"
+
+    ensure_mount_point() {
+      if [ ! -d "$MOUNT_POINT" ]; then
+        echo "Creating mount point: $MOUNT_POINT"
+        sudo mkdir -p "$MOUNT_POINT"
+      fi
+    }
+
+    ensure_mount_owner() {
+      mismatched_path="$(sudo find "$MOUNT_POINT" -xdev \( ! -user deck -o ! -group deck \) -print -quit 2>/dev/null || true)"
+      if [ -n "$mismatched_path" ]; then
+        echo "Updating Steam library ownership to deck:deck where needed"
+        sudo find "$MOUNT_POINT" -xdev \( ! -user deck -o ! -group deck \) -exec chown deck:deck '{}' +
+      fi
+    }
+
+    mount_steam_library() {
+      ensure_mount_point
+      if sudo mount "$MOUNT_POINT" 2>/dev/null; then
+        echo "Successfully mounted Steam library"
+        ensure_mount_owner
+        return 0
+      fi
+
+      echo "Warning: Failed to mount Steam library (partition may not exist yet)"
+      return 1
+    }
+
+    add_fstab_entry() {
+      ensure_mount_point
+      echo "Adding fstab entry..."
+      echo "$FSTAB_ENTRY" | sudo tee -a /etc/fstab
+    }
+
+    with_steamos_readwrite() {
+      readonly_was_enabled=0
+      if sudo steamos-readonly status | grep -q "enabled"; then
+        echo "Disabling SteamOS read-only mode..."
+        sudo steamos-readonly disable
+        readonly_was_enabled=1
+      fi
+
+      "$@"
+      status=$?
+
+      if [ "$readonly_was_enabled" = "1" ]; then
+        echo "Re-enabling SteamOS read-only mode..."
+        sudo steamos-readonly enable
+      fi
+
+      return "$status"
+    }
+
     if command -v steamos-readonly >/dev/null 2>&1; then
       echo "Checking Steam library mount setup..."
 
-      FSTAB_ENTRY="/dev/disk/by-partlabel/jovian /srv/steam-library btrfs subvol=@steam,compress=zstd,noatime 0 0"
-      MOUNT_POINT="/srv/steam-library"
-
       if ! grep -q "/srv/steam-library" /etc/fstab 2>/dev/null; then
-        echo "Steam library fstab entry missing, adding it..."
-
-        if sudo steamos-readonly status | grep -q "enabled"; then
-          echo "Disabling SteamOS read-only mode..."
-          sudo steamos-readonly disable
-          READONLY_WAS_ENABLED=1
-        else
-          READONLY_WAS_ENABLED=0
-        fi
-
-        if [ ! -d "$MOUNT_POINT" ]; then
-          echo "Creating mount point: $MOUNT_POINT"
-          sudo mkdir -p "$MOUNT_POINT"
-        fi
-
-        echo "Adding fstab entry..."
-        echo "$FSTAB_ENTRY" | sudo tee -a /etc/fstab
+        echo "Steam library fstab entry missing, applying first-run bootstrap..."
+        with_steamos_readwrite add_fstab_entry
 
         echo "Mounting Steam library..."
-        if sudo mount "$MOUNT_POINT" 2>/dev/null; then
-          echo "Successfully mounted Steam library"
-          sudo chown -R deck:deck "$MOUNT_POINT"
-          echo "Set ownership to deck:deck"
-        else
-          echo "Warning: Failed to mount Steam library (partition may not exist yet)"
-        fi
-
-        if [ "$READONLY_WAS_ENABLED" = "1" ]; then
-          echo "Re-enabling SteamOS read-only mode..."
-          sudo steamos-readonly enable
-        fi
-
+        mount_steam_library
         echo "Steam library mount setup complete"
       else
-        echo "Steam library fstab entry already exists"
+        echo "Steam library fstab entry already exists, checking runtime mount state"
 
         if [ -e "/dev/disk/by-partlabel/jovian" ] && ! mountpoint -q "$MOUNT_POINT" 2>/dev/null; then
           echo "Mounting existing Steam library..."
-          sudo mkdir -p "$MOUNT_POINT"
-          if sudo mount "$MOUNT_POINT" 2>/dev/null; then
-            sudo chown -R deck:deck "$MOUNT_POINT"
-            echo "Successfully mounted existing Steam library"
-          fi
+          mount_steam_library
+        elif mountpoint -q "$MOUNT_POINT" 2>/dev/null; then
+          ensure_mount_owner
         fi
       fi
     else
