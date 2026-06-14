@@ -39,6 +39,9 @@
   useFastPermissions ? false,
 }:
 
+let
+  userPreConfigure = preConfigure;
+in
 stdenv.mkDerivation rec {
   inherit
     pname
@@ -75,7 +78,7 @@ stdenv.mkDerivation rec {
     lib.optionalString (sourceReplacementScript != null) ''
       ${python3}/bin/python3 ${sourceReplacementScript}
     ''
-    + lib.optionalString (preConfigure != null) preConfigure;
+    + lib.optionalString (userPreConfigure != null) userPreConfigure;
 
   buildPhase = ''
     runHook preBuild
