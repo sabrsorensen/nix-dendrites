@@ -25,7 +25,7 @@ in
         system-cli
         systemd-boot
         disko
-        virtualisation
+        podman
         cross-compile
         nix-index
         caddy
@@ -61,11 +61,6 @@ in
       ];
 
       services.openssh.allowSFTP = true;
-
-      virtualisation.docker = {
-        enableOnBoot = true;
-        extraOptions = "--data-root=/opt/docker";
-      };
 
       nix.settings.system-features = config.systemConstants.atlas.systemFeatures;
 

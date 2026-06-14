@@ -20,7 +20,7 @@ in
           imports = with inputs.self.modules.nixos; [
             sam-system-base
             sam-system-private
-            virtualisation
+            podman
           ];
 
           users.users."${username}".extraGroups = lib.mkAfter [ "podman" ];
