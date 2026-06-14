@@ -6,6 +6,11 @@
 }:
 let
   replacementManifest = pkgs.writeText "${scriptName}.json" (builtins.toJSON replacements);
+  pythonDefaultFile =
+    if defaultFile == null then
+      "None"
+    else
+      builtins.toJSON defaultFile;
 in
 pkgs.writeText "${scriptName}.py" ''
   import json
@@ -14,7 +19,7 @@ pkgs.writeText "${scriptName}.py" ''
   import sys
 
   replacements = json.loads(pathlib.Path("${replacementManifest}").read_text())
-  default_file = ${builtins.toJSON defaultFile}
+  default_file = ${pythonDefaultFile}
 
   grouped = {}
   for replacement in replacements:
