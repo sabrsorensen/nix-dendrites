@@ -24,6 +24,7 @@
       dataDir = "/opt/ankerctl/config";
       capturesDir = "/opt/ankerctl/captures";
       logsDir = "/opt/ankerctl/logs";
+      tempDir = "/opt/ankerctl/tmp";
       ankerctlEnvSecret = "ankerctl-env";
       src = pkgs.fetchFromGitHub {
         owner = "sabrsorensen";
@@ -84,7 +85,7 @@
         }
 
         if [ "$(${pkgs.coreutils}/bin/id -u)" -eq 0 ]; then
-          for path in ${containerConfigDir} /captures /logs; do
+          for path in ${containerConfigDir} /captures /logs /tmp; do
             ensure_path_ownership "$path"
           done
 
@@ -178,6 +179,7 @@
         "d ${dataDir} 0750 ${toString containerUid} ${toString containerGid} -"
         "d ${capturesDir} 0750 ${toString containerUid} ${toString containerGid} -"
         "d ${logsDir} 0750 ${toString containerUid} ${toString containerGid} -"
+        "d ${tempDir} 1777 ${toString containerUid} ${toString containerGid} -"
       ];
 
       sops.secrets = lib.optionalAttrs hasAnkerctlEnv {
@@ -199,7 +201,10 @@
           "ANKERCTL_LOG_DIR" = "/logs";
           "FLASK_HOST" = host;
           "FLASK_PORT" = toString port;
+          "TEMP" = "/tmp";
           "TIMELAPSE_CAPTURES_DIR" = "/captures";
+          "TMP" = "/tmp";
+          "TMPDIR" = "/tmp";
         };
         environmentFiles = lib.optionals hasAnkerctlEnv [
           config.sops.secrets.${ankerctlEnvSecret}.path
@@ -213,6 +218,7 @@
           "${dataDir}:${containerConfigDir}:rw"
           "${capturesDir}:/captures:rw"
           "${logsDir}:/logs:rw"
+          "${tempDir}:/tmp:rw"
         ];
       };
     };
