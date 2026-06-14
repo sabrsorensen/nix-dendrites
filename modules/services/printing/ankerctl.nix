@@ -29,8 +29,8 @@
       src = pkgs.fetchFromGitHub {
         owner = "sabrsorensen";
         repo = "ankermake-m5-protocol";
-        rev = "5e2987ac2a3915497af6c44878b4e90ee2777d12";
-        hash = "11v9kgnl11cnz6bga636lqd4w36awq542k0m98gra3y4jw0hwark";
+        rev = "7a87c932b5ad37ba0ce3e30e2a8f5d96081d7877";
+        hash = "sha256-9gMFvx2OWpAhVNGS5bqphqmUuRP1DYE9bw0406jacVo=";
       };
       hasAnkerctlEnv = builtins.pathExists "${inputs.nix-secrets}/env_files/ankerctl.env";
       python = pkgs.python3.override {
