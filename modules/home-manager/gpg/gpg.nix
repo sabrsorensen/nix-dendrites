@@ -4,7 +4,7 @@
       config,
       lib,
       pkgs,
-      osConfig,
+      osConfig ? { },
       ...
     }:
     let
@@ -15,7 +15,7 @@
       #   Examples: signing-personal.asc, signing-singularityci.asc
       gpgFiles = builtins.attrNames (builtins.readDir gpgKeysDir);
       ascFiles = builtins.filter (name: lib.hasSuffix ".asc" name) gpgFiles;
-      hostname = osConfig.networking.hostName;
+      hostCfg = if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
     in
     {
       # Clean stale keyboxd/GPG lock files before gpg-agent starts.
@@ -50,7 +50,7 @@
         maxCacheTtl = 7200;
         enableFishIntegration = true;
         enableSshSupport = true;
-        pinentry.package = if hostname == "NixOS-WSL" then pkgs.pinentry-curses else pkgs.pinentry-qt;
+        pinentry.package = if hostCfg.roles.wsl then pkgs.pinentry-curses else pkgs.pinentry-qt;
         extraConfig = ''
           # Allow loopback pinentry for non-interactive scenarios
           allow-loopback-pinentry

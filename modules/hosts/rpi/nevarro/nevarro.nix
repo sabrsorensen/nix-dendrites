@@ -4,7 +4,9 @@
   ...
 }:
 let
+  primaryInteractiveUser = "sam";
   mkServiceHostModule = import ../_rpi/service-host.nix { inherit inputs lib; };
+  staticDnsRecords = inputs.self.lib.localDns.staticRecords;
 in
 {
   flake.modules.nixos.Nevarro = lib.mkMerge [
@@ -21,21 +23,29 @@ in
         dhcp-coredns
         #netbird-server
       ];
-      samAuthorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas_nevarro.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino_nevarro.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphod_nevarro.pub"
+      samAuthorizedKeyPaths = [
+        "atlasuponraiden/nevarro"
+        "kamino/nevarro"
+        "zaphodbeeblebrox/nevarro"
       ];
-      nixRemoteAuthorizedKeys = [
-        "${inputs.nix-secrets}/ssh-keys/atlas_nevarro_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/kamino_nevarro_nix.pub"
-        "${inputs.nix-secrets}/ssh-keys/zaphod_nevarro_nix.pub"
+      nixRemoteAuthorizedKeyPaths = [
+        "atlasuponraiden/nevarro_nix"
+        "kamino/nevarro_nix"
+        "zaphodbeeblebrox/nevarro_nix"
       ];
     })
     {
       # Disable problematic sysctl setting from nixos-raspberrypi
       boot.kernel.sysctl = lib.mkForce {
         # Remove vm.mmap_rnd_bits entirely - this kernel doesn't support it
+      };
+
+      my.host = {
+        inherit primaryInteractiveUser;
+        roles = {
+          rpi = true;
+          serviceHost = true;
+        };
       };
 
       services.dhcp-coredns = {
@@ -46,9 +56,46 @@ in
           "1.1.1.1"
           "9.9.9.9"
         ];
+        staticRecords = staticDnsRecords;
       };
     }
   ];
+
+  flake.lib.hostInventory.Nevarro = inputs.self.lib.mkInventoryHost {
+    ssh = inputs.self.lib.mkInventorySsh {
+      base = inputs.self.lib.mkInventorySshBase {
+        user = primaryInteractiveUser;
+        identityFile = "~/.ssh/nevarro_id_ed25519";
+      };
+      nix = inputs.self.lib.mkInventorySshNix {
+        identityFile = "~/.ssh/nix_nevarro_id_ed25519";
+      };
+    };
+    serviceRoles = [
+      "blocky-dns"
+      "dhcp-primary"
+    ];
+    deploy = inputs.self.lib.mkInventoryDeploy {
+      remoteMethod = "secure";
+      secure = inputs.self.lib.mkInventorySecureDeploy {
+        peerName = "Naboo";
+        peerIp = inputs.self.lib.rpi.network.naboo;
+        probeDomains = inputs.self.lib.localDns.secureDeployProbeDomains;
+      };
+    };
+    outputs =
+      inputs.self.lib.mkNixosOutputs {
+        system = "aarch64-linux";
+        name = "nevarro";
+        configuration = "Nevarro";
+      }
+      ++ inputs.self.lib.mkNixosOutputs {
+        system = "aarch64-linux";
+        name = "nevarro-image";
+        configuration = "NevarroImage";
+        buildProduct = "sdImage";
+      };
+  };
 
   flake.nixosConfigurations = inputs.self.lib.mkNixos "aarch64-linux" "Nevarro";
 }

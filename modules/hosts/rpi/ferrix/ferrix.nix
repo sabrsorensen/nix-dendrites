@@ -18,10 +18,25 @@ in
     ++ static.imports;
 
     networking = static.networking;
+    my.host = {
+      address = rpi.network.ferrix;
+      roles.rpi = true;
+    };
 
     # Disable problematic sysctl setting from nixos-raspberrypi
     boot.kernel.sysctl = lib.mkForce {
       # Remove vm.mmap_rnd_bits entirely - this kernel doesn't support it
+    };
+  };
+
+  flake.lib.hostInventory.Ferrix = inputs.self.lib.mkInventoryHost {
+    deploy = inputs.self.lib.mkInventoryDeploy {
+      remoteMethod = "switch";
+    };
+    outputs = inputs.self.lib.mkNixosOutputs {
+      system = "aarch64-linux";
+      name = "ferrix";
+      configuration = "Ferrix";
     };
   };
 

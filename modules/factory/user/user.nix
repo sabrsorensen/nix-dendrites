@@ -3,7 +3,7 @@
   ...
 }:
 {
-  config.flake.factory.user = username: isAdmin: {
+  config.flake.lib.factory.user = username: isAdmin: {
 
     nixos."${username}" =
       {

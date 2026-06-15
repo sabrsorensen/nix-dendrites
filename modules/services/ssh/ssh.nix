@@ -1,21 +1,17 @@
 {
   flake.modules.nixos.ssh =
-  {
-    config,
-    ...
-  }:
-  {
-    services.openssh = {
-      enable = true;
-      openFirewall = true;
-      ports = [ 22 ];
-      settings = {
-        PasswordAuthentication = true;
-        PermitRootLogin = "no";
+    { lib, ... }:
+    {
+      services.openssh = {
+        enable = true;
+        openFirewall = true;
+        allowSFTP = lib.mkDefault false;
+        settings = {
+          PasswordAuthentication = lib.mkDefault false;
+          KbdInteractiveAuthentication = lib.mkDefault false;
+          PermitRootLogin = "no";
+        };
       };
-      allowSFTP = true;
+      programs.ssh.startAgent = true;
     };
-    networking.firewall.allowedTCPPorts = config.services.openssh.ports;
-    programs.ssh.startAgent = true;
-  };
 }

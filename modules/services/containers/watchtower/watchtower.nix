@@ -5,7 +5,10 @@
       volumes = [
         "/var/run/docker.sock:/var/run/docker.sock:rw"
       ];
-      cmd = [ "--cleanup" "--label-enable" ];
+      cmd = [
+        "--cleanup"
+        "--label-enable"
+      ];
       labels = {
         "com.centurylinklabs.watchtower.enable" = "true";
       };

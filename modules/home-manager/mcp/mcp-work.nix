@@ -22,6 +22,10 @@
             startup_timeout_sec = 300;
           };
 
+          AZDORemote = {
+            url = "https://mcp.dev.azure.com/higicore";
+          };
+
           NixOS.env = {
             SSL_CERT_FILE = "/etc/ssl/certs/ca-bundle.crt";
             REQUESTS_CA_BUNDLE = "/etc/ssl/certs/ca-bundle.crt";

@@ -19,7 +19,7 @@ in
       ...
     }:
     let
-      username = config.my.wslUsername;
+      username = config.my.host.primaryInteractiveUser or "sam";
       sandboxCertPath = "/etc/ssl/certs/ca-bundle.crt";
       sandboxCertCompatPath = "/etc/ssl/certs/ca-certificates.crt";
       zscalerBundle = pkgs.runCommand "zscaler-ca-bundle.crt" { } ''
@@ -28,15 +28,30 @@ in
           ${lib.concatMapStringsSep " " lib.escapeShellArg extraCertFiles} \
           > $out
       '';
+      certEnvironment = {
+        NODE_EXTRA_CA_CERTS = "${zscalerBundle}";
+        SSL_CERT_FILE = sandboxCertPath;
+        NIX_SSL_CERT_FILE = sandboxCertPath;
+        REQUESTS_CA_BUNDLE = sandboxCertPath;
+        CURL_CA_BUNDLE = sandboxCertPath;
+        GIT_SSL_CAINFO = sandboxCertPath;
+        CARGO_HTTP_CAINFO = sandboxCertPath;
+        CARGO_NET_GIT_FETCH_WITH_CLI = "true";
+      };
+      nixDaemonCertEnvironment = lib.mapAttrs (_: value: lib.mkForce value) certEnvironment;
+      impureEnvVars = [
+        "SSL_CERT_FILE"
+        "NIX_SSL_CERT_FILE"
+        "REQUESTS_CA_BUNDLE"
+        "CURL_CA_BUNDLE"
+        "GIT_SSL_CAINFO"
+        "CARGO_HTTP_CAINFO"
+      ];
     in
     {
-      imports = [ inputs.nixos-wsl.nixosModules.wsl ];
-
-      options.my.wslUsername = lib.mkOption {
-        type = lib.types.str;
-        default = "sam";
-        description = "Primary username for the WSL host configuration.";
-      };
+      imports = [
+        inputs.nixos-wsl.nixosModules.wsl
+      ];
 
       config = {
         networking.hostName = lib.mkDefault "NixOS-WSL";
@@ -54,16 +69,7 @@ in
           };
         };
 
-        environment.sessionVariables = {
-          NODE_EXTRA_CA_CERTS = "${zscalerBundle}";
-          SSL_CERT_FILE = sandboxCertPath;
-          NIX_SSL_CERT_FILE = sandboxCertPath;
-          REQUESTS_CA_BUNDLE = sandboxCertPath;
-          CURL_CA_BUNDLE = sandboxCertPath;
-          GIT_SSL_CAINFO = sandboxCertPath;
-          CARGO_HTTP_CAINFO = sandboxCertPath;
-          CARGO_NET_GIT_FETCH_WITH_CLI = "true";
-        };
+        environment.sessionVariables = certEnvironment;
 
         users.users.${username}.extraGroups = [ "docker" ];
 
@@ -98,30 +104,14 @@ in
               "${zscalerBundle}=${sandboxCertPath}"
               "${zscalerBundle}=${sandboxCertCompatPath}"
             ];
-            "impure-env" = [
-              "SSL_CERT_FILE"
-              "NIX_SSL_CERT_FILE"
-              "REQUESTS_CA_BUNDLE"
-              "CURL_CA_BUNDLE"
-              "GIT_SSL_CAINFO"
-              "CARGO_HTTP_CAINFO"
-            ];
+            "impure-env" = impureEnvVars;
           };
           extraOptions = lib.mkAfter ''
             !include ${config.sops.secrets.github_nixos_wsl_token.path}
           '';
         };
 
-        systemd.services.nix-daemon.environment = {
-          REQUESTS_CA_BUNDLE = lib.mkForce sandboxCertPath;
-          SSL_CERT_FILE = lib.mkForce sandboxCertPath;
-          NIX_SSL_CERT_FILE = lib.mkForce sandboxCertPath;
-          CURL_CA_BUNDLE = lib.mkForce sandboxCertPath;
-          GIT_SSL_CAINFO = lib.mkForce sandboxCertPath;
-          CARGO_HTTP_CAINFO = lib.mkForce sandboxCertPath;
-          CARGO_NET_GIT_FETCH_WITH_CLI = lib.mkForce "true";
-          NODE_EXTRA_CA_CERTS = lib.mkForce "${zscalerBundle}";
-        };
+        systemd.services.nix-daemon.environment = nixDaemonCertEnvironment;
 
         security.pki.certificateFiles = extraCertFiles;
 

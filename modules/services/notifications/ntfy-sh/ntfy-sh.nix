@@ -1,26 +1,24 @@
 {
   flake.modules.nixos.ntfy-sh =
-  {
-    config,
-    ...
-  }:
-  let
-    readBuildValue =
-      path:
-      builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
-    localDomain = readBuildValue "domain.txt";
-  in
-  {
-    services = {
-      caddy = {
-        virtualHosts."ntfy.{$DOMAIN}" = {
-          extraConfig = ''
-            reverse_proxy /* 127.0.0.1:6839
-          '';
-        };
-      };
+    {
+      config,
+      ...
+    }:
+    let
+      localDomain = config.systemConstants.domain;
+    in
+    {
+      my.localDns.records = [
+        { hostname = "ntfy"; }
+      ];
 
-      ntfy-sh = {
+      my.caddy.virtualHosts."ntfy.{$DOMAIN}".routes = [
+        ''
+          reverse_proxy /* 127.0.0.1:6839
+        ''
+      ];
+
+      services.ntfy-sh = {
         enable = true;
         settings = {
           base-url = "https://ntfy.${localDomain}";
@@ -32,5 +30,4 @@
         };
       };
     };
-  };
 }

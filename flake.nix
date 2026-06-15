@@ -14,15 +14,27 @@
       url = "path:./steamdeck-packages";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    demlo = {
+      url = "github:sabrsorensen/demlo/v3.8.1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    firefox-csshacks = {
+      url = "github:MrOtherGuy/firefox-csshacks";
+      flake = false;
+    };
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+    gitignore = {
+      url = "github:hyrfilm/gitignore";
+      flake = false;
     };
     home-manager = {
       url = "github:nix-community/home-manager/master";
@@ -63,6 +75,10 @@
     };
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     packages = {
       url = "path:./packages";
       flake = false;

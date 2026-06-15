@@ -1,26 +1,22 @@
 {
   flake.modules.nixos.jellyfin =
-  {
-    ...
-  }:
-  let
-    groupName = "media";
-    localAddr = "127.0.0.1:8096";
-    serviceName = "jellyfin";
-  in
-  {
-    users.users.jellyfin.group = groupName;
-    services = {
-      caddy = {
-        virtualHosts."{$DOMAIN}" = {
-          extraConfig = ''
-            redir /${serviceName} /${serviceName}/
-            reverse_proxy /${serviceName}/* ${localAddr}
-          '';
-        };
-      };
-
-      jellyfin = {
+    {
+      ...
+    }:
+    let
+      groupName = "media";
+      localAddr = "127.0.0.1:8096";
+      serviceName = "jellyfin";
+    in
+    {
+      users.users.jellyfin.group = groupName;
+      my.media.caddy.apexRoutes = [
+        ''
+          redir /${serviceName} /${serviceName}/
+          reverse_proxy /${serviceName}/* ${localAddr}
+        ''
+      ];
+      services.jellyfin = {
         enable = true;
         openFirewall = true;
         group = groupName;
@@ -36,8 +32,8 @@
         transcoding = {
           deleteSegments = true;
           enableHardwareEncoding = true;
-          hardwareDecodingCodecs = {};
-          hardwareEncodingCodecs = {};
+          hardwareDecodingCodecs = { };
+          hardwareEncodingCodecs = { };
           enableIntelLowPowerEncoding = true;
           enableSubtitleExtraction = true;
           enableToneMapping = true;
@@ -50,5 +46,4 @@
         };
       };
     };
-  };
 }

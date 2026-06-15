@@ -12,10 +12,10 @@
     }:
     let
       cfg = config.services.dhcp-coredns;
+      publishedDnsRecords = config.my.localDns.publishedRecords;
+      zoneStaticRecords = cfg.staticRecords ++ publishedDnsRecords;
       networkConfig = config.systemConstants.network;
-
-      readBuildValue = path: builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${config.my.buildSecretRoot}/${path}");
-      localDomain = readBuildValue "domain.txt";
+      localDomain = config.systemConstants.domain;
 
       python3Bin = "${pkgs.python3}/bin/python3";
       collectLeases = ./collect_leases.py;
@@ -36,26 +36,9 @@
           dnsHostRaw;
       dnsPort = builtins.elemAt dnsListenMatch 1;
       dnsBindDirective =
-        if dnsHost == "" || dnsHost == "0.0.0.0" || dnsHost == "::" then
-          ""
-        else
-          "bind ${dnsHost}";
+        if dnsHost == "" || dnsHost == "0.0.0.0" || dnsHost == "::" then "" else "bind ${dnsHost}";
       upstreamServers = builtins.concatStringsSep " " cfg.upstreamServers;
-      staticDnsRecords = builtins.toJSON [
-        { hostname = "ns1"; ip = networkConfig.nevarro; }
-        { hostname = "ns2"; ip = networkConfig.naboo; }
-        { hostname = "atlas"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "auth"; ip = networkConfig.nevarro; }
-        { hostname = "homeassistant"; ip = networkConfig.coruscant; }
-        { hostname = "home-gw"; ip = networkConfig.gateway; }
-        { hostname = "immich"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "mealie"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "netbird"; ip = networkConfig.nevarro; }
-        { hostname = "ntfy"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "plex"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "profilarr"; ip = networkConfig.atlasuponraiden; }
-        { hostname = "scrutiny"; ip = networkConfig.atlasuponraiden; }
-      ];
+      staticDnsRecords = builtins.toJSON zoneStaticRecords;
     in
     {
       imports = [ inputs.self.modules.nixos.dhcp-failover ];
@@ -80,7 +63,27 @@
 
         upstreamServers = lib.mkOption {
           type = lib.types.listOf lib.types.str;
-          default = [ "1.1.1.1" "9.9.9.9" ];
+          default = [
+            "1.1.1.1"
+            "9.9.9.9"
+          ];
+        };
+
+        staticRecords = lib.mkOption {
+          type = lib.types.listOf (
+            lib.types.submodule {
+              options = {
+                hostname = lib.mkOption {
+                  type = lib.types.str;
+                };
+                ip = lib.mkOption {
+                  type = lib.types.str;
+                };
+              };
+            }
+          );
+          default = [ ];
+          description = "Static DNS records rendered into the local CoreDNS zone.";
         };
 
         startKeaOnBoot = lib.mkOption {
@@ -97,7 +100,21 @@
       };
 
       config = lib.mkIf cfg.enable {
-        environment.systemPackages = with pkgs; [ jq python3 sops ssh-to-age ];
+        assertions = [
+          {
+            assertion =
+              builtins.length (lib.unique (map (record: record.hostname) zoneStaticRecords))
+              == builtins.length zoneStaticRecords;
+            message = "services.dhcp-coredns static/published DNS records contain duplicate hostnames.";
+          }
+        ];
+
+        environment.systemPackages = with pkgs; [
+          jq
+          python3
+          sops
+          ssh-to-age
+        ];
 
         systemd.tmpfiles.rules = [
           "d ${cfg.stateDir} 0755 root root -"
@@ -106,8 +123,14 @@
         systemd.services.dhcp-coredns-prepare = {
           description = "Prepare Kea config inputs and CoreDNS zone data";
           wantedBy = [ "multi-user.target" ];
-          before = [ "dhcp-coredns-kea.service" "coredns.service" ];
-          after = [ "network.target" "local-fs.target" ];
+          before = [
+            "dhcp-coredns-kea.service"
+            "coredns.service"
+          ];
+          after = [
+            "network.target"
+            "local-fs.target"
+          ];
           serviceConfig = {
             Type = "oneshot";
           };
@@ -118,12 +141,12 @@
             ${pkgs.ssh-to-age}/bin/ssh-to-age -private-key < /etc/ssh/ssh_host_ed25519_key > "$TEMP_AGE_KEY"
 
             if ! SOPS_AGE_KEY_FILE="$TEMP_AGE_KEY" ${pkgs.sops}/bin/sops --decrypt "${inputs.nix-secrets}/leases.json" > "${staticLeasesPath}" 2>/dev/null; then
-              echo '{"version":1,"leases":[]}' > "${staticLeasesPath}"
+              echo '{"version":1,"reservations":[]}' > "${staticLeasesPath}"
             fi
             rm -f "$TEMP_AGE_KEY"
 
             if [ ! -s "${staticLeasesPath}" ]; then
-              echo '{"version":1,"leases":[]}' > "${staticLeasesPath}"
+              echo '{"version":1,"reservations":[]}' > "${staticLeasesPath}"
             fi
 
             if [ ! -f "${dynamicLeasePath}" ]; then
@@ -155,9 +178,12 @@
                         { "name": "domain-name-servers", "data": "'"${networkConfig.dns_servers}"'" },
                         { "name": "domain-name", "data": "'"${localDomain}"'" }
                       ],
-                      "reservations": ((.leases // [])
-                        | map(select(.static == true and .ip and .mac)
+                      "reservations": (((.reservations // [])
+                        | map(select(.ip and .mac)
                           | { "hw-address": (.mac|ascii_downcase), "ip-address": .ip }))
+                        + ((.leases // [])
+                          | map(select(.static == true and .ip and .mac)
+                            | { "hw-address": (.mac|ascii_downcase), "ip-address": .ip })))
                     }
                   ],
                   "valid-lifetime": 3600,
@@ -185,7 +211,10 @@
 
         systemd.services.dhcp-coredns-kea = {
           description = "Kea DHCP4 server (runtime-generated config)";
-          after = [ "dhcp-coredns-prepare.service" "network.target" ];
+          after = [
+            "dhcp-coredns-prepare.service"
+            "network.target"
+          ];
           requires = [ "dhcp-coredns-prepare.service" ];
           wantedBy = lib.optionals cfg.startKeaOnBoot [ "multi-user.target" ];
           serviceConfig = {
@@ -210,11 +239,11 @@
               log
               errors
               ${lib.optionalString (cfg.localDomainApexIp != null) ''
-              hosts {
-                ${cfg.localDomainApexIp} ${localDomain}
-                ${cfg.localDomainApexIp} @
-                fallthrough
-              }
+                hosts {
+                  ${cfg.localDomainApexIp} ${localDomain}
+                  ${cfg.localDomainApexIp} @
+                  fallthrough
+                }
               ''}
               file ${zonePath} ${localDomain}
               forward . ${upstreamServers}
@@ -238,7 +267,10 @@
 
         systemd.services.dhcp-coredns-sync = {
           description = "Sync DHCP leases into CoreDNS records";
-          after = [ "dhcp-coredns-kea.service" "coredns.service" ];
+          after = [
+            "dhcp-coredns-kea.service"
+            "coredns.service"
+          ];
           serviceConfig = {
             Type = "oneshot";
           };
@@ -271,7 +303,12 @@
           };
         };
 
-        networking.firewall.allowedUDPPorts = [ 53 67 68 1053 ];
+        networking.firewall.allowedUDPPorts = [
+          53
+          67
+          68
+          1053
+        ];
       };
     };
 }

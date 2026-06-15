@@ -10,6 +10,7 @@ let
         verbose = true;
         useUserPackages = true;
         useGlobalPkgs = true;
+        extraSpecialArgs.inventory = inputs.self.lib.hostInventory;
         backupFileExtension = "backup";
         backupCommand = "rm";
         overwriteBackup = true;

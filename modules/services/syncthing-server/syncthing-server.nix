@@ -8,6 +8,8 @@
     }:
     let
       hostName = config.networking.hostName;
+      syncthingCommonOptions = import ../../../lib/syncthing-common-options.nix;
+      serverUser = config.my.syncthing.serverUser;
 
       # Import the same device/folder definitions that Home Manager uses
       allDevices = config.my.syncthing.devices;
@@ -19,8 +21,8 @@
         enable = lib.mkEnableOption "NixOS server Syncthing configuration";
 
         serverUser = lib.mkOption {
-          type = lib.types.str;
-          default = "sam";
+          type = lib.types.nullOr lib.types.str;
+          default = null;
           description = "User to run Syncthing as on the server";
         };
 
@@ -38,25 +40,32 @@
       };
 
       config = lib.mkIf config.my.syncthing.enable {
+        assertions = [
+          {
+            assertion = serverUser != null;
+            message = "my.syncthing.serverUser must be set, or my.host.primaryInteractiveUser must be defined, when Syncthing server mode is enabled.";
+          }
+        ];
+
+        my.syncthing.serverUser = lib.mkDefault config.my.host.primaryInteractiveUser;
+
         # System service configuration - runs at boot, independent of user login
+        my.caddy.apexRoutes = [
+          ''
+            redir /syncthing /syncthing/
+            handle_path /syncthing/* {
+              reverse_proxy http://127.0.0.1:8384 {
+                header_up Host {upstream_hostport}
+              }
+            }
+          ''
+        ];
         services = {
-          caddy = {
-            virtualHosts."{$DOMAIN}" = {
-              extraConfig = ''
-                redir /syncthing /syncthing/
-                handle_path /syncthing/* {
-                  reverse_proxy http://127.0.0.1:8384 {
-                    header_up Host {upstream_hostport}
-                  }
-                }
-              '';
-            };
-          };
           syncthing = {
             enable = true;
-            user = config.my.syncthing.serverUser;
-            dataDir = "/home/${config.my.syncthing.serverUser}/.local/share/syncthing";
-            configDir = "/home/${config.my.syncthing.serverUser}/.config/syncthing";
+            user = serverUser;
+            dataDir = "/home/${serverUser}/.local/share/syncthing";
+            configDir = "/home/${serverUser}/.config/syncthing";
             openDefaultPorts = true;
 
             # Web GUI configuration
@@ -67,23 +76,13 @@
               devices = allDevices;
               folders = filteredFolders;
 
-              options = {
-                localAnnounceEnabled = true;
-                urAccepted = -1;
-                # Disable QUIC to work around quic-go v0.56.0 TLS bug
-                connectionPriorityQuicLan = 0;
-                connectionPriorityQuicWan = 0;
-                # Force TCP-only mode to completely avoid QUIC
-                listenAddresses = [ "tcp://:22000" ];
-                # Disable crash reporting to avoid startup delays
-                crashReportingEnabled = false;
-              };
+              options = syncthingCommonOptions;
             };
           };
         };
 
         # Ensure the user exists and has appropriate permissions
-        users.users.${config.my.syncthing.serverUser} = {
+        users.users.${serverUser} = {
           extraGroups = [ "syncthing" ];
         };
       };

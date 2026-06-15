@@ -27,7 +27,21 @@ def load_json(path: Path):
 
 def load_static_leases(path: Path):
     data = load_json(path)
-    return data.get("leases", []) if isinstance(data, dict) else []
+    if not isinstance(data, dict):
+        return []
+
+    if isinstance(data.get("reservations"), list):
+        return [
+            {
+                "hostname": record.get("hostname", ""),
+                "ip": record.get("ip", ""),
+                "mac": record.get("mac", ""),
+                "static": True,
+            }
+            for record in data["reservations"]
+        ]
+
+    return data.get("leases", [])
 
 
 def parse_dhcpd_leases(path: Path):

@@ -6,20 +6,23 @@
   flake.modules.homeManager.home =
     { pkgs, ... }:
     {
-      imports = with inputs.self.modules.homeManager; [
-        system-default
-        bash
-        fish
-        git
-        github-cli
-        gpg
-        shell
-        ssh
-        starship
-        syncthing
-        tmux
-        vim
-      ];
+      imports =
+        with inputs.self.modules.homeManager;
+        [
+          system-default
+          bash
+          fish
+          git
+          github-cli
+          gpg
+          shell
+          ssh
+          starship
+          syncthing
+          tmux
+          vim
+        ]
+        ++ [ ../context/host-context.nix ];
 
       home.sessionVariables = {
         XDG_CONFIG_HOME = "$HOME/.config";

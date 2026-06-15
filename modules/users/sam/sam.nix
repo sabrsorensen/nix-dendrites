@@ -7,51 +7,47 @@
 
 let
   username = "sam";
-  userImports = with inputs.self.modules.homeManager; [
-    sam-git
-    sam-secrets
-  ];
-  homeImports = [ inputs.self.modules.homeManager.home ];
-  graphicalImports = [ inputs.self.modules.homeManager."graphical-home" ];
-  privateImports = [
-    "${inputs.nix-secrets}/modules/sam-syncthing-universal.nix"
-    "${inputs.nix-secrets}/modules/sam-secrets-private.nix"
-  ];
 in
 {
+  flake.homeConfigurations = inputs.self.lib.mkHomeManager "x86_64-linux" "sam";
+
   flake.modules = lib.mkMerge [
-    (self.factory.user username true)
+    (self.lib.factory.user username true)
     {
-      nixos."${username}" = {
-        imports =
-          (with inputs.self.modules.nixos; [
-            virtualisation
-          ])
-          ++ [
-            "${inputs.nix-secrets}/modules/system-secrets-private.nix"
+      nixos."${username}" =
+        { lib, ... }:
+        {
+          imports = with inputs.self.modules.nixos; [
+            sam-system-base
+            sam-system-private
+            podman
           ];
 
-        users.users."${username}" = {
-          description = lib.strings.toUpper (lib.strings.substring 0 1 username) + lib.strings.substring 1 (-1) username;
-          group = username;
+          users.users."${username}".extraGroups = lib.mkAfter [ "podman" ];
         };
-        programs.fish.enable = true;
-      };
     }
 
     {
       nixos.samCli =
-        { pkgs, ... }:
         {
-          imports = [
-            "${inputs.nix-secrets}/modules/system-secrets-private.nix"
+          pkgs,
+          ...
+        }:
+        {
+          imports = with inputs.self.modules.nixos; [
+            sam-system-base
+            sam-system-private
           ];
 
           users.groups."${username}" = { };
           users.users."${username}" = {
             isNormalUser = true;
             home = "/home/${username}";
-            extraGroups = [ "media" "podman" "wheel" ];
+            extraGroups = [
+              "media"
+              "podman"
+              "wheel"
+            ];
             shell = pkgs.bash;
             group = username;
           };
@@ -70,9 +66,11 @@ in
       homeManager."${username}" =
         { ... }:
         {
-          imports = userImports ++ graphicalImports ++ privateImports;
-          home.username = lib.mkDefault "sam";
-          home.homeDirectory = lib.mkDefault "/home/sam";
+          imports = with inputs.self.modules.homeManager; [
+            sam-home-base
+            sam-home-graphical
+            sam-home-private
+          ];
         };
     }
 
@@ -80,9 +78,11 @@ in
       homeManager.samCli =
         { ... }:
         {
-          imports = userImports ++ homeImports ++ privateImports;
-          home.username = lib.mkDefault "sam";
-          home.homeDirectory = lib.mkDefault "/home/sam";
+          imports = with inputs.self.modules.homeManager; [
+            home
+            sam-home-base
+            sam-home-private
+          ];
         };
     }
   ];

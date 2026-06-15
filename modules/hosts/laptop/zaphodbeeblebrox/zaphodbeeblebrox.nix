@@ -1,35 +1,20 @@
 {
   inputs,
+  lib,
   ...
 }:
-{
-  flake.modules.nixos.ZaphodBeeblebrox = {
-    imports = with inputs.self.modules.nixos; [
-      sam
-      ./_zaphod/hardware.nix
-      ./_zaphod/filesystem.nix
-      ./_zaphod/network.nix
-      ./_zaphod/users/sam.nix
-      system-desktop
-      systemd-boot
-      disko
-      bluetooth
-      flatpak
-      nix-index
-      kde
-      nvidia
-      wine
-      xserver
-    ];
-
-    home-manager.users.sam = {
-      imports = [
-        inputs.self.modules.homeManager.ZaphodBeeblebrox
-      ];
-    };
-  };
-
-  flake.modules.homeManager.ZaphodBeeblebrox = {
+let
+  primaryInteractiveUser = "sam";
+  rootLuksUuid = lib.removeSuffix "\n" (
+    builtins.readFile "${inputs.nix-secrets}/luks/zaphod/root.txt"
+  );
+  mkWorkstation = import ../_base/workstation.nix;
+in
+mkWorkstation {
+  inherit inputs;
+  inherit lib;
+  systemName = "ZaphodBeeblebrox";
+  homeModule = {
     imports = with inputs.self.modules.homeManager; [
       firefox
       konsole
@@ -39,6 +24,33 @@
       vscode
     ];
   };
+  extraImports = with inputs.self.modules.nixos; [
+    sam
+    ./_zaphod/hardware.nix
+    ({ lib, ... }: import ./_zaphod/filesystem.nix { inherit lib rootLuksUuid; })
+    ./_zaphod/network.nix
+    ./_zaphod/users/sam.nix
+    system-desktop
+    systemd-boot
+    disko
+    bluetooth
+    flatpak
+    nix-index
+    kde
+    nvidia
+    wine
+    xserver
+  ];
+  extraHostConfig = {
+    my.host.primaryInteractiveUser = primaryInteractiveUser;
 
-  flake.nixosConfigurations = inputs.self.lib.mkNixos "x86_64-linux" "ZaphodBeeblebrox";
+    home-manager.users.sam = {
+      imports = [
+        inputs.self.modules.homeManager.ZaphodBeeblebrox
+      ];
+    };
+  };
+  primaryInteractiveUser = primaryInteractiveUser;
+  sshIdentityFile = "~/.ssh/zaphod_id_ed25519";
+  nixIdentityFile = "~/.ssh/nix_zaphodbeeblebrox_id_ed25519";
 }

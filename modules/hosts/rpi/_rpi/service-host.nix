@@ -7,11 +7,12 @@
   address,
   nameservers,
   serviceImports,
-  samAuthorizedKeys,
-  nixRemoteAuthorizedKeys,
+  samAuthorizedKeyPaths,
+  nixRemoteAuthorizedKeyPaths,
 }:
 let
   rpi = inputs.self.lib.rpi;
+  mkSecretsSshKeyFiles = inputs.self.lib.mkSecretsSshKeyFiles;
   static = rpi.mkStaticModule {
     inherit hostName address nameservers;
   };
@@ -26,9 +27,12 @@ in
 
   networking = static.networking;
 
-  users.users.sam.openssh.authorizedKeys.keyFiles = samAuthorizedKeys;
+  my.host.address = address;
+  my.host.deploy.enableRemoteUser = true;
 
-  users.users.nix-remote = lib.mkIf (config ? sops && config.sops.secrets ? hashed_password) {
-    openssh.authorizedKeys.keyFiles = nixRemoteAuthorizedKeys;
+  users.users.sam.openssh.authorizedKeys.keyFiles = mkSecretsSshKeyFiles samAuthorizedKeyPaths;
+
+  users.users.nix-remote = lib.mkIf config.my.host.deploy.enableRemoteUser {
+    openssh.authorizedKeys.keyFiles = mkSecretsSshKeyFiles nixRemoteAuthorizedKeyPaths;
   };
 }

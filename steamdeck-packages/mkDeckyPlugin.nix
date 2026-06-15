@@ -20,6 +20,7 @@
   patches ? [ ],
   prePatch ? null,
   postPatch ? null,
+  sourceReplacementScript ? null,
   preConfigure ? null,
   postConfigure ? null,
   preBuild ? null,
@@ -38,6 +39,9 @@
   useFastPermissions ? false,
 }:
 
+let
+  userPreConfigure = preConfigure;
+in
 stdenv.mkDerivation rec {
   inherit
     pname
@@ -65,11 +69,16 @@ stdenv.mkDerivation rec {
   inherit
     prePatch
     postPatch
-    preConfigure
     postConfigure
     preBuild
     postBuild
     ;
+
+  preConfigure =
+    lib.optionalString (sourceReplacementScript != null) ''
+      ${python3}/bin/python3 ${sourceReplacementScript}
+    ''
+    + lib.optionalString (userPreConfigure != null) userPreConfigure;
 
   buildPhase = ''
     runHook preBuild

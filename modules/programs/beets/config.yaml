@@ -1,0 +1,18 @@
+directory: /AnomalyRealm/media/music/ready_to_stream/sam_library
+library: ~/.local/share/beets/musiclibrary.db
+
+import:
+  move: yes
+  write: yes
+  log: ~/.local/share/beets/import.log
+
+pluginpath:
+  - ~/.config/beets/plugins
+
+plugins:
+  - demlo_compat
+
+paths:
+  default: $albumartist/$album/$track - $title
+  singleton: $artist/$artist - $title
+  comp: $album/$track - $artist - $title

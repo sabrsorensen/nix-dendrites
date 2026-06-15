@@ -27,28 +27,31 @@ function secure-deploy --description "Remote deployment script with safety check
         return 1
     end
 
-    # Set up variables
-    set peer_ip ""
-    set peer_name ""
-    set lock_host "nix-(string lower $target_host)"
-    set nh_target_host (string lower $target_host)
-    set local_domains "naboo.nesneros.space" "nevarro.nesneros.space" "atlasuponraiden.nesneros.space"
+    set config_json (secureDeployConfig $target_host)
+    if test $status -ne 0 -o -z "$config_json"
+        echo "No secure deployment topology is defined for $target_host"
+        return 1
+    end
+
+    set target_host_lower (string lower $target_host)
+    set lock_host "nix-$target_host_lower"
+    set nh_target_host $target_host_lower
+    set peer_ip (printf '%s\n' "$config_json" | jq -r '.peerIp')
+    set peer_name (printf '%s\n' "$config_json" | jq -r '.peerName')
+    set local_domains (printf '%s\n' "$config_json" | jq -r '.probeDomains[]')
+    set peer_services (printf '%s\n' "$config_json" | jq -r '.peerServices[]')
+    set target_services (printf '%s\n' "$config_json" | jq -r '.targetServices[]')
     if test "$tail" = true
         set nh_target_host "$nh_target_host-tail"
     end
     set nh_target_host "nix-$nh_target_host"
 
-    # Determine peer based on target
-    switch $target_host
-        case Naboo
-            set peer_ip "192.168.1.4"
-            set peer_name Nevarro
-        case Nevarro
-            set peer_ip "192.168.1.3"
-            set peer_name Naboo
-        case "*"
-            echo "Unknown target host: $target_host"
-            return 1
+    function __secure_deploy_service_cmd
+        set checks
+        for service in $argv
+            set checks $checks "systemctl is-active --quiet $service"
+        end
+        string join " && " $checks
     end
 
     echo "🔍 Checking health of $peer_name ($peer_ip) before deploying to $target_host..."
@@ -68,20 +71,15 @@ function secure-deploy --description "Remote deployment script with safety check
         end
     end
 
-    # Check peer service health for the current DNS/DHCP topology
-    switch $peer_name
-        case Nevarro
-            if not ssh nix-(string lower $peer_name) "systemctl is-active --quiet blocky && systemctl is-active --quiet coredns && systemctl is-active --quiet dhcp-coredns-kea" 2>/dev/null
-                echo "❌ ERROR: $peer_name is not healthy for primary DNS/DHCP duty!"
-                echo "   Expected active services: blocky, coredns, dhcp-coredns-kea"
-                return 1
-            end
-        case Naboo
-            if not ssh nix-(string lower $peer_name) "systemctl is-active --quiet blocky && systemctl is-active --quiet coredns && systemctl is-active --quiet dhcp-failover.timer" 2>/dev/null
-                echo "❌ ERROR: $peer_name is not healthy for primary DNS / standby DHCP duty!"
-                echo "   Expected active services: blocky, coredns, dhcp-failover.timer"
-                return 1
-            end
+    # Check peer service health for the current deployment topology
+    set peer_service_cmd (__secure_deploy_service_cmd $peer_services)
+    if test -n "$peer_service_cmd"
+        if not ssh "nix-"(string lower $peer_name) "$peer_service_cmd" 2>/dev/null
+            echo "❌ ERROR: $peer_name is not healthy for safe deployment!"
+            echo "   Expected active services: "(string join ", " $peer_services)
+            functions -e __secure_deploy_service_cmd
+            return 1
+        end
     end
 
     # Check if peer has deployment lock
@@ -97,7 +95,7 @@ function secure-deploy --description "Remote deployment script with safety check
         __secure_deploy_cleanup_lock
     end
 
-    if ssh nix-(string lower $peer_name) "test -f $lock_file" 2>/dev/null
+    if ssh "nix-"(string lower $peer_name) "test -f $lock_file" 2>/dev/null
         echo "❌ ERROR: Deployment already in progress on $peer_name!"
         echo "   Lock file exists: $lock_file"
         functions -e __secure_deploy_cleanup_lock __secure_deploy_cleanup_on_signal __secure_deploy_cleanup_on_exit
@@ -116,9 +114,9 @@ function secure-deploy --description "Remote deployment script with safety check
     # Run the actual deployment
     set deploy_result 0
     if test "$upgrade" = true
-        nh os switch ~/src/nix-dendrites/ -H $target_host --target-host $nh_target_host --update --keep-going $additional_args
+        nh os switch $DENDRITIC_FLAKE_PATH -H $target_host --target-host $nh_target_host --update --keep-going $additional_args
     else
-        nh os switch ~/src/nix-dendrites/ -H $target_host --target-host $nh_target_host --keep-going $additional_args
+        nh os switch $DENDRITIC_FLAKE_PATH -H $target_host --target-host $nh_target_host --keep-going $additional_args
     end
     set deploy_result $status
 
@@ -139,23 +137,15 @@ function secure-deploy --description "Remote deployment script with safety check
         end
 
         # Check deployed host service health for the current role
-        switch $target_host
-            case Naboo
-                if not ssh $nh_target_host "systemctl is-active --quiet blocky && systemctl is-active --quiet coredns && systemctl is-active --quiet dhcp-failover.timer" 2>/dev/null
-                    echo "❌ CRITICAL: Post-deployment service health check failed on $target_host!"
-                    echo "   Expected active services: blocky, coredns, dhcp-failover.timer"
-                    __secure_deploy_cleanup_lock
-                    functions -e __secure_deploy_cleanup_lock __secure_deploy_cleanup_on_signal __secure_deploy_cleanup_on_exit
-                    return 1
-                end
-            case Nevarro
-                if not ssh $nh_target_host "systemctl is-active --quiet blocky && systemctl is-active --quiet coredns && systemctl is-active --quiet dhcp-coredns-kea" 2>/dev/null
-                    echo "❌ CRITICAL: Post-deployment service health check failed on $target_host!"
-                    echo "   Expected active services: blocky, coredns, dhcp-coredns-kea"
-                    __secure_deploy_cleanup_lock
-                    functions -e __secure_deploy_cleanup_lock __secure_deploy_cleanup_on_signal __secure_deploy_cleanup_on_exit
-                    return 1
-                end
+        set target_service_cmd (__secure_deploy_service_cmd $target_services)
+        if test -n "$target_service_cmd"
+            if not ssh $nh_target_host "$target_service_cmd" 2>/dev/null
+                echo "❌ CRITICAL: Post-deployment service health check failed on $target_host!"
+                echo "   Expected active services: "(string join ", " $target_services)
+                __secure_deploy_cleanup_lock
+                functions -e __secure_deploy_cleanup_lock __secure_deploy_cleanup_on_signal __secure_deploy_cleanup_on_exit __secure_deploy_service_cmd
+                return 1
+            end
         end
 
         # Test Blocky -> CoreDNS local zone integration post-deployment
@@ -175,6 +165,6 @@ function secure-deploy --description "Remote deployment script with safety check
 
     # Always clean up deployment lock
     __secure_deploy_cleanup_lock
-    functions -e __secure_deploy_cleanup_lock __secure_deploy_cleanup_on_signal __secure_deploy_cleanup_on_exit
+    functions -e __secure_deploy_cleanup_lock __secure_deploy_cleanup_on_signal __secure_deploy_cleanup_on_exit __secure_deploy_service_cmd
     return $deploy_result
 end

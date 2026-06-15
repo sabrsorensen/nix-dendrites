@@ -4,7 +4,12 @@
 }:
 {
   flake.modules.homeManager.nix-index =
-    { lib, pkgs, config, ... }:
+    {
+      lib,
+      pkgs,
+      config,
+      ...
+    }:
     {
       # Import the nix-index-database Home Manager module within Home Manager context
       imports = [ inputs.nix-index-database.homeModules.nix-index ];

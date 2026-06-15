@@ -4,22 +4,35 @@
 }:
 {
   flake.modules.homeManager.sam-git =
-    { config, osConfig, ... }:
+    {
+      config,
+      osConfig ? { },
+      lib,
+      ...
+    }:
     let
-      hostName = osConfig.networking.hostName;
       secretRoot = config.my.gitSecretRoot;
       readGitValue =
         path: builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${secretRoot}/${path}");
 
       wslSigningKeyPath = "${secretRoot}/gpg-keys/signing-key-hash-wsl.txt";
       signingKey =
-        if hostName == "NixOS-WSL" && builtins.pathExists wslSigningKeyPath then
+        if config.my.git.signingKeyVariant == "wsl" && builtins.pathExists wslSigningKeyPath then
           readGitValue "gpg-keys/signing-key-hash-wsl.txt"
         else
           readGitValue "gpg-keys/signing-key-hash.txt";
     in
     {
-      programs.git.settings.user = {
+      options.my.git.signingKeyVariant = lib.mkOption {
+        type = lib.types.enum [
+          "default"
+          "wsl"
+        ];
+        default = "default";
+        description = "Selects which signing key hash file to use for Git signing.";
+      };
+
+      config.programs.git.settings.user = {
         name = readGitValue "git/name.txt";
         email = readGitValue "git/email.txt";
         signingKey = signingKey;

@@ -8,7 +8,7 @@ let
 in
 {
   flake.modules.nixos.netbird-server =
-    { config, ... }:
+    { config, pkgs, ... }:
     let
       domain = config.systemConstants.domain;
       netbird_domain = "netbird.${domain}";
@@ -17,8 +17,18 @@ in
       netbird_relay_port = 33080;
     in
     {
-      imports = [ inputs.self.modules.nixos.pocket-id ];
+      my.localDns.records = [
+        { hostname = "auth"; }
+        { hostname = "netbird"; }
+      ];
+
       sops.secrets = {
+        pocket-id = {
+          mode = "0400";
+          format = "dotenv";
+          sopsFile = "${inputs.nix-secrets}/pocket-id.env";
+          key = "";
+        };
         "netbird/turn_password" = {
           group = "turnserver";
           mode = "0440";
@@ -46,6 +56,78 @@ in
 
       systemd.services.netbird-management.serviceConfig = {
         EnvironmentFile = config.sops.secrets."netbird-env".path;
+      };
+
+      services = {
+        pocket-id = {
+          enable = true;
+          package = pkgs.pocket-id;
+          settings = {
+            APP_URL = "https://auth.${domain}";
+            ANALYTICS_DISABLED = true;
+            TRUST_PROXY = true;
+          };
+          environmentFile = config.sops.secrets.pocket-id.path;
+        };
+      };
+
+      my.caddy.virtualHosts = {
+        "auth.{$DOMAIN}" = {
+          logFormat = ''
+            output stdout
+            format console
+            level INFO
+          '';
+          routes = [
+            ''
+              import cors https://auth.{$DOMAIN}
+              reverse_proxy http://127.0.0.1:1411
+            ''
+          ];
+        };
+
+        "netbird.{$DOMAIN}" = {
+          logFormat = ''
+            output stdout
+            format console
+            level INFO
+          '';
+          routes = [
+            ''
+              root * ${config.services.netbird.server.dashboard.finalDrv}
+
+              reverse_proxy /api/* http://${netbird_mgmt_addr}:${toString netbird_mgmt_port}
+
+              reverse_proxy /management.ManagementService/* h2c://${netbird_mgmt_addr}:${toString netbird_mgmt_port} {
+                transport http {
+                  read_timeout 0
+                  write_timeout 0
+                  dial_timeout 30s
+                }
+                flush_interval -1
+              }
+
+              reverse_proxy /ws-proxy/management/* http://${netbird_mgmt_addr}:${toString netbird_mgmt_port}
+
+              reverse_proxy /signalexchange.SignalExchange/* h2c://${netbird_mgmt_addr}:${toString config.services.netbird.server.signal.port} {
+                transport http {
+                  read_timeout 0
+                  write_timeout 0
+                  dial_timeout 30s
+                }
+                flush_interval -1
+              }
+
+              reverse_proxy /ws-proxy/signal/* http://${netbird_mgmt_addr}:${toString config.services.netbird.server.signal.port}
+
+              handle /relay {
+                reverse_proxy http://${netbird_mgmt_addr}:${toString netbird_relay_port}
+              }
+
+              file_server
+            ''
+          ];
+        };
       };
 
       services.netbird = {
@@ -122,7 +204,7 @@ in
       virtualisation.podman.enable = true;
 
       virtualisation.oci-containers.containers.netbird-relay = {
-        image = "netbirdio/relay:latest";
+        image = "netbirdio/relay:0.71.4";
         ports = [
           "33080:33080"
         ];
@@ -134,51 +216,6 @@ in
         environmentFiles = [
           config.sops.secrets."netbird-relay-env".path
         ];
-      };
-
-      services.caddy = {
-        virtualHosts = {
-          "netbird.{$DOMAIN}" = {
-            logFormat = ''
-              output stdout
-              format console
-              level INFO
-            '';
-            extraConfig = ''
-              root * ${config.services.netbird.server.dashboard.finalDrv}
-
-              reverse_proxy /api/* http://${netbird_mgmt_addr}:${toString netbird_mgmt_port}
-
-              reverse_proxy /management.ManagementService/* h2c://${netbird_mgmt_addr}:${toString netbird_mgmt_port} {
-                transport http {
-                  read_timeout 0
-                  write_timeout 0
-                  dial_timeout 30s
-                }
-                flush_interval -1
-              }
-
-              reverse_proxy /ws-proxy/management/* http://${netbird_mgmt_addr}:${toString netbird_mgmt_port}
-
-              reverse_proxy /signalexchange.SignalExchange/* h2c://${netbird_mgmt_addr}:${toString config.services.netbird.server.signal.port} {
-                transport http {
-                  read_timeout 0
-                  write_timeout 0
-                  dial_timeout 30s
-                }
-                flush_interval -1
-              }
-
-              reverse_proxy /ws-proxy/signal/* http://${netbird_mgmt_addr}:${toString config.services.netbird.server.signal.port}
-
-              handle /relay {
-                reverse_proxy http://${netbird_mgmt_addr}:${toString netbird_relay_port}
-              }
-
-              file_server
-            '';
-          };
-        };
       };
 
       networking.firewall.allowedTCPPorts = [

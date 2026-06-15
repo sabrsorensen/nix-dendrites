@@ -2,8 +2,24 @@
   lib,
   fetchFromGitHub,
   mkDeckyPlugin,
+  pkgs,
 }:
 
+let
+  sourceReplacementScript = import ../lib/write-source-replacement-script.nix { inherit pkgs; } {
+    scriptName = "decky-autosuspend-lockfile";
+    defaultFile = "pnpm-lock.yaml";
+    replacements = [
+      {
+        kind = "regex";
+        reason = "Normalize the lockfile version to the format expected by fetchPnpmDeps.";
+        pattern = ''lockfileVersion: .*'';
+        replacement = ''lockfileVersion: "6.0"'';
+        expectedCount = 1;
+      }
+    ];
+  };
+in
 mkDeckyPlugin {
   pname = "decky-autosuspend";
   version = "2.2.0";
@@ -16,24 +32,8 @@ mkDeckyPlugin {
   };
 
   hash = "sha256-HNkAGz7I+JDa1n/eTsDy1CDYMCpI831Q+7TB9Nq8qeI=";
-
-  prePatch = ''
-    if [ -f pnpm-lock.yaml ]; then
-      echo "Fixing pnpm lockfile version..."
-      sed -i 's/lockfileVersion: .*/lockfileVersion: "6.0"/' pnpm-lock.yaml
-    fi
-  '';
-
+  sourceReplacementScript = sourceReplacementScript;
   buildMessage = "Building AutoSuspend frontend...";
-  buildCommand = ''
-    pnpm config set auto-install-peers true
-    pnpm install --no-frozen-lockfile || {
-      echo "Standard install failed, trying with legacy peer deps..."
-      rm -rf node_modules
-      pnpm install --no-frozen-lockfile --legacy-peer-deps
-    }
-    pnpm build
-  '';
 
   meta = with lib; {
     description = "Automatically suspend Steam Deck on low power";
