@@ -32,7 +32,10 @@
       isPi = hostCfg.roles.rpi;
       isDeck = hostCfg.roles.steamdeck;
       isWsl = hostCfg.roles.wsl;
-      hasPodman = osConfig ? virtualisation && osConfig.virtualisation ? podman && (osConfig.virtualisation.podman.enable or false);
+      hasPodman =
+        osConfig ? virtualisation
+        && osConfig.virtualisation ? podman
+        && (osConfig.virtualisation.podman.enable or false);
       sleepySystem = hostCfg.deploy.sleepy;
 
       hasNixFlake = nixFlakePath != null;
@@ -441,10 +444,7 @@
               null;
 
           podmanServices =
-            if hasPodman then
-              "systemctl list-units --type=service --all 'podman-*.service'"
-            else
-              null;
+            if hasPodman then "systemctl list-units --type=service --all 'podman-*.service'" else null;
           pcs = if hasPodman then "podmanServices" else null;
 
           podmanServiceStatus =

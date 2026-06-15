@@ -30,8 +30,8 @@ let
     {
       kind = "literal";
       reason = "Resolve su from the Nix store instead of relying on the SteamOS host PATH.";
-      old = ''['su', '-l', '-c','';
-      new = ''['${pkgs.shadow}/bin/su', '-l', '-c','';
+      old = "['su', '-l', '-c',";
+      new = "['${pkgs.shadow}/bin/su', '-l', '-c',";
       expectedCount = 1;
     }
     {
@@ -39,19 +39,19 @@ let
       reason = "Replace Decky's helper with a NixOS-safe user-service probe.";
       pattern = ''ipc\.is_driver_running\(as_user=decky\.DECKY_USER\)'';
       replacement = ''
-try:
-            subprocess.check_output([
-                '${pkgs.shadow}/bin/su', '-l', '-c',
-                '${xrGamingDriverStatusCommand}',
-                decky.DECKY_USER,
-            ], stderr=subprocess.STDOUT)
-            return True
-        except subprocess.CalledProcessError as exc:
-            decky.logger.error(f\"Error checking driver status {exc.output}\")
-            return False
-        except FileNotFoundError as exc:
-            decky.logger.error(f\"Error checking driver status {exc}\")
-            return False'';
+        try:
+                    subprocess.check_output([
+                        '${pkgs.shadow}/bin/su', '-l', '-c',
+                        '${xrGamingDriverStatusCommand}',
+                        decky.DECKY_USER,
+                    ], stderr=subprocess.STDOUT)
+                    return True
+                except subprocess.CalledProcessError as exc:
+                    decky.logger.error(f\"Error checking driver status {exc.output}\")
+                    return False
+                except FileNotFoundError as exc:
+                    decky.logger.error(f\"Error checking driver status {exc}\")
+                    return False'';
       expectedCount = 1;
     }
   ];

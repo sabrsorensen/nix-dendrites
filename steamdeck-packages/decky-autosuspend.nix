@@ -13,7 +13,7 @@ let
       {
         kind = "regex";
         reason = "Normalize the lockfile version to the format expected by fetchPnpmDeps.";
-        pattern = ''lockfileVersion: .*'';
+        pattern = "lockfileVersion: .*";
         replacement = ''lockfileVersion: "6.0"'';
         expectedCount = 1;
       }

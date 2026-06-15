@@ -9,7 +9,9 @@
 }:
 let
   cfg = config.jovian.decky-loader;
-  writeSourceReplacementScript = import ../../../../../lib/write-source-replacement-script.nix { inherit pkgs; };
+  writeSourceReplacementScript = import ../../../../../lib/write-source-replacement-script.nix {
+    inherit pkgs;
+  };
   systemctlActions = [
     "is-active"
     "daemon-reload"
@@ -78,26 +80,28 @@ let
       expectedCount = 1;
     }
   ]
-  ++ map
-    (
-      action:
-      let
-        oldSuffix = if action == "daemon-reload" then ''["systemctl", "${action}"]'' else ''["systemctl", "${action}", service_name]'';
-        newSuffix =
-          if action == "daemon-reload" then
-            ''["${pkgs.systemd}/bin/systemctl", "${action}"]''
-          else
-            ''["${pkgs.systemd}/bin/systemctl", "${action}", service_name]'';
-      in
-      {
-        file = "backend/decky_loader/localplatform/localplatformlinux.py";
-        reason = "Resolve systemctl from the Nix store instead of assuming a mutable host PATH.";
-        old = oldSuffix;
-        new = newSuffix;
-        expectedCount = 1;
-      }
-    )
-    systemctlActions
+  ++ map (
+    action:
+    let
+      oldSuffix =
+        if action == "daemon-reload" then
+          ''["systemctl", "${action}"]''
+        else
+          ''["systemctl", "${action}", service_name]'';
+      newSuffix =
+        if action == "daemon-reload" then
+          ''["${pkgs.systemd}/bin/systemctl", "${action}"]''
+        else
+          ''["${pkgs.systemd}/bin/systemctl", "${action}", service_name]'';
+    in
+    {
+      file = "backend/decky_loader/localplatform/localplatformlinux.py";
+      reason = "Resolve systemctl from the Nix store instead of assuming a mutable host PATH.";
+      old = oldSuffix;
+      new = newSuffix;
+      expectedCount = 1;
+    }
+  ) systemctlActions
   ++ [
     {
       file = "backend/decky_loader/helpers.py";
@@ -109,7 +113,7 @@ let
     {
       file = "backend/decky_loader/helpers.py";
       reason = "Keep PATH available for Linux helper subprocesses.";
-      old = ''env={} if localplatform.ON_LINUX else None'';
+      old = "env={} if localplatform.ON_LINUX else None";
       new = ''env={"PATH": os.environ.get("PATH", "")} if localplatform.ON_LINUX else None'';
       expectedCount = 1;
     }

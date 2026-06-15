@@ -14,7 +14,7 @@ let
         kind = "literal";
         reason = "Resolve the plugin-local import path without assuming Decky's mutable plugins directory layout.";
         old = ''sys.path.append(os.path.abspath("../plugins/free-loader"))'';
-        new = ''sys.path.append(os.path.dirname(os.path.abspath(__file__)))'';
+        new = "sys.path.append(os.path.dirname(os.path.abspath(__file__)))";
         expectedCount = 1;
       }
     ];

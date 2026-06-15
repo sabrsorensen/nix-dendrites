@@ -6,11 +6,7 @@
 }:
 let
   replacementManifest = pkgs.writeText "${scriptName}.json" (builtins.toJSON replacements);
-  pythonDefaultFile =
-    if defaultFile == null then
-      "None"
-    else
-      builtins.toJSON defaultFile;
+  pythonDefaultFile = if defaultFile == null then "None" else builtins.toJSON defaultFile;
 in
 pkgs.writeText "${scriptName}.py" ''
   import json

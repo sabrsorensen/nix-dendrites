@@ -65,12 +65,13 @@
       };
     in
     {
-      home.packages =
-        [ pkgs.bubblewrap ]
-        ++ lib.optional (pkgs ? spec-kit) pkgs.spec-kit
-        ++ [
-          (pkgs.python3.withPackages (ps: with ps; [ pyyaml ]))
-        ];
+      home.packages = [
+        pkgs.bubblewrap
+      ]
+      ++ lib.optional (pkgs ? spec-kit) pkgs.spec-kit
+      ++ [
+        (pkgs.python3.withPackages (ps: with ps; [ pyyaml ]))
+      ];
 
       programs.codex = {
         enable = true;

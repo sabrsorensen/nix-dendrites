@@ -66,15 +66,15 @@ let
       animationConfig ? null,
     }:
     mkDeckyPlugin {
-  pname = "decky-sdh-animationchanger-enhanced";
-  version = "unstable-jovian";
+      pname = "decky-sdh-animationchanger-enhanced";
+      version = "unstable-jovian";
 
-  src = fetchFromGitHub {
-    owner = "TheLogicMaster";
-    repo = "SDH-AnimationChanger";
-    rev = "main";
-    sha256 = "sha256-F9OKBmuX0Pux3KTPX6UYJ1RL05ZMso2h0uw/VlvQ8CU=";
-  };
+      src = fetchFromGitHub {
+        owner = "TheLogicMaster";
+        repo = "SDH-AnimationChanger";
+        rev = "main";
+        sha256 = "sha256-F9OKBmuX0Pux3KTPX6UYJ1RL05ZMso2h0uw/VlvQ8CU=";
+      };
 
       hash = "sha256-2yKZ+HQPJM2Lh8IZ3SKxUJFE2fCQszbyMJGq+76G6vk=";
 
