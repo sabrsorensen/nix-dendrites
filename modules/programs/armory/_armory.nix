@@ -58,9 +58,9 @@ let
           pkgs.xdg-utils
         ]}:$out/bin:$out/usr/bin:''${PATH}"
         if [ -z "''${HOME:-}" ] || [ "''${HOME}" = "/homeless-shelter" ]; then
-          HOME="$(${pkgs.glibc.bin}/bin/getent passwd "$(${pkgs.coreutils}/bin/id -un)" | ${pkgs.coreutils}/bin/cut -d: -f6 || true)"
+          HOME="''$(${pkgs.glibc.bin}/bin/getent passwd "''$(${pkgs.coreutils}/bin/id -un)" | ${pkgs.coreutils}/bin/cut -d: -f6 || true)"
           if [ -z "''${HOME:-}" ]; then
-            HOME="/home/$(${pkgs.coreutils}/bin/id -un)"
+            HOME="/home/''$(${pkgs.coreutils}/bin/id -un)"
           fi
           export HOME
         fi
