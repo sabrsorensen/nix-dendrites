@@ -30,7 +30,6 @@ let
         pkgs.autoPatchelfHook
         pkgs.dpkg
         pkgs.makeWrapper
-        pkgs.replaceVars
       ];
 
       buildInputs = [
