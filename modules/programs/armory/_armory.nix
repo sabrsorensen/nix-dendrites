@@ -49,9 +49,13 @@ let
         rm -f "$out/usr/bin/armory"
         cat > "$out/bin/armory" <<EOF
         #!${pkgs.runtimeShell}
-        export PATH="${lib.makeBinPath [ pkgs.xdg-utils ]}:$out/bin:$out/usr/bin:\$PATH"
+        mkdir -p "''${HOME}/.bitcoin/blocks"
+        export PATH="${lib.makeBinPath [
+          pkgs.bitcoind
+          pkgs.xdg-utils
+        ]}:$out/bin:$out/usr/bin:''${PATH}"
         cd "$out/usr/share/armory"
-        exec ${python}/bin/python2 "$out/usr/lib/armory/ArmoryQt.py" "\$@"
+        exec ${python}/bin/python2 "$out/usr/lib/armory/ArmoryQt.py" "''$@"
         EOF
         chmod +x "$out/bin/armory"
 
@@ -104,6 +108,7 @@ in
       environment.systemPackages =
         lib.optionals (pkgs.stdenv.hostPlatform.system == supportedSystem) [
           inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.armory
+          pkgs.bitcoind
         ];
     };
 }
