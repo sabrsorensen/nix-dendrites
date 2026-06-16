@@ -10,6 +10,7 @@ let
     pkgs:
     let
       runtimePkgs = inputs.armory-runtime-nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
+      bitcoind = runtimePkgs.bitcoind;
       python = runtimePkgs.python27.withPackages (
         ps: with ps; [
           psutil
@@ -71,7 +72,7 @@ let
         substituteInPlace "$out/bin/armory" \
           --replace-fail "@runtimeShell@" "${pkgs.runtimeShell}" \
           --replace-fail "@runtimePath@" "${lib.makeBinPath [
-            pkgs.bitcoind
+            bitcoind
             pkgs.coreutils
             pkgs.glibc.bin
             pkgs.procps
@@ -136,7 +137,7 @@ in
       environment.systemPackages =
         lib.optionals (pkgs.stdenv.hostPlatform.system == supportedSystem) [
           inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.armory
-          pkgs.bitcoind
+          inputs.armory-runtime-nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.bitcoind
         ];
     };
 }
