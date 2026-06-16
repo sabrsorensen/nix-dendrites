@@ -49,9 +49,16 @@ let
         rm -f "$out/usr/bin/armory"
         cat > "$out/bin/armory" <<EOF
         #!${pkgs.runtimeShell}
+        if [ -z "''${HOME:-}" ] || [ "''${HOME}" = "/homeless-shelter" ]; then
+          HOME="$(getent passwd "$(id -un)" | cut -d: -f6)"
+          export HOME
+        fi
         mkdir -p "''${HOME}/.bitcoin/blocks"
         export PATH="${lib.makeBinPath [
           pkgs.bitcoind
+          pkgs.coreutils
+          pkgs.procps
+          pkgs.util-linux
           pkgs.xdg-utils
         ]}:$out/bin:$out/usr/bin:''${PATH}"
         cd "$out/usr/share/armory"
