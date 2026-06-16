@@ -49,11 +49,6 @@ let
         rm -f "$out/usr/bin/armory"
         cat > "$out/bin/armory" <<EOF
         #!${pkgs.runtimeShell}
-        if [ -z "''${HOME:-}" ] || [ "''${HOME}" = "/homeless-shelter" ]; then
-          HOME="$(getent passwd "$(id -un)" | cut -d: -f6)"
-          export HOME
-        fi
-        mkdir -p "''${HOME}/.bitcoin/blocks"
         export PATH="${lib.makeBinPath [
           pkgs.bitcoind
           pkgs.coreutils
@@ -62,6 +57,14 @@ let
           pkgs.util-linux
           pkgs.xdg-utils
         ]}:$out/bin:$out/usr/bin:''${PATH}"
+        if [ -z "''${HOME:-}" ] || [ "''${HOME}" = "/homeless-shelter" ]; then
+          HOME="$(${pkgs.glibc.bin}/bin/getent passwd "$(${pkgs.coreutils}/bin/id -un)" | ${pkgs.coreutils}/bin/cut -d: -f6 || true)"
+          if [ -z "''${HOME:-}" ]; then
+            HOME="/home/$(${pkgs.coreutils}/bin/id -un)"
+          fi
+          export HOME
+        fi
+        ${pkgs.coreutils}/bin/mkdir -p "''${HOME}/.bitcoin/blocks"
         cd "$out/usr/share/armory"
         exec ${python}/bin/python2 "$out/usr/lib/armory/ArmoryQt.py" "''$@"
         EOF
