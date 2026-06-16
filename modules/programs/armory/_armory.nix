@@ -30,6 +30,7 @@ let
         pkgs.autoPatchelfHook
         pkgs.dpkg
         pkgs.makeWrapper
+        pkgs.replaceVars
       ];
 
       buildInputs = [
@@ -47,27 +48,37 @@ let
         ln -s "$out/usr/bin/ArmoryDB" "$out/bin/ArmoryDB"
 
         rm -f "$out/usr/bin/armory"
-        cat > "$out/bin/armory" <<EOF
-        #!${pkgs.runtimeShell}
-        export PATH="${lib.makeBinPath [
-          pkgs.bitcoind
-          pkgs.coreutils
-          pkgs.glibc.bin
-          pkgs.procps
-          pkgs.util-linux
-          pkgs.xdg-utils
-        ]}:$out/bin:$out/usr/bin:''${PATH}"
-        if [ -z "''${HOME:-}" ] || [ "''${HOME}" = "/homeless-shelter" ]; then
-          HOME="''$(${pkgs.glibc.bin}/bin/getent passwd "''$(${pkgs.coreutils}/bin/id -un)" | ${pkgs.coreutils}/bin/cut -d: -f6 || true)"
-          if [ -z "''${HOME:-}" ]; then
-            HOME="/home/''$(${pkgs.coreutils}/bin/id -un)"
+        cat > "$out/bin/armory" <<'EOF'
+        #!@runtimeShell@
+        export PATH="@runtimePath@:${PATH}"
+        if [ -z "${HOME:-}" ] || [ "${HOME}" = "/homeless-shelter" ]; then
+          HOME="$(@getent@ passwd "$(@id@ -un)" | @cut@ -d: -f6 || true)"
+          if [ -z "${HOME:-}" ]; then
+            HOME="/home/$(@id@ -un)"
           fi
           export HOME
         fi
-        ${pkgs.coreutils}/bin/mkdir -p "''${HOME}/.bitcoin/blocks"
-        cd "$out/usr/share/armory"
-        exec ${python}/bin/python2 "$out/usr/lib/armory/ArmoryQt.py" "''$@"
+        @mkdir@ -p "${HOME}/.bitcoin/blocks"
+        cd "@armoryShareDir@"
+        exec @python@ "@armoryQt@" "$@"
         EOF
+        substituteInPlace "$out/bin/armory" \
+          --replace-fail "@runtimeShell@" "${pkgs.runtimeShell}" \
+          --replace-fail "@runtimePath@" "${lib.makeBinPath [
+            pkgs.bitcoind
+            pkgs.coreutils
+            pkgs.glibc.bin
+            pkgs.procps
+            pkgs.util-linux
+            pkgs.xdg-utils
+          ]}:$out/bin:$out/usr/bin" \
+          --replace-fail "@getent@" "${pkgs.glibc.bin}/bin/getent" \
+          --replace-fail "@id@" "${pkgs.coreutils}/bin/id" \
+          --replace-fail "@cut@" "${pkgs.coreutils}/bin/cut" \
+          --replace-fail "@mkdir@" "${pkgs.coreutils}/bin/mkdir" \
+          --replace-fail "@armoryShareDir@" "$out/usr/share/armory" \
+          --replace-fail "@python@" "${python}/bin/python2" \
+          --replace-fail "@armoryQt@" "$out/usr/lib/armory/ArmoryQt.py"
         chmod +x "$out/bin/armory"
 
         cat > "$out/share/applications/armory.desktop" <<EOF
