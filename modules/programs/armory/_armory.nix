@@ -47,7 +47,7 @@ let
         ln -s "$out/usr/bin/ArmoryDB" "$out/bin/ArmoryDB"
 
         rm -f "$out/usr/bin/armory"
-        cat > "$out/bin/armory" <<'EOF'
+        cat > "$out/bin/armory" <<EOF
         #!${pkgs.runtimeShell}
         if [ -z "''${HOME:-}" ] || [ "''${HOME}" = "/homeless-shelter" ]; then
           HOME="$(getent passwd "$(id -un)" | cut -d: -f6)"
