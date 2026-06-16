@@ -88,6 +88,14 @@ let
           --replace-fail "@armoryQt@" "$out/usr/lib/armory/ArmoryQt.py"
         chmod +x "$out/bin/armory"
 
+        cp "$out/bin/armory" "$out/bin/armory-offline"
+        substituteInPlace "$out/bin/armory-offline" \
+          --replace-fail 'exec @python@ "@armoryQt@" "$@"' 'exec @python@ "@armoryQt@" --offline "$@"'
+        substituteInPlace "$out/bin/armory-offline" \
+          --replace-fail "@python@" "${python}/bin/python2" \
+          --replace-fail "@armoryQt@" "$out/usr/lib/armory/ArmoryQt.py"
+        chmod +x "$out/bin/armory-offline"
+
         cat > "$out/share/applications/armory.desktop" <<EOF
         [Desktop Entry]
         Name=Armory

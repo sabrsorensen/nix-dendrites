@@ -4,8 +4,8 @@
 
   flake-file.inputs = {
     flake-file.url = "github:vic/flake-file";
-    # Override the channels URL for more consistency with other flakes
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # Use Determinate's cooled-down Nixpkgs feed as the repo-wide default.
+    nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
   };
 
   imports = [
