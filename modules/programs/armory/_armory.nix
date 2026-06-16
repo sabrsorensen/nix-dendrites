@@ -47,22 +47,23 @@ let
         ln -s "$out/usr/bin/ArmoryDB" "$out/bin/ArmoryDB"
 
         rm -f "$out/usr/bin/armory"
-        cat > "$out/bin/armory" <<EOF
+        cat > "$out/bin/armory" <<'EOF'
         #!${pkgs.runtimeShell}
-        if [ -z "''${HOME:-}" ] || [ "''${HOME}" = "/homeless-shelter" ]; then
+        if [ -z "${HOME:-}" ] || [ "${HOME}" = "/homeless-shelter" ]; then
           HOME="$(getent passwd "$(id -un)" | cut -d: -f6)"
           export HOME
         fi
-        mkdir -p "''${HOME}/.bitcoin/blocks"
+        mkdir -p "${HOME}/.bitcoin/blocks"
         export PATH="${lib.makeBinPath [
           pkgs.bitcoind
           pkgs.coreutils
+          pkgs.glibc.bin
           pkgs.procps
           pkgs.util-linux
           pkgs.xdg-utils
-        ]}:$out/bin:$out/usr/bin:''${PATH}"
+        ]}:$out/bin:$out/usr/bin:${PATH}"
         cd "$out/usr/share/armory"
-        exec ${python}/bin/python2 "$out/usr/lib/armory/ArmoryQt.py" "''$@"
+        exec ${python}/bin/python2 "$out/usr/lib/armory/ArmoryQt.py" "$@"
         EOF
         chmod +x "$out/bin/armory"
 
