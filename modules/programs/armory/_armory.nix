@@ -50,17 +50,17 @@ let
         rm -f "$out/usr/bin/armory"
         cat > "$out/bin/armory" <<'EOF'
         #!@runtimeShell@
-        export PATH="@runtimePath@:${PATH}"
-        if [ -z "${HOME:-}" ] || [ "${HOME}" = "/homeless-shelter" ]; then
+        export PATH="@runtimePath@:''${PATH}"
+        if [ -z "''${HOME:-}" ] || [ "''${HOME}" = "/homeless-shelter" ]; then
           HOME="$(@getent@ passwd "$(@id@ -un)" | @cut@ -d: -f6 || true)"
-          if [ -z "${HOME:-}" ]; then
+          if [ -z "''${HOME:-}" ]; then
             HOME="/home/$(@id@ -un)"
           fi
           export HOME
         fi
-        @mkdir@ -p "${HOME}/.bitcoin/blocks"
+        @mkdir@ -p "''${HOME}/.bitcoin/blocks"
         cd "@armoryShareDir@"
-        exec @python@ "@armoryQt@" "$@"
+        exec @python@ "@armoryQt@" "''$@"
         EOF
         substituteInPlace "$out/bin/armory" \
           --replace-fail "@runtimeShell@" "${pkgs.runtimeShell}" \
