@@ -43,6 +43,12 @@ let
 
         dpkg-deb -x "$src" "$out"
 
+        substituteInPlace "$out/usr/lib/armory/SDM.py" \
+          --replace-fail "pargs.append('--db-type=\"' + ARMORY_DB_TYPE + '\"')" "pargs.append('--db-type=' + ARMORY_DB_TYPE)" \
+          --replace-fail "pargs.append('--satoshi-datadir=\"' + blocksdir + '\"')" "pargs.append('--satoshi-datadir=' + blocksdir)" \
+          --replace-fail "pargs.append('--datadir=\"' + dataDir + '\"')" "pargs.append('--datadir=' + dataDir)" \
+          --replace-fail "pargs.append('--dbdir=\"' + dbDir + '\"')" "pargs.append('--dbdir=' + dbDir)"
+
         mkdir -p "$out/bin" "$out/share/applications" "$out/share/pixmaps"
         ln -s "$out/usr/bin/ArmoryDB" "$out/bin/ArmoryDB"
 
