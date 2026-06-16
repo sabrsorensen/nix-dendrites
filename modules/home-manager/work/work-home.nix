@@ -71,14 +71,7 @@
           dotnetCombined
           azureCliWithDevOps
           (if pkgs ? pulumi then pulumi else null)
-          (
-            if pkgs ? uv then
-              uv
-            else if pkgs ? unstable && pkgs.unstable ? uv then
-              pkgs.unstable.uv
-            else
-              null
-          )
+          (if pkgs ? uv then uv else null)
           (if pkgs ? nodejs then nodejs else null)
         ];
 

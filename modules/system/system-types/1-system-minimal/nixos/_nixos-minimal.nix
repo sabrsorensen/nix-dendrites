@@ -47,14 +47,6 @@
         ../../../settings/host-context/host-context.nix
       ];
 
-      nixpkgs.overlays = [
-        (final: _prev: {
-          unstable = import inputs.nixpkgs-unstable {
-            inherit (final) config;
-            system = pkgs.stdenv.hostPlatform.system;
-          };
-        })
-      ];
       #nixpkgs.config.allowUnfree = true;
       system.stateVersion = "26.05";
       console.keyMap = "dvorak";

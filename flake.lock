@@ -16,6 +16,22 @@
         "type": "github"
       }
     },
+    "armory-runtime-nixpkgs": {
+      "locked": {
+        "lastModified": 1606681687,
+        "narHash": "sha256-hY9Dq8fIK/sDmLgXzhoQnqvwEV2jK2Yv6anjJBeAfZs=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "752b6a95db93f03d6901304f760bd452b4b7db41",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "752b6a95db93f03d6901304f760bd452b4b7db41",
+        "type": "github"
+      }
+    },
     "codex-nix": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -429,11 +445,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781477932,
-        "narHash": "sha256-7EZqIpytCiWoVsUQIRytWr2H0esy2xuntQHjG4Hb/48=",
+        "lastModified": 1781533608,
+        "narHash": "sha256-Mgsu/x5cs8EqlhIQ7bMBo14LpkAYtgzDbG/S/eattJA=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "ed8263e7d7813ec8f447e78e5dcd7f94f333f1d5",
+        "rev": "8aec76cc1e045f37b55d82ca3cee4910ae04d3db",
         "type": "github"
       },
       "original": {
@@ -450,11 +466,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781477932,
-        "narHash": "sha256-7EZqIpytCiWoVsUQIRytWr2H0esy2xuntQHjG4Hb/48=",
+        "lastModified": 1781533608,
+        "narHash": "sha256-Mgsu/x5cs8EqlhIQ7bMBo14LpkAYtgzDbG/S/eattJA=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "ed8263e7d7813ec8f447e78e5dcd7f94f333f1d5",
+        "rev": "8aec76cc1e045f37b55d82ca3cee4910ae04d3db",
         "type": "github"
       },
       "original": {
@@ -657,11 +673,11 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 1781490901,
-        "narHash": "sha256-bn33RVkUXYO6skFBaITRB1AxShqoY4e9BTJgBgqds08=",
+        "lastModified": 1781500213,
+        "narHash": "sha256-WaPsPW0vctZ4dxo0PdgsNQCf0ABfITdqR3Eu0zBnfFc=",
         "owner": "nix-community",
         "repo": "nix4vscode",
-        "rev": "1fa83df0213e094013302b403a44bc832bad45d4",
+        "rev": "2e1d0388b51b2c692b5c73a2e9924acbcf33df35",
         "type": "github"
       },
       "original": {
@@ -805,22 +821,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-unstable": {
-      "locked": {
-        "lastModified": 1781074563,
-        "narHash": "sha256-md8WlXOlfnIeHeOScMTTHFyf2d6iaTwPl2apR5EQ3P4=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "9ae611a455b90cf061d8f332b977e387bda8e1ca",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1781074563,
@@ -901,22 +901,6 @@
         "type": "github"
       }
     },
-    "nixpkgs_7": {
-      "locked": {
-        "lastModified": 1781074563,
-        "narHash": "sha256-md8WlXOlfnIeHeOScMTTHFyf2d6iaTwPl2apR5EQ3P4=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "9ae611a455b90cf061d8f332b977e387bda8e1ca",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nur": {
       "inputs": {
         "flake-parts": "flake-parts_3",
@@ -925,11 +909,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781496996,
-        "narHash": "sha256-X2vwcO0oyJUHBi4lNPVKuUy4+6eklrmx9955UGO1GTg=",
+        "lastModified": 1781539966,
+        "narHash": "sha256-eA0tQ1Di+h83id9Kh0dh3Cw1Il/hYC27nU/SwyAQ9sk=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "7b31d9870c7f71b6bb8eb8d9a9be6a68e6aa1453",
+        "rev": "e87773f13ebe40f64737ab35251c76ed9c951547",
         "type": "github"
       },
       "original": {
@@ -988,6 +972,7 @@
     },
     "root": {
       "inputs": {
+        "armory-runtime-nixpkgs": "armory-runtime-nixpkgs",
         "codex-nix": "codex-nix",
         "decky-packages": "decky-packages",
         "demlo": "demlo",
@@ -1011,7 +996,6 @@
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_6",
-        "nixpkgs-unstable": "nixpkgs-unstable",
         "nur": "nur",
         "packages": "packages",
         "partyowl84-vscode-theme": "partyowl84-vscode-theme",
@@ -1194,7 +1178,9 @@
     },
     "treefmt-nix": {
       "inputs": {
-        "nixpkgs": "nixpkgs_7"
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1780220602,

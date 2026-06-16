@@ -23,7 +23,7 @@
     qt5.qttools
     qt5.qtwayland
     qt5.qtx11extras
-    unstable.uv
+    uv
     xwayland
   ];
 
