@@ -2,6 +2,7 @@
   inputs,
   lib,
   host,
+  steamdeck,
 }:
 bootMode:
 {
@@ -31,10 +32,10 @@ mkBaseModule {
     inputs.nix-flatpak.nixosModules.nix-flatpak
     inputs.jovian-nixos.nixosModules.default
     (inputs.nixpkgs + "/nixos/modules/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix")
-    ../../../system/settings/host-context/host-context.nix
-    (import ../_platform/steamdeck/steamdeck-hw-config.nix bootMode)
-    (import ../_platform/steamdeck/steamdeck-steam.nix { inherit steamUser; })
-    ../_platform/steamdeck/steamdeck-system.nix
+    inputs.self.modules.nixos.host-context
+    (steamdeck.mkHwConfig bootMode)
+    (steamdeck.mkSteamModule { inherit steamUser; })
+    inputs.self.modules.nixos.steamdeck-system
   ];
   extraConfig = {
     nixpkgs.config.allowUnfree = true;

@@ -3,10 +3,11 @@
   fetchFromGitHub,
   mkDeckyPlugin,
   pkgs,
+  writeSourceReplacementScript,
 }:
 
 let
-  sourceReplacementScript = import ../lib/write-source-replacement-script.nix { inherit pkgs; } {
+  sourceReplacementScript = writeSourceReplacementScript pkgs {
     scriptName = "decky-autosuspend-lockfile";
     defaultFile = "pnpm-lock.yaml";
     replacements = [

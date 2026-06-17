@@ -1,25 +1,25 @@
 {
   inputs,
   lib,
-  systemName,
+  name,
   homeModule,
-  extraImports ? [ ],
-  extraHostConfig ? { },
-  primaryInteractiveUser,
+  nixosImports ? [ ],
+  config ? { },
+  primaryUser,
   sshIdentityFile,
   nixIdentityFile,
 }:
 {
-  flake.modules.nixos.${systemName} =
+  flake.modules.nixos.${name} =
     { ... }:
     {
-      imports = extraImports ++ [
+      imports = nixosImports ++ [
         inputs.self.modules.nixos.deploy-defaults
-        extraHostConfig
+        config
       ];
 
       my.host = {
-        inherit primaryInteractiveUser;
+        primaryInteractiveUser = primaryUser;
         roles = {
           workstation = true;
           desktop = true;
@@ -37,12 +37,12 @@
       };
     };
 
-  flake.modules.homeManager.${systemName} = homeModule;
+  flake.modules.homeManager.${name} = homeModule;
 
-  flake.lib.hostInventory.${systemName} = inputs.self.lib.mkInventoryHost {
+  flake.lib.hostInventory.${name} = inputs.self.lib.mkInventoryHost {
     ssh = inputs.self.lib.mkInventorySsh {
       base = inputs.self.lib.mkInventorySshBase {
-        user = primaryInteractiveUser;
+        user = primaryUser;
         identityFile = sshIdentityFile;
       };
       nix = inputs.self.lib.mkInventorySshNix {
@@ -54,10 +54,10 @@
     };
     outputs = inputs.self.lib.mkNixosOutputs {
       system = "x86_64-linux";
-      name = lib.strings.toLower systemName;
-      configuration = systemName;
+      name = lib.strings.toLower name;
+      configuration = name;
     };
   };
 
-  flake.nixosConfigurations = inputs.self.lib.mkNixos "x86_64-linux" systemName;
+  flake.nixosConfigurations = inputs.self.lib.mkNixos "x86_64-linux" name;
 }

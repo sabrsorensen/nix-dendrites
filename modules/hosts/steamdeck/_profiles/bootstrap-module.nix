@@ -2,6 +2,7 @@
   inputs,
   lib,
   host,
+  steamdeck,
 }:
 bootMode:
 { ... }:
@@ -31,9 +32,9 @@ mkBaseModule {
     disko
     inputs.nix-flatpak.nixosModules.nix-flatpak
     inputs.jovian-nixos.nixosModules.default
-    (import ../_platform/steamdeck/steamdeck-hw-config.nix bootMode)
-    (import ../_platform/steamdeck/steamdeck-steam.nix { inherit steamUser; })
-    ../_platform/steamdeck/steamdeck-system.nix
+    (steamdeck.mkHwConfig bootMode)
+    (steamdeck.mkSteamModule { inherit steamUser; })
+    steamdeck-system
   ];
   extraConfig = {
     services.openssh.settings = {

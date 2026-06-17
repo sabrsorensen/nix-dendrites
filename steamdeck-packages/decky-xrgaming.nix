@@ -4,10 +4,10 @@
   fetchurl,
   mkDeckyPlugin,
   pkgs,
+  writeSourceReplacementScript,
 }:
 
 let
-  writeSourceReplacementScript = import ../lib/write-source-replacement-script.nix { inherit pkgs; };
   breezyVulkanPayload = fetchurl {
     url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.9.11/breezyVulkan-x86_64.tar.gz";
     sha256 = "sha256-stp1KLMT5pgFEXDuq4ii80L7/QUlnoFDVJfGeZdX0F0=";
@@ -56,7 +56,7 @@ let
     }
   ];
 
-  xrGamingMainPyPatchScript = writeSourceReplacementScript {
+  xrGamingMainPyPatchScript = writeSourceReplacementScript pkgs {
     scriptName = "decky-xrgaming-main-patches";
     defaultFile = "main.py";
     replacements = xrGamingMainPyPatches;

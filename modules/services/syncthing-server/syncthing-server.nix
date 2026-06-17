@@ -1,4 +1,8 @@
 {
+  inputs,
+  ...
+}:
+{
   flake.modules.nixos.syncthing-server =
     {
       config,
@@ -8,7 +12,7 @@
     }:
     let
       hostName = config.networking.hostName;
-      syncthingCommonOptions = import ../../../lib/syncthing-common-options.nix;
+      syncthingCommonOptions = inputs.self.lib.shared.syncthingCommonOptions;
       serverUser = config.my.syncthing.serverUser;
 
       # Import the same device/folder definitions that Home Manager uses

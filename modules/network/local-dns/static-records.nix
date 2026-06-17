@@ -5,8 +5,8 @@
 }:
 let
   hostInventory = inputs.self.lib.hostInventory or { };
-  network = inputs.self.lib.site.network;
-  domain = inputs.self.lib.site.domain;
+  network = inputs.self.lib.shared.site.network;
+  domain = inputs.self.lib.shared.site.domain;
   defaultDnsConfigurationsFor =
     host:
     map (descriptor: descriptor.configuration) (

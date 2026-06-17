@@ -22,7 +22,7 @@
           tmux
           vim
         ]
-        ++ [ ../context/host-context.nix ];
+        ++ [ inputs.self.modules.homeManager.host-context ];
 
       home.sessionVariables = {
         XDG_CONFIG_HOME = "$HOME/.config";

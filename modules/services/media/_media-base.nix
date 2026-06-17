@@ -79,6 +79,18 @@ in
   };
 
   config = {
+    assertions =
+      let
+        identities = builtins.attrValues mediaCfg.containerIdentities;
+        uids = map (identity: identity.uid) identities;
+      in
+      [
+        {
+          assertion = lib.length uids == lib.length (lib.unique uids);
+          message = "my.media.containerIdentities must assign a unique UID to each service.";
+        }
+      ];
+
     my.caddy.apexRoutes = apexRoutes;
     my.caddy.virtualHosts = lib.mapAttrs (_: routes: {
       inherit routes;

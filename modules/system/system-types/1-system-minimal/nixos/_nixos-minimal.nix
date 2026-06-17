@@ -44,7 +44,7 @@
     {
       imports = [
         inputs.self.modules.generic.systemConstants
-        ../../../settings/host-context/host-context.nix
+        inputs.self.modules.nixos.host-context
       ];
 
       #nixpkgs.config.allowUnfree = true;

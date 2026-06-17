@@ -1,4 +1,8 @@
 {
+  inputs,
+  ...
+}:
+{
   flake.modules.homeManager.syncthing =
     {
       config,
@@ -14,7 +18,7 @@
       shouldEnable = hostCfg.syncthing.mode == "home";
       shouldWarnServer = hostCfg.syncthing.mode == "system";
       shouldHaveTray = hostCfg.syncthing.hasTray;
-      syncthingCommonOptions = import ../../../lib/syncthing-common-options.nix;
+      syncthingCommonOptions = inputs.self.lib.shared.syncthingCommonOptions;
 
       allDevices = config.my.syncthing.devices;
       allFolders = config.my.syncthing.folders;

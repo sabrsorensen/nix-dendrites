@@ -11,16 +11,17 @@
   nixRemoteAuthorizedKeyPaths,
 }:
 let
-  rpi = inputs.self.lib.rpi;
-  mkSecretsSshKeyFiles = inputs.self.lib.mkSecretsSshKeyFiles;
-  static = rpi.mkStaticModule {
+  mkSecretsSshKeyFiles = inputs.self.lib.shared.mkSecretsSshKeyFiles;
+  moduleBuilders = import ../_module-builders.nix { inherit inputs lib; };
+  static = mkStaticModule {
     inherit hostName address nameservers;
   };
+  inherit (moduleBuilders) mkBaseModule mkStaticModule;
 in
 { config, ... }:
 {
   imports = [
-    (rpi.mkBaseModule hostName)
+    (mkBaseModule hostName)
   ]
   ++ static.imports
   ++ serviceImports;

@@ -1,4 +1,8 @@
 {
+  inputs,
+  ...
+}:
+{
   flake.modules.homeManager.vscode =
     {
       config,
@@ -9,7 +13,7 @@
     }:
     let
       vscodePackageConfig = import ./_package.nix {
-        inherit config lib pkgs;
+        inherit config inputs lib pkgs;
       };
       vscodeData = import ./_config-data.nix {
         inherit

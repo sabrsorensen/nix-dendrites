@@ -40,31 +40,13 @@
 
       hasNixFlake = nixFlakePath != null;
       canDeployRemotely = hostCfg.deploy.canDeployRemotely && hasNixFlake;
-      secureDeployRoleUnits = {
-        "blocky-dns" = [
-          "blocky"
-          "coredns"
-        ];
-        "dhcp-primary" = [ "dhcp-coredns-kea" ];
-        "dhcp-standby" = [ "dhcp-failover.timer" ];
-      };
-      expandServiceRoles =
-        roles: lib.unique (lib.concatLists (map (role: secureDeployRoleUnits.${role} or [ ]) roles));
       secureDeployConfigCases = lib.concatStrings (
         lib.mapAttrsToList (
           name: peer:
           if peer ? deploy && peer.deploy ? secure then
-            let
-              secureCfg = peer.deploy.secure;
-              peerCfg = inventory.${secureCfg.peerName} or { };
-              renderedSecureCfg = secureCfg // {
-                peerServices = expandServiceRoles (peerCfg.serviceRoles or [ ]);
-                targetServices = expandServiceRoles (peer.serviceRoles or [ ]);
-              };
-            in
             ''
               case ${name}
-                  printf '%s\n' '${builtins.toJSON renderedSecureCfg}'
+                  printf '%s\n' '${builtins.toJSON peer.deploy.secure}'
             ''
           else
             ""

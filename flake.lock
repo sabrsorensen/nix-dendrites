@@ -53,22 +53,6 @@
         "type": "github"
       }
     },
-    "decky-packages": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./steamdeck-packages",
-        "type": "path"
-      },
-      "original": {
-        "path": "./steamdeck-packages",
-        "type": "path"
-      },
-      "parent": []
-    },
     "demlo": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -962,7 +946,6 @@
       "inputs": {
         "armory-runtime-nixpkgs": "armory-runtime-nixpkgs",
         "codex-nix": "codex-nix",
-        "decky-packages": "decky-packages",
         "demlo": "demlo",
         "determinate": "determinate",
         "disko": "disko",

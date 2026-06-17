@@ -2,12 +2,13 @@
   inputs,
   lib,
   host,
+  steamdeck,
 }:
 bootMode:
 { config, pkgs, ... }:
 let
   mkBaseModule = import ./base-module.nix { inherit host; };
-  mkSecretsSshKeyFiles = inputs.self.lib.mkSecretsSshKeyFiles;
+  mkSecretsSshKeyFiles = inputs.self.lib.shared.mkSecretsSshKeyFiles;
   steamUser = host.users.steam.name;
 in
 mkBaseModule {
@@ -20,12 +21,12 @@ mkBaseModule {
     deploy-defaults
     inputs.nix-flatpak.nixosModules.nix-flatpak
     inputs.jovian-nixos.nixosModules.default
-    ../_platform/decky/decky-plugins.nix
-    (import ../_platform/decky/steamdeck-decky.nix { inherit steamUser; })
-    ../_platform/decky/steamdeck-plugins.nix
-    (import ../_platform/steamdeck/steamdeck-hw-config.nix bootMode)
-    (import ../_platform/steamdeck/steamdeck-steam.nix { inherit steamUser; })
-    ../_platform/steamdeck/steamdeck-system.nix
+    steamdeck-decky-plugins
+    (steamdeck.mkDeckyModule { inherit steamUser; })
+    steamdeck-plugins
+    (steamdeck.mkHwConfig bootMode)
+    (steamdeck.mkSteamModule { inherit steamUser; })
+    steamdeck-system
   ];
   extraConfig = {
     my.host.deploy.enableRemoteUser = true;

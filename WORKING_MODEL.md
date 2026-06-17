@@ -75,7 +75,7 @@ The media stack now has shared structure rather than being a bag of unrelated mo
 
 Important files:
 
-- [`modules/services/media/_arr/lib.nix`](./modules/services/media/_arr/lib.nix)
+- [`modules/services/media/_arr/default.nix`](./modules/services/media/_arr/default.nix)
 - [`modules/services/media/_media-base.nix`](./modules/services/media/_media-base.nix)
 
 When working on media services:

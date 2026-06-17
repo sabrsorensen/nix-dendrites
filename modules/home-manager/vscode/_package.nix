@@ -1,11 +1,12 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
 }:
 let
-  secretWrapArgsFromSpecs = import ../../../lib/secret-wrap-args.nix { inherit lib; };
+  secretWrapArgsFromSpecs = inputs.self.lib.shared.secretWrapArgsFromSpecs;
   context7ApiKeyPath =
     if config.sops.secrets ? context7_api_key then config.sops.secrets.context7_api_key.path else null;
 

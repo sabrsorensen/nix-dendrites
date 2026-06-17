@@ -3,6 +3,7 @@
   fetchFromGitHub,
   mkDeckyPlugin,
   pkgs,
+  writeSourceReplacementScript,
   themeConfig ? null,
   callPackage ? null,
 }:
@@ -11,7 +12,7 @@ let
   cssThemeConfigBuilder =
     if callPackage != null then callPackage ./css-theme-config-simple.nix { } else null;
 
-  patchScript = import ../lib/write-source-replacement-script.nix { inherit pkgs; } {
+  patchScript = writeSourceReplacementScript pkgs {
     scriptName = "decky-css-loader-nixos-fix";
     defaultFile = "css_utils.py";
     replacements = [
