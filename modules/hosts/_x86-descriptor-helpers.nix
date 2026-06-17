@@ -1,0 +1,79 @@
+{
+  inputs,
+  lib,
+  ...
+}:
+let
+  inherit (inputs.self.lib)
+    mkInventoryDeploy
+    mkInventoryHost
+    mkInventorySsh
+    mkInventorySshBase
+    mkInventorySshNix
+    mkNixosOutputs
+    ;
+in
+{
+  mkX86Inventory =
+    {
+      name,
+      outputName ? lib.strings.toLower name,
+      userName ? null,
+      identityFile ? null,
+      nixIdentityFile ? null,
+      deployRemoteMethod ? null,
+      builder ? null,
+      extraInventory ? { },
+    }:
+    mkInventoryHost (
+      {
+        outputs = mkNixosOutputs {
+          system = "x86_64-linux";
+          name = outputName;
+          configuration = name;
+        };
+      }
+      // lib.optionalAttrs (userName != null && identityFile != null && nixIdentityFile != null) {
+        ssh = mkInventorySsh {
+          base = mkInventorySshBase {
+            user = userName;
+            inherit identityFile;
+          };
+          nix = mkInventorySshNix {
+            identityFile = nixIdentityFile;
+          };
+        };
+      }
+      // lib.optionalAttrs (deployRemoteMethod != null) {
+        deploy = mkInventoryDeploy {
+          remoteMethod = deployRemoteMethod;
+        };
+      }
+      // lib.optionalAttrs (builder != null) {
+        inherit builder;
+      }
+      // extraInventory
+    );
+
+  mkX86Descriptor =
+    {
+      name,
+      homeImports ? [ ],
+      nixosImports,
+      config ? { },
+      inventory,
+      user ? null,
+      localDnsRecords ? [ ],
+    }:
+    {
+      inherit name config inventory;
+      home.imports = homeImports;
+      nixos.imports = nixosImports;
+    }
+    // lib.optionalAttrs (user != null) {
+      inherit user;
+    }
+    // lib.optionalAttrs (localDnsRecords != [ ]) {
+      inherit localDnsRecords;
+    };
+}

@@ -1,23 +1,19 @@
 {
   inputs,
+  lib,
   network,
 }:
 let
+  aarch64Helpers = import ../_aarch64-descriptor-helpers.nix { inherit inputs lib; };
   inherit (inputs.self.lib)
     localDns
-    mkInventoryDeploy
-    mkInventoryHost
-    mkInventorySecureDeploy
-    mkInventorySsh
-    mkInventorySshBase
-    mkInventorySshNix
-    mkNixosOutputs
     ;
 in
 rec {
   mkStaticDescriptor =
     {
       address,
+      config ? { },
       configuration,
       hostName,
       localDnsRecords ? [ ],
@@ -26,16 +22,13 @@ rec {
     }:
     {
       kind = "static";
-      inherit localDnsRecords name outputName;
+      inherit config localDnsRecords name outputName;
       network = {
         inherit address hostName;
       };
-      inventory = mkInventoryHost {
-        deploy = mkInventoryDeploy {
-          remoteMethod = "switch";
-        };
-        outputs = mkNixosOutputs {
-          system = "aarch64-linux";
+      inventory = aarch64Helpers.mkAarch64Inventory {
+        deployRemoteMethod = "switch";
+        outputs = aarch64Helpers.mkAarch64Outputs {
           name = outputName;
           inherit configuration;
         };
@@ -44,6 +37,7 @@ rec {
 
   mkDhcpDescriptor =
     {
+      config ? { },
       configuration,
       hostName,
       imageName,
@@ -52,8 +46,8 @@ rec {
       outputName,
     }:
     {
-      kind = "static";
-      inherit name outputName;
+      kind = "dhcp";
+      inherit config name outputName;
       image = {
         name = imageName;
         outputName = imageOutputName;
@@ -63,22 +57,19 @@ rec {
         address = null;
         dhcp = true;
       };
-      inventory = mkInventoryHost {
-        deploy = mkInventoryDeploy {
-          remoteMethod = "switch";
-        };
+      inventory = aarch64Helpers.mkAarch64Inventory {
+        deployRemoteMethod = "switch";
         outputs =
-          mkNixosOutputs {
-            system = "aarch64-linux";
+          aarch64Helpers.mkAarch64Outputs {
             name = outputName;
             inherit configuration;
           }
-          ++ mkNixosOutputs {
-            system = "aarch64-linux";
-            name = imageOutputName;
-            configuration = imageName;
-            buildProduct = "sdImage";
-          };
+          ++ builtins.map
+            (output: output // { buildProduct = "sdImage"; })
+            (aarch64Helpers.mkAarch64Outputs {
+              name = imageOutputName;
+              configuration = imageName;
+            });
       };
     };
 
@@ -86,6 +77,7 @@ rec {
     {
       address,
       authorizedKeys,
+      config ? { },
       configuration,
       failoverPeer ? null,
       imageName,
@@ -103,7 +95,7 @@ rec {
     }:
     {
       kind = "service";
-      inherit name outputName;
+      inherit config name outputName;
       image = {
         name = imageName;
         outputName = imageOutputName;
@@ -132,37 +124,28 @@ rec {
         blocky
         dhcp-coredns
       ];
-      inventory = mkInventoryHost {
-        ssh = mkInventorySsh {
-          base = mkInventorySshBase {
-            user = userName;
-            inherit identityFile;
-          };
-          nix = mkInventorySshNix {
-            identityFile = nixIdentityFile;
-          };
+      inventory = aarch64Helpers.mkAarch64Inventory {
+        inherit userName identityFile nixIdentityFile;
+        deployRemoteMethod = "secure";
+        secureDeploy = {
+          peerName = securePeer.name;
+          peerIp = securePeer.ip;
+          probeDomains = localDns.secureDeployProbeDomains;
         };
-        inherit serviceRoles;
-        deploy = mkInventoryDeploy {
-          remoteMethod = "secure";
-          secure = mkInventorySecureDeploy {
-            peerName = securePeer.name;
-            peerIp = securePeer.ip;
-            probeDomains = localDns.secureDeployProbeDomains;
-          };
+        extraInventory = {
+          inherit serviceRoles;
         };
         outputs =
-          mkNixosOutputs {
-            system = "aarch64-linux";
+          aarch64Helpers.mkAarch64Outputs {
             name = outputName;
             inherit configuration;
           }
-          ++ mkNixosOutputs {
-            system = "aarch64-linux";
-            name = imageOutputName;
-            configuration = imageName;
-            buildProduct = "sdImage";
-          };
+          ++ builtins.map
+            (output: output // { buildProduct = "sdImage"; })
+            (aarch64Helpers.mkAarch64Outputs {
+              name = imageOutputName;
+              configuration = imageName;
+            });
       };
     }
     // (

@@ -124,4 +124,3 @@ When adding or changing something, default to these questions:
 
 - `NixPi` intentionally leaves `my.host.address` unset because it is DHCP-addressed.
 - `netbird-*` is intentionally dormant until it is revived on Atlas.
-- `homeassistant-proxy` is incomplete and should not be treated as a finished reference design yet.

@@ -11,21 +11,23 @@ let
   swapUuid = lib.removeSuffix "\n" (builtins.readFile "${inputs.nix-secrets}/disk/kamino/swap-uuid.txt");
 in
 {
-  flake.modules = {
-    homeManager.kaminoHome = import ./_kamino/home-manager.nix { inherit inputs; };
+  flake.modules.homeManager.kaminoHome = import ./_kamino/home-manager.nix { inherit inputs; };
 
-    nixos = {
-      kaminoHardware = ./_kamino/hardware.nix;
-      kaminoFilesystem = import ./_kamino/filesystem.nix {
-        inherit bootUuid rootFsUuid swapUuid;
-      };
-      kaminoNetwork = ./_kamino/network.nix;
-      kaminoBoot = import ./_kamino/boot.nix {
-        inherit rootLuksUuid swapLuksUuid;
-      };
-      kaminoDesktop = ./_kamino/desktop.nix;
-      kaminoPackages = ./_kamino/packages.nix;
-      kaminoUserSam = ./_kamino/users/sam.nix;
+  flake.modules.nixos = {
+    kamino = {
+      imports = [
+        ./_kamino/hardware.nix
+        (import ./_kamino/filesystem.nix {
+          inherit bootUuid rootFsUuid swapUuid;
+        })
+        ./_kamino/network.nix
+        (import ./_kamino/boot.nix {
+          inherit rootLuksUuid swapLuksUuid;
+        })
+        ./_kamino/desktop.nix
+        ./_kamino/packages.nix
+        ./_kamino/users/sam.nix
+      ];
     };
   };
 }

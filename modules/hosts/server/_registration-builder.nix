@@ -2,8 +2,11 @@
   inputs,
   lib,
 }:
+let
+  x86Builder = import ../_x86-registration-builder.nix { inherit inputs; };
+in
 rec {
-  mkServerModule =
+  mkHostModule =
     descriptor:
     { config, ... }:
     {
@@ -25,14 +28,7 @@ rec {
 
   mkRegisteredHost =
     descriptor:
-    {
-      flake.modules.nixos.${descriptor.name} = mkServerModule descriptor;
-
-      flake.modules.homeManager.${descriptor.name} = {
-        imports = descriptor.home.imports;
-      };
-
-      flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
-      flake.nixosConfigurations = inputs.self.lib.mkNixos "x86_64-linux" descriptor.name;
+    x86Builder.mkRegisteredHost {
+      inherit descriptor mkHostModule;
     };
 }

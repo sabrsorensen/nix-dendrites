@@ -5,14 +5,18 @@
 }:
 {
   flake.modules.nixos = {
-    atlasUponRaidenHardware = ./_atlas/hardware.nix;
-    atlasUponRaidenFilesystem = ./_atlas/filesystem.nix;
-    atlasUponRaidenNetwork = ./_atlas/network.nix;
-    atlasUponRaidenUserSam = ./_atlas/users/sam.nix;
-    atlasUponRaidenImmich = ./_atlas/immich.nix;
-    atlasUponRaidenMedia = ./_atlas/media.nix;
-    atlasUponRaidenSyncthing = import ./_atlas/syncthing.nix { inherit inputs; };
-    atlasUponRaidenNixRemote = import ./_atlas/nix-remote.nix { inherit inputs lib; };
-    atlasUponRaidenSamba = ./_atlas/samba.nix;
+    atlasUponRaiden = {
+      imports = [
+        ./_atlas/hardware.nix
+        ./_atlas/filesystem.nix
+        ./_atlas/network.nix
+        ./_atlas/users/sam.nix
+        ./_atlas/immich.nix
+        ./_atlas/media.nix
+        (import ./_atlas/syncthing.nix { inherit inputs; })
+        (import ./_atlas/nix-remote.nix { inherit inputs lib; })
+        ./_atlas/samba.nix
+      ];
+    };
   };
 }

@@ -2,11 +2,8 @@
   inputs,
   ...
 }:
-let
-  root = ../../../..;
-in
 {
-  inherit root;
+  root = ../../../..;
   primaryHostName = "EmeraldEcho";
   homeConfigurationName = "deck@EmeraldEcho";
 
@@ -73,3 +70,5 @@ in
       vlc
     ];
 }
+// import ./runtime.nix
+// import ./variants.nix

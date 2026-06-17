@@ -3,20 +3,18 @@
   lib,
   ...
 }:
+let
+  sshKeyHelpers = import ../../../../_ssh-key-helpers.nix { inherit config; };
+in
 {
   users.users.sam = {
     extraGroups = [
       "dialout"
-      "docker"
       "networkmanager"
       "users"
     ];
     hashedPasswordFile = config.sops.secrets.hashed_password.path;
-    openssh.authorizedKeys.keyFiles = lib.mkForce (
-      map (keyPath: "${config.my.buildSecretRoot}/ssh-keys/${keyPath}.pub") [
-        "kamino/zaphod"
-      ]
-    );
+    openssh.authorizedKeys.keyFiles = lib.mkForce (sshKeyHelpers.mkBuildSecretSshKeyFiles [ "kamino/zaphod" ]);
   };
 
   services = {

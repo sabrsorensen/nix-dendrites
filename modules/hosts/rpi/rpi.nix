@@ -6,7 +6,7 @@
 let
   rpi = import ./_public.nix { inherit inputs lib; };
   network = builtins.fromJSON (builtins.readFile "${inputs.nix-secrets}/network.json");
-  descriptorHelpers = import ./_descriptor-helpers.nix { inherit inputs network; };
+  descriptorHelpers = import ./_descriptor-helpers.nix { inherit inputs lib network; };
   descriptors = [
     (descriptorHelpers.mkStaticDescriptor {
       name = "Coruscant";
@@ -111,15 +111,7 @@ let
       configuration = "NixPi";
     })
   ];
-  mkRegistration =
-    descriptor:
-    if descriptor.kind == "static" && descriptor.network.address != null then
-      rpi.mkStaticHostRegistration descriptor
-    else if descriptor.kind == "service" then
-      rpi.mkServiceHostRegistration descriptor
-    else
-      rpi.mkDhcpHostRegistration descriptor;
 in
 {
-  imports = [ ./exports.nix ] ++ map mkRegistration descriptors;
+  imports = [ ./exports.nix ] ++ map rpi.mkRegisteredHost descriptors;
 }
