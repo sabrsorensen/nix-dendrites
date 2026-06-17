@@ -1,8 +1,7 @@
 { inputs, ... }:
 {
   imports = [
-    # Universal syncthing config that works in both NixOS and Home Manager contexts
-    "${inputs.nix-secrets}/modules/sam-syncthing-universal.nix"
+    inputs.self.modules.nixos.sam-syncthing
   ];
 
   # Enable server-mode syncthing for AtlasUponRaiden
