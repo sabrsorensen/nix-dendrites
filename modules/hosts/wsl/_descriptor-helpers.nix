@@ -24,7 +24,8 @@ in
         ;
       nixosImports = [
         hostModule
-      ] ++ extraImports;
+      ]
+      ++ extraImports;
       inventory = x86Helpers.mkX86Inventory {
         inherit name outputName;
       };

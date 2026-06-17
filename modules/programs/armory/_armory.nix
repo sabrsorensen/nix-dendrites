@@ -71,14 +71,16 @@ let
         EOF
         substituteInPlace "$out/bin/armory" \
           --replace-fail "@runtimeShell@" "${pkgs.runtimeShell}" \
-          --replace-fail "@runtimePath@" "${lib.makeBinPath [
-            bitcoind
-            pkgs.coreutils
-            pkgs.glibc.bin
-            pkgs.procps
-            pkgs.util-linux
-            pkgs.xdg-utils
-          ]}:$out/bin:$out/usr/bin" \
+          --replace-fail "@runtimePath@" "${
+            lib.makeBinPath [
+              bitcoind
+              pkgs.coreutils
+              pkgs.glibc.bin
+              pkgs.procps
+              pkgs.util-linux
+              pkgs.xdg-utils
+            ]
+          }:$out/bin:$out/usr/bin" \
           --replace-fail "@getent@" "${pkgs.glibc.bin}/bin/getent" \
           --replace-fail "@id@" "${pkgs.coreutils}/bin/id" \
           --replace-fail "@cut@" "${pkgs.coreutils}/bin/cut" \
@@ -142,10 +144,9 @@ in
         }
       ];
 
-      environment.systemPackages =
-        lib.optionals (pkgs.stdenv.hostPlatform.system == supportedSystem) [
-          inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.armory
-          inputs.armory-runtime-nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.bitcoind
-        ];
+      environment.systemPackages = lib.optionals (pkgs.stdenv.hostPlatform.system == supportedSystem) [
+        inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.armory
+        inputs.armory-runtime-nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.bitcoind
+      ];
     };
 }

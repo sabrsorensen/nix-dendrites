@@ -83,5 +83,10 @@ let
     ];
 in
 {
-  inherit mkLocalAddr mkManagedService mkModule mkThemeParkRoute;
+  inherit
+    mkLocalAddr
+    mkManagedService
+    mkModule
+    mkThemeParkRoute
+    ;
 }

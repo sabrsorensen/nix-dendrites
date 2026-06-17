@@ -39,7 +39,8 @@ in
       nixosImports = [
         hostModules.nixos.samCli
         hostModule
-      ] ++ extraImports;
+      ]
+      ++ extraImports;
       inventory = x86Helpers.mkX86Inventory {
         inherit
           name

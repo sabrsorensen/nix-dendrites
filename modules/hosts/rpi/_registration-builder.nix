@@ -41,22 +41,20 @@ rec {
       boot.kernel.sysctl = lib.mkForce { };
     };
 
-  mkDhcpHostModule =
-    descriptor:
-    {
-      imports = [
-        (mkBaseModule descriptor.network.hostName)
-        descriptor.config
-      ];
+  mkDhcpHostModule = descriptor: {
+    imports = [
+      (mkBaseModule descriptor.network.hostName)
+      descriptor.config
+    ];
 
-      networking = {
-        hostName = descriptor.network.hostName;
-        useDHCP = true;
-        interfaces.end0.useDHCP = true;
-      };
-      my.host.roles.rpi = true;
-      boot.kernel.sysctl = lib.mkForce { };
+    networking = {
+      hostName = descriptor.network.hostName;
+      useDHCP = true;
+      interfaces.end0.useDHCP = true;
     };
+    my.host.roles.rpi = true;
+    boot.kernel.sysctl = lib.mkForce { };
+  };
 
   mkServiceHostModuleFromDescriptor =
     descriptor:
@@ -110,32 +108,26 @@ rec {
       }
     ];
 
-  mkStaticHostRegistration =
-    descriptor:
-    {
-      flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
-      flake.modules.nixos.${descriptor.name} = mkStaticHostModule descriptor;
-      flake.nixosConfigurations = inputs.self.lib.mkNixos "aarch64-linux" descriptor.name;
-    };
+  mkStaticHostRegistration = descriptor: {
+    flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
+    flake.modules.nixos.${descriptor.name} = mkStaticHostModule descriptor;
+    flake.nixosConfigurations = inputs.self.lib.mkNixos "aarch64-linux" descriptor.name;
+  };
 
-  mkDhcpHostRegistration =
-    descriptor:
-    {
-      flake.modules.nixos.${descriptor.name} = mkDhcpHostModule descriptor;
-      flake.modules.nixos.${descriptor.image.name} = mkImageModule descriptor.name;
-      flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
-      flake.nixosConfigurations =
-        inputs.self.lib.mkNixos "aarch64-linux" descriptor.name
-        // inputs.self.lib.mkNixos "aarch64-linux" descriptor.image.name;
-    };
+  mkDhcpHostRegistration = descriptor: {
+    flake.modules.nixos.${descriptor.name} = mkDhcpHostModule descriptor;
+    flake.modules.nixos.${descriptor.image.name} = mkImageModule descriptor.name;
+    flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
+    flake.nixosConfigurations =
+      inputs.self.lib.mkNixos "aarch64-linux" descriptor.name
+      // inputs.self.lib.mkNixos "aarch64-linux" descriptor.image.name;
+  };
 
-  mkServiceHostRegistration =
-    descriptor:
-    {
-      flake.modules.nixos.${descriptor.name} = mkServiceHostModuleFromDescriptor descriptor;
-      flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
-      flake.nixosConfigurations = inputs.self.lib.mkNixos "aarch64-linux" descriptor.name;
-    };
+  mkServiceHostRegistration = descriptor: {
+    flake.modules.nixos.${descriptor.name} = mkServiceHostModuleFromDescriptor descriptor;
+    flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
+    flake.nixosConfigurations = inputs.self.lib.mkNixos "aarch64-linux" descriptor.name;
+  };
 
   mkRegisteredHost =
     descriptor:

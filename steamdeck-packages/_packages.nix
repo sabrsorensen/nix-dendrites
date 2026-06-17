@@ -14,17 +14,24 @@ let
         (lib.optionalAttrs (builtins.hasAttr "mkDeckyPlugin" functionArgs) {
           inherit mkDeckyPlugin;
         })
-        // (lib.optionalAttrs (writeSourceReplacementScript != null && builtins.hasAttr "writeSourceReplacementScript" functionArgs) {
-          inherit writeSourceReplacementScript;
-        });
+        // (lib.optionalAttrs
+          (
+            writeSourceReplacementScript != null && builtins.hasAttr "writeSourceReplacementScript" functionArgs
+          )
+          {
+            inherit writeSourceReplacementScript;
+          }
+        );
     in
     pkgs.callPackage file (extraArgs // args);
 in
 rec {
   decky-animation-changer = callPackage ./decky-animation-changer.nix { };
-  decky-animation-changer-enhanced = callPackage ./SDH-AnimationChanger/decky-animation-changer-enhanced.nix {
-    inherit callPackage;
-  };
+  decky-animation-changer-enhanced =
+    callPackage ./SDH-AnimationChanger/decky-animation-changer-enhanced.nix
+      {
+        inherit callPackage;
+      };
   decky-css-loader = callPackage ./decky-css-loader.nix {
     inherit callPackage;
   };

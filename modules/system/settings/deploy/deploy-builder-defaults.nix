@@ -12,11 +12,8 @@
         (config.networking.hostName or null)
       ];
       builders = builtins.filter (
-        builder:
-        builder != null && !(builtins.elem (builder.hostName or null) currentBuilderHostNames)
-      ) (
-        map (host: host.builder or null) (builtins.attrValues inputs.self.lib.hostInventory)
-      );
+        builder: builder != null && !(builtins.elem (builder.hostName or null) currentBuilderHostNames)
+      ) (map (host: host.builder or null) (builtins.attrValues inputs.self.lib.hostInventory));
       buildMachines = map (builder: builtins.removeAttrs builder [ "alias" ]) builders;
       mkBuilderSubstituter =
         builder:

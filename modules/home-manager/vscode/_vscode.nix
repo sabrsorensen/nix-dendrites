@@ -13,7 +13,12 @@
     }:
     let
       vscodePackageConfig = import ./_package.nix {
-        inherit config inputs lib pkgs;
+        inherit
+          config
+          inputs
+          lib
+          pkgs
+          ;
       };
       vscodeData = import ./_config-data.nix {
         inherit

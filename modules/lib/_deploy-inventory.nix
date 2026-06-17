@@ -16,8 +16,7 @@ in
   inherit serviceRoleUnits;
 
   expandServiceRoles =
-    roles:
-    lib.unique (lib.concatLists (map (role: serviceRoleUnits.${role} or [ ]) roles));
+    roles: lib.unique (lib.concatLists (map (role: serviceRoleUnits.${role} or [ ]) roles));
 
   mkHomeManagerInventory =
     inventory:

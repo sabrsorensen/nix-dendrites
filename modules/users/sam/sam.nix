@@ -19,7 +19,10 @@ userHelpers.mkUserFamily {
         sam-home-private
       ];
       extraSystemImports = with inputs.self.modules.nixos; [ podman ];
-      extraUserConfig.extraGroups = [ "wheel" "podman" ];
+      extraUserConfig.extraGroups = [
+        "wheel"
+        "podman"
+      ];
     }
 
     {

@@ -25,17 +25,17 @@ rec {
       imports = [
         (builtins.getAttr "${username}-system-base" nixosModules)
         (builtins.getAttr "${username}-system-private" nixosModules)
-      ] ++ extraImports;
+      ]
+      ++ extraImports;
 
       users.groups."${username}" = { };
-      users.users."${username}" =
-        {
-          isNormalUser = true;
-          home = mkUserHomePath username;
-          group = username;
-          shell = pkgs.bash;
-        }
-        // extraUserConfig;
+      users.users."${username}" = {
+        isNormalUser = true;
+        home = mkUserHomePath username;
+        group = username;
+        shell = pkgs.bash;
+      }
+      // extraUserConfig;
 
       home-manager.users."${username}" = {
         imports = [ homeModule ];
@@ -88,7 +88,9 @@ rec {
     {
       flake = {
         inherit homeConfigurations;
-        modules = lib.mkMerge (map (variant: mkUserVariantModules ({ inherit username; } // variant)) variants);
+        modules = lib.mkMerge (
+          map (variant: mkUserVariantModules ({ inherit username; } // variant)) variants
+        );
       };
     };
 }

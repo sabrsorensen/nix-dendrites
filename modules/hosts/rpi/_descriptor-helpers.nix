@@ -22,7 +22,12 @@ rec {
     }:
     {
       kind = "static";
-      inherit config localDnsRecords name outputName;
+      inherit
+        config
+        localDnsRecords
+        name
+        outputName
+        ;
       network = {
         inherit address hostName;
       };
@@ -64,12 +69,12 @@ rec {
             name = outputName;
             inherit configuration;
           }
-          ++ builtins.map
-            (output: output // { buildProduct = "sdImage"; })
-            (aarch64Helpers.mkAarch64Outputs {
+          ++ builtins.map (output: output // { buildProduct = "sdImage"; }) (
+            aarch64Helpers.mkAarch64Outputs {
               name = imageOutputName;
               configuration = imageName;
-            });
+            }
+          );
       };
     };
 
@@ -140,18 +145,13 @@ rec {
             name = outputName;
             inherit configuration;
           }
-          ++ builtins.map
-            (output: output // { buildProduct = "sdImage"; })
-            (aarch64Helpers.mkAarch64Outputs {
+          ++ builtins.map (output: output // { buildProduct = "sdImage"; }) (
+            aarch64Helpers.mkAarch64Outputs {
               name = imageOutputName;
               configuration = imageName;
-            });
+            }
+          );
       };
     }
-    // (
-      if startKeaOnBoot == null then
-        { }
-      else
-        { inherit startKeaOnBoot; }
-    );
+    // (if startKeaOnBoot == null then { } else { inherit startKeaOnBoot; });
 }

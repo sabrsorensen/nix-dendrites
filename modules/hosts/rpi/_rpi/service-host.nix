@@ -33,7 +33,8 @@ in
   my.host.address = address;
   my.host.deploy.enableRemoteUser = true;
 
-  users.users.sam.openssh.authorizedKeys.keyFiles = sshKeyHelpers.mkBuildSecretSshKeyFiles samAuthorizedKeyPaths;
+  users.users.sam.openssh.authorizedKeys.keyFiles =
+    sshKeyHelpers.mkBuildSecretSshKeyFiles samAuthorizedKeyPaths;
 
   users.users.nix-remote = lib.mkIf config.my.host.deploy.enableRemoteUser {
     openssh.authorizedKeys.keyFiles = sshKeyHelpers.mkBuildSecretSshKeyFiles nixRemoteAuthorizedKeyPaths;

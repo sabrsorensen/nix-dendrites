@@ -7,19 +7,34 @@ steamdeck:
 let
   homeModule = import ../../_profiles/home-module.nix { inherit inputs; };
   mkBootstrapModule = import ../../_profiles/bootstrap-module.nix {
-    inherit inputs lib host steamdeck;
+    inherit
+      inputs
+      lib
+      host
+      steamdeck
+      ;
   };
   mkHomeConfiguration = import ../../_profiles/home-configuration.nix {
     inherit inputs host;
   };
   mkInstallerModule = import ../../_profiles/installer-module.nix {
-    inherit inputs lib host steamdeck;
+    inherit
+      inputs
+      lib
+      host
+      steamdeck
+      ;
   };
   mkNixosConfigurations = import ../../_profiles/nixos-configurations.nix {
     inherit inputs lib host;
   };
   mkSystemModule = import ../../_profiles/system-module.nix {
-    inherit inputs lib host steamdeck;
+    inherit
+      inputs
+      lib
+      host
+      steamdeck
+      ;
   };
   mkVariantModule =
     variant:
@@ -80,5 +95,11 @@ let
     };
 in
 {
-  inherit homeModule mkHomeConfiguration mkInventory mkNixosConfigurations mkVariantModule;
+  inherit
+    homeModule
+    mkHomeConfiguration
+    mkInventory
+    mkNixosConfigurations
+    mkVariantModule
+    ;
 }

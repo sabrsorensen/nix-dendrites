@@ -14,12 +14,11 @@ in
     default = { };
   };
 
-  config.flake.lib =
-    {
-      hostInventory = { };
-      localDns = { };
-    }
-    // outputConstructors
-    // inventoryConstructors
-    // configurationConstructors;
+  config.flake.lib = {
+    hostInventory = { };
+    localDns = { };
+  }
+  // outputConstructors
+  // inventoryConstructors
+  // configurationConstructors;
 }

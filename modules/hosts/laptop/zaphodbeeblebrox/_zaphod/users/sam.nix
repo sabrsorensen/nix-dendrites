@@ -14,7 +14,9 @@ in
       "users"
     ];
     hashedPasswordFile = config.sops.secrets.hashed_password.path;
-    openssh.authorizedKeys.keyFiles = lib.mkForce (sshKeyHelpers.mkBuildSecretSshKeyFiles [ "kamino/zaphod" ]);
+    openssh.authorizedKeys.keyFiles = lib.mkForce (
+      sshKeyHelpers.mkBuildSecretSshKeyFiles [ "kamino/zaphod" ]
+    );
   };
 
   services = {

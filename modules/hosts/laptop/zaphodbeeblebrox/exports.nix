@@ -4,7 +4,9 @@
   ...
 }:
 let
-  rootLuksUuid = lib.removeSuffix "\n" (builtins.readFile "${inputs.nix-secrets}/luks/zaphod/root.txt");
+  rootLuksUuid = lib.removeSuffix "\n" (
+    builtins.readFile "${inputs.nix-secrets}/luks/zaphod/root.txt"
+  );
 in
 {
   flake.modules.homeManager.zaphodBeeblebroxHome = {
