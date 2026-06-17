@@ -49,6 +49,8 @@
           ];
         }
         (lib.mkIf (config.my.syncthing.enable && shouldEnable) {
+          sops.secrets.syncthing_gui_password = { };
+
           services.syncthing = {
             enable = true;
             #guiAddress = "0.0.0.0:8384";

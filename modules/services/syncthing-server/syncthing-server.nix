@@ -44,6 +44,12 @@
       };
 
       config = lib.mkIf config.my.syncthing.enable {
+        sops.secrets.syncthing_gui_password = {
+          owner = serverUser;
+          group = serverUser;
+          mode = "0400";
+        };
+
         assertions = [
           {
             assertion = serverUser != null;

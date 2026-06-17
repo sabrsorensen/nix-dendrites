@@ -1,11 +1,12 @@
 {
   inputs,
+  lib,
   ...
 }:
 {
   flake.modules.nixos.sam-system-private = {
     sops = {
-      defaultSopsFile = "${inputs.nix-secrets}/secrets.yaml";
+      defaultSopsFile = lib.mkDefault "${inputs.nix-secrets}/secrets.yaml";
       secrets = {
         hashed_password = {
           owner = "root";
@@ -21,11 +22,6 @@
         ghcr_token = {
           owner = "root";
           group = "root";
-          mode = "0400";
-        };
-        syncthing_gui_password = {
-          owner = "sam";
-          group = "sam";
           mode = "0400";
         };
       };

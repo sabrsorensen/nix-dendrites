@@ -86,8 +86,9 @@
             src_root="$1"
             dst_root="$2"
             rel_path="$3"
+            dst_path="''${dst_root:?}/''${rel_path:?}"
 
-            rm -rf "$dst_root/$rel_path"
+            rm -rf -- "$dst_path"
             if [ -e "$src_root/$rel_path" ]; then
               mkdir -p "$dst_root/$(dirname "$rel_path")"
               cp -RL "$src_root/$rel_path" "$dst_root/$rel_path"
