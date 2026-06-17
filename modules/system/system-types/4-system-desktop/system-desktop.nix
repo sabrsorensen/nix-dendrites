@@ -6,6 +6,11 @@
   # expansion of cli system for desktop use
 
   flake.modules.nixos.system-desktop = {
+    nixpkgs.config.permittedInsecurePackages = [
+      # Bitwarden Desktop currently depends on this Electron release.
+      "electron-39.8.10"
+    ];
+
     imports = with inputs.self.modules.nixos; [
       system-cli
       printing
