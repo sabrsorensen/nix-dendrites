@@ -18,7 +18,7 @@
           label ? name,
         }:
         {
-          copyOwnershipFromParent = true;
+          copyOwnershipFromParent = false;
           inherit
             devices
             id
@@ -126,7 +126,7 @@
           label ? name,
         }:
         {
-          copyOwnershipFromParent = true;
+          copyOwnershipFromParent = false;
           inherit
             devices
             id
