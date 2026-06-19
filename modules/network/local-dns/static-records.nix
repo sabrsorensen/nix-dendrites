@@ -54,7 +54,16 @@ in
       builtins.concatLists (
         map (
           configuration:
-          inputs.self.nixosConfigurations.${configuration}.config.my.localDns.publishedRecords or [ ]
+          if builtins.hasAttr configuration inputs.self.nixosConfigurations then
+            let
+              cfg = inputs.self.nixosConfigurations.${configuration}.config;
+            in
+            if lib.attrByPath [ "my" "host" "lifecycle" "mode" ] "system" cfg == "system" then
+              cfg.my.localDns.publishedRecords or [ ]
+            else
+              [ ]
+          else
+            [ ]
         ) configurations
       );
 

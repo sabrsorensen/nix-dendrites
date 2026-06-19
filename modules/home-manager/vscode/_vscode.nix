@@ -12,6 +12,7 @@
       ...
     }:
     let
+      enableVscode = config.my.host.is.laptop || config.my.host.is.desktop;
       vscodePackageConfig = import ./_package.nix {
         inherit
           config
@@ -64,165 +65,167 @@
         windowsInterop.enable = lib.mkEnableOption "Windows terminal integration for VS Code profiles";
       };
 
-      config.home.packages = lib.optionals config.my.vscode.installLocalDotnetSdk [
-        pkgs.dotnetCorePackages.sdk_10_0-bin
-      ];
-      config.programs.vscode = {
-        enable = true;
-        #mutableExtsDir = true; # mutually exclusive with profiles
-        #package = lib.mkDefault (pkgs.vscode.fhsWithPackages (_: [ patched-openssh ]);
-        # To use a different baked version, set:
-        package = vscodePackageConfig.package;
-        #package = bakedVscodeByName "synthwave-blues";
-        profiles = {
-          default = {
-            enableExtensionUpdateCheck = true;
-            enableUpdateCheck = true;
-            keybindings = vscodeData.defaultKeyBindings ++ [
-            ];
-            globalSnippets = {
+      config = lib.mkIf enableVscode {
+        home.packages = lib.optionals config.my.vscode.installLocalDotnetSdk [
+          pkgs.dotnetCorePackages.sdk_10_0-bin
+        ];
+        programs.vscode = {
+          enable = true;
+          #mutableExtsDir = true; # mutually exclusive with profiles
+          #package = lib.mkDefault (pkgs.vscode.fhsWithPackages (_: [ patched-openssh ]);
+          # To use a different baked version, set:
+          package = vscodePackageConfig.package;
+          #package = bakedVscodeByName "synthwave-blues";
+          profiles = {
+            default = {
+              enableExtensionUpdateCheck = true;
+              enableUpdateCheck = true;
+              keybindings = vscodeData.defaultKeyBindings ++ [
+              ];
+              globalSnippets = {
+              };
+              languageSnippets = {
+              };
+              userSettings =
+                vscodeData.defaultProfileOnlySettings
+                // vscodeData.defaultUserSettings
+                // lib.optionalAttrs config.my.vscode.windowsInterop.enable vscodeData.windowsTerminalSettings;
+              extensions = vscodeData.mkExtensions (
+                vscodeData.defaultExts
+                ++ vscodeData.pythonExts
+                ++ [
+                  "bmalehorn.vscode-fish"
+                ]
+              );
+              enableMcpIntegration = true;
             };
-            languageSnippets = {
-            };
-            userSettings =
-              vscodeData.defaultProfileOnlySettings
-              // vscodeData.defaultUserSettings
-              // lib.optionalAttrs config.my.vscode.windowsInterop.enable vscodeData.windowsTerminalSettings;
-            extensions = vscodeData.mkExtensions (
-              vscodeData.defaultExts
-              ++ vscodeData.pythonExts
-              ++ [
-                "bmalehorn.vscode-fish"
-              ]
-            );
-            enableMcpIntegration = true;
-          };
-          Higi_LLP =
-            if config.my.vscode.profiles.higiLlp then
-              {
-                extensions = vscodeData.mkExtensions (
-                  vscodeData.higiExts
-                  ++ vscodeData.pythonExts
-                  ++ vscodeData.sqlExts
-                  ++ vscodeData.gitHubExts
-                  ++ vscodeData.defaultExts
-                  ++ [
-                  ]
-                );
-                keybindings = vscodeData.defaultKeyBindings ++ [ ];
-                languageSnippets = { };
-                userSettings = vscodeData.defaultUserSettings // vscodeData.higiSettings // { };
-                enableMcpIntegration = true;
-              }
-            else
-              { };
-          Nix = {
-            extensions = vscodeData.mkExtensions (
-              vscodeData.defaultExts
-              ++ vscodeData.pythonExts
-              ++ [
-                "bmalehorn.vscode-fish"
-                "signageos.signageos-vscode-sops"
-              ]
-            );
-            keybindings = vscodeData.defaultKeyBindings ++ [ ];
-            languageSnippets = {
-              nix = {
-                buildFirefoxXpiAddon = {
-                  prefix = [
-                    "buildFirefoxXpiAddon"
-                    "ffXpi"
-                  ];
-                  description = "Nix expression for building a Firefox XPI addon";
-                  body = [
-                    "= buildFirefoxXpiAddon {"
-                    "\tpname = \"$1\";"
-                    "\tversion = \"$2\";"
-                    "\taddonId = \"$3\";"
-                    "\turl = \"$4\";"
-                    "\tsha256 = \"\";"
-                    "\tmeta = with lib;"
-                    "\t{"
-                    "\t\thomepage = \"$5\";"
-                    "\t\tdescription = \"$6\";"
-                    "\t\tlicense = \"$7\";"
-                    "\t\tmozPermissions = [$8];"
-                    "\t\tplatforms = platforms.all;"
-                    "\t};"
-                    "};"
-                  ];
+            Higi_LLP =
+              if config.my.vscode.profiles.higiLlp then
+                {
+                  extensions = vscodeData.mkExtensions (
+                    vscodeData.higiExts
+                    ++ vscodeData.pythonExts
+                    ++ vscodeData.sqlExts
+                    ++ vscodeData.gitHubExts
+                    ++ vscodeData.defaultExts
+                    ++ [
+                    ]
+                  );
+                  keybindings = vscodeData.defaultKeyBindings ++ [ ];
+                  languageSnippets = { };
+                  userSettings = vscodeData.defaultUserSettings // vscodeData.higiSettings // { };
+                  enableMcpIntegration = true;
+                }
+              else
+                { };
+            Nix = {
+              extensions = vscodeData.mkExtensions (
+                vscodeData.defaultExts
+                ++ vscodeData.pythonExts
+                ++ [
+                  "bmalehorn.vscode-fish"
+                  "signageos.signageos-vscode-sops"
+                ]
+              );
+              keybindings = vscodeData.defaultKeyBindings ++ [ ];
+              languageSnippets = {
+                nix = {
+                  buildFirefoxXpiAddon = {
+                    prefix = [
+                      "buildFirefoxXpiAddon"
+                      "ffXpi"
+                    ];
+                    description = "Nix expression for building a Firefox XPI addon";
+                    body = [
+                      "= buildFirefoxXpiAddon {"
+                      "\tpname = \"$1\";"
+                      "\tversion = \"$2\";"
+                      "\taddonId = \"$3\";"
+                      "\turl = \"$4\";"
+                      "\tsha256 = \"\";"
+                      "\tmeta = with lib;"
+                      "\t{"
+                      "\t\thomepage = \"$5\";"
+                      "\t\tdescription = \"$6\";"
+                      "\t\tlicense = \"$7\";"
+                      "\t\tmozPermissions = [$8];"
+                      "\t\tplatforms = platforms.all;"
+                      "\t};"
+                      "};"
+                    ];
+                  };
+                };
+                json = {
+                  DhcpReservation = {
+                    prefix = [ "reservation" ];
+                    description = "Kea/CoreDNS DHCP reservation";
+                    body = [
+                      "{"
+                      "  \"ip\": \"192.168.1.$0\","
+                      "  \"hostname\": \"$2\","
+                      "  \"mac\": \"$1\""
+                      "}"
+                    ];
+                  };
                 };
               };
-              json = {
-                DhcpReservation = {
-                  prefix = [ "reservation" ];
-                  description = "Kea/CoreDNS DHCP reservation";
-                  body = [
-                    "{"
-                    "  \"ip\": \"192.168.1.$0\","
-                    "  \"hostname\": \"$2\","
-                    "  \"mac\": \"$1\""
-                    "}"
-                  ];
-                };
-              };
+              userSettings =
+                vscodeData.nixSettings // vscodeData.pythonSettings // vscodeData.defaultUserSettings;
+              enableMcpIntegration = true;
             };
-            userSettings =
-              vscodeData.nixSettings // vscodeData.pythonSettings // vscodeData.defaultUserSettings;
-            enableMcpIntegration = true;
-          };
 
-          Python =
-            if config.my.vscode.profiles.python then
-              {
-                extensions = vscodeData.mkExtensions (
-                  vscodeData.defaultExts
-                  ++ vscodeData.pythonExts
-                  ++ [
-                  ]
-                );
-                keybindings = vscodeData.defaultKeyBindings ++ [ ];
-                languageSnippets = { };
-                userSettings = vscodeData.pythonSettings // vscodeData.defaultUserSettings;
-                enableMcpIntegration = true;
-              }
-            else
-              { };
-          STM32 =
-            if config.my.vscode.profiles.stm32 then
-              {
-                extensions = vscodeData.mkExtensions (
-                  vscodeData.defaultExts
-                  ++ [
-                    "eclipse-cdt.memory-inspector"
-                    "eclipse-cdt.serial-monitor"
-                    "ms-vscode.cmake-tools"
-                    "platformio.platformio-ide"
-                    "stmicroelectronics.stm32-vscode-extension"
-                    "stmicroelectronics.stm32cube-ide-build-analyzer"
-                    "stmicroelectronics.stm32cube-ide-build-cmake"
-                    "stmicroelectronics.stm32cube-ide-bundles-manager"
-                    "stmicroelectronics.stm32cube-ide-clangd"
-                    "stmicroelectronics.stm32cube-ide-core"
-                    "stmicroelectronics.stm32cube-ide-debug-core"
-                    "stmicroelectronics.stm32cube-ide-debug-generic-gdbserver"
-                    "stmicroelectronics.stm32cube-ide-debug-jlink-gdbserver"
-                    "stmicroelectronics.stm32cube-ide-debug-stlink-gdbserver"
-                    "stmicroelectronics.stm32cube-ide-project-manager"
-                    "stmicroelectronics.stm32cube-ide-registers"
-                    "stmicroelectronics.stm32cube-ide-rtos"
-                  ]
-                );
-                keybindings = vscodeData.defaultKeyBindings ++ [ ];
-                languageSnippets = { };
-                userSettings = vscodeData.defaultUserSettings // {
-                  "stm32cube-ide-core.configuration.productSTM32CubeMX.executablePath" =
-                    "/etc/profiles/per-user/sam/bin/stm32cubemx";
-                  "stm32cube-ide-core.enableTelemetry" = false;
-                };
-              }
-            else
-              { };
+            Python =
+              if config.my.vscode.profiles.python then
+                {
+                  extensions = vscodeData.mkExtensions (
+                    vscodeData.defaultExts
+                    ++ vscodeData.pythonExts
+                    ++ [
+                    ]
+                  );
+                  keybindings = vscodeData.defaultKeyBindings ++ [ ];
+                  languageSnippets = { };
+                  userSettings = vscodeData.pythonSettings // vscodeData.defaultUserSettings;
+                  enableMcpIntegration = true;
+                }
+              else
+                { };
+            STM32 =
+              if config.my.vscode.profiles.stm32 then
+                {
+                  extensions = vscodeData.mkExtensions (
+                    vscodeData.defaultExts
+                    ++ [
+                      "eclipse-cdt.memory-inspector"
+                      "eclipse-cdt.serial-monitor"
+                      "ms-vscode.cmake-tools"
+                      "platformio.platformio-ide"
+                      "stmicroelectronics.stm32-vscode-extension"
+                      "stmicroelectronics.stm32cube-ide-build-analyzer"
+                      "stmicroelectronics.stm32cube-ide-build-cmake"
+                      "stmicroelectronics.stm32cube-ide-bundles-manager"
+                      "stmicroelectronics.stm32cube-ide-clangd"
+                      "stmicroelectronics.stm32cube-ide-core"
+                      "stmicroelectronics.stm32cube-ide-debug-core"
+                      "stmicroelectronics.stm32cube-ide-debug-generic-gdbserver"
+                      "stmicroelectronics.stm32cube-ide-debug-jlink-gdbserver"
+                      "stmicroelectronics.stm32cube-ide-debug-stlink-gdbserver"
+                      "stmicroelectronics.stm32cube-ide-project-manager"
+                      "stmicroelectronics.stm32cube-ide-registers"
+                      "stmicroelectronics.stm32cube-ide-rtos"
+                    ]
+                  );
+                  keybindings = vscodeData.defaultKeyBindings ++ [ ];
+                  languageSnippets = { };
+                  userSettings = vscodeData.defaultUserSettings // {
+                    "stm32cube-ide-core.configuration.productSTM32CubeMX.executablePath" =
+                      "/etc/profiles/per-user/sam/bin/stm32cubemx";
+                    "stm32cube-ide-core.enableTelemetry" = false;
+                  };
+                }
+              else
+                { };
+          };
         };
       };
     };

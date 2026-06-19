@@ -1,9 +1,14 @@
 {
   flake.modules.homeManager."mcp-work" =
     {
+      config,
+      lib,
       ...
     }:
-    {
+    let
+      enableMcp = config.my.host.is.wsl;
+    in
+    lib.mkIf enableMcp {
       programs.mcp = {
         enable = true;
         servers = {

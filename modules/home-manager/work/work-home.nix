@@ -49,7 +49,6 @@
           sam-home-work-private
           sam-work-secrets
           vscode
-          mcp
           mcp-work
           codex
         ]

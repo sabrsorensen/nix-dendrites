@@ -11,10 +11,13 @@
         [
           system-default
           bash
+          firefox
           fish
           git
           github-cli
           gpg
+          mcp
+          nix-index
           shell
           ssh
           starship

@@ -11,6 +11,7 @@ in
   mkServerDescriptor =
     {
       name,
+      hostName ? name,
       outputName,
       hostModule,
       identityFile,
@@ -22,13 +23,19 @@ in
       extraImports ? [ ],
       builder ? null,
       extraInventory ? { },
+      bootstrap ? null,
     }:
     x86Helpers.mkX86Descriptor {
       inherit
         name
-        config
+        hostName
         localDnsRecords
+        bootstrap
         ;
+      config = lib.recursiveUpdate {
+        formFactor = "server";
+        roles.server = true;
+      } config;
       user = {
         name = userName;
         ssh = {
@@ -51,6 +58,19 @@ in
           builder
           extraInventory
           ;
+        outputs =
+          inputs.self.lib.mkNixosOutputs {
+            system = "x86_64-linux";
+            name = outputName;
+            configuration = name;
+          }
+          ++ lib.optionals (bootstrap != null) (
+            inputs.self.lib.mkNixosOutputs {
+              system = "x86_64-linux";
+              name = bootstrap.outputName;
+              configuration = bootstrap.configurationName;
+            }
+          );
         deployRemoteMethod = "switch";
       };
     };

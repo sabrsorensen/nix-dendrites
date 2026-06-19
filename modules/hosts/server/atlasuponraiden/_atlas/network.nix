@@ -19,7 +19,6 @@
         32108 # ankerctl
       ];
     };
-    hostName = "AtlasUponRaiden";
     networkmanager.enable = true;
     useDHCP = lib.mkDefault true;
   };

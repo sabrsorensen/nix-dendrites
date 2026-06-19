@@ -18,6 +18,7 @@ in
     {
       name,
       outputName ? lib.strings.toLower name,
+      outputs ? null,
       userName ? null,
       identityFile ? null,
       nixIdentityFile ? null,
@@ -27,11 +28,15 @@ in
     }:
     mkInventoryHost (
       {
-        outputs = mkNixosOutputs {
-          system = "x86_64-linux";
-          name = outputName;
-          configuration = name;
-        };
+        outputs =
+          if outputs != null then
+            outputs
+          else
+            mkNixosOutputs {
+              system = "x86_64-linux";
+              name = outputName;
+              configuration = name;
+            };
       }
       // lib.optionalAttrs (userName != null && identityFile != null && nixIdentityFile != null) {
         ssh = mkInventorySsh {
@@ -58,15 +63,23 @@ in
   mkX86Descriptor =
     {
       name,
+      hostName ? name,
       homeImports ? [ ],
       nixosImports,
       config ? { },
       inventory,
       user ? null,
       localDnsRecords ? [ ],
+      bootstrap ? null,
     }:
     {
-      inherit name config inventory;
+      inherit
+        name
+        hostName
+        config
+        inventory
+        bootstrap
+        ;
       home.imports = homeImports;
       nixos.imports = nixosImports;
     }

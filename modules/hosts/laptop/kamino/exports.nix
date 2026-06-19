@@ -21,7 +21,7 @@ let
   );
 in
 {
-  flake.modules.homeManager.kaminoHome = import ./_kamino/home-manager.nix { inherit inputs; };
+  flake.modules.homeManager.kaminoHostHome = import ./_kamino/home-manager.nix { inherit inputs; };
 
   flake.modules.nixos = {
     kamino = {
@@ -37,6 +37,20 @@ in
         ./_kamino/desktop.nix
         ./_kamino/packages.nix
         ./_kamino/users/sam.nix
+      ];
+    };
+
+    kaminoBootstrap = {
+      imports = [
+        ./_kamino/hardware.nix
+        (import ./_kamino/filesystem.nix {
+          inherit bootUuid rootFsUuid swapUuid;
+        })
+        ./_kamino/network.nix
+        (import ./_kamino/boot.nix {
+          inherit rootLuksUuid swapLuksUuid;
+        })
+        inputs.self.modules.nixos.systemd-boot
       ];
     };
   };

@@ -4,7 +4,7 @@
   ...
 }:
 {
-  flake.modules.homeManager.nixosWslHome = import ./nixos-wsl/_nixos-wsl/home-manager.nix {
+  flake.modules.homeManager.nixosWslHostHome = import ./nixos-wsl/_nixos-wsl/home-manager.nix {
     inherit inputs;
   };
 

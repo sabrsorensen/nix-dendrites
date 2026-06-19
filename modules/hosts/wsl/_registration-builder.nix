@@ -1,5 +1,6 @@
 {
   inputs,
+  lib,
   ...
 }:
 let
@@ -8,6 +9,7 @@ in
 rec {
   mkHostModule = descriptor: {
     imports = descriptor.nixos.imports;
+    networking.hostName = lib.mkDefault descriptor.hostName;
     my.host = descriptor.config;
   };
 

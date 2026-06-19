@@ -10,7 +10,7 @@ in
 descriptorHelpers.mkWslDescriptor {
   name = "NixOS-WSL";
   outputName = "nixos-wsl";
-  homeImports = [ hostModules.homeManager.nixosWslHome ];
+  homeImports = [ hostModules.homeManager.nixosWslHostHome ];
   hostModule = hostModules.nixos.nixosWsl;
   extraImports = [
     hostModules.nixos."work-dev"
@@ -18,6 +18,7 @@ descriptorHelpers.mkWslDescriptor {
   ];
   config = {
     primaryInteractiveUser = lib.mkDefault "sam";
+    tags = [ "wsl" ];
     roles = {
       workstation = true;
       wsl = true;

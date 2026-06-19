@@ -8,7 +8,6 @@ let
   username = config.my.host.primaryInteractiveUser or "sam";
 in
 {
-  networking.hostName = lib.mkDefault "NixOS-WSL";
   time.timeZone = lib.mkDefault "America/Boise";
 
   wsl = {
@@ -38,6 +37,7 @@ in
 
   environment.systemPackages = with pkgs; [
     gnumake
+    just
     python3
     ripgrep
     sops

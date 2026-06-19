@@ -98,7 +98,7 @@
         }) cssFiles
       );
     in
-    {
+    lib.mkIf config.my.host.features.gui {
       home.file = homeFileAttrs;
 
       programs.firefox = {

@@ -4,6 +4,48 @@
 }:
 let
   x86Builder = import ../_x86-registration-builder.nix { inherit inputs; };
+  mkBootstrapModule =
+    descriptor:
+    {
+      lib,
+      pkgs,
+      ...
+    }:
+    let
+      shared = inputs.self.lib.shared;
+      bootstrap = descriptor.bootstrap;
+      bootstrapUser = bootstrap.user or { };
+      bootstrapHostConfig = lib.recursiveUpdate descriptor.config {
+        lifecycle.mode = "bootstrap";
+        bootstrap.finalConfigName = bootstrap.finalConfigName or descriptor.name;
+      };
+    in
+    {
+      imports = bootstrap.nixos.imports ++ [
+        inputs.self.modules.nixos."bootstrap-base"
+      ];
+
+      networking.hostName = lib.mkDefault descriptor.hostName;
+      my.host = bootstrapHostConfig;
+      my.localDns.records = descriptor.localDnsRecords or [ ];
+
+      nix.buildMachines = lib.mkForce [ ];
+      nix.distributedBuilds = lib.mkForce false;
+
+      users.users.${descriptor.user.name} = {
+        isNormalUser = true;
+        extraGroups = bootstrapUser.extraGroups or [ "wheel" ];
+        openssh.authorizedKeys.keyFiles = shared.mkSecretsSshKeyFiles bootstrap.authorizedKeyPaths;
+      }
+      // lib.optionalAttrs (bootstrapUser ? initialPassword) {
+        initialPassword = bootstrapUser.initialPassword;
+      };
+
+      services.openssh = {
+        enable = true;
+        settings.PasswordAuthentication = lib.mkForce (bootstrapUser ? initialPassword);
+      };
+    };
 in
 rec {
   mkHostModule =
@@ -12,6 +54,7 @@ rec {
     {
       imports = descriptor.nixos.imports;
 
+      networking.hostName = lib.mkDefault descriptor.hostName;
       my.host = descriptor.config;
       my.localDns.records = descriptor.localDnsRecords or [ ];
 
@@ -29,6 +72,6 @@ rec {
   mkRegisteredHost =
     descriptor:
     x86Builder.mkRegisteredHost {
-      inherit descriptor mkHostModule;
+      inherit descriptor mkHostModule mkBootstrapModule;
     };
 }

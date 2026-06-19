@@ -6,7 +6,7 @@
   flake.modules.nixos."deploy-builder-defaults" =
     { config, lib, ... }:
     let
-      enableBuilderDefaults = !(config.my.host.roles.wsl or false);
+      enableBuilderDefaults = !(config.my.host.is.wsl or false);
       currentBuilderHostNames = builtins.filter (name: name != null) [
         (config.my.host.name or null)
         (config.networking.hostName or null)

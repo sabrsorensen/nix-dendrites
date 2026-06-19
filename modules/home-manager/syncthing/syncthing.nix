@@ -14,7 +14,7 @@
     let
       hostCfg = if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
       hostName = hostCfg.name;
-      isSteamDeck = hostCfg.roles.steamdeck;
+      isSteamDeck = hostCfg.is.steamdeck;
       shouldEnable = hostCfg.syncthing.mode == "home";
       shouldWarnServer = hostCfg.syncthing.mode == "system";
       shouldHaveTray = hostCfg.syncthing.hasTray;

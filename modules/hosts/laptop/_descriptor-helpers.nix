@@ -11,6 +11,7 @@ in
   mkWorkstationDescriptor =
     {
       name,
+      hostName ? name,
       outputName ? lib.strings.toLower name,
       homeImports,
       hostModule,
@@ -19,18 +20,23 @@ in
       userName ? "sam",
       extraImports ? [ ],
       config ? { },
+      bootstrap ? null,
     }:
     x86Helpers.mkX86Descriptor {
       inherit
         name
+        hostName
         homeImports
+        bootstrap
         ;
-      config = {
+      config = lib.recursiveUpdate {
         primaryInteractiveUser = userName;
+        formFactor = "laptop";
         roles = {
           workstation = true;
           desktop = true;
         };
+        features.gui = true;
         deploy = {
           canDeployRemotely = true;
           enableRemoteUser = true;
@@ -41,8 +47,7 @@ in
           mode = "home";
           hasTray = true;
         };
-      }
-      // config;
+      } config;
       user = {
         name = userName;
         ssh = {
@@ -62,6 +67,19 @@ in
           identityFile
           nixIdentityFile
           ;
+        outputs =
+          inputs.self.lib.mkNixosOutputs {
+            system = "x86_64-linux";
+            name = outputName;
+            configuration = name;
+          }
+          ++ lib.optionals (bootstrap != null) (
+            inputs.self.lib.mkNixosOutputs {
+              system = "x86_64-linux";
+              name = bootstrap.outputName;
+              configuration = bootstrap.configurationName;
+            }
+          );
         deployRemoteMethod = "switch";
       };
     };

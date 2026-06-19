@@ -4,12 +4,13 @@
 }:
 {
   root = ../../../..;
-  primaryHostName = "EmeraldEcho";
-  homeConfigurationName = "deck@EmeraldEcho";
+  hostName = "EmeraldEcho";
 
-  context = {
+  config = {
     primaryInteractiveUser = "sam";
+    formFactor = "handheld";
     roles.steamdeck = true;
+    features.gui = true;
     deploy = {
       canDeployRemotely = false;
       sleepy = true;

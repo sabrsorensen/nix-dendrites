@@ -20,10 +20,15 @@
       zsa
       cross-compile
       appimage
+      bluetooth
       deskflow
+      flatpak
+      kde
       threedprinter
       minecraft
-      steam
+      nvidia
+      wine
+      xserver
     ];
   };
 

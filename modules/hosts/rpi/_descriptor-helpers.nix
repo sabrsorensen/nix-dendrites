@@ -19,10 +19,12 @@ rec {
       localDnsRecords ? [ ],
       name,
       outputName,
+      bootstrap ? null,
     }:
     {
       kind = "static";
       inherit
+        bootstrap
         config
         localDnsRecords
         name
@@ -49,10 +51,16 @@ rec {
       imageOutputName,
       name,
       outputName,
+      bootstrap ? null,
     }:
     {
       kind = "dhcp";
-      inherit config name outputName;
+      inherit
+        bootstrap
+        config
+        name
+        outputName
+        ;
       image = {
         name = imageName;
         outputName = imageOutputName;
@@ -74,6 +82,18 @@ rec {
               name = imageOutputName;
               configuration = imageName;
             }
+          )
+          ++ lib.optionals (bootstrap != null) (
+            aarch64Helpers.mkAarch64Outputs {
+              name = bootstrap.outputName;
+              configuration = bootstrap.configurationName;
+            }
+            ++ builtins.map (output: output // { buildProduct = "sdImage"; }) (
+              aarch64Helpers.mkAarch64Outputs {
+                name = bootstrap.imageOutputName;
+                configuration = bootstrap.imageName;
+              }
+            )
           );
       };
     };
@@ -97,10 +117,16 @@ rec {
       serviceRoles,
       startKeaOnBoot ? null,
       userName ? "sam",
+      bootstrap ? null,
     }:
     {
       kind = "service";
-      inherit config name outputName;
+      inherit
+        bootstrap
+        config
+        name
+        outputName
+        ;
       image = {
         name = imageName;
         outputName = imageOutputName;
@@ -150,6 +176,18 @@ rec {
               name = imageOutputName;
               configuration = imageName;
             }
+          )
+          ++ lib.optionals (bootstrap != null) (
+            aarch64Helpers.mkAarch64Outputs {
+              name = bootstrap.outputName;
+              configuration = bootstrap.configurationName;
+            }
+            ++ builtins.map (output: output // { buildProduct = "sdImage"; }) (
+              aarch64Helpers.mkAarch64Outputs {
+                name = bootstrap.imageOutputName;
+                configuration = bootstrap.imageName;
+              }
+            )
           );
       };
     }

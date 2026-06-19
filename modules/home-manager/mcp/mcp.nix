@@ -7,8 +7,9 @@
       ...
     }:
     let
+      enableMcp = config.my.host.is.wsl || config.my.host.is.laptop || config.my.host.is.desktop;
     in
-    {
+    lib.mkIf enableMcp {
       programs.mcp = {
         enable = true;
         servers = {

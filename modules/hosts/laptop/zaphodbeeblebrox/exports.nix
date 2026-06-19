@@ -9,18 +9,8 @@ let
   );
 in
 {
-  flake.modules.homeManager.zaphodBeeblebroxHome = {
-    imports = with inputs.self.modules.homeManager; [
-      firefox
-      gdrive
-      konsole
-      mcp
-      mcp-personal
-      nix-index
-      vscode
-    ];
-
-    my.gdrive.enable = true;
+  flake.modules.homeManager.zaphodBeeblebroxHostHome = import ./_zaphod/home-manager.nix {
+    inherit inputs;
   };
 
   flake.modules.nixos = {

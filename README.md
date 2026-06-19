@@ -17,6 +17,45 @@ Converting my NixOS and Home Manager configurations to Dendritic Nix structuring
 - `modules/devshell.nix` adds a devshell with pre-commit for setting up the pre-commit hook.
 - `modules/*` shows feature-module structure.
 
+## Host Model
+
+The repo is moving toward a property-driven module model similar in spirit to
+the "broadcast-and-gate" pattern used by
+[`wimpysworld/nix-config`](https://github.com/wimpysworld/nix-config), but
+without introducing a second host metadata system.
+
+`my.host.*` is the single source of truth for host metadata.
+
+- `my.host.roles.*` captures broad intent such as workstation, server, rpi, steamdeck, and wsl.
+- `my.host.formFactor` captures physical or operational shape such as `laptop`, `desktop`, `handheld`, and `server`.
+- `my.host.features.*` captures concrete capabilities or policy toggles such as `gui`, `bluetooth`, `nvidia`, `flatpak`, `steam`, and `wine`.
+- `my.host.tags` is a sparse escape hatch for grouping and exceptions.
+- `my.host.is.*` is the derived read-side used by modules.
+
+Rule of thumb:
+
+- use `my.host.is.*` for broad class decisions
+- use `my.host.features.*` for capability or policy toggles
+- use `my.host.roles.*` and `my.host.formFactor` to define hosts, not as the first-choice read API in modules
+
+For server classification, `roles.server` is the authoritative host declaration.
+`formFactor = "server"` remains useful metadata, but modules should prefer
+`my.host.is.server`.
+
+The design goal is:
+
+- hosts declare facts and explicit feature flags
+- reusable modules self-gate with `lib.mkIf`
+- broad defaults move into shared bundles
+- host directories shrink toward hardware, disks, networking facts, and true exceptions
+
+WSL is treated as its own environment, not as a VM.
+
+`features.gui` should mean "this host is expected to run a local graphical
+session". It is broader than "has some GUI apps installed", and it is the
+right gate for shared desktop/session modules such as Firefox, audio, Wayland,
+KDE, and other local-user GUI defaults.
+
 ## Regenerating `flake.nix`
 
 When a module adds or changes `flake-file.inputs`, regenerate the top-level
@@ -43,6 +82,18 @@ The hook first runs `nix run .#write-flake`, then `nix flake check`.
 
 ```bash
 nix develop
+```
+
+For repo-scoped maintenance commands, a small [justfile](./justfile) wraps the
+existing workflows:
+
+```bash
+just fmt
+just write-flake
+just check
+just update
+just install-hooks
+just run-hooks
 ```
 
 CI is configured in `.github/workflows/check.yml` and runs `nix flake check`

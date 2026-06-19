@@ -19,7 +19,6 @@
   swapDevices = [ ];
 
   networking.useDHCP = lib.mkDefault true;
-  networking.hostName = lib.mkDefault "nixpi";
   networking.interfaces.end0.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";

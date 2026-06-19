@@ -13,9 +13,25 @@ descriptorHelpers.mkServerDescriptor {
   hostModule = hostModules.nixos.atlasUponRaiden;
   identityFile = "~/.ssh/atlasuponraiden_id_ed25519";
   nixIdentityFile = "~/.ssh/nix_atlasuponraiden_id_ed25519";
-  homeImports = import ./home-imports.nix { inherit inputs; };
+  homeImports = [ hostModules.homeManager.atlasUponRaidenHostHome ];
   localDnsRecords = import ./local-dns-records.nix;
   config = import ./config.nix;
+  bootstrap = {
+    configurationName = "AtlasUponRaidenBootstrap";
+    outputName = "atlasuponraiden-bootstrap";
+    finalConfigName = "AtlasUponRaiden";
+    authorizedKeyPaths = [
+      "kamino/atlas"
+      "zaphodbeeblebrox/atlas"
+    ];
+    nixos.imports = [
+      (import ./bootstrap.nix { inherit inputs lib; })
+    ];
+    user.extraGroups = [
+      "wheel"
+      "networkmanager"
+    ];
+  };
   extraImports = with hostModules.nixos; [
     samba
     deploy-defaults
@@ -24,7 +40,6 @@ descriptorHelpers.mkServerDescriptor {
     disko
     podman
     cross-compile
-    nix-index
     caddy
     apprise
     ankerctl

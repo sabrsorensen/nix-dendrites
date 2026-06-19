@@ -10,6 +10,7 @@ in
   mkWslDescriptor =
     {
       name,
+      hostName ? name,
       outputName,
       homeImports,
       hostModule,
@@ -19,6 +20,7 @@ in
     x86Helpers.mkX86Descriptor {
       inherit
         name
+        hostName
         config
         homeImports
         ;

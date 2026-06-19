@@ -1,5 +1,6 @@
 {
   inputs,
+  descriptor,
   lib,
   host,
   steamdeck,
@@ -11,7 +12,7 @@ bootMode:
   ...
 }:
 let
-  mkBaseModule = import ./base-module.nix { inherit host; };
+  mkBaseModule = import ./base-module.nix { inherit descriptor host; };
   system = pkgs.stdenv.hostPlatform.system;
   isDualBoot = bootMode == "dual";
   steamUser = host.users.steam.name;

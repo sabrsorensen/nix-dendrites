@@ -4,8 +4,13 @@
 }:
 {
   flake.modules.nixos.plymouth =
-    { pkgs, ... }:
     {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    lib.mkIf config.my.host.features.gui {
       boot = {
         # Ensure framebuffer console stays at high resolution
         consoleLogLevel = 3; # Reduce kernel messages that might affect display

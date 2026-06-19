@@ -27,11 +27,11 @@
             set ping_host "$target_host"
           '';
 
-      # Feature flags based on host type
-      isWorkstation = hostCfg.roles.workstation;
-      isPi = hostCfg.roles.rpi;
-      isDeck = hostCfg.roles.steamdeck;
-      isWsl = hostCfg.roles.wsl;
+      # Derived host predicates for behavior decisions
+      isWorkstation = hostCfg.is.workstation;
+      isPi = hostCfg.is.rpi;
+      isDeck = hostCfg.is.steamdeck;
+      isWsl = hostCfg.is.wsl;
       hasPodman =
         osConfig ? virtualisation
         && osConfig.virtualisation ? podman
@@ -330,7 +330,7 @@
             let
               runCleanCommand = command: if sleepySystem then "inhibitSleep ${command}" else command;
             in
-            if isWorkstation || isPi || isWsl || hostCfg.roles.server || isDeck then
+            if isWorkstation || isPi || isWsl || hostCfg.is.server || isDeck then
               ''
                 echo "Cleaning user profile generations..."
                 nix-collect-garbage -d

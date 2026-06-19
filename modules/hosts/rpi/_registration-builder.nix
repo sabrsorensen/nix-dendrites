@@ -3,10 +3,80 @@
   lib,
   mkBaseModule,
   mkImageModule,
+  mkBootstrapBaseModule,
+  mkBootstrapImageModule,
   mkServiceHostModule,
   mkStaticModule,
 }:
 rec {
+  mkBootstrapHostModule =
+    descriptor:
+    let
+      bootstrap = descriptor.bootstrap;
+      bootstrapUser = bootstrap.user or { };
+      shared = inputs.self.lib.shared;
+      static =
+        if descriptor.network.address == null then
+          null
+        else
+          mkStaticModule {
+            hostName = descriptor.network.hostName;
+            address = descriptor.network.address;
+            nameservers = descriptor.network.nameservers or [ ];
+          };
+    in
+    {
+      imports = [
+        (mkBootstrapBaseModule descriptor.network.hostName)
+      ]
+      ++ lib.optionals (static != null) static.imports
+      ++ bootstrap.nixos.imports;
+
+      networking =
+        if static != null then
+          static.networking
+        else
+          {
+            hostName = descriptor.network.hostName;
+            useDHCP = true;
+            interfaces.end0.useDHCP = true;
+          };
+
+      my.host = {
+        lifecycle.mode = "bootstrap";
+        bootstrap.finalConfigName = bootstrap.finalConfigName or descriptor.name;
+        roles.rpi = true;
+      }
+      // lib.optionalAttrs (descriptor.network.address != null) {
+        address = descriptor.network.address;
+      }
+      // lib.optionalAttrs (descriptor.kind == "service") {
+        primaryInteractiveUser = descriptor.user.name;
+        formFactor = "server";
+        roles = {
+          server = true;
+          rpi = true;
+          serviceHost = true;
+        };
+      };
+
+      users.users.${bootstrap.userName or "sam"} = {
+        isNormalUser = true;
+        extraGroups = bootstrapUser.extraGroups or [ "wheel" ];
+        openssh.authorizedKeys.keyFiles = shared.mkSecretsSshKeyFiles bootstrap.authorizedKeyPaths;
+      }
+      // lib.optionalAttrs (bootstrapUser ? initialPassword) {
+        initialPassword = bootstrapUser.initialPassword;
+      };
+
+      services.openssh = {
+        enable = true;
+        settings.PasswordAuthentication = lib.mkForce (bootstrapUser ? initialPassword);
+      };
+
+      boot.kernel.sysctl = lib.mkForce { };
+    };
+
   mkHostModule =
     descriptor:
     if descriptor.kind == "static" then
@@ -78,7 +148,9 @@ rec {
 
         my.host = {
           primaryInteractiveUser = descriptor.user.name;
+          formFactor = "server";
           roles = {
+            server = true;
             rpi = true;
             serviceHost = true;
           };
@@ -110,23 +182,53 @@ rec {
 
   mkStaticHostRegistration = descriptor: {
     flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
-    flake.modules.nixos.${descriptor.name} = mkStaticHostModule descriptor;
-    flake.nixosConfigurations = inputs.self.lib.mkNixos "aarch64-linux" descriptor.name;
+    flake.modules.nixos = {
+      ${descriptor.name} = mkStaticHostModule descriptor;
+    }
+    // lib.optionalAttrs (descriptor ? bootstrap && descriptor.bootstrap != null) {
+      ${descriptor.bootstrap.configurationName} = mkBootstrapHostModule descriptor;
+    };
+    flake.nixosConfigurations =
+      inputs.self.lib.mkNixos "aarch64-linux" descriptor.name
+      // lib.optionalAttrs (descriptor ? bootstrap && descriptor.bootstrap != null) (
+        inputs.self.lib.mkNixos "aarch64-linux" descriptor.bootstrap.configurationName
+      );
   };
 
   mkDhcpHostRegistration = descriptor: {
-    flake.modules.nixos.${descriptor.name} = mkDhcpHostModule descriptor;
-    flake.modules.nixos.${descriptor.image.name} = mkImageModule descriptor.name;
+    flake.modules.nixos = {
+      ${descriptor.name} = mkDhcpHostModule descriptor;
+      ${descriptor.image.name} = mkImageModule descriptor.name;
+    }
+    // lib.optionalAttrs (descriptor ? bootstrap && descriptor.bootstrap != null) {
+      ${descriptor.bootstrap.configurationName} = mkBootstrapHostModule descriptor;
+      ${descriptor.bootstrap.imageName} = mkBootstrapImageModule descriptor.bootstrap.configurationName;
+    };
     flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
     flake.nixosConfigurations =
       inputs.self.lib.mkNixos "aarch64-linux" descriptor.name
-      // inputs.self.lib.mkNixos "aarch64-linux" descriptor.image.name;
+      // inputs.self.lib.mkNixos "aarch64-linux" descriptor.image.name
+      // lib.optionalAttrs (descriptor ? bootstrap && descriptor.bootstrap != null) (
+        inputs.self.lib.mkNixos "aarch64-linux" descriptor.bootstrap.configurationName
+        // inputs.self.lib.mkNixos "aarch64-linux" descriptor.bootstrap.imageName
+      );
   };
 
   mkServiceHostRegistration = descriptor: {
-    flake.modules.nixos.${descriptor.name} = mkServiceHostModuleFromDescriptor descriptor;
+    flake.modules.nixos = {
+      ${descriptor.name} = mkServiceHostModuleFromDescriptor descriptor;
+    }
+    // lib.optionalAttrs (descriptor ? bootstrap && descriptor.bootstrap != null) {
+      ${descriptor.bootstrap.configurationName} = mkBootstrapHostModule descriptor;
+      ${descriptor.bootstrap.imageName} = mkBootstrapImageModule descriptor.bootstrap.configurationName;
+    };
     flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
-    flake.nixosConfigurations = inputs.self.lib.mkNixos "aarch64-linux" descriptor.name;
+    flake.nixosConfigurations =
+      inputs.self.lib.mkNixos "aarch64-linux" descriptor.name
+      // lib.optionalAttrs (descriptor ? bootstrap && descriptor.bootstrap != null) (
+        inputs.self.lib.mkNixos "aarch64-linux" descriptor.bootstrap.configurationName
+        // inputs.self.lib.mkNixos "aarch64-linux" descriptor.bootstrap.imageName
+      );
   };
 
   mkRegisteredHost =

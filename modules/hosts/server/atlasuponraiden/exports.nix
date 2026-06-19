@@ -4,6 +4,10 @@
   ...
 }:
 {
+  flake.modules.homeManager.atlasUponRaidenHostHome = import ./_atlas/home-manager.nix {
+    inherit inputs;
+  };
+
   flake.modules.nixos = {
     atlasUponRaiden = {
       imports = [

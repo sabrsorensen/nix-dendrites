@@ -1,5 +1,6 @@
 {
   inputs,
+  descriptor,
   lib,
   host,
   steamdeck,
@@ -7,7 +8,7 @@
 bootMode:
 { ... }:
 let
-  mkBaseModule = import ./base-module.nix { inherit host; };
+  mkBaseModule = import ./base-module.nix { inherit descriptor host; };
   isDualBoot = bootMode == "dual";
   steamUser = host.users.steam.name;
   returnToGamingEntry = {
@@ -23,11 +24,9 @@ mkBaseModule {
   inherit bootMode;
   lifecycle = "bootstrap";
   extraImports = with inputs.self.modules.nixos; [
-    system-minimal
+    inputs.self.modules.nixos."bootstrap-base"
     home-manager
-    ssh
     firmware
-    cli-tools
     locale
     disko
     inputs.nix-flatpak.nixosModules.nix-flatpak
@@ -37,6 +36,9 @@ mkBaseModule {
     steamdeck-system
   ];
   extraConfig = {
+    my.host.bootstrap.finalConfigName =
+      if bootMode == "single" then "${descriptor.name}SingleBoot" else "${descriptor.name}DualBoot";
+
     services.openssh.settings = {
       PasswordAuthentication = lib.mkForce true;
       KbdInteractiveAuthentication = lib.mkForce false;

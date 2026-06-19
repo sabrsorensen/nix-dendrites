@@ -1,4 +1,5 @@
 {
+  descriptor,
   host,
 }:
 {
@@ -10,8 +11,10 @@
 {
   imports = extraImports ++ [ extraConfig ];
 
-  networking.hostName = host.primaryHostName;
-  my.host = host.context;
+  networking.hostName = descriptor.hostName;
+  my.host = descriptor.config // {
+    lifecycle.mode = lifecycle;
+  };
 
   my.platform.steamdeck = {
     enable = true;

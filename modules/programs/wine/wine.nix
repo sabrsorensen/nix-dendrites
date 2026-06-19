@@ -6,10 +6,12 @@
 {
   flake.modules.nixos.wine =
     {
+      config,
+      lib,
       pkgs,
       ...
     }:
-    {
+    lib.mkIf config.my.host.features.wine {
       # Enable Wine with WoW64 support for running 32-bit and 64-bit Windows apps
       environment.systemPackages = with pkgs; [
         # Wine with 64-bit and 32-bit support

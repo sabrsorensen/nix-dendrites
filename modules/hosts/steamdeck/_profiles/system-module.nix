@@ -1,5 +1,6 @@
 {
   inputs,
+  descriptor,
   lib,
   host,
   steamdeck,
@@ -7,7 +8,7 @@
 bootMode:
 { config, pkgs, ... }:
 let
-  mkBaseModule = import ./base-module.nix { inherit host; };
+  mkBaseModule = import ./base-module.nix { inherit descriptor host; };
   sshKeyHelpers = import ../../_ssh-key-helpers.nix { inherit config; };
   steamUser = host.users.steam.name;
 in
@@ -46,7 +47,7 @@ mkBaseModule {
     };
 
     home-manager.users.${steamUser}.imports = [
-      inputs.self.modules.homeManager.${host.primaryHostName}
+      inputs.self.modules.homeManager.${descriptor.home.moduleName}
     ];
 
     networking.firewall.allowedTCPPorts = [
