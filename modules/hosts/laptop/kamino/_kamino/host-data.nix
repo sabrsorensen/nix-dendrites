@@ -16,6 +16,7 @@ descriptorHelpers.mkWorkstationDescriptor {
   config.features = {
     flatpak = true;
     nvidia = true;
+    steam = true;
     wine = true;
   };
   bootstrap = {

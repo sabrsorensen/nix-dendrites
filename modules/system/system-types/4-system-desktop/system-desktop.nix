@@ -26,6 +26,7 @@
       kde
       threedprinter
       minecraft
+      steam
       nvidia
       wine
       xserver

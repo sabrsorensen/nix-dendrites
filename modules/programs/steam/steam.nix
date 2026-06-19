@@ -5,7 +5,7 @@
 {
   flake.modules.nixos.steam =
     { config, lib, ... }:
-    lib.mkIf config.my.host.features.gui {
+    lib.mkIf (config.my.host.features.gui && config.my.host.features.steam) {
       programs.steam = {
         enable = true;
         remotePlay.openFirewall = true;
