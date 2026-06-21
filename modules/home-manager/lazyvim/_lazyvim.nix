@@ -75,6 +75,12 @@
           alejandra # Nix formatter
         ];
         plugins = {
+          lazy-core = inputs.lazyvim.lib.lazyConfig {
+            plugin = "folke/lazy.nvim";
+            dir = "${pkgs.vimPlugins.lazy-nvim}";
+            dev = true;
+            pin = true;
+          };
           colorscheme = inputs.lazyvim.lib.lazyConfig [
             {
               plugin = "oxfist/night-owl.nvim";
