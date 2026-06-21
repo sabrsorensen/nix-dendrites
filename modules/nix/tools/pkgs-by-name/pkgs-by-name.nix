@@ -28,7 +28,7 @@
         local = withSystem prev.stdenv.hostPlatform.system ({ config, ... }: config.packages);
         vimPlugins = prev.vimPlugins // {
           lazy-nvim = prev.vimPlugins.lazy-nvim.overrideAttrs (old: {
-            patches = (old.patches or [ ]) ++ [ ../../../../home-manager/lazyvim/lazy-nvim-skip-readonly-helptags.patch ];
+            patches = (old.patches or [ ]) ++ [ ../../../home-manager/lazyvim/lazy-nvim-skip-readonly-helptags.patch ];
           });
         };
         vscode-partyowl84 =
