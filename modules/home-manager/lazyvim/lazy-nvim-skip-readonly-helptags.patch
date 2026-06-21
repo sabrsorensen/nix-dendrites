@@ -1,11 +1,14 @@
 diff --git a/lua/lazy/manage/task/plugin.lua b/lua/lazy/manage/task/plugin.lua
-index c84e8a4..bf0fd2e 100644
+index c84e8a4..61fd6c2 100644
 --- a/lua/lazy/manage/task/plugin.lua
 +++ b/lua/lazy/manage/task/plugin.lua
-@@ -91,6 +91,9 @@ M.docs = {
+@@ -91,6 +91,12 @@ M.docs = {
    run = function(self)
      local docs = self.plugin.dir .. "/doc"
      if Util.file_exists(docs) then
++      if self.plugin.dir:find("/nix/store/", 1, true) == 1 then
++        return
++      end
 +      if not vim.uv.fs_access(docs, "W") then
 +        return
 +      end
