@@ -41,13 +41,13 @@ descriptorHelpers.mkServerDescriptor {
     podman
     cross-compile
     caddy
-    apprise
     ankerctl
+    apprise
+    atuin-server
     immich
     mealie
     media-server
     minecraft-server
-    demlo
     scrutiny
     syncthing-server
   ];

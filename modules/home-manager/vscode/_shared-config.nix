@@ -120,6 +120,10 @@ let
     "[github-actions-workflow]"."editor.defaultFormatter" = "redhat.vscode-yaml";
     "[json]"."editor.defaultFormatter" = "esbenp.prettier-vscode";
     "[jsonc]"."editor.defaultFormatter" = "vscode.json-language-features";
+    "[nix]" = {
+      "editor.tabSize" = 2;
+      "editor.indentSize" = "tabSize";
+    };
     "accessibility.signals.terminalBell"."sound" = "on";
     "debug.toolBarLocation" = "commandCenter";
     "diffEditor.ignoreTrimWhitespace" = false;
@@ -144,6 +148,7 @@ let
     "editor.suggest.localityBonus" = true;
     "editor.suggest.shareSuggestSelections" = true;
     "editor.tabCompletion" = "on";
+    "editor.tabSize" = "2";
     "explorer.confirmDelete" = false;
     "explorer.openEditors.visible" = 10;
     "extensions.closeExtensionDetailsOnViewChange" = true;

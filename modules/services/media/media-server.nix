@@ -15,6 +15,7 @@
       arr-sync
       bazarr
       deluge
+      demlo
       flaresolverr
       gonic
       gotify

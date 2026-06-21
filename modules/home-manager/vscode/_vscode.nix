@@ -169,8 +169,7 @@
                   };
                 };
               };
-              userSettings =
-                vscodeData.nixSettings // vscodeData.pythonSettings // vscodeData.defaultUserSettings;
+              userSettings = vscodeData.pythonSettings // vscodeData.defaultUserSettings;
               enableMcpIntegration = true;
             };
 

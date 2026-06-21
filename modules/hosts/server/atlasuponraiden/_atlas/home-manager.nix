@@ -2,6 +2,7 @@
 with inputs.self.modules.homeManager;
 {
   imports = [
+    atuin
     beets
     gdrive
     demlo

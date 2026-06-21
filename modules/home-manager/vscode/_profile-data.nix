@@ -46,13 +46,6 @@ let
     "chatgpt.runCodexInWindowsSubsystemForLinux" = true;
   };
 
-  nixSettings = {
-    "[nix]" = {
-      "editor.tabSize" = 2;
-      "editor.indentSize" = "tabSize";
-    };
-  };
-
   pythonSettings = {
     "[python]"."editor.formatOnType" = true;
   };
@@ -64,7 +57,6 @@ in
     gitHubExts
     higiExts
     higiSettings
-    nixSettings
     pythonExts
     pythonSettings
     sqlExts

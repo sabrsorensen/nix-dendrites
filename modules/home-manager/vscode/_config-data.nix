@@ -29,7 +29,6 @@ in
     gitHubExts
     higiExts
     higiSettings
-    nixSettings
     pythonExts
     pythonSettings
     sqlExts
