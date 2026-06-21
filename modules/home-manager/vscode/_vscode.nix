@@ -12,7 +12,7 @@
       ...
     }:
     let
-      enableVscode = config.my.host.is.laptop || config.my.host.is.desktop;
+      enableVscode = config.my.host.is.wsl || config.my.host.is.laptop || config.my.host.is.desktop;
       vscodePackageConfig = import ./_package.nix {
         inherit
           config
