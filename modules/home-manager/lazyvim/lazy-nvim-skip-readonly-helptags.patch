@@ -1,21 +1,5 @@
-diff --git a/lua/lazy/help.lua b/lua/lazy/help.lua
-index 684f475..7f2cdb0 100644
---- a/lua/lazy/help.lua
-+++ b/lua/lazy/help.lua
-@@ -40,7 +40,10 @@ end
- 
- function M.update()
-   if Config.plugins["lazy.nvim"] then
--    vim.cmd.helptags(Config.plugins["lazy.nvim"].dir .. "/doc")
-+    local docs = Config.plugins["lazy.nvim"].dir .. "/doc"
-+    if vim.uv.fs_access(docs, "W") then
-+      vim.cmd.helptags(docs)
-+    end
-   end
-   if Config.options.readme.enabled == false then
-     return
 diff --git a/lua/lazy/manage/task/plugin.lua b/lua/lazy/manage/task/plugin.lua
-index edf6ccf..fe430d5 100644
+index c84e8a4..bf0fd2e 100644
 --- a/lua/lazy/manage/task/plugin.lua
 +++ b/lua/lazy/manage/task/plugin.lua
 @@ -91,6 +91,9 @@ M.docs = {
