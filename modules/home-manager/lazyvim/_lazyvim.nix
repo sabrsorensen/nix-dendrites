@@ -6,10 +6,13 @@
 {
   flake.modules.homeManager.lazyvim =
     {
+      config,
       pkgs,
       ...
     }:
     let
+      appName = config.programs.lazyvim.appName;
+      lazyBootstrapTarget = "${config.xdg.dataHome}/${appName}/lazy/lazy.nvim";
     in
     {
       imports = [ inputs.lazyvim.homeManagerModules.default ];
@@ -107,5 +110,16 @@
         treesitterParsers = with pkgs.vimPlugins.nvim-treesitter-parsers; [
         ];
       };
+
+      xdg.dataFile."${appName}/lazy/lazy.nvim".source = pkgs.vimPlugins.lazy-nvim;
+
+      home.activation.lazyvimBootstrapFromNix = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+        target=${lib.escapeShellArg lazyBootstrapTarget}
+        if [ -d "$target" ] && [ ! -L "$target" ]; then
+          backup="$target.pre-nix-bootstrap"
+          rm -rf "$backup"
+          mv "$target" "$backup"
+        fi
+      '';
     };
 }
