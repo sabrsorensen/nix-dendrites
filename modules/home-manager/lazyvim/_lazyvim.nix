@@ -91,6 +91,10 @@
               opts.colorscheme = "night-owl";
             }
           ];
+          markdown-preview = inputs.lazyvim.lib.lazyConfig {
+            plugin = "iamcco/markdown-preview.nvim";
+            build = false;
+          };
         };
 
         # Only needed for languages not covered by LazyVim extras
