@@ -99,10 +99,7 @@ let
   };
 
   copilotSettings = {
-    "chat.agent.enabled" = true;
-    "chat.commandCenter.enabled" = true;
-    "chat.mcp.gallery.enabled" = true;
-    "chat.viewSessions.orientation" = "stacked";
+    "chat.disableAIFeatures" = true;
   };
 
   defaultUserSettings = {
@@ -148,7 +145,7 @@ let
     "editor.suggest.localityBonus" = true;
     "editor.suggest.shareSuggestSelections" = true;
     "editor.tabCompletion" = "on";
-    "editor.tabSize" = "2";
+    "editor.tabSize" = 2;
     "explorer.confirmDelete" = false;
     "explorer.openEditors.visible" = 10;
     "extensions.closeExtensionDetailsOnViewChange" = true;

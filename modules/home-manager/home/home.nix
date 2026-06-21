@@ -16,6 +16,7 @@
           git
           github-cli
           gpg
+          lazyvim
           mcp
           nix-index
           shell
