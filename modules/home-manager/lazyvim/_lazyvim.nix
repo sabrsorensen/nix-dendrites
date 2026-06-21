@@ -113,7 +113,7 @@
 
       xdg.dataFile."${appName}/lazy/lazy.nvim".source = pkgs.vimPlugins.lazy-nvim;
 
-      home.activation.lazyvimBootstrapFromNix = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+      home.activation.lazyvimBootstrapFromNix = config.lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
         target=${lib.escapeShellArg lazyBootstrapTarget}
         if [ -d "$target" ] && [ ! -L "$target" ]; then
           backup="$target.pre-nix-bootstrap"
