@@ -20,6 +20,7 @@ in
       localDnsRecords ? [ ],
       config ? { },
       userName ? "sam",
+      authorizedKeys ? { },
       extraImports ? [ ],
       builder ? null,
       extraInventory ? { },
@@ -41,6 +42,9 @@ in
         ssh = {
           inherit identityFile nixIdentityFile;
         };
+      }
+      // lib.optionalAttrs (authorizedKeys != { }) {
+        inherit authorizedKeys;
       };
       inherit homeImports;
       nixosImports = [

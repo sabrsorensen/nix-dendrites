@@ -18,6 +18,7 @@ in
       identityFile,
       nixIdentityFile,
       userName ? "sam",
+      authorizedKeys ? { },
       extraImports ? [ ],
       config ? { },
       bootstrap ? null,
@@ -53,6 +54,9 @@ in
         ssh = {
           inherit identityFile nixIdentityFile;
         };
+      }
+      // lib.optionalAttrs (authorizedKeys != { }) {
+        inherit authorizedKeys;
       };
       nixosImports = [
         hostModules.nixos.sam

@@ -51,6 +51,10 @@ rec {
   mkHostModule =
     descriptor:
     { config, ... }:
+    let
+      sshKeyHelpers = import ../_ssh-key-helpers.nix { inherit config; };
+      nixRemoteAuthorizedKeyPaths = lib.attrByPath [ "user" "authorizedKeys" "nixRemote" ] [ ] descriptor;
+    in
     {
       imports = descriptor.nixos.imports;
 
@@ -60,6 +64,12 @@ rec {
 
       services.openssh.allowSFTP = true;
       nix.settings.system-features = config.systemConstants.atlas.systemFeatures;
+
+      users.users.nix-remote =
+        lib.mkIf (config.my.host.deploy.enableRemoteUser && nixRemoteAuthorizedKeyPaths != [ ])
+          {
+            openssh.authorizedKeys.keyFiles = sshKeyHelpers.mkBuildSecretSshKeyFiles nixRemoteAuthorizedKeyPaths;
+          };
 
       home-manager.users.${descriptor.user.name} = {
         imports = [

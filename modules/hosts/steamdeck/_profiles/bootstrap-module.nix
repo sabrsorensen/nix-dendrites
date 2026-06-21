@@ -59,6 +59,7 @@ mkBaseModule {
     };
 
     home-manager.users.${steamUser} = {
+      imports = [ inputs.self.modules.homeManager.host-context ];
       home.username = steamUser;
       home.homeDirectory = "/home/${steamUser}";
       home.stateVersion = "26.05";

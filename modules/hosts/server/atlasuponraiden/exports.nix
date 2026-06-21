@@ -18,7 +18,6 @@
         ./_atlas/immich.nix
         ./_atlas/media.nix
         (import ./_atlas/syncthing.nix { inherit inputs; })
-        (import ./_atlas/users/nix-remote.nix { inherit inputs lib; })
         ./_atlas/samba.nix
       ];
     };

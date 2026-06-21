@@ -16,6 +16,10 @@ descriptorHelpers.mkServerDescriptor {
   homeImports = [ hostModules.homeManager.atlasUponRaidenHostHome ];
   localDnsRecords = import ./local-dns-records.nix;
   config = import ./config.nix;
+  authorizedKeys.nixRemote = [
+    "kamino/atlas_nix"
+    "zaphodbeeblebrox/atlas_nix"
+  ];
   bootstrap = {
     configurationName = "AtlasUponRaidenBootstrap";
     outputName = "atlasuponraiden-bootstrap";

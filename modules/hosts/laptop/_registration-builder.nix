@@ -62,18 +62,31 @@ let
     };
 in
 rec {
-  mkHostModule = descriptor: {
-    imports = descriptor.nixos.imports ++ [
-      inputs.self.modules.nixos.deploy-defaults
-    ];
+  mkHostModule =
+    descriptor:
+    { config, ... }:
+    let
+      sshKeyHelpers = import ../_ssh-key-helpers.nix { inherit config; };
+      nixRemoteAuthorizedKeyPaths = lib.attrByPath [ "user" "authorizedKeys" "nixRemote" ] [ ] descriptor;
+    in
+    {
+      imports = descriptor.nixos.imports ++ [
+        inputs.self.modules.nixos.deploy-defaults
+      ];
 
-    networking.hostName = lib.mkDefault descriptor.hostName;
-    my.host = descriptor.config;
+      networking.hostName = lib.mkDefault descriptor.hostName;
+      my.host = descriptor.config;
 
-    home-manager.users.${descriptor.user.name}.imports = [
-      inputs.self.modules.homeManager.${descriptor.name}
-    ];
-  };
+      users.users.nix-remote =
+        lib.mkIf (config.my.host.deploy.enableRemoteUser && nixRemoteAuthorizedKeyPaths != [ ])
+          {
+            openssh.authorizedKeys.keyFiles = sshKeyHelpers.mkBuildSecretSshKeyFiles nixRemoteAuthorizedKeyPaths;
+          };
+
+      home-manager.users.${descriptor.user.name}.imports = [
+        inputs.self.modules.homeManager.${descriptor.name}
+      ];
+    };
 
   mkRegisteredHost =
     descriptor:

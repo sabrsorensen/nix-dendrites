@@ -37,7 +37,6 @@ in
 
   environment.systemPackages = with pkgs; [
     gnumake
-    just
     python3
     ripgrep
     sops
