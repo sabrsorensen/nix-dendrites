@@ -17,6 +17,7 @@ descriptorHelpers.mkWorkstationDescriptor {
     bluetooth = true;
     flatpak = true;
     nvidia = true;
+    steam = true;
     wine = true;
   };
   extraImports = with hostModules.nixos; [
