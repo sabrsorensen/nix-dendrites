@@ -5,28 +5,14 @@
 }:
 let
   descriptorHelpers = import ../../_descriptor-helpers.nix { inherit inputs lib; };
-  hostModules = inputs.self.modules;
 in
 descriptorHelpers.mkWslDescriptor {
   name = "NixOS-WSL";
   outputName = "nixos-wsl";
-  homeImports = [ hostModules.homeManager.nixosWslHostHome ];
-  hostModule = hostModules.nixos.nixosWsl;
-  extraImports = [
-    hostModules.nixos."work-dev"
-    (import ./home-defaults.nix { inherit inputs lib; })
+  hostModule = inputs.self.modules.nixos.nixosWsl;
+  nixosProfileNames = [ "system-work-dev" ];
+  homeProfileNames = [
+    "sam-home-work"
+    "sam-home-work-wsl"
   ];
-  config = {
-    primaryInteractiveUser = lib.mkDefault "sam";
-    tags = [ "wsl" ];
-    roles = {
-      workstation = true;
-      wsl = true;
-    };
-    deploy = {
-      canDeployRemotely = false;
-      sleepy = false;
-    };
-    syncthing.mode = "disabled";
-  };
 }

@@ -4,6 +4,7 @@
   ...
 }:
 let
+  hostModules = inputs.self.modules;
   inherit (inputs.self.lib)
     mkInventoryDeploy
     mkInventoryHost
@@ -13,7 +14,7 @@ let
     mkNixosOutputs
     ;
 in
-{
+rec {
   mkX86Inventory =
     {
       name,
@@ -65,7 +66,9 @@ in
       name,
       hostName ? name,
       homeImports ? [ ],
+      homeProfileNames ? [ ],
       nixosImports,
+      nixosProfileNames ? [ ],
       config ? { },
       inventory,
       user ? null,
@@ -80,13 +83,98 @@ in
         inventory
         bootstrap
         ;
-      home.imports = homeImports;
-      nixos.imports = nixosImports;
+      home.imports = homeImports ++ map (name: hostModules.homeManager.${name}) homeProfileNames;
+      nixos.imports = nixosImports ++ map (name: hostModules.nixos.${name}) nixosProfileNames;
     }
     // lib.optionalAttrs (user != null) {
       inherit user;
     }
     // lib.optionalAttrs (localDnsRecords != [ ]) {
       inherit localDnsRecords;
+    };
+
+  mkProfiledX86Descriptor =
+    {
+      name,
+      hostName ? name,
+      outputName ? lib.strings.toLower name,
+      hostModule,
+      config ? { },
+      userName ? null,
+      identityFile ? null,
+      nixIdentityFile ? null,
+      authorizedKeys ? { },
+      homeImports ? [ ],
+      homeProfileNames ? [ ],
+      defaultHomeProfileNames ? [ ],
+      nixosImports ? [ ],
+      extraImports ? [ ],
+      nixosProfileNames ? [ ],
+      defaultNixosProfileNames ? [ ],
+      enableSystemdBoot ? false,
+      enableDisko ? false,
+      localDnsRecords ? [ ],
+      builder ? null,
+      extraInventory ? { },
+      deployRemoteMethod ? null,
+      bootstrap ? null,
+    }:
+    let
+      resolvedHomeProfileNames = defaultHomeProfileNames ++ homeProfileNames;
+      resolvedNixosProfileNames =
+        defaultNixosProfileNames
+        ++ nixosProfileNames
+        ++ lib.optionals enableSystemdBoot [ "systemd-boot" ]
+        ++ lib.optionals enableDisko [ "disko" ];
+      user =
+        if userName != null && identityFile != null && nixIdentityFile != null then
+          {
+            name = userName;
+            ssh = {
+              inherit identityFile nixIdentityFile;
+            };
+          }
+          // lib.optionalAttrs (authorizedKeys != { }) {
+            inherit authorizedKeys;
+          }
+        else
+          null;
+    in
+    mkX86Descriptor {
+      inherit
+        name
+        hostName
+        config
+        user
+        localDnsRecords
+        bootstrap
+        homeImports
+        ;
+      homeProfileNames = resolvedHomeProfileNames;
+      nixosImports = nixosImports ++ [ hostModule ] ++ extraImports;
+      nixosProfileNames = resolvedNixosProfileNames;
+      inventory = mkX86Inventory {
+        inherit
+          name
+          outputName
+          userName
+          identityFile
+          nixIdentityFile
+          deployRemoteMethod
+          builder
+          extraInventory
+          ;
+        outputs =
+          mkNixosOutputs {
+            system = "x86_64-linux";
+            name = outputName;
+            configuration = name;
+          }
+          ++ lib.optionals (bootstrap != null) (mkNixosOutputs {
+            system = "x86_64-linux";
+            name = bootstrap.outputName;
+            configuration = bootstrap.configurationName;
+          });
+      };
     };
 }

@@ -10,7 +10,7 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.features.gui {
+    lib.mkIf config.my.host.features.deskflow {
       environment.systemPackages = with pkgs; [
         deskflow
       ];

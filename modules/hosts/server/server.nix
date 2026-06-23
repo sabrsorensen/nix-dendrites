@@ -4,7 +4,7 @@
   ...
 }:
 let
-  server = import ./_public.nix { inherit inputs lib; };
+  server = import ./_registration-builder.nix { inherit inputs lib; };
   descriptors = [
     (import ./atlasuponraiden/_atlas/host-data.nix { inherit inputs lib; })
   ];

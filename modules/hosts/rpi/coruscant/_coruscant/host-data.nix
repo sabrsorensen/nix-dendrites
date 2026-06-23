@@ -13,6 +13,7 @@ descriptorHelpers.mkStaticDescriptor {
   hostName = "Coruscant";
   address = network.coruscant;
   configuration = "Coruscant";
+  nixosProfileNames = [ "sam-system-cli" ];
   localDnsRecords = [
     { hostname = "homeassistant"; }
   ];

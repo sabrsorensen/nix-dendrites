@@ -16,7 +16,8 @@ let
   system = pkgs.stdenv.hostPlatform.system;
   isDualBoot = bootMode == "dual";
   steamUser = host.users.steam.name;
-  installerUser = host.users.installer.name;
+  installer = host.users.installer;
+  installerUser = installer.name;
   diskConfigFile =
     if isDualBoot then "steamdeck-dualboot-disk-config.nix" else "steamdeck-singleboot-disk-config.nix";
   diskConfigPath =
@@ -106,9 +107,9 @@ mkBaseModule {
 
     users.users.${installerUser} = {
       isNormalUser = true;
-      description = "Steam Deck Installer User";
-      extraGroups = host.users.steam.extraGroups;
-      password = "jovian";
+      description = installer.description;
+      extraGroups = installer.extraGroups;
+      password = installer.password;
       shell = pkgs.bash;
     }
     // lib.optionalAttrs isDualBoot {

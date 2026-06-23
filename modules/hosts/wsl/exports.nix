@@ -3,19 +3,15 @@
   lib,
   ...
 }:
+let
+  wsl = import ./_registration-builder.nix { inherit inputs lib; };
+in
 {
-  flake.modules.homeManager.nixosWslHostHome = import ./nixos-wsl/_nixos-wsl/home-manager.nix {
-    inherit inputs;
-  };
-
   flake.modules.nixos = {
     nixosWsl = {
-      imports = [
-        (import ./nixos-wsl/_nixos-wsl/system.nix { inherit inputs; })
-        ./nixos-wsl/_nixos-wsl/user.nix
-      ];
+      imports = [ (import ./nixos-wsl/_nixos-wsl/host.nix { inherit inputs; }) ];
     };
   };
 
-  flake.lib.wsl = import ./_public.nix { inherit inputs lib; };
+  flake.lib.wsl = wsl;
 }

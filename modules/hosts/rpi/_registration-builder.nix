@@ -14,6 +14,7 @@ rec {
     let
       bootstrap = descriptor.bootstrap;
       bootstrapUser = bootstrap.user or { };
+      bootstrapUserName = bootstrapUser.name or bootstrap.userName or "sam";
       shared = inputs.self.lib.shared;
       static =
         if descriptor.network.address == null then
@@ -60,7 +61,7 @@ rec {
         };
       };
 
-      users.users.${bootstrap.userName or "sam"} = {
+      users.users.${bootstrapUserName} = {
         isNormalUser = true;
         extraGroups = bootstrapUser.extraGroups or [ "wheel" ];
         openssh.authorizedKeys.keyFiles = shared.mkSecretsSshKeyFiles bootstrap.authorizedKeyPaths;
@@ -99,6 +100,7 @@ rec {
         (mkBaseModule descriptor.network.hostName)
         descriptor.config
       ]
+      ++ descriptor.nixos.imports
       ++ static.imports;
 
       networking = static.networking;
@@ -115,7 +117,8 @@ rec {
     imports = [
       (mkBaseModule descriptor.network.hostName)
       descriptor.config
-    ];
+    ]
+    ++ descriptor.nixos.imports;
 
     networking = {
       hostName = descriptor.network.hostName;

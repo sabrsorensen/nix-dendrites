@@ -3,7 +3,7 @@
   ...
 }:
 {
-  flake.modules.homeManager."wsl-home" = {
+  flake.modules.homeManager."sam-home-work-wsl" = {
     imports = [
       inputs.self.modules.homeManager."vscode-wsl"
     ];

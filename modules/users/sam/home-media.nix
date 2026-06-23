@@ -3,11 +3,10 @@
   ...
 }:
 {
-  flake.modules.homeManager."graphical-home" = {
+  flake.modules.homeManager.sam-home-media = {
     imports = with inputs.self.modules.homeManager; [
-      home
-      browser
-      konsole
+      beets
+      demlo
     ];
   };
 }

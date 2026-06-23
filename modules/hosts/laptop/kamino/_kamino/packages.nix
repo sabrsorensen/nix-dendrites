@@ -5,14 +5,10 @@
 }:
 {
   environment.systemPackages = with pkgs; [
-    cura-appimage
     hunspell
     hunspellDicts.en_US
-    keymapp
     # libreoffice-qt
     lshw
-    orca-slicer
-    prismlauncher
     (python3.withPackages (
       python-pkgs: with python-pkgs; [
         pyqt5
@@ -31,7 +27,6 @@
     pkg:
     builtins.elem (lib.getName pkg) [
       "discord"
-      "keymapp"
       "nvidia-persistenced"
       "nvidia-settings"
       "nvidia-x11"

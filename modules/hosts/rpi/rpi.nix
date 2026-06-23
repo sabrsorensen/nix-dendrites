@@ -4,7 +4,14 @@
   ...
 }:
 let
-  rpi = import ./_public.nix { inherit inputs lib; };
+  moduleBuilders = import ./_module-builders.nix { inherit inputs lib; };
+  mkServiceHostModule = import ./_rpi/service-host.nix { inherit inputs lib; };
+  rpi = import ./_registration-builder.nix (
+    {
+      inherit inputs lib mkServiceHostModule;
+    }
+    // moduleBuilders
+  );
   descriptors = [
     (import ./coruscant/_coruscant/host-data.nix { inherit inputs lib; })
     (import ./ferrix/_ferrix/host-data.nix { inherit inputs lib; })

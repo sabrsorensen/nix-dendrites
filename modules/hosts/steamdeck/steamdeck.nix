@@ -4,7 +4,14 @@
   ...
 }:
 let
-  steamdeck = import ./_public.nix { inherit inputs lib; };
+  platformHelpers = import ./_platform-helpers.nix { inherit inputs; };
+  steamdeck = {
+    inherit (platformHelpers) steamdeck;
+  }
+  // import ./_registration-builder.nix {
+    inherit lib;
+    inherit (platformHelpers) steamdeck;
+  };
   descriptors = [
     (import ./emeraldecho/_host/host-data.nix { inherit inputs lib; })
   ];

@@ -5,7 +5,6 @@
 steamdeck: descriptor:
 let
   host = descriptor.platform.host;
-  homeModule = import ../../_profiles/home-module.nix { inherit inputs; };
   mkBootstrapModule = import ../../_profiles/bootstrap-module.nix {
     inherit
       descriptor
@@ -27,9 +26,6 @@ let
       steamdeck
       ;
   };
-  mkNixosConfigurations = import ../../_profiles/nixos-configurations.nix {
-    inherit inputs lib host;
-  };
   mkSystemModule = import ../../_profiles/system-module.nix {
     inherit
       descriptor
@@ -39,6 +35,12 @@ let
       steamdeck
       ;
   };
+  homeModule = {
+    imports = [ inputs.self.modules.homeManager.steamdeck-home ];
+  };
+  mkNixosConfigurations = lib.mkMerge (
+    map (variant: inputs.self.lib.mkNixos "x86_64-linux" variant.name) host.nixosVariants
+  );
   mkVariantModule =
     variant:
     if variant.lifecycle == "system" then

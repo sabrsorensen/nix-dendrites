@@ -13,6 +13,8 @@ let
 in
 {
   options.my.media = {
+    enable = lib.mkEnableOption "media service stack";
+
     configRoot = lib.mkOption {
       type = lib.types.str;
       default = "/opt";
@@ -78,7 +80,7 @@ in
     };
   };
 
-  config = {
+  config = lib.mkIf mediaCfg.enable {
     assertions =
       let
         identities = builtins.attrValues mediaCfg.containerIdentities;

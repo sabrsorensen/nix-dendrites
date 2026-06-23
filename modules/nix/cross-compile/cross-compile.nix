@@ -1,13 +1,17 @@
 {
-  flake.modules.nixos."cross-compile" = {
-    boot = {
-      binfmt = {
-        # Enable aarch64-linux builds
-        emulatedSystems = [
-          "aarch64-linux"
-          #"i686-linux"
-        ];
+  flake.modules.nixos."cross-compile" =
+    { config, lib, ... }:
+    {
+      config = lib.mkIf config.my.host.is.builder {
+        boot = {
+          binfmt = {
+            # Enable aarch64-linux builds
+            emulatedSystems = [
+              "aarch64-linux"
+              #"i686-linux"
+            ];
+          };
+        };
       };
     };
-  };
 }

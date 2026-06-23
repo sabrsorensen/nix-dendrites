@@ -9,10 +9,6 @@ let
   );
 in
 {
-  flake.modules.homeManager.zaphodBeeblebroxHostHome = import ./_zaphod/home-manager.nix {
-    inherit inputs;
-  };
-
   flake.modules.nixos = {
     zaphodBeeblebrox = {
       imports = [

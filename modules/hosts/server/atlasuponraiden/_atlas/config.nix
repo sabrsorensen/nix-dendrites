@@ -1,14 +1,27 @@
 {
-  primaryInteractiveUser = "sam";
-  roles = {
-    server = true;
-    builder = true;
+  host = {
+    primaryInteractiveUser = "sam";
+    roles = {
+      server = true;
+      builder = true;
+    };
+    deploy = {
+      canDeployRemotely = true;
+      enableRemoteUser = true;
+      sleepy = false;
+    };
+    ssh.enableNixBlocks = true;
+    syncthing.mode = "system";
   };
-  deploy = {
-    canDeployRemotely = true;
-    enableRemoteUser = true;
-    sleepy = false;
+
+  services = {
+    my.services = {
+      apprise.enable = true;
+      atuin.enable = true;
+      immich.enable = true;
+      mealie.enable = true;
+      samba.enable = true;
+      scrutiny.enable = true;
+    };
   };
-  ssh.enableNixBlocks = true;
-  syncthing.mode = "system";
 }

@@ -25,15 +25,12 @@ in
   users.users.${username}.extraGroups = [ "docker" ];
   services.openssh.openFirewall = lib.mkForce false;
 
-  programs.nix-ld = {
-    enable = true;
-    libraries = with pkgs; [
-      icu
-      openssl
-      zlib
-      stdenv.cc.cc.lib
-    ];
-  };
+  programs.nix-ld.libraries = with pkgs; [
+    icu
+    openssl
+    zlib
+    stdenv.cc.cc.lib
+  ];
 
   environment.systemPackages = with pkgs; [
     gnumake

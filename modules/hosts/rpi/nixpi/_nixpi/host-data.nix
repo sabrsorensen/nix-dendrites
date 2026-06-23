@@ -14,6 +14,7 @@ descriptorHelpers.mkDhcpDescriptor {
   imageOutputName = "nixpi-image";
   hostName = "nixpi";
   configuration = "NixPi";
+  nixosProfileNames = [ "sam-system-cli" ];
   bootstrap = {
     configurationName = "NixPiBootstrap";
     outputName = "nixpi-bootstrap";
@@ -21,10 +22,13 @@ descriptorHelpers.mkDhcpDescriptor {
     imageOutputName = "nixpi-bootstrap-image";
     finalConfigName = "NixPi";
     authorizedKeyPaths = [ "zaphodbeeblebrox/kamino" ];
-    user.extraGroups = [
-      "wheel"
-      "video"
-    ];
+    user = {
+      name = "sam";
+      extraGroups = [
+        "wheel"
+        "video"
+      ];
+    };
     nixos.imports = [ ];
   };
 }

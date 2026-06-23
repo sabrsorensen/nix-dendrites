@@ -13,4 +13,5 @@ descriptorHelpers.mkStaticDescriptor {
   hostName = "Ferrix";
   address = network.ferrix;
   configuration = "Ferrix";
+  nixosProfileNames = [ "sam-system-cli" ];
 }

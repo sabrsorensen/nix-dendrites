@@ -6,10 +6,12 @@
       ...
     }:
     {
-      services = {
-        flaresolverr = {
-          enable = true;
-          openFirewall = true;
+      config = lib.mkIf config.my.media.enable {
+        services = {
+          flaresolverr = {
+            enable = true;
+            openFirewall = true;
+          };
         };
       };
     };

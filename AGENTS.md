@@ -12,6 +12,7 @@ just
 just fmt
 just write-flake
 just check
+just checknb
 just update
 nix develop
 ```
@@ -40,7 +41,7 @@ Use these buckets consistently:
 
 - `my.host.roles.*`: broad intent and environment class such as workstation, server, rpi, steamdeck, wsl.
 - `my.host.formFactor`: physical or operational shape such as `laptop`, `desktop`, `handheld`, `server`, `vm`.
-- `my.host.features.*`: concrete capabilities or policy toggles such as `gui`, `bluetooth`, `nvidia`, `flatpak`, `steam`, `wine`.
+- `my.host.features.*`: concrete capabilities or policy toggles such as `gui`, `bluetooth`, `firmware`, `nix-ld`, `nvidia`, `flatpak`, `steam`, `wine`, `deskflow`, `minecraft`, `threedprinter`, `zsa`.
 - `my.host.tags`: sparse escape hatch for grouping and exceptions.
 - `my.host.is.*`: derived read-side booleans for module authors.
 
@@ -123,7 +124,9 @@ Treat WSL as its own environment, not as a VM.
 
 These are already trending toward generic shared behavior:
 
-- desktop NixOS modules in `system-desktop`
+- CLI NixOS defaults in `system-cli`
+- desktop/session NixOS foundations in `system-desktop`
+- workstation-oriented NixOS layering in `system-workstation`
 - base HM modules in `home`
 - GUI HM bundle in `graphical-home`
 - host metadata in `my.host.*`
@@ -131,27 +134,48 @@ These are already trending toward generic shared behavior:
 Before re-adding a host-level import, check whether the module should instead
 be gated and moved into one of those shared layers.
 
+Sam-specific personal policy should generally live under `modules/users/sam/*`
+rather than being pushed back down into the generic `home` or
+`graphical-home` bundles.
+
 ## Host Structure
 
-For x86-style host families, keep host-scoped Home Manager helper modules on a
-consistent pattern:
+For x86-style host families, prefer a descriptor-level profile API over
+host-local wrapper modules.
 
-- put the helper in a dedicated `home-manager.nix` file under the host's private directory
-- export it as `flake.modules.homeManager.<hostName>HostHome`
-- point descriptor `homeImports` at that helper module
+The current preferred split is:
 
-This keeps helper naming distinct from the generated final per-host Home
-Manager modules created by the registration builders.
+- `homeProfileNames`: named shared Home Manager profiles such as `sam-home-personal`, `sam-home-media`, `sam-home-work`, `sam-home-work-wsl`
+- `nixosProfileNames`: named shared NixOS profiles such as `system-workstation`, `system-desktop`, `system-cli`, `system-work-dev`
+- `homeImports`: rare escape hatch for true one-off Home Manager modules
+- `extraImports`: rare escape hatch for true one-off NixOS modules
+
+Rule of thumb:
+
+- prefer `*ProfileNames` for reusable policy and capability bundles
+- use raw `*Imports` only when the module is genuinely host-specific and not yet worth promoting
+- avoid reintroducing host-local `HostHome` wrapper modules unless they carry real host-only behavior that cannot be expressed as shared profiles yet
+
+The remaining `extraImports` usage inside Steam Deck `_profiles/*` is internal
+family assembly, not a model to copy into ordinary host descriptors.
 
 For x86-style hosts, prefer setting `networking.hostName` from the descriptor
 via the registration builders. Do not restate the hostname in per-host network
 modules unless a host truly needs to override the descriptor value.
+
+For x86-style host families, shared descriptor mechanics are intentionally
+aligned:
+
+- all x86 families use the shared x86 registration builder
+- laptop and server families use shared `enableSystemdBoot` / `enableDisko` toggles
+- WSL intentionally diverges only where its environment semantics differ, not in basic descriptor plumbing
 
 For Steam Deck hosts, keep the same common concepts at descriptor level where
 practical:
 
 - `descriptor.hostName`
 - `descriptor.config`
+- `descriptor.nixos.*`
 - `descriptor.home.*`
 
 Keep only Steam Deck-specific variant and runtime data under `descriptor.platform.*`.
@@ -168,6 +192,16 @@ Keep shared RPi platform logic under `modules/hosts/rpi/_*.nix` and
 `modules/hosts/rpi/_rpi/*`, and keep `modules/hosts/rpi/rpi.nix` as the
 family registry that imports those per-host descriptors.
 
+For non-x86 lifecycle products such as RPi bootstrap images or Steam Deck
+bootstrap/installer variants, prefer lifecycle user defaults in descriptor or
+host data. Shared lifecycle modules should consume that data rather than
+hardcoding host-specific user names, groups, or passwords.
+
+At this point, the main migration from host-local wrapper layering toward
+descriptor profiles and self-gating shared modules is mostly complete for the
+x86 families. Favor documentation and narrow follow-up cleanups over new broad
+restructuring unless a concrete inconsistency justifies it.
+
 ## Validation
 
 Preferred checks:
@@ -176,6 +210,7 @@ Preferred checks:
 just fmt
 just write-flake
 just check
+just checknb
 ```
 
 If you change only documentation or obviously isolated metadata wiring, say what

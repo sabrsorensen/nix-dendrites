@@ -10,7 +10,10 @@
     primaryInteractiveUser = "sam";
     formFactor = "handheld";
     roles.steamdeck = true;
-    features.gui = true;
+    features = {
+      firmware = true;
+      gui = true;
+    };
     deploy = {
       canDeployRemotely = false;
       sleepy = true;
@@ -31,6 +34,7 @@
         "audio"
         "video"
       ];
+      bootstrap.initialPassword = "jovian";
 
       authorizedKeyPaths = [
         "atlasuponraiden/emeraldecho"
@@ -41,6 +45,14 @@
 
     installer = {
       name = "jovian";
+      description = "Steam Deck Installer User";
+      password = "jovian";
+      extraGroups = [
+        "wheel"
+        "networkmanager"
+        "audio"
+        "video"
+      ];
     };
 
     nixRemote = {

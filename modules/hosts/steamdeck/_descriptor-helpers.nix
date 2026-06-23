@@ -1,13 +1,7 @@
-{ lib, ... }:
-let
-  mkHostHomeModuleName =
-    name:
-    let
-      first = builtins.substring 0 1 name;
-      rest = builtins.substring 1 (builtins.stringLength name - 1) name;
-    in
-    "${lib.toLower first}${rest}HostHome";
-in
+{
+  inputs,
+  ...
+}:
 {
   mkSteamdeckDescriptor =
     {
@@ -18,7 +12,9 @@ in
       config,
       homeOutputName,
       homeConfigurationName ? "deck@${hostName}",
-      homeModuleName ? mkHostHomeModuleName name,
+      homeModuleName ? homeOutputName,
+      nixosProfileNames ? [ ],
+      extraImports ? [ ],
       platformHost,
       platformRegistration,
     }:
@@ -31,6 +27,8 @@ in
       user.ssh = {
         inherit identityFile nixIdentityFile;
       };
+      nixos.imports =
+        extraImports ++ map (profileName: inputs.self.modules.nixos.${profileName}) nixosProfileNames;
       home = {
         outputName = homeOutputName;
         configurationName = homeConfigurationName;

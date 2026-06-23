@@ -29,6 +29,7 @@ let
           _: hostCfg: hostCfg.routes != [ ] || hostCfg.logFormat != null
         ) caddyCfg.virtualHosts
       );
+  caddyEnabled = caddyCfg.apexRoutes != [ ] || renderedVirtualHosts != { };
 in
 {
   options.my.caddy = {
@@ -61,7 +62,7 @@ in
     };
   };
 
-  config = {
+  config = lib.mkIf caddyEnabled {
     sops.secrets.caddy_env = {
       owner = "caddy";
       group = "caddy";

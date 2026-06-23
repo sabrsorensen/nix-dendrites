@@ -20,7 +20,7 @@
         gid = 2096;
       } mediaCfg.containerIdentities;
     in
-    {
+    lib.mkIf config.my.media.enable {
       users.users = {
         plex = {
           isSystemUser = true;

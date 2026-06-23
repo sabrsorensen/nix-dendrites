@@ -4,7 +4,7 @@
   ...
 }:
 let
-  descriptorHelpers = import ../../_descriptor-helpers.nix { inherit lib; };
+  descriptorHelpers = import ../../_descriptor-helpers.nix { inherit inputs; };
   host = import ./host.nix { inherit inputs; };
 in
 descriptorHelpers.mkSteamdeckDescriptor {
@@ -14,6 +14,7 @@ descriptorHelpers.mkSteamdeckDescriptor {
   hostName = host.hostName;
   config = host.config;
   homeOutputName = "home-deck-emeraldecho";
+  nixosProfileNames = [ "sam-system-cli" ];
   platformHost = host;
   platformRegistration = import ./registration.nix { inherit inputs lib; };
 }

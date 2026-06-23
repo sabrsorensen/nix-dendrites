@@ -12,24 +12,38 @@ in
       name,
       hostName ? name,
       outputName,
-      homeImports,
+      homeImports ? [ ],
+      homeProfileNames ? [ ],
       hostModule,
       extraImports ? [ ],
+      nixosProfileNames ? [ ],
       config ? { },
     }:
-    x86Helpers.mkX86Descriptor {
+    x86Helpers.mkProfiledX86Descriptor {
       inherit
         name
         hostName
-        config
         homeImports
-        ;
-      nixosImports = [
+        homeProfileNames
+        outputName
         hostModule
-      ]
-      ++ extraImports;
-      inventory = x86Helpers.mkX86Inventory {
-        inherit name outputName;
-      };
+        extraImports
+        nixosProfileNames
+        ;
+      config = lib.recursiveUpdate {
+        primaryInteractiveUser = lib.mkDefault "sam";
+        tags = [ "wsl" ];
+        roles = {
+          workstation = true;
+          wsl = true;
+        };
+        features.nix-ld = true;
+        deploy = {
+          canDeployRemotely = false;
+          sleepy = false;
+        };
+        syncthing.mode = "disabled";
+      } config;
+      deployRemoteMethod = null;
     };
 }

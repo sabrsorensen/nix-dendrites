@@ -15,20 +15,21 @@ in
 mkBaseModule {
   inherit bootMode;
   lifecycle = "system";
-  extraImports = with inputs.self.modules.nixos; [
-    samCli
-    system-cli
-    disko
-    deploy-defaults
-    inputs.nix-flatpak.nixosModules.nix-flatpak
-    inputs.jovian-nixos.nixosModules.default
-    steamdeck-decky-plugins
-    (steamdeck.mkDeckyModule { inherit steamUser; })
-    steamdeck-plugins
-    (steamdeck.mkHwConfig bootMode)
-    (steamdeck.mkSteamModule { inherit steamUser; })
-    steamdeck-system
-  ];
+  extraImports =
+    descriptor.nixos.imports
+    ++ (with inputs.self.modules.nixos; [
+      system-cli
+      disko
+      deploy-defaults
+      inputs.nix-flatpak.nixosModules.nix-flatpak
+      inputs.jovian-nixos.nixosModules.default
+      steamdeck-decky-plugins
+      (steamdeck.mkDeckyModule { inherit steamUser; })
+      steamdeck-plugins
+      (steamdeck.mkHwConfig bootMode)
+      (steamdeck.mkSteamModule { inherit steamUser; })
+      steamdeck-system
+    ]);
   extraConfig = {
     my.host.deploy.enableRemoteUser = true;
 

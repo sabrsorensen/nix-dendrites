@@ -2,13 +2,14 @@
   flake.modules.nixos.gonic =
     {
       config,
+      lib,
       ...
     }:
     let
       mediaCfg = config.my.media;
       serviceName = "gonic";
     in
-    {
+    lib.mkIf config.my.media.enable {
       my.media.caddy.apexRoutes = [
         ''
           redir /${serviceName} /${serviceName}/

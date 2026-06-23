@@ -3,6 +3,9 @@
   lib,
   ...
 }:
+let
+  server = import ./_registration-builder.nix { inherit inputs lib; };
+in
 {
-  flake.lib.server = import ./_public.nix { inherit inputs lib; };
+  flake.lib.server = server;
 }

@@ -52,6 +52,49 @@ If you want to add a new cross-cutting host trait:
 2. add it only to the NixOS wrapper if it is system-specific
 3. consume it from modules rather than inventing another parallel option path
 
+### X86 host families share a contract
+
+Laptop, server, and WSL now intentionally share the same x86 descriptor
+machinery even though they keep different defaults.
+
+The preferred x86 descriptor surface is:
+
+- `config` for host facts under `my.host.*`
+- `homeProfileNames` for reusable HM profile bundles
+- `nixosProfileNames` for reusable NixOS profile bundles
+- `homeImports` for rare host-local HM exceptions
+- `extraImports` for rare host-local NixOS exceptions
+
+In practice, laptop descriptors should usually target `system-workstation`,
+while `system-desktop` should stay closer to shared desktop/session
+foundations.
+
+The current NixOS bundle intent is:
+
+- `system-cli`
+  base CLI/system policy only
+- `system-desktop`
+  shared desktop/session foundations layered on `system-cli`
+- `system-workstation`
+  workstation-oriented extras layered on `system-desktop`
+
+One concrete consequence is that SSH should not be treated as an automatic
+property of every `system-cli` host. Shared service modules should prefer to
+gate from host facts and deploy metadata instead of assuming that a broad
+profile implies a daemon.
+
+This is the intended layering:
+
+1. shared x86 registration and output mechanics
+2. family-specific default profiles and metadata
+3. host-local facts and true one-offs
+
+That means:
+
+- laptop and server should stay very close structurally
+- WSL may keep environment-specific defaults, but should avoid bespoke wiring when the shared x86 contract can express the same thing
+- host-local wrapper modules are no longer the preferred way to express profile selection
+
 ### DNS is published, not curated
 
 Old model:
@@ -109,6 +152,61 @@ This is the preferred shape for future multi-variant hosts:
 1. separate platform concerns from host identity
 2. separate lifecycle variants from runtime data
 3. keep the top-level host file mostly focused on assembly
+
+That now also applies to lifecycle user policy:
+
+- bootstrap user defaults should come from host/runtime data
+- installer user defaults should come from host/runtime data
+- shared lifecycle modules should consume those values rather than hardcoding
+  host-specific credentials or group policy
+
+### Family differences are intentional at two levels
+
+Some family differences are worth reconciling. Some are not.
+
+Reasonably reconcilable:
+
+- laptop, server, and WSL descriptor/profile plumbing
+- shared x86 boot/install toggles
+- shared user/home profile selection
+
+Intentionally specialized:
+
+- RPi image/static/DHCP/service host variants
+- Steam Deck lifecycle and boot-mode matrix
+
+Even in those specialized families, bootstrap and installer user policy should
+still prefer descriptor/host-owned data over shared-module hardcoding.
+
+The repo should aim for one shared cross-family contract:
+
+- host facts through `my.host.*`
+- reusable behavior through shared option surfaces and self-gating modules
+- descriptor-driven outputs and inventory
+
+It does not need one identical host-construction strategy for every platform.
+
+## Current Migration Status
+
+The main structural migration is effectively complete in these areas:
+
+- laptop, server, and WSL descriptor/profile plumbing
+- shared x86 registration/output mechanics
+- broad movement from host-local imports toward self-gating modules
+- removal of thin family forwarding wrappers where they did not carry real
+  behavior
+
+What remains is mostly opportunistic cleanup:
+
+- further narrowing of broad shared bundles when they still carry policy that
+  should live in a more specific layer
+- occasional promotion of repeated host-local exceptions into named shared
+  profiles
+- documentation updates when the intended boundaries change
+
+After the current audit, the main remaining raw `extraImports` usage is inside
+Steam Deck lifecycle assembly modules. That is intentional internal family
+plumbing, not a preferred host-descriptor pattern.
 
 ## Practical Guidance
 

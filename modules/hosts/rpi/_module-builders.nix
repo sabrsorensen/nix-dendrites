@@ -35,7 +35,6 @@
           inputs.nixos-raspberrypi.nixosModules.nixpkgs-rpi
         ];
       }
-      inputs.self.modules.nixos.samCli
       inputs.self.modules.nixos.system-cli
       ./_rpi/base.nix
     ];

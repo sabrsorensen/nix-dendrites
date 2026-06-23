@@ -2,6 +2,7 @@
 {
   flake.modules.nixos.radarr =
     {
+      config,
       lib,
       pkgs,
       ...
@@ -14,34 +15,36 @@
       port4k = 7879;
       serviceName = "radarr";
     in
-    arr.mkModule {
-      inherit serviceName;
-      group = groupName;
-      routeSpecs = [
-        {
-          inherit bindAddr port;
-        }
-        {
-          inherit bindAddr;
-          port = port4k;
-          pathSuffix = "4k";
-        }
-      ];
-      serviceConfig = {
-        enable = true;
-        openFirewall = false;
+    lib.mkIf config.my.media.enable (
+      arr.mkModule {
+        inherit serviceName;
         group = groupName;
-        settings.server = {
-          urlbase = "/${serviceName}";
-          inherit port;
-          bindaddress = bindAddr;
+        routeSpecs = [
+          {
+            inherit bindAddr port;
+          }
+          {
+            inherit bindAddr;
+            port = port4k;
+            pathSuffix = "4k";
+          }
+        ];
+        serviceConfig = {
+          enable = true;
+          openFirewall = false;
+          group = groupName;
+          settings.server = {
+            urlbase = "/${serviceName}";
+            inherit port;
+            bindaddress = bindAddr;
+          };
         };
-      };
-      managedServices.radarr4k = arr.mkManagedService {
-        description = "Radarr 4K";
-        execStart = "${pkgs.radarr}/bin/Radarr -nobrowser -data=/var/lib/radarr4k";
-        user = serviceName;
-        group = groupName;
-      };
-    };
+        managedServices.radarr4k = arr.mkManagedService {
+          description = "Radarr 4K";
+          execStart = "${pkgs.radarr}/bin/Radarr -nobrowser -data=/var/lib/radarr4k";
+          user = serviceName;
+          group = groupName;
+        };
+      }
+    );
 }

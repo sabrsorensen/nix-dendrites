@@ -2,6 +2,7 @@
 {
   flake.modules.nixos.sonarr =
     {
+      config,
       lib,
       pkgs,
       ...
@@ -14,34 +15,36 @@
       port4k = 8990;
       serviceName = "sonarr";
     in
-    arr.mkModule {
-      inherit serviceName;
-      group = groupName;
-      routeSpecs = [
-        {
-          inherit bindAddr port;
-        }
-        {
-          inherit bindAddr;
-          port = port4k;
-          pathSuffix = "4k";
-        }
-      ];
-      serviceConfig = {
-        enable = true;
-        openFirewall = false;
+    lib.mkIf config.my.media.enable (
+      arr.mkModule {
+        inherit serviceName;
         group = groupName;
-        settings.server = {
-          urlbase = "/${serviceName}";
-          inherit port;
-          bindaddress = bindAddr;
+        routeSpecs = [
+          {
+            inherit bindAddr port;
+          }
+          {
+            inherit bindAddr;
+            port = port4k;
+            pathSuffix = "4k";
+          }
+        ];
+        serviceConfig = {
+          enable = true;
+          openFirewall = false;
+          group = groupName;
+          settings.server = {
+            urlbase = "/${serviceName}";
+            inherit port;
+            bindaddress = bindAddr;
+          };
         };
-      };
-      managedServices.sonarr4k = arr.mkManagedService {
-        description = "Sonarr 4K";
-        execStart = "${pkgs.sonarr}/bin/Sonarr -nobrowser -data=/var/lib/sonarr4k/";
-        user = serviceName;
-        group = groupName;
-      };
-    };
+        managedServices.sonarr4k = arr.mkManagedService {
+          description = "Sonarr 4K";
+          execStart = "${pkgs.sonarr}/bin/Sonarr -nobrowser -data=/var/lib/sonarr4k/";
+          user = serviceName;
+          group = groupName;
+        };
+      }
+    );
 }

@@ -3,7 +3,7 @@
   ...
 }:
 {
-  flake.modules.homeManager."work-home" =
+  flake.modules.homeManager."sam-home-work" =
     {
       config,
       lib,
@@ -46,13 +46,18 @@
         [
           home
           sam-home-base
-          sam-home-work-private
-          sam-work-secrets
           vscode
           mcp-work
           codex
+          "${inputs.nix-work-secrets}/modules/sam-secrets-private.nix"
         ]
       );
+
+      my = {
+        buildSecretRoot = lib.mkForce inputs.nix-work-secrets;
+        gitSecretRoot = lib.mkForce inputs.nix-work-secrets;
+        gpgKeysDir = lib.mkForce "${inputs.nix-work-secrets}/gpg-keys";
+      };
 
       my.vscode = {
         installLocalDotnetSdk = lib.mkDefault true;

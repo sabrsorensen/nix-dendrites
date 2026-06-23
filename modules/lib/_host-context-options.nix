@@ -124,10 +124,16 @@
         gui = lib.mkEnableOption "graphical local session support on this host";
         bluetooth = lib.mkEnableOption "Bluetooth support on this host";
         wifi = lib.mkEnableOption "Wi-Fi support on this host";
+        firmware = lib.mkEnableOption "device firmware management and redistributable firmware support on this host";
+        nix-ld = lib.mkEnableOption "nix-ld compatibility support on this host";
         nvidia = lib.mkEnableOption "NVIDIA graphics support on this host";
         flatpak = lib.mkEnableOption "Flatpak support on this host";
         steam = lib.mkEnableOption "Steam or Steam-adjacent gaming support on this host";
         wine = lib.mkEnableOption "Wine and related Windows compatibility tools on this host";
+        deskflow = lib.mkEnableOption "Deskflow keyboard and mouse sharing support on this host";
+        minecraft = lib.mkEnableOption "Minecraft launcher and related local access on this host";
+        threedprinter = lib.mkEnableOption "3D printing tools on this host";
+        zsa = lib.mkEnableOption "ZSA keyboard tooling on this host";
       };
 
       is = {

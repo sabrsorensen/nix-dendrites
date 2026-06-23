@@ -4,6 +4,7 @@
   ...
 }:
 let
+  atlasConfig = import ./config.nix;
   descriptorHelpers = import ../../_descriptor-helpers.nix { inherit inputs lib; };
   hostModules = inputs.self.modules;
 in
@@ -13,9 +14,13 @@ descriptorHelpers.mkServerDescriptor {
   hostModule = hostModules.nixos.atlasUponRaiden;
   identityFile = "~/.ssh/atlasuponraiden_id_ed25519";
   nixIdentityFile = "~/.ssh/nix_atlasuponraiden_id_ed25519";
-  homeImports = [ hostModules.homeManager.atlasUponRaidenHostHome ];
-  localDnsRecords = import ./local-dns-records.nix;
-  config = import ./config.nix;
+  homeProfileNames = [ "sam-home-media" ];
+  localDnsRecords = [
+    { hostname = "atlas"; }
+  ];
+  config = atlasConfig.host;
+  enableSystemdBoot = true;
+  enableDisko = true;
   authorizedKeys.nixRemote = [
     "kamino/atlas_nix"
     "zaphodbeeblebrox/atlas_nix"
@@ -36,25 +41,6 @@ descriptorHelpers.mkServerDescriptor {
       "networkmanager"
     ];
   };
-  extraImports = with hostModules.nixos; [
-    samba
-    deploy-defaults
-    system-cli
-    systemd-boot
-    disko
-    podman
-    cross-compile
-    caddy
-    ankerctl
-    apprise
-    atuin-server
-    immich
-    mealie
-    media-server
-    minecraft-server
-    scrutiny
-    syncthing-server
-  ];
   builder = inputs.self.lib.mkInventoryBuilder {
     hostName = "AtlasUponRaiden";
     sshKey = "/root/.ssh/nix_atlasuponraiden_id_ed25519";

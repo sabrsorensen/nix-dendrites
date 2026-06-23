@@ -11,18 +11,15 @@ descriptorHelpers.mkWorkstationDescriptor {
   name = "ZaphodBeeblebrox";
   identityFile = "~/.ssh/zaphod_id_ed25519";
   nixIdentityFile = "~/.ssh/nix_zaphodbeeblebrox_id_ed25519";
-  homeImports = [ hostModules.homeManager.zaphodBeeblebroxHostHome ];
   hostModule = hostModules.nixos.zaphodBeeblebrox;
   config.features = {
     bluetooth = true;
+    deskflow = true;
     flatpak = true;
     nvidia = true;
     steam = true;
     wine = true;
   };
-  extraImports = with hostModules.nixos; [
-    system-desktop
-    systemd-boot
-    disko
-  ];
+  enableSystemdBoot = true;
+  enableDisko = true;
 }

@@ -18,9 +18,15 @@ rec {
       hostName,
       localDnsRecords ? [ ],
       name,
+      nixosProfileNames ? [ ],
       outputName,
+      extraImports ? [ ],
       bootstrap ? null,
     }:
+    let
+      resolvedNixosImports =
+        extraImports ++ map (profileName: inputs.self.modules.nixos.${profileName}) nixosProfileNames;
+    in
     {
       kind = "static";
       inherit
@@ -30,6 +36,7 @@ rec {
         name
         outputName
         ;
+      nixos.imports = resolvedNixosImports;
       network = {
         inherit address hostName;
       };
@@ -50,9 +57,15 @@ rec {
       imageName,
       imageOutputName,
       name,
+      nixosProfileNames ? [ ],
       outputName,
+      extraImports ? [ ],
       bootstrap ? null,
     }:
+    let
+      resolvedNixosImports =
+        extraImports ++ map (profileName: inputs.self.modules.nixos.${profileName}) nixosProfileNames;
+    in
     {
       kind = "dhcp";
       inherit
@@ -61,6 +74,7 @@ rec {
         name
         outputName
         ;
+      nixos.imports = resolvedNixosImports;
       image = {
         name = imageName;
         outputName = imageOutputName;
@@ -117,16 +131,29 @@ rec {
       serviceRoles,
       startKeaOnBoot ? null,
       userName ? "sam",
+      nixosProfileNames ? [ ],
+      extraImports ? [ ],
       bootstrap ? null,
     }:
+    let
+      resolvedNixosImports =
+        (with inputs.self.modules.nixos; [
+          blocky
+          dhcp-coredns
+        ])
+        ++ extraImports
+        ++ map (profileName: inputs.self.modules.nixos.${profileName}) nixosProfileNames;
+    in
     {
       kind = "service";
       inherit
         bootstrap
-        config
         name
         outputName
         ;
+      config = lib.recursiveUpdate {
+        my.services.blocky.enable = true;
+      } config;
       image = {
         name = imageName;
         outputName = imageOutputName;
@@ -151,10 +178,7 @@ rec {
             };
           }
       );
-      nixos.imports = with inputs.self.modules.nixos; [
-        blocky
-        dhcp-coredns
-      ];
+      nixos.imports = resolvedNixosImports;
       inventory = aarch64Helpers.mkAarch64Inventory {
         inherit userName identityFile nixIdentityFile;
         deployRemoteMethod = "secure";

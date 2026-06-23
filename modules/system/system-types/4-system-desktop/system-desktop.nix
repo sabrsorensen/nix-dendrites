@@ -1,41 +1,27 @@
 {
   inputs,
+  lib,
   ...
 }:
 {
-  # expansion of cli system for desktop use
+  # expansion of cli system for shared desktop/session foundations
 
   flake.modules.nixos.system-desktop = {
-    nixpkgs.config.permittedInsecurePackages = [
-      # Bitwarden Desktop currently depends on this Electron release.
-      "electron-39.8.10"
-    ];
-
     imports = with inputs.self.modules.nixos; [
       system-cli
       printing
       plymouth
       wayland
       audio
-      zsa
-      cross-compile
       appimage
-      bluetooth
-      deskflow
-      flatpak
       kde
-      threedprinter
-      minecraft
-      steam
-      nvidia
-      wine
       xserver
     ];
+
+    my.services.printing.enable = lib.mkDefault true;
   };
 
   flake.modules.homeManager.system-desktop = {
-    imports = with inputs.self.modules.homeManager; [
-      "graphical-home"
-    ];
+    imports = [ inputs.self.modules.homeManager."graphical-home" ];
   };
 }

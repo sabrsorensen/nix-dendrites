@@ -3,7 +3,7 @@
   ...
 }:
 {
-  flake.modules.nixos."work-dev" =
+  flake.modules.nixos."system-work-dev" =
     { ... }:
     {
       imports =

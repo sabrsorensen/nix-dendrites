@@ -5,7 +5,6 @@
 }:
 let
   x86Helpers = import ../_x86-descriptor-helpers.nix { inherit inputs lib; };
-  hostModules = inputs.self.modules;
 in
 {
   mkWorkstationDescriptor =
@@ -13,23 +12,38 @@ in
       name,
       hostName ? name,
       outputName ? lib.strings.toLower name,
-      homeImports,
+      homeImports ? [ ],
+      homeProfileNames ? [ ],
       hostModule,
       identityFile,
       nixIdentityFile,
       userName ? "sam",
       authorizedKeys ? { },
       extraImports ? [ ],
+      nixosProfileNames ? [ ],
+      enableSystemdBoot ? false,
+      enableDisko ? false,
       config ? { },
       bootstrap ? null,
     }:
-    x86Helpers.mkX86Descriptor {
+    x86Helpers.mkProfiledX86Descriptor {
       inherit
         name
         hostName
+        outputName
+        hostModule
+        identityFile
+        nixIdentityFile
+        userName
+        authorizedKeys
         homeImports
+        extraImports
+        nixosProfileNames
+        enableSystemdBoot
+        enableDisko
         bootstrap
         ;
+      defaultHomeProfileNames = lib.optional (userName == "sam") "sam-home-personal";
       config = lib.recursiveUpdate {
         primaryInteractiveUser = userName;
         formFactor = "laptop";
@@ -37,7 +51,11 @@ in
           workstation = true;
           desktop = true;
         };
-        features.gui = true;
+        features = {
+          firmware = true;
+          gui = true;
+          nix-ld = true;
+        };
         deploy = {
           canDeployRemotely = true;
           enableRemoteUser = true;
@@ -49,42 +67,10 @@ in
           hasTray = true;
         };
       } config;
-      user = {
-        name = userName;
-        ssh = {
-          inherit identityFile nixIdentityFile;
-        };
-      }
-      // lib.optionalAttrs (authorizedKeys != { }) {
-        inherit authorizedKeys;
-      };
-      nixosImports = [
-        hostModules.nixos.sam
-        hostModule
-      ]
-      ++ extraImports;
-      inventory = x86Helpers.mkX86Inventory {
-        inherit
-          name
-          outputName
-          userName
-          identityFile
-          nixIdentityFile
-          ;
-        outputs =
-          inputs.self.lib.mkNixosOutputs {
-            system = "x86_64-linux";
-            name = outputName;
-            configuration = name;
-          }
-          ++ lib.optionals (bootstrap != null) (
-            inputs.self.lib.mkNixosOutputs {
-              system = "x86_64-linux";
-              name = bootstrap.outputName;
-              configuration = bootstrap.configurationName;
-            }
-          );
-        deployRemoteMethod = "switch";
-      };
+      defaultNixosProfileNames = [
+        "sam"
+        "system-workstation"
+      ];
+      deployRemoteMethod = "switch";
     };
 }

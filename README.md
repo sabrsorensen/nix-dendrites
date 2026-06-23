@@ -28,7 +28,7 @@ without introducing a second host metadata system.
 
 - `my.host.roles.*` captures broad intent such as workstation, server, rpi, steamdeck, and wsl.
 - `my.host.formFactor` captures physical or operational shape such as `laptop`, `desktop`, `handheld`, and `server`.
-- `my.host.features.*` captures concrete capabilities or policy toggles such as `gui`, `bluetooth`, `nvidia`, `flatpak`, `steam`, and `wine`.
+- `my.host.features.*` captures concrete capabilities or policy toggles such as `gui`, `bluetooth`, `firmware`, `nix-ld`, `nvidia`, `flatpak`, `steam`, `wine`, `deskflow`, `minecraft`, `threedprinter`, and `zsa`.
 - `my.host.tags` is a sparse escape hatch for grouping and exceptions.
 - `my.host.is.*` is the derived read-side used by modules.
 
@@ -48,6 +48,17 @@ The design goal is:
 - reusable modules self-gate with `lib.mkIf`
 - broad defaults move into shared bundles
 - host directories shrink toward hardware, disks, networking facts, and true exceptions
+
+For x86 host families, the preferred descriptor API is:
+
+- `homeProfileNames` for reusable Home Manager profile bundles
+- `nixosProfileNames` for reusable NixOS profile bundles such as `system-workstation`, `system-desktop`, `system-cli`, and `system-work-dev`
+- `homeImports` only for true host-local HM exceptions
+- `extraImports` only for true host-local NixOS exceptions
+
+Laptop, server, and WSL all use the same shared x86 descriptor and registration
+mechanics. Their intended differences are in default profiles and environment
+semantics, not in ad hoc host wiring.
 
 WSL is treated as its own environment, not as a VM.
 
@@ -91,6 +102,7 @@ existing workflows:
 just fmt
 just write-flake
 just check
+just checknb
 just update
 just install-hooks
 just run-hooks
@@ -98,6 +110,50 @@ just run-hooks
 
 CI is configured in `.github/workflows/check.yml` and runs `nix flake check`
 on pushes to `main` and on pull requests.
+
+## Current Layering
+
+The current shared NixOS bundle layering is:
+
+- `system-cli`
+  base CLI/system defaults
+- `system-desktop`
+  shared desktop/session foundations layered on `system-cli`
+- `system-workstation`
+  workstation-oriented extras layered on `system-desktop`
+
+The current shared Home Manager layering is:
+
+- `home`
+  base HM defaults
+- `graphical-home`
+  minimal shared GUI layer on `home`
+
+Sam-specific policy now mostly lives under `modules/users/sam/*` rather than
+inside the generic shared HM bundles.
+
+`system-cli` no longer implies that every CLI-shaped host runs SSH. SSH is now
+expected to self-gate from host facts and deploy metadata.
+
+## Migration Status
+
+The broad migration toward a more `wimpysworld/nix-config`-like
+"declare facts, import broadly, self-gate in modules" setup is largely in
+place for the x86 families:
+
+- laptop, server, and WSL share the x86 descriptor/registration model
+- host-local wrapper modules have mostly been removed in favor of descriptor
+  profiles
+- many reusable programs, services, and system settings now gate on
+  `my.host.*` or shared option surfaces
+
+The biggest remaining family differences are now mostly intentional:
+
+- RPi keeps specialized image/bootstrap/static/service-host plumbing
+- Steam Deck keeps specialized platform/lifecycle/boot-mode plumbing
+
+At this point the remaining work is mostly incremental narrowing and
+documentation rather than another large structural migration.
 
 ## Bootstrapping New Modules
 

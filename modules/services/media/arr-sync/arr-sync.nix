@@ -6,13 +6,14 @@
   flake.modules.nixos.arr-sync =
     {
       config,
+      lib,
       ...
     }:
     let
       localAddr = "127.0.0.1:3000";
       serviceName = "arr-sync";
     in
-    {
+    lib.mkIf config.my.media.enable {
       users.groups.${serviceName} = { };
       users.users.${serviceName} = {
         isSystemUser = true;

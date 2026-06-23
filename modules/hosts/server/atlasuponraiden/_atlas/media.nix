@@ -5,6 +5,7 @@
 }:
 {
   my.media = {
+    enable = true;
     dataRoot = lib.mkDefault "/AnomalyRealm/media";
     dnsServers = lib.mkDefault [
       config.systemConstants.network.nevarro

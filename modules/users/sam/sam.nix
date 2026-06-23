@@ -15,8 +15,7 @@ userHelpers.mkUserFamily {
     {
       homeImports = with inputs.self.modules.homeManager; [
         sam-home-base
-        sam-home-graphical
-        sam-home-private
+        sam-home-desktop
       ];
       extraSystemImports = with inputs.self.modules.nixos; [ podman ];
       extraUserConfig.extraGroups = [
@@ -26,19 +25,17 @@ userHelpers.mkUserFamily {
     }
 
     {
-      systemModuleName = "samCli";
-      homeModuleName = "samCli";
+      systemModuleName = "sam-system-cli";
+      homeModuleName = "sam-home-cli";
       homeImports = with inputs.self.modules.homeManager; [
         home
         sam-home-base
-        sam-home-private
       ];
       extraUserConfig.extraGroups = [
         "media"
         "podman"
         "wheel"
       ];
-      extraSystemConfig.programs.fish.enable = true;
     }
   ];
 }

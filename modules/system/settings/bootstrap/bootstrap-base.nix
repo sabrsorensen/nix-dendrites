@@ -1,5 +1,6 @@
 {
   inputs,
+  lib,
   ...
 }:
 {
@@ -22,6 +23,8 @@
           sleepy = lib.mkDefault false;
         };
       };
+
+      my.services.ssh.enable = lib.mkDefault true;
 
       services.openssh.enable = lib.mkDefault true;
       services.openssh.settings = {

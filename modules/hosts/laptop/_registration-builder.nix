@@ -21,6 +21,7 @@ let
         features = {
           gui = false;
           bluetooth = false;
+          deskflow = false;
           nvidia = false;
           flatpak = false;
           steam = false;

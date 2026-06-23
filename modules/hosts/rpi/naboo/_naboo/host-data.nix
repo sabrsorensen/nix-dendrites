@@ -13,6 +13,7 @@ descriptorHelpers.mkServiceDescriptor {
   imageName = "NabooImage";
   imageOutputName = "naboo-image";
   configuration = "Naboo";
+  nixosProfileNames = [ "sam-system-cli" ];
   address = network.naboo;
   nameservers = [
     network.nevarro

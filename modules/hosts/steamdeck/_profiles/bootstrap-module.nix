@@ -11,6 +11,7 @@ let
   mkBaseModule = import ./base-module.nix { inherit descriptor host; };
   isDualBoot = bootMode == "dual";
   steamUser = host.users.steam.name;
+  bootstrapUser = host.users.steam.bootstrap or { };
   returnToGamingEntry = {
     name = "Return to Gaming Mode";
     exec = "qdbus org.kde.Shutdown /Shutdown logout";
@@ -48,7 +49,9 @@ mkBaseModule {
       isNormalUser = true;
       extraGroups = host.users.steam.extraGroups;
       hashedPasswordFile = lib.mkForce null;
-      initialPassword = "jovian";
+    }
+    // lib.optionalAttrs (bootstrapUser ? initialPassword) {
+      inherit (bootstrapUser) initialPassword;
     }
     // lib.optionalAttrs isDualBoot {
       uid = lib.mkForce 1000;

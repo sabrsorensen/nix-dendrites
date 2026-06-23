@@ -1,6 +1,8 @@
 {
   flake.modules.nixos.jellyfin =
     {
+      config,
+      lib,
       ...
     }:
     let
@@ -8,7 +10,7 @@
       localAddr = "127.0.0.1:8096";
       serviceName = "jellyfin";
     in
-    {
+    lib.mkIf config.my.media.enable {
       users.users.jellyfin.group = groupName;
       my.media.caddy.apexRoutes = [
         ''

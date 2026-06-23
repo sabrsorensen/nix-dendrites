@@ -31,6 +31,9 @@ fmt:
 check:
     nix flake check
 
+checknb:
+    nix flake check --no-build
+
 update:
     nix flake update
 

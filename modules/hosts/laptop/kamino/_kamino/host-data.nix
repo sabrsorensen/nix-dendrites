@@ -11,14 +11,18 @@ descriptorHelpers.mkWorkstationDescriptor {
   name = "Kamino";
   identityFile = "~/.ssh/kamino_id_ed25519";
   nixIdentityFile = "~/.ssh/nix_kamino_id_ed25519";
-  homeImports = [ hostModules.homeManager.kaminoHostHome ];
   hostModule = hostModules.nixos.kamino;
   config.features = {
+    deskflow = true;
     flatpak = true;
+    minecraft = true;
     nvidia = true;
     steam = true;
+    threedprinter = true;
     wine = true;
+    zsa = true;
   };
+  enableSystemdBoot = true;
   bootstrap = {
     configurationName = "KaminoBootstrap";
     outputName = "kamino-bootstrap";
@@ -30,8 +34,4 @@ descriptorHelpers.mkWorkstationDescriptor {
       "networkmanager"
     ];
   };
-  extraImports = with hostModules.nixos; [
-    system-desktop
-    systemd-boot
-  ];
 }

@@ -17,7 +17,6 @@ in
 
   programs.command-not-found.enable = false;
   programs.nix-index.enable = false;
-  programs.nix-ld.enable = lib.mkForce false;
 
   security.pam.services.sshd.updateWtmp = true;
 

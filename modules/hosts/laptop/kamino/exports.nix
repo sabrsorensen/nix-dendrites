@@ -21,8 +21,6 @@ let
   );
 in
 {
-  flake.modules.homeManager.kaminoHostHome = import ./_kamino/home-manager.nix { inherit inputs; };
-
   flake.modules.nixos = {
     kamino = {
       imports = [
