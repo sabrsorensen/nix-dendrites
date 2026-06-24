@@ -363,6 +363,8 @@
           nhBuildThenSwitchRemote = mkNhBuildThenSwitchRemote { };
           nhBuildThenSwitchUpgradeRemote = mkNhBuildThenSwitchRemote { upgrade = true; };
           remoteDeployMethod = if canDeployRemotely then remoteDeployMethod else null;
+          remoteHomeOutput = if canDeployRemotely then remoteHomeOutput else null;
+          remoteHomeUser = if canDeployRemotely then remoteHomeUser else null;
           secureDeployConfig =
             if canDeployRemotely then
               ''
