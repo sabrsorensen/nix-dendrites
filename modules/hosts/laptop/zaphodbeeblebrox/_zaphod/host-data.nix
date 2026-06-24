@@ -12,6 +12,7 @@ descriptorHelpers.mkWorkstationDescriptor {
   identityFile = "~/.ssh/zaphod_id_ed25519";
   nixIdentityFile = "~/.ssh/nix_zaphodbeeblebrox_id_ed25519";
   hostModule = hostModules.nixos.zaphodBeeblebrox;
+  config.roles.builder = true;
   config.features = {
     bluetooth = true;
     containers = true;
@@ -22,6 +23,7 @@ descriptorHelpers.mkWorkstationDescriptor {
     steam = true;
     threedprinter = true;
     wine = true;
+    zsa = true;
   };
   enableSystemdBoot = true;
   enableDisko = true;
