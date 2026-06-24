@@ -230,7 +230,7 @@
             or return $status
 
             echo "🚀 Activating Home Manager on $remote_target..."
-            ssh $remote_target "$store_path/activate"
+            ssh $remote_target "HOME=/home/$remote_user PATH=/home/$remote_user/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/bin:/bin:\$PATH bash -lc '$store_path/activate'"
           ''
         else
           null;
