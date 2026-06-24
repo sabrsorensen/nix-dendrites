@@ -98,6 +98,8 @@ let
   '';
 in
 {
+  xdg.enable = lib.mkDefault true;
+
   sops = {
     age.sshKeyPaths = [ sopsKeyPath ];
     defaultSopsFile = lib.mkDefault "${config.my.buildSecretRoot}/secrets.yaml";

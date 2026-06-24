@@ -4,7 +4,7 @@
 }:
 {
   flake.modules.homeManager.home =
-    { ... }:
+    { lib, ... }:
     {
       imports =
         with inputs.self.modules.homeManager;
@@ -22,7 +22,7 @@
         ++ [ inputs.self.modules.homeManager.host-context ];
 
       home.sessionVariables = {
-        XDG_CONFIG_HOME = "$HOME/.config";
+        XDG_CONFIG_HOME = lib.mkDefault "$HOME/.config";
       };
 
       programs.home-manager.enable = true;
