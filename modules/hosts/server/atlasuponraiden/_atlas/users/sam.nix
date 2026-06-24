@@ -18,6 +18,7 @@ in
     openssh.authorizedKeys.keyFiles = lib.mkForce (
       sshKeyHelpers.mkBuildSecretSshKeyFiles [
         "kamino/atlas"
+        "no-phone/atlas"
         "zaphodbeeblebrox/atlas"
       ]
     );

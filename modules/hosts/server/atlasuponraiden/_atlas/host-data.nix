@@ -33,6 +33,7 @@ descriptorHelpers.mkServerDescriptor {
     finalConfigName = "AtlasUponRaiden";
     authorizedKeyPaths = [
       "kamino/atlas"
+      "no-phone/atlas"
       "zaphodbeeblebrox/atlas"
     ];
     nixos.imports = [
