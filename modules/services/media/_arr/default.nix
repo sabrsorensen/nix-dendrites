@@ -7,20 +7,21 @@ let
       serviceName,
       localAddr,
       marker ? "</body>",
+      routeName ? null,
       pathSuffix ? "",
     }:
     let
-      routeName = "${serviceName}${pathSuffix}";
+      effectiveRouteName = if routeName != null then routeName else "${serviceName}${pathSuffix}";
     in
     ''
-      redir /${routeName} /${routeName}/
-      route /${routeName}/* {
+      redir /${effectiveRouteName} /${effectiveRouteName}/
+      route /${effectiveRouteName}/* {
         filter {
           content_type text/html.*
           search_pattern ${marker}
           replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'>${marker}"
         }
-        reverse_proxy /${routeName}/* ${localAddr} {
+        reverse_proxy /${effectiveRouteName}/* ${localAddr} {
           header_up -Accept-Encoding
         }
       }
@@ -58,7 +59,7 @@ let
     }:
     lib.mkMerge [
       {
-        my.media.caddy.apexRoutes = map (
+        my.caddy.apexRoutes = map (
           routeSpec:
           mkThemeParkRoute (
             (builtins.removeAttrs routeSpec [

@@ -6,19 +6,29 @@
       pkgs,
       ...
     }:
+    let
+      cfg = config.my.services.scrutiny;
+    in
     {
-      options.my.services.scrutiny.enable = lib.mkEnableOption "Scrutiny SMART monitoring service";
+      options.my.services.scrutiny = {
+        enable = lib.mkEnableOption "Scrutiny SMART monitoring service";
 
-      config = lib.mkIf config.my.services.scrutiny.enable {
+        hostName = lib.mkOption {
+          type = lib.types.str;
+          default = "scrutiny";
+        };
+      };
+
+      config = lib.mkIf cfg.enable {
         environment.systemPackages = with pkgs; [
           smartmontools
         ];
 
         my.localDns.records = [
-          { hostname = "scrutiny"; }
+          { hostname = cfg.hostName; }
         ];
 
-        my.caddy.virtualHosts."scrutiny.{$DOMAIN}".routes = [
+        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
           ''
             basic_auth /* {
                 sorenssa {$SCRUTINY_PASSWORD}

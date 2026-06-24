@@ -11,6 +11,7 @@
       ...
     }:
     let
+      cfg = config.my.services.syncthing.server;
       hostName = config.networking.hostName;
       syncthingCommonOptions = inputs.self.lib.shared.syncthingCommonOptions;
       serverUser = config.my.syncthing.serverUser;
@@ -21,9 +22,33 @@
       filteredFolders = lib.filterAttrs (_: folder: builtins.elem hostName folder.devices) allFolders;
     in
     {
-      options.my.syncthing = {
-        enable = lib.mkEnableOption "NixOS server Syncthing configuration";
+      options.my.services.syncthing.server = {
+        enable = lib.mkEnableOption "boot-time system-service Syncthing configuration";
 
+        pathSegment = lib.mkOption {
+          type = lib.types.str;
+          default = "syncthing";
+        };
+
+        guiAddress = lib.mkOption {
+          type = lib.types.str;
+          default = "127.0.0.1:8384";
+        };
+
+        dataDir = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          description = "Syncthing data directory for the system service.";
+        };
+
+        configDir = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          description = "Syncthing config directory for the system service.";
+        };
+      };
+
+      options.my.syncthing = {
         serverUser = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = null;
@@ -43,7 +68,7 @@
         };
       };
 
-      config = lib.mkIf config.my.syncthing.enable {
+      config = lib.mkIf cfg.enable {
         sops.secrets.syncthing_gui_password = {
           owner = serverUser;
           group = serverUser;
@@ -53,7 +78,7 @@
         assertions = [
           {
             assertion = serverUser != null;
-            message = "my.syncthing.serverUser must be set, or my.host.primaryInteractiveUser must be defined, when Syncthing server mode is enabled.";
+            message = "my.syncthing.serverUser must be set, or my.host.primaryInteractiveUser must be defined, when my.services.syncthing.server.enable is set.";
           }
         ];
 
@@ -62,9 +87,9 @@
         # System service configuration - runs at boot, independent of user login
         my.caddy.apexRoutes = [
           ''
-            redir /syncthing /syncthing/
-            handle_path /syncthing/* {
-              reverse_proxy http://127.0.0.1:8384 {
+            redir /${cfg.pathSegment} /${cfg.pathSegment}/
+            handle_path /${cfg.pathSegment}/* {
+              reverse_proxy http://${cfg.guiAddress} {
                 header_up Host {upstream_hostport}
               }
             }
@@ -74,12 +99,13 @@
           syncthing = {
             enable = true;
             user = serverUser;
-            dataDir = "/home/${serverUser}/.local/share/syncthing";
-            configDir = "/home/${serverUser}/.config/syncthing";
+            dataDir = if cfg.dataDir != null then cfg.dataDir else "/home/${serverUser}/.local/share/syncthing";
+            configDir =
+              if cfg.configDir != null then cfg.configDir else "/home/${serverUser}/.config/syncthing";
             openDefaultPorts = true;
 
             # Web GUI configuration
-            guiAddress = "127.0.0.1:8384";
+            guiAddress = cfg.guiAddress;
             guiPasswordFile = config.sops.secrets.syncthing_gui_password.path;
 
             settings = {

@@ -167,7 +167,6 @@
       };
 
       config.my.syncthing = {
-        enable = true;
         devices = lib.mapAttrs mkDevice private.deviceIds;
         folders = {
           "3DPrinting" = mkFolder {

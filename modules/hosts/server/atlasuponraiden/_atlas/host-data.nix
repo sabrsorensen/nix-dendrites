@@ -18,7 +18,9 @@ descriptorHelpers.mkServerDescriptor {
   localDnsRecords = [
     { hostname = "atlas"; }
   ];
-  config = atlasConfig.host;
+  config = lib.recursiveUpdate atlasConfig.host {
+    features.containers = true;
+  };
   enableSystemdBoot = true;
   enableDisko = true;
   authorizedKeys.nixRemote = [

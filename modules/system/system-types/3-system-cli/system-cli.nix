@@ -10,6 +10,7 @@
       system-default
 
       ssh
+      syncthing
       firmware
       cli-tools
       nix-index

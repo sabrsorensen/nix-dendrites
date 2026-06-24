@@ -159,7 +159,7 @@ rec {
           };
         };
 
-        services.dhcp-coredns = {
+        my.services."dhcp-coredns" = {
           enable = true;
           interface = "end0";
           localDomainApexIp = descriptor.network.localDomainApexIp;

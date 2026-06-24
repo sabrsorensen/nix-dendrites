@@ -13,6 +13,7 @@ descriptorHelpers.mkWorkstationDescriptor {
   nixIdentityFile = "~/.ssh/nix_kamino_id_ed25519";
   hostModule = hostModules.nixos.kamino;
   config.features = {
+    containers = true;
     deskflow = true;
     flatpak = true;
     minecraft = true;

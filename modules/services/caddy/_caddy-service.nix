@@ -10,6 +10,7 @@
 }:
 let
   caddyCfg = config.my.caddy;
+  serviceCfg = config.my.services.caddy;
   renderRoutes = routes: lib.concatStringsSep "\n" (lib.filter (route: route != "") routes);
   renderedVirtualHosts =
     lib.mapAttrs
@@ -32,6 +33,16 @@ let
   caddyEnabled = caddyCfg.apexRoutes != [ ] || renderedVirtualHosts != { };
 in
 {
+  options.my.services.caddy = {
+    enable = lib.mkEnableOption "Caddy reverse proxy service";
+
+    enableFail2ban = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Whether Caddy should also configure its Fail2ban protection.";
+    };
+  };
+
   options.my.caddy = {
     apexRoutes = lib.mkOption {
       type = lib.types.listOf lib.types.lines;
@@ -62,7 +73,7 @@ in
     };
   };
 
-  config = lib.mkIf caddyEnabled {
+  config = lib.mkIf (serviceCfg.enable || caddyEnabled) {
     sops.secrets.caddy_env = {
       owner = "caddy";
       group = "caddy";

@@ -3,6 +3,17 @@
   ...
 }:
 {
+  flake.modules.nixos.syncthing =
+    { config, lib, ... }:
+    let
+      shouldOpenPorts = config.my.host.syncthing.mode == "home";
+    in
+    {
+      config = lib.mkIf shouldOpenPorts {
+        services.syncthing.openDefaultPorts = true;
+      };
+    };
+
   flake.modules.homeManager.syncthing =
     {
       config,

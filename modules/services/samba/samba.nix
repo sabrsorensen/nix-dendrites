@@ -3,24 +3,34 @@
     {
       config,
       lib,
-      pkgs,
       ...
     }:
+    let
+      cfg = config.my.services.samba;
+    in
     {
-      options.my.services.samba.enable = lib.mkEnableOption "Samba file sharing service";
+      options.my.services.samba = {
+        enable = lib.mkEnableOption "Samba file sharing service";
 
-      config = lib.mkIf config.my.services.samba.enable {
+        settings = lib.mkOption {
+          type = lib.types.attrs;
+          default = { };
+          description = "Additional Samba settings merged on top of the shared defaults.";
+        };
+      };
+
+      config = lib.mkIf cfg.enable {
         services.samba = {
           enable = true;
           openFirewall = true;
-          settings = {
+          settings = lib.recursiveUpdate {
             global = {
               security = "user";
               "workgroup" = "MYGROUP";
               "dns proxy" = "yes";
               "logging" = "systemd";
             };
-          };
+          } cfg.settings;
         };
 
         services.samba-wsdd = {

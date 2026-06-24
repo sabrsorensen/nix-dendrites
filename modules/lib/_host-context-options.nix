@@ -128,6 +128,7 @@
         nix-ld = lib.mkEnableOption "nix-ld compatibility support on this host";
         nvidia = lib.mkEnableOption "NVIDIA graphics support on this host";
         flatpak = lib.mkEnableOption "Flatpak support on this host";
+        containers = lib.mkEnableOption "Container runtime support on this host";
         steam = lib.mkEnableOption "Steam or Steam-adjacent gaming support on this host";
         wine = lib.mkEnableOption "Wine and related Windows compatibility tools on this host";
         deskflow = lib.mkEnableOption "Deskflow keyboard and mouse sharing support on this host";

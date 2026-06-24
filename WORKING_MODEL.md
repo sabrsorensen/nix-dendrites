@@ -10,7 +10,7 @@ Leaf modules should prefer publishing intent through shared option surfaces inst
 
 Examples:
 
-- Caddy routes should usually go through `my.caddy.virtualHosts`, `my.caddy.apexRoutes`, or `my.media.caddy.*`
+- Caddy routes should usually go through `my.caddy.virtualHosts` or `my.caddy.apexRoutes`
 - local DNS names should go through `my.localDns.records`
 - host traits should go through `my.host.*`
 
@@ -125,7 +125,13 @@ When working on media services:
 
 - prefer extending `_media-base.nix` over open-coding another media root/path/network convention
 - prefer reusing `arr.mkThemeParkRoute` and `arr.mkManagedService` for `*Arr`-like apps
+- prefer publishing routes directly to `my.caddy.*`; `_media-base.nix` is for shared media facts, not a Caddy translation layer
 - treat the media stack as a cohesive subsystem
+
+That said, the long-term direction is for `media-server` to be the stack
+assembler and for leaf services to expose their own `my.services.<name>`
+switches. A child service should not need to infer activation solely from
+`my.media.enable` once it has a meaningful standalone option surface.
 
 ### Private helpers belong on `_` paths
 
@@ -204,6 +210,39 @@ What remains is mostly opportunistic cleanup:
   profiles
 - documentation updates when the intended boundaries change
 
+## Services Audit
+
+Current service-module buckets:
+
+- Broad-import ready or already close:
+  `ssh`, `xserver`, `printing`, `podman`, `docker`, `blocky`,
+  `netbird-client`, `gotify`, `ntfy-sh`, `syncthing-server`, `dhcp-coredns`,
+  `caddy`, `flaresolverr`
+- Needs `my.services.<name>` API cleanup or activation separation:
+  `netbird-proxy`
+- Should remain explicit stack/app selection for now even if their leaf APIs
+  improve:
+  `media-server`, `immich`, `mealie`, `minecraft-server`, `netbird-server`,
+  `ankerctl`, `samba`, `scrutiny`, `apprise`, `atuin-server`
+
+The media subtree is currently the largest mixed case:
+
+- `my.media.*` already acts as a stack-level subsystem API
+- leaf activation is now centered on `my.services.<name>.enable`
+- media leaves now publish routing directly to `my.caddy.*`
+- `_media-base.nix` now owns shared media facts and assertions only
+- several leaf modules still have only a narrow option surface even though
+  their activation and routing model are now normalized
+- path-routed leaves should generally expose `pathSegment`, and host-routed
+  leaves should generally expose `hostName`, unless there is a strong reason
+  to keep that shape fixed
+- the preferred direction is:
+  1. `media-server` selects/defaults the stack members
+  2. leaf services expose `my.services.<name>.enable`
+  3. leaf services own obvious route and hostname knobs
+  4. host-local files provide instance data such as paths, UID/GID pins,
+     DNS names, or credentials
+
 After the current audit, the main remaining raw `extraImports` usage is inside
 Steam Deck lifecycle assembly modules. That is intentional internal family
 plumbing, not a preferred host-descriptor pattern.
@@ -221,4 +260,4 @@ When adding or changing something, default to these questions:
 ## Notes
 
 - `NixPi` intentionally leaves `my.host.address` unset because it is DHCP-addressed.
-- `netbird-*` is intentionally dormant until it is revived on Atlas.
+- `netbird-*` still needs a topology-level redesign; it is not currently a model service family.

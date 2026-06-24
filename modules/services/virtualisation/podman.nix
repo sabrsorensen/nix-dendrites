@@ -8,7 +8,7 @@
     {
       options.my.services.podman.enable = lib.mkEnableOption "Podman container runtime";
 
-      config = lib.mkIf config.my.services.podman.enable {
+      config = lib.mkIf (config.my.host.features.containers || config.my.services.podman.enable) {
         # Enable container name DNS for all Podman networks.
         networking.firewall.interfaces =
           let

@@ -14,10 +14,13 @@ descriptorHelpers.mkWorkstationDescriptor {
   hostModule = hostModules.nixos.zaphodBeeblebrox;
   config.features = {
     bluetooth = true;
+    containers = true;
     deskflow = true;
     flatpak = true;
+    minecraft = true;
     nvidia = true;
     steam = true;
+    threedprinter = true;
     wine = true;
   };
   enableSystemdBoot = true;

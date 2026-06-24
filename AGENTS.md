@@ -100,6 +100,13 @@ Poor candidates for blind auto-import:
 - service bundles like media stacks
 - hardware modules with device-specific assumptions
 
+When a service needs reverse-proxy publication, prefer publishing intent
+through `my.caddy.virtualHosts` or `my.caddy.apexRoutes`.
+
+Keep `my.media.*` for genuinely shared media-stack facts such as storage
+roots, container identities, and media-specific network conventions, not as
+a second generic routing namespace.
+
 ## Auto-Import Guidance
 
 Do not auto-import a module family until the modules in that family are safe to

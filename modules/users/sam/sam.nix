@@ -17,7 +17,6 @@ userHelpers.mkUserFamily {
         sam-home-base
         sam-home-desktop
       ];
-      extraSystemImports = with inputs.self.modules.nixos; [ podman ];
       extraUserConfig.extraGroups = [
         "wheel"
         "podman"

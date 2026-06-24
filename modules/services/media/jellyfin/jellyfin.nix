@@ -6,45 +6,47 @@
       ...
     }:
     let
+      cfg = config.my.services.jellyfin;
       groupName = "media";
       localAddr = "127.0.0.1:8096";
       serviceName = "jellyfin";
     in
-    lib.mkIf config.my.media.enable {
-      users.users.jellyfin.group = groupName;
-      my.media.caddy.apexRoutes = [
-        ''
-          redir /${serviceName} /${serviceName}/
-          reverse_proxy /${serviceName}/* ${localAddr}
-        ''
-      ];
-      services.jellyfin = {
-        enable = true;
-        openFirewall = true;
-        group = groupName;
-        #cacheDir
-        #configDir
-        #dataDir
-        #logDir
-        hardwareAcceleration = {
-          #enable = true;
-          #device =
-          #type
+    {
+      options.my.services.jellyfin = {
+        enable = lib.mkEnableOption "Jellyfin media service";
+
+        pathSegment = lib.mkOption {
+          type = lib.types.str;
+          default = serviceName;
         };
-        transcoding = {
-          deleteSegments = true;
-          enableHardwareEncoding = true;
-          hardwareDecodingCodecs = { };
-          hardwareEncodingCodecs = { };
-          enableIntelLowPowerEncoding = true;
-          enableSubtitleExtraction = true;
-          enableToneMapping = true;
-          #encodingPreset = "auto";
-          #h264Crf = 23;
-          #h265Crf = 28;
-          maxConcurrentStreams = null;
-          threadCount = null;
-          throttleTranscoding = false;
+      };
+
+      config = lib.mkIf cfg.enable {
+        users.users.jellyfin.group = groupName;
+        my.caddy.apexRoutes = [
+          ''
+            redir /${cfg.pathSegment} /${cfg.pathSegment}/
+            reverse_proxy /${cfg.pathSegment}/* ${localAddr}
+          ''
+        ];
+        services.jellyfin = {
+          enable = true;
+          openFirewall = true;
+          group = groupName;
+          hardwareAcceleration = {
+          };
+          transcoding = {
+            deleteSegments = true;
+            enableHardwareEncoding = true;
+            hardwareDecodingCodecs = { };
+            hardwareEncodingCodecs = { };
+            enableIntelLowPowerEncoding = true;
+            enableSubtitleExtraction = true;
+            enableToneMapping = true;
+            maxConcurrentStreams = null;
+            threadCount = null;
+            throttleTranscoding = false;
+          };
         };
       };
     };

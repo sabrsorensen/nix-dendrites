@@ -8,7 +8,7 @@
   ...
 }:
 {
-  config = lib.mkIf config.services.caddy.enable {
+  config = lib.mkIf (config.services.caddy.enable && config.my.services.caddy.enableFail2ban) {
     services.fail2ban = {
       enable = true;
       maxretry = 5;

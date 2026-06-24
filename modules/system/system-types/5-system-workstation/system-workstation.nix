@@ -11,6 +11,7 @@
 
     imports = with inputs.self.modules.nixos; [
       system-desktop
+      podman
       zsa
       cross-compile
       bluetooth

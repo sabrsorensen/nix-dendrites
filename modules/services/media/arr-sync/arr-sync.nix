@@ -10,42 +10,50 @@
       ...
     }:
     let
-      localAddr = "127.0.0.1:3000";
+      cfg = config.my.services."arr-sync";
       serviceName = "arr-sync";
     in
-    lib.mkIf config.my.media.enable {
-      users.groups.${serviceName} = { };
-      users.users.${serviceName} = {
-        isSystemUser = true;
-        group = serviceName;
+    {
+      options.my.services."arr-sync" = {
+        enable = lib.mkEnableOption "Arr Sync webhook service";
+
+        image = lib.mkOption {
+          type = lib.types.str;
+          default = "ghcr.io/sabrsorensen/arr-sync-webhook";
+        };
       };
-      sops.secrets = {
-        arr-sync_env = {
-          owner = serviceName;
+
+      config = lib.mkIf cfg.enable {
+        users.groups.${serviceName} = { };
+        users.users.${serviceName} = {
+          isSystemUser = true;
           group = serviceName;
-          mode = "0400";
-          format = "dotenv";
-          sopsFile = "${inputs.nix-secrets}/env_files/arr-sync.env";
-          key = "";
         };
-      };
-      virtualisation.oci-containers.containers.${serviceName} = {
-        image = "ghcr.io/sabrsorensen/arr-sync-webhook";
-        login = {
-          registry = "ghcr.io";
-          username = "sabrsorensen";
-          passwordFile = config.sops.secrets.ghcr_token.path;
+        sops.secrets = {
+          arr-sync_env = {
+            owner = serviceName;
+            group = serviceName;
+            mode = "0400";
+            format = "dotenv";
+            sopsFile = "${inputs.nix-secrets}/env_files/arr-sync.env";
+            key = "";
+          };
         };
-        environmentFiles = [
-          config.sops.secrets.arr-sync_env.path
-        ];
-        ports = [
-          "${localAddr}:3000/tcp"
-        ];
-        log-driver = "journald";
-        extraOptions = [
-          "--network=host"
-        ];
+        virtualisation.oci-containers.containers.${serviceName} = {
+          image = cfg.image;
+          login = {
+            registry = "ghcr.io";
+            username = "sabrsorensen";
+            passwordFile = config.sops.secrets.ghcr_token.path;
+          };
+          environmentFiles = [
+            config.sops.secrets.arr-sync_env.path
+          ];
+          log-driver = "journald";
+          extraOptions = [
+            "--network=host"
+          ];
+        };
       };
     };
 }
