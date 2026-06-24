@@ -100,7 +100,7 @@
 
           mcp_servers = {
             Atlassian = {
-              url = "https://mcp.atlassian.com/v1/mcp";
+              url = "https://mcp.atlassian.com/v1/mcp/authv2";
             };
             AZDOLocal = {
               command = "npx";
