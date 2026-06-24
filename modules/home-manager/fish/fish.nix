@@ -188,7 +188,13 @@
                 return 1
             end
 
-            set remote_target "$remote_user@$target_host"
+            set configured_remote_user (remoteHomeUser $target_host)
+            if test "$remote_user" = "$configured_remote_user"
+                set remote_target "$target_host"
+            else
+                set remote_target "$remote_user@$target_host"
+            end
+            set remote_store_url "ssh://$remote_target?remote-program=/home/$remote_user/.nix-profile/bin/nix-store"
             set remote_method (remoteDeployMethod $target_host)
             ${pingTargetFallback}
             set ssh_ping_host (ssh -G $target_host 2>/dev/null | string match -r "^[Hh]ostname " | string replace -r "^[Hh]ostname " "")
@@ -220,7 +226,7 @@
             end
 
             echo "📦 Copying $home_output to $remote_target..."
-            inhibitSleep nix copy --to "ssh://$remote_target" ${nixFlakePath}#$home_output
+            inhibitSleep nix copy --to "$remote_store_url" ${nixFlakePath}#$home_output
             or return $status
 
             echo "🚀 Activating Home Manager on $remote_target..."
