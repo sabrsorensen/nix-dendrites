@@ -11,6 +11,11 @@
       programs.bash = {
         enable = true;
         enableCompletion = true;
+        profileExtra = lib.optionalString config.my.host.is.steamdeck ''
+          if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+            . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+          fi
+        '';
         bashrcExtra = ''
           # If not running interactively, don't do anything
           [[ $- != *i* ]] && return
