@@ -235,18 +235,18 @@
           nhSwitch =
             if hasNixFlake then
               if sleepySystem then
-                "inhibitSleep nh os switch ${nixFlakePath} --keep-going"
+                "inhibitSleep nh os switch ${nixFlakePath} --keep-going $argv"
               else
-                "nh os switch ${nixFlakePath} --keep-going"
+                "nh os switch ${nixFlakePath} --keep-going $argv"
             else
               null;
           nhs = if hasNixFlake then "nhSwitch" else null;
           nhSwitchUpgrade =
             if hasNixFlake then
               if sleepySystem then
-                "inhibitSleep nh os switch ${nixFlakePath} --update --keep-going"
+                "inhibitSleep nh os switch ${nixFlakePath} --update --keep-going $argv"
               else
-                "nh os switch ${nixFlakePath} --update --keep-going"
+                "nh os switch ${nixFlakePath} --update --keep-going $argv"
             else
               null;
           nhsu = if hasNixFlake then "nhSwitchUpgrade" else null;
