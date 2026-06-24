@@ -326,24 +326,6 @@
         };
       };
 
-      xdg.desktopEntries.firefox = lib.mkIf config.my.host.is.steamdeck {
-        name = "Firefox";
-        genericName = "Web Browser";
-        exec = "firefox %u";
-        terminal = false;
-        categories = [
-          "Network"
-          "WebBrowser"
-        ];
-        mimeType = [
-          "text/html"
-          "text/xml"
-          "x-scheme-handler/http"
-          "x-scheme-handler/https"
-        ];
-        icon = "firefox";
-      };
-
       xdg.mimeApps.defaultApplications = {
         "text/html" = [ "firefox.desktop" ];
         "text/xml" = [ "firefox.desktop" ];
