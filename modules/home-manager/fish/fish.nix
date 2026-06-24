@@ -65,6 +65,37 @@
           );
         in
         "switch $argv[1]\n${cases}    case '*'\n        echo switch\nend";
+      remoteHomeOutput =
+        let
+          cases = lib.concatStrings (
+            lib.mapAttrsToList (
+              name: peer:
+              let
+                homeOutputs = builtins.filter (output: output.kind == "home" && output.collection == "packages") (
+                  peer.outputs or [ ]
+                );
+              in
+              lib.optionalString (homeOutputs != [ ]) ''
+                case ${name}
+                    echo ${(builtins.head homeOutputs).name}
+              ''
+            ) inventory
+          );
+        in
+        "switch $argv[1]\n${cases}    case '*'\n        echo\nend";
+      remoteHomeUser =
+        let
+          cases = lib.concatStrings (
+            lib.mapAttrsToList (
+              name: peer:
+              lib.optionalString (peer ? ssh && peer.ssh ? base && peer.ssh.base ? user) ''
+                case ${name}
+                    echo ${peer.ssh.base.user}
+              ''
+            ) inventory
+          );
+        in
+        "switch $argv[1]\n${cases}    case '*'\n        echo\nend";
       mkNhSwitchRemote =
         {
           upgrade ? false,
@@ -123,6 +154,77 @@
 
             echo "$target_host is reachable. Starting remote switch..."
             inhibitSleep nh os switch ${nixFlakePath} -H $target_host --target-host $switch_target_host ${upgradeFlag} --keep-going $argv[2..-1]
+          ''
+        else
+          null;
+      homeManagerSwitchRemote =
+        if canDeployRemotely then
+          ''
+            set target_spec $argv[1]
+            set target_host $target_spec
+
+            if test -z "$target_spec"
+                echo "Usage: <command> <target_host|user@target_host> [build_args...]"
+                return 1
+            end
+
+            set remote_user ""
+            if string match -q '*@*' $target_spec
+                set remote_user (string split -m1 '@' $target_spec)[1]
+                set target_host (string split -m1 '@' $target_spec)[2]
+            end
+
+            set home_output (remoteHomeOutput $target_host)
+            if test -z "$home_output"
+                echo "No remote Home Manager output is defined for $target_host"
+                return 1
+            end
+
+            if test -z "$remote_user"
+                set remote_user (remoteHomeUser $target_host)
+            end
+            if test -z "$remote_user"
+                echo "No remote SSH user is defined for $target_host"
+                return 1
+            end
+
+            set remote_target "$remote_user@$target_host"
+            set remote_method (remoteDeployMethod $target_host)
+            ${pingTargetFallback}
+            set ssh_ping_host (ssh -G $target_host 2>/dev/null | string match -r "^[Hh]ostname " | string replace -r "^[Hh]ostname " "")
+
+            if test -n "$ssh_ping_host"
+                set ping_host $ssh_ping_host
+            end
+
+            echo "🔨 Building $home_output locally..."
+            inhibitSleep nix build ${nixFlakePath}#$home_output $argv[2..-1]
+            or return $status
+
+            set store_path (nix path-info ${nixFlakePath}#$home_output)
+            or return $status
+
+            if test "$remote_method" = "build-then-switch"
+                if command -sq notify-send
+                    notify-send "Home Manager build complete" "Turn on $target_host. Activation will continue after it responds to ping."
+                end
+
+                echo "Build completed for $target_host."
+                echo "Turn on $target_host, then press Enter to start waiting for network reachability."
+                read
+
+                echo "Waiting for $target_host at $ping_host to respond to ping..."
+                while not ping -c 1 -W 1 $ping_host >/dev/null 2>&1
+                    sleep 5
+                end
+            end
+
+            echo "📦 Copying $home_output to $remote_target..."
+            inhibitSleep nix copy --to "ssh://$remote_target" ${nixFlakePath}#$home_output
+            or return $status
+
+            echo "🚀 Activating Home Manager on $remote_target..."
+            ssh $remote_target "$store_path/activate"
           ''
         else
           null;
@@ -275,13 +377,17 @@
           nhsr =
             if canDeployRemotely then
               ''
-                switch (remoteDeployMethod $argv[1])
-                    case secure
-                        secure-deploy $argv
-                    case build-then-switch
-                        nhBuildThenSwitchRemote $argv
-                    case '*'
-                        nhSwitchRemote $argv
+                if string match -q '*@*' $argv[1]
+                    homeManagerSwitchRemote $argv
+                else
+                    switch (remoteDeployMethod $argv[1])
+                        case secure
+                            secure-deploy $argv
+                        case build-then-switch
+                            nhBuildThenSwitchRemote $argv
+                        case '*'
+                            nhSwitchRemote $argv
+                    end
                 end
               ''
             else
@@ -289,13 +395,18 @@
           nhsur =
             if canDeployRemotely then
               ''
-                switch (remoteDeployMethod $argv[1])
-                    case secure
-                        secure-deploy --upgrade $argv
-                    case build-then-switch
-                        nhBuildThenSwitchUpgradeRemote $argv
-                    case '*'
-                        nhSwitchUpgradeRemote $argv
+                if string match -q '*@*' $argv[1]
+                    echo "Home Manager remote activation uses the current flake state; no separate --update mode is applied."
+                    homeManagerSwitchRemote $argv
+                else
+                    switch (remoteDeployMethod $argv[1])
+                        case secure
+                            secure-deploy --upgrade $argv
+                        case build-then-switch
+                            nhBuildThenSwitchUpgradeRemote $argv
+                        case '*'
+                            nhSwitchUpgradeRemote $argv
+                    end
                 end
               ''
             else
@@ -324,6 +435,7 @@
               ''
             else
               null;
+          homeManagerSwitchRemote = homeManagerSwitchRemote;
 
           # === MAINTENANCE FUNCTIONS ===
           cleanGenerations =
