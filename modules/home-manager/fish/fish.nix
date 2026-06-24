@@ -281,6 +281,15 @@
         #shellInitLast = ''
         #'';
         interactiveShellInit = ''
+          ${lib.optionalString isDeck ''
+            # SteamOS does not source Home Manager session variables the same
+            # way NixOS does, so bootstrap the expected Nix profile PATH here.
+            fish_add_path -m \
+              "$HOME/.nix-profile/bin" \
+              "/nix/var/nix/profiles/default/bin" \
+              "/run/current-system/sw/bin"
+          ''}
+
           # Load greeting function
           source ${./functions/fish_greeting.fish}
 

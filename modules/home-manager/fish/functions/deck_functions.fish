@@ -1,7 +1,12 @@
 # Steam Deck status function
 
 function deckStatus -d "Show Steam Deck system status"
-    echo "🎮 Steam Deck Status ("(hostname)"):"
+    set -l host_name (prompt_hostname)
+    if test -z "$host_name"
+        set host_name (uname -n)
+    end
+
+    echo "🎮 Steam Deck Status ($host_name):"
     echo "Battery: $(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null || echo "N/A")%"
     echo "CPU Temp: $(sensors 2>/dev/null | grep 'Tctl:' | awk '{print $2}' || echo "N/A")"
     echo "GPU: $(lspci | grep VGA | cut -d: -f3)"
