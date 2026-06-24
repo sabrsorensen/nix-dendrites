@@ -16,8 +16,7 @@ inputs.self.lib.mkHomeManager {
   hostContext = descriptor.config;
   modules = [
     inputs.self.modules.homeManager.home
-    inputs.self.modules.homeManager.fish
-    inputs.self.modules.homeManager.sam-secrets
+    inputs.self.modules.homeManager.sam-home-base
     inputs.self.modules.homeManager.${descriptor.home.moduleName}
   ];
   extraConfig =
