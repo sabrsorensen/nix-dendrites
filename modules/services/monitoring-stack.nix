@@ -19,7 +19,7 @@
         routePrefix:
         lib.optionals (cfg.basicAuthPasswordEnvVar != null) [
           "${routePrefix}basic_auth /* {"
-          "${routePrefix}    ${cfg.basicAuthUser} {$${cfg.basicAuthPasswordEnvVar}}"
+          ("${routePrefix}    ${cfg.basicAuthUser} {$" + cfg.basicAuthPasswordEnvVar + "}")
           "${routePrefix}}"
         ];
       mkReverseProxyRoute =
