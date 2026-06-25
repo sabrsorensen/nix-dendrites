@@ -592,7 +592,7 @@
               domain = grafanaDomain;
               enforce_domain = true;
               http_addr = "127.0.0.1";
-              http_port = 3000;
+              http_port = 3030;
               root_url = grafanaRootUrl;
             };
             users.default_theme = "system";
