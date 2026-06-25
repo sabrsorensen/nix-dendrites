@@ -518,6 +518,12 @@
           { hostname = cfg.prometheusHostName; }
         ];
 
+        sops.secrets.grafana_secret_key = {
+          owner = "grafana";
+          group = "grafana";
+          mode = "0400";
+        };
+
         my.caddy.virtualHosts = {
           "${grafanaVirtualHost}".routes = [
             (mkReverseProxyRoute {
@@ -580,7 +586,7 @@
             };
             security = {
               disable_initial_admin_creation = true;
-              secret_key = "$__file{${config.sops.secrets.grafana-secret-key.path}}"
+              secret_key = "$__file{${config.sops.secrets.grafana_secret_key.path}}";
             };
             server = {
               domain = grafanaDomain;
