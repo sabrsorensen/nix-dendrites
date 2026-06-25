@@ -15,6 +15,7 @@ descriptorHelpers.mkServerDescriptor {
   identityFile = "~/.ssh/atlasuponraiden_id_ed25519";
   nixIdentityFile = "~/.ssh/nix_atlasuponraiden_id_ed25519";
   homeProfileNames = [ "sam-home-media" ];
+  nixosProfileNames = [ "monitoring-stack" ];
   localDnsRecords = [
     { hostname = "atlas"; }
   ];

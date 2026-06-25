@@ -20,6 +20,10 @@
       atuin.enable = true;
       immich.enable = true;
       mealie.enable = true;
+      monitoring = {
+        enable = true;
+        basicAuthPasswordEnvVar = "SCRUTINY_PASSWORD";
+      };
       samba.enable = true;
       scrutiny.enable = true;
     };
