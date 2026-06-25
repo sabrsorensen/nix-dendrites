@@ -578,7 +578,10 @@
               org_name = "Main Org.";
               org_role = "Viewer";
             };
-            security.disable_initial_admin_creation = true;
+            security = {
+              disable_initial_admin_creation = true;
+              secret_key = "$__file{${config.sops.secrets.grafana-secret-key.path}}"
+            };
             server = {
               domain = grafanaDomain;
               enforce_domain = true;
