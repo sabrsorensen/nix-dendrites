@@ -194,6 +194,12 @@ descriptor helper from the host name unless a host needs an explicit override.
 Do not mirror those names back into `host.nix` unless there is a real
 platform-specific reason.
 
+For SteamOS-managed Deck userlands, remember that Home Manager owns the active
+`~/.bash_profile` and `~/.bashrc`. If SteamOS or the standalone Nix installer
+expects login-shell bootstrap such as sourcing `~/.nix-profile/etc/profile.d/nix.sh`,
+carry that forward in the Home Manager bash module rather than relying on
+mutable local shell files outside the repo.
+
 For the RPi family, prefer per-host directories for host descriptors.
 Keep shared RPi platform logic under `modules/hosts/rpi/_*.nix` and
 `modules/hosts/rpi/_rpi/*`, and keep `modules/hosts/rpi/rpi.nix` as the

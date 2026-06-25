@@ -124,6 +124,12 @@ modules.
 
 The same applies to bootstrap and installer user defaults.
 
+For SteamOS Home Manager deployments, session/bootstrap wiring is part of the
+platform contract. In particular, if the SteamOS userland relies on login-shell
+bootstrap from the standalone Nix installer, preserve that behavior in the
+shared Deck/Home Manager bash configuration so desktop-session app discovery
+and profile environment setup continue to work.
+
 ## Reconciliation Guidance
 
 Try to reconcile families when the difference is only:
