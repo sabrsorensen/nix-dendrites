@@ -21,7 +21,7 @@
           sync_frequency = "0";
           search_mode = "daemon-fuzzy";
           search_mode_shell_up_key_binding = "daemon-fuzzy";
-          filter_mode_shell_up_key_binding = "session";
+          filter_mode_shell_up_key_binding = "session-preload";
           workspaces = true;
           style = "auto";
           command_chaining = true;
