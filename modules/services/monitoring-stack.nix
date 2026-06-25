@@ -460,6 +460,66 @@
             title = "Filesystem Usage";
             type = "timeseries";
           }
+          {
+            datasource = {
+              type = "prometheus";
+              uid = grafanaDatasourceUid;
+            };
+            fieldConfig.defaults = {
+              color.mode = "palette-classic";
+              decimals = 1;
+              thresholds = {
+                mode = "absolute";
+                steps = [
+                  {
+                    color = "green";
+                    value = null;
+                  }
+                  {
+                    color = "orange";
+                    value = 70;
+                  }
+                  {
+                    color = "red";
+                    value = 85;
+                  }
+                ];
+              };
+              unit = "celsius";
+            };
+            gridPos = {
+              h = 8;
+              w = 24;
+              x = 0;
+              y = 19;
+            };
+            id = 9;
+            options = {
+              legend = {
+                displayMode = "table";
+                placement = "right";
+                showLegend = true;
+              };
+              tooltip = {
+                mode = "multi";
+                sort = "desc";
+              };
+            };
+            targets = [
+              {
+                expr = "node_hwmon_temp_celsius{job=\"node\"}";
+                legendFormat = "{{chip}} {{sensor}}";
+                refId = "A";
+              }
+              {
+                expr = "smartctl_device_temperature{job=\"smartctl\"}";
+                legendFormat = "{{device}} drive";
+                refId = "B";
+              }
+            ];
+            title = "Hardware Temperatures";
+            type = "timeseries";
+          }
         ];
         refresh = "30s";
         schemaVersion = 39;
@@ -607,7 +667,10 @@
           exporters = {
             node = {
               enable = true;
-              enabledCollectors = [ "systemd" ];
+              enabledCollectors = [
+                "hwmon"
+                "systemd"
+              ];
               listenAddress = "127.0.0.1";
             };
             smartctl = {
