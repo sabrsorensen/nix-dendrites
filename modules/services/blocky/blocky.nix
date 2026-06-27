@@ -20,7 +20,10 @@
         services.blocky = {
           enable = true;
           settings = {
-            ports.dns = 53;
+            ports = {
+              dns = 53;
+              http = 4000;
+            };
 
             upstreams.groups.default = [
               "1.1.1.1"
@@ -49,9 +52,10 @@
             blocking = {
               denylists = {
                 ads = [
-                  "https://adguardteam.github.io/HostlistsRegistry/assets/filter_9.txt"
-                  "https://adguardteam.github.io/HostlistsRegistry/assets/filter_11.txt"
+                  "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews/hosts"
                   "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/ultimate.txt"
+                  "https://raw.githubusercontent.com/kboghdady/youTube_ads_4_pi-hole/master/youtubelist.txt"
+                  "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro.txt"
                 ];
               };
               clientGroupsBlock.default = [ "ads" ];

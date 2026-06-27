@@ -12,7 +12,6 @@
     }:
     let
       ryceeAddonAttrByPname = {
-        adnauseam = "adnauseam";
         "bitwarden-password-manager" = "bitwarden";
         "dark-mode-webextension" = "dark-mode-webextension";
         decentraleyes = "decentraleyes";
@@ -25,6 +24,7 @@
         "refined-github-" = "refined-github";
         "return-youtube-dislikes" = "return-youtube-dislikes";
         sidebery = "sidebery";
+        "ublock-origin" = "ublock-origin";
       };
 
       customAddonPnames = [
