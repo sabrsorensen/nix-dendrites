@@ -43,7 +43,7 @@ let
     publisher = "jeanp413";
     name = "open-remote-wsl";
     version = "0.0.5";
-    sha256 = "1vjx96k0m32naxa30llskrjjdpdnv6qvs60mgl063fk15scb2w0c";
+    sha256 = "0md3fmchsk5948n748m7j1zmj3hqjxy1vwbbhyrfk8pp5j55s0pi";
     url = "https://open-vsx.org/api/jeanp413/open-remote-wsl/0.0.5/file/jeanp413.open-remote-wsl-0.0.5.vsix";
   };
 
@@ -51,7 +51,7 @@ let
     publisher = "jeanp413";
     name = "open-remote-ssh";
     version = "0.1.2";
-    sha256 = "0p60li5d7mwmaqi086vqaxqbap6gs6qspf5fllaphblk6zg3pn76";
+    sha256 = "10ankbl6gfbrgc5ghj5744g1n66cx1vpr9bbmkp1k89m9m40ahsc";
     url = "https://open-vsx.org/api/jeanp413/open-remote-ssh/0.1.2/file/jeanp413.open-remote-ssh-0.1.2.vsix";
   };
 
