@@ -35,7 +35,7 @@ let
     publisher = "3timeslazy";
     name = "vscodium-devpodcontainers";
     version = "0.0.18";
-    sha256 = "1krzhr0sm5zfwd08rpd90sqh9ijldnrcv27rqgrh0ibc9cjy9ibc";
+    sha256 = "156nv9xvdsbq4782d0lpg7pjm45zi36ga6d7prv2lb844jsbli22";
     url = "https://open-vsx.org/api/3timeslazy/vscodium-devpodcontainers/0.0.18/file/3timeslazy.vscodium-devpodcontainers-0.0.18.vsix";
   };
 
