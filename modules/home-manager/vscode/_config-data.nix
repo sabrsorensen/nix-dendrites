@@ -2,6 +2,7 @@
   config,
   inventory ? { },
   lib,
+  packageFlavor,
   pkgs,
   selectedTheme,
   vscodePackage,
@@ -13,6 +14,7 @@ let
     inherit
       inventory
       lib
+      packageFlavor
       pkgs
       vscodePackage
       ;

@@ -9,6 +9,7 @@
     ];
 
     my.editor = {
+      packageFlavor = "vscode";
       installLocalDotnetSdk = false;
       higi.runCodexInWsl = true;
       profiles = {

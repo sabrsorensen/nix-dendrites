@@ -29,6 +29,7 @@
           lib
           pkgs
           ;
+        packageFlavor = cfg.packageFlavor;
         selectedTheme = vscodePackageConfig.selectedTheme;
         vscodePackage = vscodePackageConfig.package;
       };
@@ -222,6 +223,7 @@
       };
 
       config = lib.mkIf enableVscode ({
+        my.editor.packageFlavor = lib.mkDefault (if config.my.host.is.wsl then "vscode" else "vscodium");
         home.packages = lib.optionals config.my.editor.installLocalDotnetSdk [
           pkgs.dotnetCorePackages.sdk_10_0-bin
         ];

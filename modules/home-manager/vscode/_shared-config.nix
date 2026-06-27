@@ -1,6 +1,7 @@
 {
   inventory ? { },
   lib,
+  packageFlavor,
   pkgs,
   themeSettings,
   vscodePackage,
@@ -11,13 +12,65 @@ let
     name: peer: lib.nameValuePair name (if peer ? platform then peer.platform else "linux")
   ) (lib.filterAttrs (_: peer: peer ? ssh && peer.ssh ? base) inventory);
 
-  remoteExts = [
-    "ms-vscode.remote-explorer"
-    "ms-vscode-remote.remote-containers"
-    "ms-vscode-remote.remote-ssh"
-    "ms-vscode-remote.remote-ssh-edit"
-    "ms-vscode-remote.remote-wsl"
-  ];
+  openVsxExtension =
+    {
+      publisher,
+      name,
+      version,
+      sha256,
+      url,
+    }:
+    pkgs.vscode-utils.buildVscodeExtension {
+      inherit version;
+      pname = "${publisher}-${name}";
+      src = pkgs.fetchurl {
+        inherit url sha256;
+      };
+      vscodeExtPublisher = publisher;
+      vscodeExtName = name;
+      vscodeExtUniqueId = "${publisher}.${name}";
+    };
+
+  vscodiumDevpodContainers = openVsxExtension {
+    publisher = "3timeslazy";
+    name = "vscodium-devpodcontainers";
+    version = "0.0.18";
+    sha256 = "1krzhr0sm5zfwd08rpd90sqh9ijldnrcv27rqgrh0ibc9cjy9ibc";
+    url = "https://open-vsx.org/api/3timeslazy/vscodium-devpodcontainers/0.0.18/file/3timeslazy.vscodium-devpodcontainers-0.0.18.vsix";
+  };
+
+  openRemoteWsl = openVsxExtension {
+    publisher = "jeanp413";
+    name = "open-remote-wsl";
+    version = "0.0.5";
+    sha256 = "1vjx96k0m32naxa30llskrjjdpdnv6qvs60mgl063fk15scb2w0c";
+    url = "https://open-vsx.org/api/jeanp413/open-remote-wsl/0.0.5/file/jeanp413.open-remote-wsl-0.0.5.vsix";
+  };
+
+  openRemoteSsh = openVsxExtension {
+    publisher = "jeanp413";
+    name = "open-remote-ssh";
+    version = "0.1.2";
+    sha256 = "0p60li5d7mwmaqi086vqaxqbap6gs6qspf5fllaphblk6zg3pn76";
+    url = "https://open-vsx.org/api/jeanp413/open-remote-ssh/0.1.2/file/jeanp413.open-remote-ssh-0.1.2.vsix";
+  };
+
+  remoteExts =
+    if packageFlavor == "vscodium" then
+      [
+        "ms-vscode.remote-explorer"
+        vscodiumDevpodContainers
+        openRemoteSsh
+        openRemoteWsl
+      ]
+    else
+      [
+        "ms-vscode.remote-explorer"
+        "ms-vscode-remote.remote-containers"
+        "ms-vscode-remote.remote-ssh"
+        "ms-vscode-remote.remote-ssh-edit"
+        "ms-vscode-remote.remote-wsl"
+      ];
 
   uiExts = [
     "esbenp.prettier-vscode"
@@ -244,10 +297,15 @@ let
 
   mkExtensions =
     exts:
+    let
+      marketplaceExts = builtins.filter builtins.isString exts;
+      explicitExts = builtins.filter (ext: !builtins.isString ext) exts;
+    in
     # Several pinned extensions in this repo, including the baked theme
-    # packages, are not available from OpenVSX. Keep Marketplace-backed
-    # extension packaging for both editor flavors.
-    pkgs.nix4vscode.forVscodeVersion upstreamEditorVersion exts;
+    # packages, are not available from OpenVSX. Resolve string IDs through
+    # the existing Marketplace-backed nix4vscode flow, and allow explicit
+    # derivations for extensions that need a different source such as Open VSX.
+    (pkgs.nix4vscode.forVscodeVersion upstreamEditorVersion marketplaceExts) ++ explicitExts;
 in
 {
   inherit
