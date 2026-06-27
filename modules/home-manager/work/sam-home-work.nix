@@ -59,7 +59,7 @@
         gpgKeysDir = lib.mkForce "${inputs.nix-work-secrets}/gpg-keys";
       };
 
-      my.vscode = {
+      my.editor = {
         installLocalDotnetSdk = lib.mkDefault true;
         profiles = {
           higiLlp = lib.mkDefault true;

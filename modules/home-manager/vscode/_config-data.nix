@@ -3,12 +3,12 @@
   inventory ? { },
   lib,
   pkgs,
-  selectedBakedTheme,
+  selectedTheme,
   vscodePackage,
   ...
 }:
 let
-  themeData = import ./_theme-data.nix { inherit selectedBakedTheme; };
+  themeData = import ./_theme-data.nix { inherit selectedTheme; };
   sharedConfig = import ./_shared-config.nix {
     inherit
       inventory

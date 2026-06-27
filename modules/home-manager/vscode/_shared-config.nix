@@ -6,6 +6,7 @@
   vscodePackage,
 }:
 let
+  upstreamEditorVersion = vscodePackage.vscodeVersion or vscodePackage.version;
   remotePlatformSettings = lib.mapAttrs' (
     name: peer: lib.nameValuePair name (if peer ? platform then peer.platform else "linux")
   ) (lib.filterAttrs (_: peer: peer ? ssh && peer.ssh ? base) inventory);
@@ -241,7 +242,12 @@ let
     };
   };
 
-  mkExtensions = exts: pkgs.nix4vscode.forVscodeVersion vscodePackage.version exts;
+  mkExtensions =
+    exts:
+    # Several pinned extensions in this repo, including the baked theme
+    # packages, are not available from OpenVSX. Keep Marketplace-backed
+    # extension packaging for both editor flavors.
+    pkgs.nix4vscode.forVscodeVersion upstreamEditorVersion exts;
 in
 {
   inherit

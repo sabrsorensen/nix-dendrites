@@ -23,6 +23,17 @@ When a module adds or changes `flake-file.inputs`, regenerate `flake.nix`:
 just write-flake
 ```
 
+Before any `nix build`, `nix flake check`, `nix eval`, `just check`,
+`just checknb`, or similar repo evaluation that must see a newly created file,
+intent-add it first:
+
+```bash
+git add -N path/to/new-file.nix
+```
+
+Nix evaluates the Git snapshot of this repo. Untracked files are invisible
+until they are at least intent-added.
+
 ## Repo Shape
 
 - `flake.nix` is generated from `./modules`.

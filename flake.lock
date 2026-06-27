@@ -40,11 +40,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782378836,
-        "narHash": "sha256-TaT6D1jJUUyu17MI/wix4jb5MDXiomAE8V3OdK+tAL8=",
+        "lastModified": 1782513074,
+        "narHash": "sha256-j5uoPwDZsm6+ByJ9s9z3ZqkuEQjd/pbbEBU7adLATJ0=",
         "owner": "sadjow",
         "repo": "codex-cli-nix",
-        "rev": "4751eb49f905fc1760b9f6ee7120bf5c32f4eb56",
+        "rev": "c25e97164653047e58532880f0b531227055f3d3",
         "type": "github"
       },
       "original": {
@@ -920,11 +920,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782495341,
-        "narHash": "sha256-O2vcbKOt4xWo1utKz5bfJxlPp8RvxMwiGVUTO+0fitI=",
+        "lastModified": 1782519522,
+        "narHash": "sha256-+fSo6liae8ujDGG3K5CGY168QtdAZhZTmgTSNbAjwPQ=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "7ec313fbd79ed9c6819ddd44ea07565f72f5065b",
+        "rev": "a94583039a0f54dd9a90139a15cb349820ff8753",
         "type": "github"
       },
       "original": {
@@ -953,11 +953,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775171615,
-        "narHash": "sha256-nesfeU5PmTgCtJ2prOgATONxnvI3CP+SGrkXqclSCv0=",
+        "lastModified": 1782519719,
+        "narHash": "sha256-2LLN6okoLKqb6nlafszuEpgHmGaORwqz+udcuMKQMDI=",
         "owner": "sabrsorensen",
         "repo": "partyowl84-vscode-theme",
-        "rev": "858dd105c6e91febc30fd3c5aa54977e380c23eb",
+        "rev": "79151b8f43b801c67358da50218a027533617678",
         "type": "github"
       },
       "original": {
@@ -1046,11 +1046,11 @@
         "synthwave-vscode": "synthwave-vscode"
       },
       "locked": {
-        "lastModified": 1770224682,
-        "narHash": "sha256-Zq8zndtoSRq+Y7idAr3bp8UOICHRKWbikRtgeJASFkM=",
+        "lastModified": 1782519685,
+        "narHash": "sha256-+TtRVEiF3lhBNnr/5buTRN3PPw/UBxVmYvuG9I6w+JI=",
         "owner": "sabrsorensen",
         "repo": "nix-synthwave-vscode",
-        "rev": "4c156189645ada6faad69508760ab1442608f4c5",
+        "rev": "4a6dcd860cf6222777b7cca01d21ba5dc2421445",
         "type": "github"
       },
       "original": {
@@ -1067,11 +1067,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775171671,
-        "narHash": "sha256-0CRvF7Y5Ed0zmr6F+69Kcrc/3StxNyhUs5CYdrW4tOE=",
+        "lastModified": 1782519735,
+        "narHash": "sha256-pp7HgqyVeHKbrjbQkBbKfsB4Bw16Xo+jgk/TRYJHPCw=",
         "owner": "sabrsorensen",
         "repo": "synthwave-blues-vscode-theme",
-        "rev": "b66538a1a0ed7bc1d01d6fa5b7d550e7fa5e09c5",
+        "rev": "f2f0ee558bc5e2efd4d3ad6836ee17659a0bc1ef",
         "type": "github"
       },
       "original": {

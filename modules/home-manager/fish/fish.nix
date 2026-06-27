@@ -367,10 +367,10 @@
             else
               null;
           nhsu = if hasNixFlake then "nhSwitchUpgrade" else null;
-          vscodeSyncWindows = if isWsl then "vscode-sync-windows" else null;
-          vsw = if isWsl then "vscodeSyncWindows" else null;
-          vscodeSyncWindowsExtensions = if isWsl then "vscode-sync-windows --install-extensions" else null;
-          vswe = if isWsl then "vscodeSyncWindowsExtensions" else null;
+          editorSyncWindows = if isWsl then "editor-sync-windows" else null;
+          esw = if isWsl then "editorSyncWindows" else null;
+          editorSyncWindowsExtensions = if isWsl then "editor-sync-windows --install-extensions" else null;
+          eswe = if isWsl then "editorSyncWindowsExtensions" else null;
 
           # Remote deployment functions - only on workstations
           nhSwitchRemote = mkNhSwitchRemote { };

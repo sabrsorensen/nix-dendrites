@@ -1,4 +1,4 @@
-{ selectedBakedTheme }:
+{ selectedTheme }:
 {
   bakedThemeSettings =
     {
@@ -129,5 +129,5 @@
         };
       };
     }
-    .${selectedBakedTheme} or { };
+    .${selectedTheme} or { };
 }

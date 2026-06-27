@@ -8,7 +8,7 @@
       inputs.self.modules.homeManager."vscode-wsl"
     ];
 
-    my.vscode = {
+    my.editor = {
       installLocalDotnetSdk = false;
       higi.runCodexInWsl = true;
       profiles = {
