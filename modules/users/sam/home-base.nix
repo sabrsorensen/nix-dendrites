@@ -11,7 +11,7 @@
         firefox
         fish
         github-cli
-        lazyvim
+        #lazyvim
         mcp
         sam-git
         sam-secrets
