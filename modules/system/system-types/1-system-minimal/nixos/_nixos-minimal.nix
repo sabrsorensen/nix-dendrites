@@ -94,14 +94,16 @@
             # "allow-import-from-derivation"
           ];
           extra-substituters = [
-            "https://nix-gaming.cachix.org"
-            "https://jovian-experiments.cachix.org"
             "https://cache.thalheim.io"
+            "https://jovian-experiments.cachix.org"
+            "https://nix-gaming.cachix.org"
+            "https://nixos-raspberrypi.cachix.org"
           ];
           extra-trusted-public-keys = [
-            "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
-            "jovian-experiments.cachix.org-1:lwPS3KgK5sJlI2B9KBY4VpbWNGbAjCcKVkUyqfzVrJE="
             "cache.thalheim.io-1:R7msbosLEZKrxk/lKxf9BTjOOH7Ax3H0Qj0/6wiHOgc="
+            "jovian-experiments.cachix.org-1:lwPS3KgK5sJlI2B9KBY4VpbWNGbAjCcKVkUyqfzVrJE="
+            "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
+            "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
           ];
           keep-derivations = true;
           keep-outputs = true;
