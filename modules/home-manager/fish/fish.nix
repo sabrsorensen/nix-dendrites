@@ -27,11 +27,11 @@
             set ping_host "$target_host"
           '';
 
-      # Feature flags based on host type
-      isWorkstation = hostCfg.roles.workstation;
-      isPi = hostCfg.roles.rpi;
-      isDeck = hostCfg.roles.steamdeck;
-      isWsl = hostCfg.roles.wsl;
+      # Derived host predicates for behavior decisions
+      isWorkstation = hostCfg.is.workstation;
+      isPi = hostCfg.is.rpi;
+      isDeck = hostCfg.is.steamdeck;
+      isWsl = hostCfg.is.wsl;
       hasPodman =
         osConfig ? virtualisation
         && osConfig.virtualisation ? podman
@@ -40,31 +40,13 @@
 
       hasNixFlake = nixFlakePath != null;
       canDeployRemotely = hostCfg.deploy.canDeployRemotely && hasNixFlake;
-      secureDeployRoleUnits = {
-        "blocky-dns" = [
-          "blocky"
-          "coredns"
-        ];
-        "dhcp-primary" = [ "dhcp-coredns-kea" ];
-        "dhcp-standby" = [ "dhcp-failover.timer" ];
-      };
-      expandServiceRoles =
-        roles: lib.unique (lib.concatLists (map (role: secureDeployRoleUnits.${role} or [ ]) roles));
       secureDeployConfigCases = lib.concatStrings (
         lib.mapAttrsToList (
           name: peer:
           if peer ? deploy && peer.deploy ? secure then
-            let
-              secureCfg = peer.deploy.secure;
-              peerCfg = inventory.${secureCfg.peerName} or { };
-              renderedSecureCfg = secureCfg // {
-                peerServices = expandServiceRoles (peerCfg.serviceRoles or [ ]);
-                targetServices = expandServiceRoles (peer.serviceRoles or [ ]);
-              };
-            in
             ''
               case ${name}
-                  printf '%s\n' '${builtins.toJSON renderedSecureCfg}'
+                  printf '%s\n' '${builtins.toJSON peer.deploy.secure}'
             ''
           else
             ""
@@ -83,6 +65,37 @@
           );
         in
         "switch $argv[1]\n${cases}    case '*'\n        echo switch\nend";
+      remoteHomeOutput =
+        let
+          cases = lib.concatStrings (
+            lib.mapAttrsToList (
+              name: peer:
+              let
+                homeOutputs = builtins.filter (output: output.kind == "home" && output.collection == "packages") (
+                  peer.outputs or [ ]
+                );
+              in
+              lib.optionalString (homeOutputs != [ ]) ''
+                case ${name}
+                    echo ${(builtins.head homeOutputs).name}
+              ''
+            ) inventory
+          );
+        in
+        "switch $argv[1]\n${cases}    case '*'\n        echo\nend";
+      remoteHomeUser =
+        let
+          cases = lib.concatStrings (
+            lib.mapAttrsToList (
+              name: peer:
+              lib.optionalString (peer ? ssh && peer.ssh ? base && peer.ssh.base ? user) ''
+                case ${name}
+                    echo ${peer.ssh.base.user}
+              ''
+            ) inventory
+          );
+        in
+        "switch $argv[1]\n${cases}    case '*'\n        echo\nend";
       mkNhSwitchRemote =
         {
           upgrade ? false,
@@ -144,6 +157,83 @@
           ''
         else
           null;
+      homeManagerSwitchRemote =
+        if canDeployRemotely then
+          ''
+            set target_spec $argv[1]
+            set target_host $target_spec
+
+            if test -z "$target_spec"
+                echo "Usage: <command> <target_host|user@target_host> [build_args...]"
+                return 1
+            end
+
+            set remote_user ""
+            if string match -q '*@*' $target_spec
+                set remote_user (string split -m1 '@' $target_spec)[1]
+                set target_host (string split -m1 '@' $target_spec)[2]
+            end
+
+            set home_output (remoteHomeOutput $target_host)
+            if test -z "$home_output"
+                echo "No remote Home Manager output is defined for $target_host"
+                return 1
+            end
+
+            if test -z "$remote_user"
+                set remote_user (remoteHomeUser $target_host)
+            end
+            if test -z "$remote_user"
+                echo "No remote SSH user is defined for $target_host"
+                return 1
+            end
+
+            set configured_remote_user (remoteHomeUser $target_host)
+            if test "$remote_user" = "$configured_remote_user"
+                set remote_target "$target_host"
+            else
+                set remote_target "$remote_user@$target_host"
+            end
+            set remote_store_url "ssh://$remote_target?remote-program=/home/$remote_user/.nix-profile/bin/nix-store"
+            set remote_method (remoteDeployMethod $target_host)
+            ${pingTargetFallback}
+            set ssh_ping_host (ssh -G $target_host 2>/dev/null | string match -r "^[Hh]ostname " | string replace -r "^[Hh]ostname " "")
+
+            if test -n "$ssh_ping_host"
+                set ping_host $ssh_ping_host
+            end
+
+            echo "🔨 Building $home_output locally..."
+            inhibitSleep nix build ${nixFlakePath}#$home_output $argv[2..-1]
+            or return $status
+
+            set store_path (nix path-info ${nixFlakePath}#$home_output)
+            or return $status
+
+            if test "$remote_method" = "build-then-switch"
+                if command -sq notify-send
+                    notify-send "Home Manager build complete" "Turn on $target_host. Activation will continue after it responds to ping."
+                end
+
+                echo "Build completed for $target_host."
+                echo "Turn on $target_host, then press Enter to start waiting for network reachability."
+                read
+
+                echo "Waiting for $target_host at $ping_host to respond to ping..."
+                while not ping -c 1 -W 1 $ping_host >/dev/null 2>&1
+                    sleep 5
+                end
+            end
+
+            echo "📦 Copying $home_output to $remote_target..."
+            inhibitSleep nix copy --to "$remote_store_url" ${nixFlakePath}#$home_output
+            or return $status
+
+            echo "🚀 Activating Home Manager on $remote_target..."
+            ssh $remote_target "HOME=/home/$remote_user PATH=/home/$remote_user/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/bin:/bin:\$PATH bash -lc '$store_path/activate'"
+          ''
+        else
+          null;
 
     in
     {
@@ -191,6 +281,15 @@
         #shellInitLast = ''
         #'';
         interactiveShellInit = ''
+          ${lib.optionalString isDeck ''
+            # SteamOS does not source Home Manager session variables the same
+            # way NixOS does, so bootstrap the expected Nix profile PATH here.
+            fish_add_path -m \
+              "$HOME/.nix-profile/bin" \
+              "/nix/var/nix/profiles/default/bin" \
+              "/run/current-system/sw/bin"
+          ''}
+
           # Load greeting function
           source ${./functions/fish_greeting.fish}
 
@@ -253,25 +352,25 @@
           nhSwitch =
             if hasNixFlake then
               if sleepySystem then
-                "inhibitSleep nh os switch ${nixFlakePath} --keep-going"
+                "inhibitSleep nh os switch ${nixFlakePath} --keep-going $argv"
               else
-                "nh os switch ${nixFlakePath} --keep-going"
+                "nh os switch ${nixFlakePath} --keep-going $argv"
             else
               null;
           nhs = if hasNixFlake then "nhSwitch" else null;
           nhSwitchUpgrade =
             if hasNixFlake then
               if sleepySystem then
-                "inhibitSleep nh os switch ${nixFlakePath} --update --keep-going"
+                "inhibitSleep nh os switch ${nixFlakePath} --update --keep-going $argv"
               else
-                "nh os switch ${nixFlakePath} --update --keep-going"
+                "nh os switch ${nixFlakePath} --update --keep-going $argv"
             else
               null;
           nhsu = if hasNixFlake then "nhSwitchUpgrade" else null;
-          vscodeSyncWindows = if isWsl then "vscode-sync-windows" else null;
-          vsw = if isWsl then "vscodeSyncWindows" else null;
-          vscodeSyncWindowsExtensions = if isWsl then "vscode-sync-windows --install-extensions" else null;
-          vswe = if isWsl then "vscodeSyncWindowsExtensions" else null;
+          editorSyncWindows = if isWsl then "editor-sync-windows" else null;
+          esw = if isWsl then "editorSyncWindows" else null;
+          editorSyncWindowsExtensions = if isWsl then "editor-sync-windows --install-extensions" else null;
+          eswe = if isWsl then "editorSyncWindowsExtensions" else null;
 
           # Remote deployment functions - only on workstations
           nhSwitchRemote = mkNhSwitchRemote { };
@@ -279,6 +378,8 @@
           nhBuildThenSwitchRemote = mkNhBuildThenSwitchRemote { };
           nhBuildThenSwitchUpgradeRemote = mkNhBuildThenSwitchRemote { upgrade = true; };
           remoteDeployMethod = if canDeployRemotely then remoteDeployMethod else null;
+          remoteHomeOutput = if canDeployRemotely then remoteHomeOutput else null;
+          remoteHomeUser = if canDeployRemotely then remoteHomeUser else null;
           secureDeployConfig =
             if canDeployRemotely then
               ''
@@ -293,13 +394,17 @@
           nhsr =
             if canDeployRemotely then
               ''
-                switch (remoteDeployMethod $argv[1])
-                    case secure
-                        secure-deploy $argv
-                    case build-then-switch
-                        nhBuildThenSwitchRemote $argv
-                    case '*'
-                        nhSwitchRemote $argv
+                if string match -q '*@*' $argv[1]
+                    homeManagerSwitchRemote $argv
+                else
+                    switch (remoteDeployMethod $argv[1])
+                        case secure
+                            secure-deploy $argv
+                        case build-then-switch
+                            nhBuildThenSwitchRemote $argv
+                        case '*'
+                            nhSwitchRemote $argv
+                    end
                 end
               ''
             else
@@ -307,13 +412,18 @@
           nhsur =
             if canDeployRemotely then
               ''
-                switch (remoteDeployMethod $argv[1])
-                    case secure
-                        secure-deploy --upgrade $argv
-                    case build-then-switch
-                        nhBuildThenSwitchUpgradeRemote $argv
-                    case '*'
-                        nhSwitchUpgradeRemote $argv
+                if string match -q '*@*' $argv[1]
+                    echo "Home Manager remote activation uses the current flake state; no separate --update mode is applied."
+                    homeManagerSwitchRemote $argv
+                else
+                    switch (remoteDeployMethod $argv[1])
+                        case secure
+                            secure-deploy --upgrade $argv
+                        case build-then-switch
+                            nhBuildThenSwitchUpgradeRemote $argv
+                        case '*'
+                            nhSwitchUpgradeRemote $argv
+                    end
                 end
               ''
             else
@@ -342,13 +452,14 @@
               ''
             else
               null;
+          homeManagerSwitchRemote = homeManagerSwitchRemote;
 
           # === MAINTENANCE FUNCTIONS ===
           cleanGenerations =
             let
               runCleanCommand = command: if sleepySystem then "inhibitSleep ${command}" else command;
             in
-            if isWorkstation || isPi || isWsl || hostCfg.roles.server || isDeck then
+            if isWorkstation || isPi || isWsl || hostCfg.is.server || isDeck then
               ''
                 echo "Cleaning user profile generations..."
                 nix-collect-garbage -d

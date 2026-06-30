@@ -12,8 +12,8 @@
       };
 
       config.systemConstants = {
-        inherit (self.lib.site) domain network atlas;
-        adminEmail = "admin@${self.lib.site.domain}";
+        inherit (self.lib.shared.site) domain network atlas;
+        adminEmail = "admin@${self.lib.shared.site.domain}";
       };
     };
 }

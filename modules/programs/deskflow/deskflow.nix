@@ -5,10 +5,12 @@
 {
   flake.modules.nixos.deskflow =
     {
+      config,
+      lib,
       pkgs,
       ...
     }:
-    {
+    lib.mkIf config.my.host.features.deskflow {
       environment.systemPackages = with pkgs; [
         deskflow
       ];

@@ -9,7 +9,6 @@
       allowedUDPPorts = [
       ];
     };
-    hostName = "ZaphodBeeblebrox";
     networkmanager.enable = true;
     useDHCP = lib.mkDefault true;
   };

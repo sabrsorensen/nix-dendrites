@@ -1,11 +1,15 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
 }:
 let
-  secretWrapArgsFromSpecs = import ../../../lib/secret-wrap-args.nix { inherit lib; };
+  secretWrapArgsFromSpecs = inputs.self.lib.shared.secretWrapArgsFromSpecs;
+  product = import ./_product.nix {
+    flavor = config.my.editor.packageFlavor;
+  };
   context7ApiKeyPath =
     if config.sops.secrets ? context7_api_key then config.sops.secrets.context7_api_key.path else null;
 
@@ -39,51 +43,62 @@ let
     items:
     lib.map (
       i:
-      if i.meta.name == "code-url-handler.desktop" then
+      if i.meta.name == product.urlHandlerDesktopName then
         i.overrideAttrs (
           _final: prev: {
-            text = lib.strings.replaceStrings [ "StartupWMClass=Code\n" ] [ "" ] prev.text;
+            text =
+              lib.strings.replaceStrings [ "StartupWMClass=Code\n" "StartupWMClass=VSCodium\n" ] [ "" "" ]
+                prev.text;
           }
         )
       else
         i
     ) items;
 
-  mkBakedVscode =
+  mkEditorPackage =
     package:
     package.overrideAttrs (prev: {
       buildInputs = (prev.buildInputs or [ ]) ++ [ patched-openssh ];
       desktopItems = patchDesktopItems prev.desktopItems;
     });
 
-  selectedBakedTheme = "partyowl84";
-  #selectedBakedTheme = "synthwave-blues";
-  #selectedBakedTheme = "synthwave-84";
+  selectedTheme = "partyowl84";
+  #selectedTheme = "synthwave-blues";
+  #selectedTheme = "synthwave-84";
 
-  bakedVscodeByName = {
-    "partyowl84" = mkBakedVscode pkgs.vscode-partyowl84;
-    "synthwave-blues" = mkBakedVscode pkgs.vscode-synthwave-blues;
-    "synthwave-84" = mkBakedVscode pkgs.vscode-synthwave-84;
+  bakedPackageByFlavor = {
+    vscode = {
+      "partyowl84" = mkEditorPackage pkgs.vscode-partyowl84;
+      "synthwave-blues" = mkEditorPackage pkgs.vscode-synthwave-blues;
+      "synthwave-84" = mkEditorPackage pkgs.vscode-synthwave-84;
+    };
+    vscodium = {
+      "partyowl84" = mkEditorPackage pkgs.vscodium-partyowl84;
+      "synthwave-blues" = mkEditorPackage pkgs.vscodium-synthwave-blues;
+      "synthwave-84" = mkEditorPackage pkgs.vscodium-synthwave-84;
+    };
   };
 
-  baseVscode = bakedVscodeByName.${selectedBakedTheme} or bakedVscodeByName.partyowl84;
+  basePackage =
+    bakedPackageByFlavor.${config.my.editor.packageFlavor}.${selectedTheme}
+      or bakedPackageByFlavor.vscodium.partyowl84;
   wrappedPackage = pkgs.symlinkJoin {
-    pname = baseVscode.pname;
-    version = baseVscode.version;
-    name = baseVscode.name;
-    paths = [ baseVscode ];
+    pname = basePackage.pname;
+    version = basePackage.version;
+    name = basePackage.name;
+    paths = [ basePackage ];
     nativeBuildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
-      if [ -f "$out/bin/code" ]; then
-        wrapProgram "$out/bin/code"${renderedVscodeSecretWrapArgs}
+      if [ -f "$out/bin/${product.binaryName}" ]; then
+        wrapProgram "$out/bin/${product.binaryName}"${renderedVscodeSecretWrapArgs}
       fi
-      if [ -f "$out/bin/code-url-handler" ]; then
-        wrapProgram "$out/bin/code-url-handler"${renderedVscodeSecretWrapArgs}
+      if [ -f "$out/bin/${product.urlHandlerBinaryName}" ]; then
+        wrapProgram "$out/bin/${product.urlHandlerBinaryName}"${renderedVscodeSecretWrapArgs}
       fi
     '';
   };
 in
 {
-  inherit selectedBakedTheme;
+  inherit selectedTheme;
   package = wrappedPackage;
 }

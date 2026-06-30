@@ -4,8 +4,17 @@
   # base OS still owns `/etc` and mount activation. This script only patches in
   # the extra Steam library mount that the host needs.
   setupSteamLibraryMount = ''
+    export PATH="/usr/bin:/bin:$PATH"
+
     FSTAB_ENTRY="/dev/disk/by-partlabel/jovian /srv/steam-library btrfs subvol=@steam,compress=zstd,noatime 0 0"
     MOUNT_POINT="/srv/steam-library"
+    STEAMOS_READONLY_BIN=""
+
+    if [ -x /usr/bin/steamos-readonly ]; then
+      STEAMOS_READONLY_BIN=/usr/bin/steamos-readonly
+    elif [ -x /bin/steamos-readonly ]; then
+      STEAMOS_READONLY_BIN=/bin/steamos-readonly
+    fi
 
     ensure_mount_point() {
       if [ ! -d "$MOUNT_POINT" ]; then
@@ -41,10 +50,15 @@
     }
 
     with_steamos_readwrite() {
+      if [ -z "$STEAMOS_READONLY_BIN" ]; then
+        "$@"
+        return $?
+      fi
+
       readonly_was_enabled=0
-      if sudo steamos-readonly status | grep -q "enabled"; then
+      if sudo "$STEAMOS_READONLY_BIN" status | grep -q "enabled"; then
         echo "Disabling SteamOS read-only mode..."
-        sudo steamos-readonly disable
+        sudo "$STEAMOS_READONLY_BIN" disable
         readonly_was_enabled=1
       fi
 
@@ -53,13 +67,13 @@
 
       if [ "$readonly_was_enabled" = "1" ]; then
         echo "Re-enabling SteamOS read-only mode..."
-        sudo steamos-readonly enable
+        sudo "$STEAMOS_READONLY_BIN" enable
       fi
 
       return "$status"
     }
 
-    if command -v steamos-readonly >/dev/null 2>&1; then
+    if [ -n "$STEAMOS_READONLY_BIN" ] || grep -q '^ID=steamos$' /etc/os-release 2>/dev/null; then
       echo "Checking Steam library mount setup..."
 
       if ! grep -q "/srv/steam-library" /etc/fstab 2>/dev/null; then

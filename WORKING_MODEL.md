@@ -10,7 +10,7 @@ Leaf modules should prefer publishing intent through shared option surfaces inst
 
 Examples:
 
-- Caddy routes should usually go through `my.caddy.virtualHosts`, `my.caddy.apexRoutes`, or `my.media.caddy.*`
+- Caddy routes should usually go through `my.caddy.virtualHosts` or `my.caddy.apexRoutes`
 - local DNS names should go through `my.localDns.records`
 - host traits should go through `my.host.*`
 
@@ -52,6 +52,49 @@ If you want to add a new cross-cutting host trait:
 2. add it only to the NixOS wrapper if it is system-specific
 3. consume it from modules rather than inventing another parallel option path
 
+### X86 host families share a contract
+
+Laptop, server, and WSL now intentionally share the same x86 descriptor
+machinery even though they keep different defaults.
+
+The preferred x86 descriptor surface is:
+
+- `config` for host facts under `my.host.*`
+- `homeProfileNames` for reusable HM profile bundles
+- `nixosProfileNames` for reusable NixOS profile bundles
+- `homeImports` for rare host-local HM exceptions
+- `extraImports` for rare host-local NixOS exceptions
+
+In practice, laptop descriptors should usually target `system-workstation`,
+while `system-desktop` should stay closer to shared desktop/session
+foundations.
+
+The current NixOS bundle intent is:
+
+- `system-cli`
+  base CLI/system policy only
+- `system-desktop`
+  shared desktop/session foundations layered on `system-cli`
+- `system-workstation`
+  workstation-oriented extras layered on `system-desktop`
+
+One concrete consequence is that SSH should not be treated as an automatic
+property of every `system-cli` host. Shared service modules should prefer to
+gate from host facts and deploy metadata instead of assuming that a broad
+profile implies a daemon.
+
+This is the intended layering:
+
+1. shared x86 registration and output mechanics
+2. family-specific default profiles and metadata
+3. host-local facts and true one-offs
+
+That means:
+
+- laptop and server should stay very close structurally
+- WSL may keep environment-specific defaults, but should avoid bespoke wiring when the shared x86 contract can express the same thing
+- host-local wrapper modules are no longer the preferred way to express profile selection
+
 ### DNS is published, not curated
 
 Old model:
@@ -75,14 +118,20 @@ The media stack now has shared structure rather than being a bag of unrelated mo
 
 Important files:
 
-- [`modules/services/media/_arr/lib.nix`](./modules/services/media/_arr/lib.nix)
+- [`modules/services/media/_arr/default.nix`](./modules/services/media/_arr/default.nix)
 - [`modules/services/media/_media-base.nix`](./modules/services/media/_media-base.nix)
 
 When working on media services:
 
 - prefer extending `_media-base.nix` over open-coding another media root/path/network convention
 - prefer reusing `arr.mkThemeParkRoute` and `arr.mkManagedService` for `*Arr`-like apps
+- prefer publishing routes directly to `my.caddy.*`; `_media-base.nix` is for shared media facts, not a Caddy translation layer
 - treat the media stack as a cohesive subsystem
+
+That said, the long-term direction is for `media-server` to be the stack
+assembler and for leaf services to expose their own `my.services.<name>`
+switches. A child service should not need to infer activation solely from
+`my.media.enable` once it has a meaningful standalone option surface.
 
 ### Private helpers belong on `_` paths
 
@@ -110,6 +159,94 @@ This is the preferred shape for future multi-variant hosts:
 2. separate lifecycle variants from runtime data
 3. keep the top-level host file mostly focused on assembly
 
+That now also applies to lifecycle user policy:
+
+- bootstrap user defaults should come from host/runtime data
+- installer user defaults should come from host/runtime data
+- shared lifecycle modules should consume those values rather than hardcoding
+  host-specific credentials or group policy
+
+### Family differences are intentional at two levels
+
+Some family differences are worth reconciling. Some are not.
+
+Reasonably reconcilable:
+
+- laptop, server, and WSL descriptor/profile plumbing
+- shared x86 boot/install toggles
+- shared user/home profile selection
+
+Intentionally specialized:
+
+- RPi image/static/DHCP/service host variants
+- Steam Deck lifecycle and boot-mode matrix
+
+Even in those specialized families, bootstrap and installer user policy should
+still prefer descriptor/host-owned data over shared-module hardcoding.
+
+The repo should aim for one shared cross-family contract:
+
+- host facts through `my.host.*`
+- reusable behavior through shared option surfaces and self-gating modules
+- descriptor-driven outputs and inventory
+
+It does not need one identical host-construction strategy for every platform.
+
+## Current Migration Status
+
+The main structural migration is effectively complete in these areas:
+
+- laptop, server, and WSL descriptor/profile plumbing
+- shared x86 registration/output mechanics
+- broad movement from host-local imports toward self-gating modules
+- removal of thin family forwarding wrappers where they did not carry real
+  behavior
+
+What remains is mostly opportunistic cleanup:
+
+- further narrowing of broad shared bundles when they still carry policy that
+  should live in a more specific layer
+- occasional promotion of repeated host-local exceptions into named shared
+  profiles
+- documentation updates when the intended boundaries change
+
+## Services Audit
+
+Current service-module buckets:
+
+- Broad-import ready or already close:
+  `ssh`, `xserver`, `printing`, `podman`, `docker`, `blocky`,
+  `netbird-client`, `gotify`, `ntfy-sh`, `syncthing-server`, `dhcp-coredns`,
+  `caddy`, `flaresolverr`
+- Needs `my.services.<name>` API cleanup or activation separation:
+  `netbird-proxy`
+- Should remain explicit stack/app selection for now even if their leaf APIs
+  improve:
+  `media-server`, `immich`, `mealie`, `minecraft-server`, `netbird-server`,
+  `ankerctl`, `samba`, `scrutiny`, `apprise`, `atuin-server`
+
+The media subtree is currently the largest mixed case:
+
+- `my.media.*` already acts as a stack-level subsystem API
+- leaf activation is now centered on `my.services.<name>.enable`
+- media leaves now publish routing directly to `my.caddy.*`
+- `_media-base.nix` now owns shared media facts and assertions only
+- several leaf modules still have only a narrow option surface even though
+  their activation and routing model are now normalized
+- path-routed leaves should generally expose `pathSegment`, and host-routed
+  leaves should generally expose `hostName`, unless there is a strong reason
+  to keep that shape fixed
+- the preferred direction is:
+  1. `media-server` selects/defaults the stack members
+  2. leaf services expose `my.services.<name>.enable`
+  3. leaf services own obvious route and hostname knobs
+  4. host-local files provide instance data such as paths, UID/GID pins,
+     DNS names, or credentials
+
+After the current audit, the main remaining raw `extraImports` usage is inside
+Steam Deck lifecycle assembly modules. That is intentional internal family
+plumbing, not a preferred host-descriptor pattern.
+
 ## Practical Guidance
 
 When adding or changing something, default to these questions:
@@ -123,5 +260,4 @@ When adding or changing something, default to these questions:
 ## Notes
 
 - `NixPi` intentionally leaves `my.host.address` unset because it is DHCP-addressed.
-- `netbird-*` is intentionally dormant until it is revived on Atlas.
-- `homeassistant-proxy` is incomplete and should not be treated as a finished reference design yet.
+- `netbird-*` still needs a topology-level redesign; it is not currently a model service family.

@@ -5,8 +5,8 @@
 }:
 let
   hostInventory = inputs.self.lib.hostInventory or { };
-  network = inputs.self.lib.site.network;
-  domain = inputs.self.lib.site.domain;
+  network = inputs.self.lib.shared.site.network;
+  domain = inputs.self.lib.shared.site.domain;
   defaultDnsConfigurationsFor =
     host:
     map (descriptor: descriptor.configuration) (
@@ -54,7 +54,16 @@ in
       builtins.concatLists (
         map (
           configuration:
-          inputs.self.nixosConfigurations.${configuration}.config.my.localDns.publishedRecords or [ ]
+          if builtins.hasAttr configuration inputs.self.nixosConfigurations then
+            let
+              cfg = inputs.self.nixosConfigurations.${configuration}.config;
+            in
+            if lib.attrByPath [ "my" "host" "lifecycle" "mode" ] "system" cfg == "system" then
+              cfg.my.localDns.publishedRecords or [ ]
+            else
+              [ ]
+          else
+            [ ]
         ) configurations
       );
 

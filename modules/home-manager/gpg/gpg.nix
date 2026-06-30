@@ -50,7 +50,7 @@
         maxCacheTtl = 7200;
         enableFishIntegration = true;
         enableSshSupport = true;
-        pinentry.package = if hostCfg.roles.wsl then pkgs.pinentry-curses else pkgs.pinentry-qt;
+        pinentry.package = if hostCfg.is.wsl then pkgs.pinentry-curses else pkgs.pinentry-qt;
         extraConfig = ''
           # Allow loopback pinentry for non-interactive scenarios
           allow-loopback-pinentry

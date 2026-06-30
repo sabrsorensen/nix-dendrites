@@ -11,10 +11,6 @@
       url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    decky-packages = {
-      url = "path:./steamdeck-packages";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     demlo = {
       url = "github:sabrsorensen/demlo/v3.8.1";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -45,6 +41,10 @@
     import-tree.url = "github:vic/import-tree";
     jovian-nixos = {
       url = "github:Jovian-Experiments/Jovian-NixOS";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    lazyvim = {
+      url = "github:pfassina/lazyvim-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-auto-follow = {

@@ -6,10 +6,14 @@
   flake.modules.nixos."deploy-builder-defaults" =
     { config, lib, ... }:
     let
-      enableBuilderDefaults = !(config.my.host.roles.wsl or false);
-      builders = builtins.filter (builder: builder != null) (
-        map (host: host.builder or null) (builtins.attrValues inputs.self.lib.hostInventory)
-      );
+      enableBuilderDefaults = !(config.my.host.is.wsl or false);
+      currentBuilderHostNames = builtins.filter (name: name != null) [
+        (config.my.host.name or null)
+        (config.networking.hostName or null)
+      ];
+      builders = builtins.filter (
+        builder: builder != null && !(builtins.elem (builder.hostName or null) currentBuilderHostNames)
+      ) (map (host: host.builder or null) (builtins.attrValues inputs.self.lib.hostInventory));
       buildMachines = map (builder: builtins.removeAttrs builder [ "alias" ]) builders;
       mkBuilderSubstituter =
         builder:

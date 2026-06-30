@@ -4,37 +4,26 @@
 }:
 {
   flake.modules.homeManager.home =
-    { pkgs, ... }:
+    { lib, ... }:
     {
       imports =
         with inputs.self.modules.homeManager;
         [
           system-default
           bash
-          fish
           git
-          github-cli
           gpg
+          nix-index
           shell
           ssh
           starship
           syncthing
-          tmux
-          vim
         ]
-        ++ [ ../context/host-context.nix ];
+        ++ [ inputs.self.modules.homeManager.host-context ];
 
       home.sessionVariables = {
-        XDG_CONFIG_HOME = "$HOME/.config";
+        XDG_CONFIG_HOME = lib.mkDefault "$HOME/.config";
       };
-
-      home.packages = with pkgs; [
-        cowsay
-        fortune
-        lolcat
-        mediainfo
-        nerd-fonts.caskaydia-cove
-      ];
 
       programs.home-manager.enable = true;
       programs.man.generateCaches = false;

@@ -11,16 +11,19 @@
   nixRemoteAuthorizedKeyPaths,
 }:
 let
-  rpi = inputs.self.lib.rpi;
-  mkSecretsSshKeyFiles = inputs.self.lib.mkSecretsSshKeyFiles;
-  static = rpi.mkStaticModule {
+  moduleBuilders = import ../_module-builders.nix { inherit inputs lib; };
+  static = mkStaticModule {
     inherit hostName address nameservers;
   };
+  inherit (moduleBuilders) mkBaseModule mkStaticModule;
 in
 { config, ... }:
+let
+  sshKeyHelpers = import ../../_ssh-key-helpers.nix { inherit config; };
+in
 {
   imports = [
-    (rpi.mkBaseModule hostName)
+    (mkBaseModule hostName)
   ]
   ++ static.imports
   ++ serviceImports;
@@ -30,9 +33,10 @@ in
   my.host.address = address;
   my.host.deploy.enableRemoteUser = true;
 
-  users.users.sam.openssh.authorizedKeys.keyFiles = mkSecretsSshKeyFiles samAuthorizedKeyPaths;
+  users.users.sam.openssh.authorizedKeys.keyFiles =
+    sshKeyHelpers.mkBuildSecretSshKeyFiles samAuthorizedKeyPaths;
 
   users.users.nix-remote = lib.mkIf config.my.host.deploy.enableRemoteUser {
-    openssh.authorizedKeys.keyFiles = mkSecretsSshKeyFiles nixRemoteAuthorizedKeyPaths;
+    openssh.authorizedKeys.keyFiles = sshKeyHelpers.mkBuildSecretSshKeyFiles nixRemoteAuthorizedKeyPaths;
   };
 }

@@ -1,26 +1,45 @@
 {
   flake.modules.nixos.samba =
-    { pkgs, ... }:
     {
-      services.samba = {
-        enable = true;
-        openFirewall = true;
-        settings = {
-          global = {
-            security = "user";
-            "workgroup" = "MYGROUP";
-            "dns proxy" = "yes";
-            "logging" = "systemd";
-          };
+      config,
+      lib,
+      ...
+    }:
+    let
+      cfg = config.my.services.samba;
+    in
+    {
+      options.my.services.samba = {
+        enable = lib.mkEnableOption "Samba file sharing service";
+
+        settings = lib.mkOption {
+          type = lib.types.attrs;
+          default = { };
+          description = "Additional Samba settings merged on top of the shared defaults.";
         };
       };
 
-      services.samba-wsdd = {
-        enable = true;
-        openFirewall = true;
-      };
+      config = lib.mkIf cfg.enable {
+        services.samba = {
+          enable = true;
+          openFirewall = true;
+          settings = lib.recursiveUpdate {
+            global = {
+              security = "user";
+              "workgroup" = "MYGROUP";
+              "dns proxy" = "yes";
+              "logging" = "systemd";
+            };
+          } cfg.settings;
+        };
 
-      networking.firewall.enable = true;
-      networking.firewall.allowPing = true;
+        services.samba-wsdd = {
+          enable = true;
+          openFirewall = true;
+        };
+
+        networking.firewall.enable = true;
+        networking.firewall.allowPing = true;
+      };
     };
 }

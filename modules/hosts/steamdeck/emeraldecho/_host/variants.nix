@@ -1,7 +1,7 @@
 {
   nixosVariants = [
     {
-      moduleName = "EmeraldEcho";
+      name = "EmeraldEcho";
       outputName = "emeraldecho";
       bootMode = "dual";
       lifecycle = "system";
@@ -10,7 +10,7 @@
       includeInPackages = true;
     }
     {
-      moduleName = "EmeraldEchoDualBoot";
+      name = "EmeraldEchoDualBoot";
       outputName = "emeraldecho-dualboot";
       bootMode = "dual";
       lifecycle = "system";
@@ -19,7 +19,7 @@
       includeInPackages = true;
     }
     {
-      moduleName = "EmeraldEchoSingleBoot";
+      name = "EmeraldEchoSingleBoot";
       outputName = "emeraldecho-singleboot";
       bootMode = "single";
       lifecycle = "system";
@@ -28,7 +28,7 @@
       includeInPackages = true;
     }
     {
-      moduleName = "EmeraldEchoBootstrap";
+      name = "EmeraldEchoBootstrap";
       outputName = "emeraldecho-bootstrap";
       bootMode = "dual";
       lifecycle = "bootstrap";
@@ -37,7 +37,7 @@
       includeInPackages = true;
     }
     {
-      moduleName = "EmeraldEchoDualBootBootstrap";
+      name = "EmeraldEchoDualBootBootstrap";
       outputName = "emeraldecho-dualboot-bootstrap";
       bootMode = "dual";
       lifecycle = "bootstrap";
@@ -46,7 +46,7 @@
       includeInPackages = true;
     }
     {
-      moduleName = "EmeraldEchoSingleBootBootstrap";
+      name = "EmeraldEchoSingleBootBootstrap";
       outputName = "emeraldecho-singleboot-bootstrap";
       bootMode = "single";
       lifecycle = "bootstrap";
@@ -55,7 +55,7 @@
       includeInPackages = true;
     }
     {
-      moduleName = "EmeraldEchoInstaller";
+      name = "EmeraldEchoInstaller";
       outputName = "emeraldecho-installer";
       bootMode = "dual";
       lifecycle = "installer";
@@ -64,7 +64,7 @@
       includeInPackages = true;
     }
     {
-      moduleName = "EmeraldEchoDualBootInstaller";
+      name = "EmeraldEchoDualBootInstaller";
       outputName = "emeraldecho-dualboot-installer";
       bootMode = "dual";
       lifecycle = "installer";
@@ -73,7 +73,7 @@
       includeInPackages = true;
     }
     {
-      moduleName = "EmeraldEchoSingleBootInstaller";
+      name = "EmeraldEchoSingleBootInstaller";
       outputName = "emeraldecho-singleboot-installer";
       bootMode = "single";
       lifecycle = "installer";

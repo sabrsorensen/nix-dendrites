@@ -1,22 +1,76 @@
 {
   inventory ? { },
   lib,
+  packageFlavor,
   pkgs,
   themeSettings,
   vscodePackage,
 }:
 let
+  upstreamEditorVersion = vscodePackage.vscodeVersion or vscodePackage.version;
   remotePlatformSettings = lib.mapAttrs' (
     name: peer: lib.nameValuePair name (if peer ? platform then peer.platform else "linux")
   ) (lib.filterAttrs (_: peer: peer ? ssh && peer.ssh ? base) inventory);
 
-  remoteExts = [
-    "ms-vscode.remote-explorer"
-    "ms-vscode-remote.remote-containers"
-    "ms-vscode-remote.remote-ssh"
-    "ms-vscode-remote.remote-ssh-edit"
-    "ms-vscode-remote.remote-wsl"
-  ];
+  openVsxExtension =
+    {
+      publisher,
+      name,
+      version,
+      sha256,
+      url,
+    }:
+    pkgs.vscode-utils.buildVscodeExtension {
+      inherit version;
+      pname = "${publisher}-${name}";
+      src = pkgs.fetchurl {
+        inherit url sha256;
+      };
+      vscodeExtPublisher = publisher;
+      vscodeExtName = name;
+      vscodeExtUniqueId = "${publisher}.${name}";
+    };
+
+  vscodiumDevpodContainers = openVsxExtension {
+    publisher = "3timeslazy";
+    name = "vscodium-devpodcontainers";
+    version = "0.0.18";
+    sha256 = "156nv9xvdsbq4782d0lpg7pjm45zi36ga6d7prv2lb844jsbli22";
+    url = "https://open-vsx.org/api/3timeslazy/vscodium-devpodcontainers/0.0.18/file/3timeslazy.vscodium-devpodcontainers-0.0.18.vsix";
+  };
+
+  openRemoteWsl = openVsxExtension {
+    publisher = "jeanp413";
+    name = "open-remote-wsl";
+    version = "0.0.5";
+    sha256 = "0md3fmchsk5948n748m7j1zmj3hqjxy1vwbbhyrfk8pp5j55s0pi";
+    url = "https://open-vsx.org/api/jeanp413/open-remote-wsl/0.0.5/file/jeanp413.open-remote-wsl-0.0.5.vsix";
+  };
+
+  openRemoteSsh = openVsxExtension {
+    publisher = "jeanp413";
+    name = "open-remote-ssh";
+    version = "0.1.2";
+    sha256 = "10ankbl6gfbrgc5ghj5744g1n66cx1vpr9bbmkp1k89m9m40ahsc";
+    url = "https://open-vsx.org/api/jeanp413/open-remote-ssh/0.1.2/file/jeanp413.open-remote-ssh-0.1.2.vsix";
+  };
+
+  remoteExts =
+    if packageFlavor == "vscodium" then
+      [
+        "ms-vscode.remote-explorer"
+        vscodiumDevpodContainers
+        openRemoteSsh
+        openRemoteWsl
+      ]
+    else
+      [
+        "ms-vscode.remote-explorer"
+        "ms-vscode-remote.remote-containers"
+        "ms-vscode-remote.remote-ssh"
+        "ms-vscode-remote.remote-ssh-edit"
+        "ms-vscode-remote.remote-wsl"
+      ];
 
   uiExts = [
     "esbenp.prettier-vscode"
@@ -99,10 +153,7 @@ let
   };
 
   copilotSettings = {
-    "chat.agent.enabled" = true;
-    "chat.commandCenter.enabled" = true;
-    "chat.mcp.gallery.enabled" = true;
-    "chat.viewSessions.orientation" = "stacked";
+    "chat.disableAIFeatures" = true;
   };
 
   defaultUserSettings = {
@@ -120,6 +171,10 @@ let
     "[github-actions-workflow]"."editor.defaultFormatter" = "redhat.vscode-yaml";
     "[json]"."editor.defaultFormatter" = "esbenp.prettier-vscode";
     "[jsonc]"."editor.defaultFormatter" = "vscode.json-language-features";
+    "[nix]" = {
+      "editor.tabSize" = 2;
+      "editor.indentSize" = "tabSize";
+    };
     "accessibility.signals.terminalBell"."sound" = "on";
     "debug.toolBarLocation" = "commandCenter";
     "diffEditor.ignoreTrimWhitespace" = false;
@@ -144,6 +199,7 @@ let
     "editor.suggest.localityBonus" = true;
     "editor.suggest.shareSuggestSelections" = true;
     "editor.tabCompletion" = "on";
+    "editor.tabSize" = 2;
     "explorer.confirmDelete" = false;
     "explorer.openEditors.visible" = 10;
     "extensions.closeExtensionDetailsOnViewChange" = true;
@@ -239,7 +295,17 @@ let
     };
   };
 
-  mkExtensions = exts: pkgs.nix4vscode.forVscodeVersion vscodePackage.version exts;
+  mkExtensions =
+    exts:
+    let
+      marketplaceExts = builtins.filter builtins.isString exts;
+      explicitExts = builtins.filter (ext: !builtins.isString ext) exts;
+    in
+    # Several pinned extensions in this repo, including the baked theme
+    # packages, are not available from OpenVSX. Resolve string IDs through
+    # the existing Marketplace-backed nix4vscode flow, and allow explicit
+    # derivations for extensions that need a different source such as Open VSX.
+    (pkgs.nix4vscode.forVscodeVersion upstreamEditorVersion marketplaceExts) ++ explicitExts;
 in
 {
   inherit

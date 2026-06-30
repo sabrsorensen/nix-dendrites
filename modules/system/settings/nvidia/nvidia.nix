@@ -6,7 +6,7 @@
 {
   flake.modules.nixos.nvidia =
     { config, lib, ... }:
-    {
+    lib.mkIf config.my.host.features.nvidia {
       # Hardware modules needed for boot
       boot = {
         initrd = {

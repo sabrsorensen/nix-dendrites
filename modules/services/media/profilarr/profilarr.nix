@@ -6,6 +6,7 @@
       ...
     }:
     let
+      cfg = config.my.services.profilarr;
       toInt = value: if builtins.isInt value then value else builtins.fromJSON value;
       localDomain = config.systemConstants.domain;
       groupName = "media";
@@ -24,42 +25,58 @@
           mediaCfg.containerIdentities;
     in
     {
-      users.users.${serviceName} = {
-        isSystemUser = true;
-        group = groupName;
-        uid = toInt containerIdentity.uid;
+      options.my.services.profilarr = {
+        enable = lib.mkEnableOption "Profilarr media service";
+
+        hostName = lib.mkOption {
+          type = lib.types.str;
+          default = serviceName;
+        };
+
+        origin = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+        };
       };
-      my.localDns.records = [
-        { hostname = serviceName; }
-      ];
-      my.media.caddy.virtualHosts."${serviceName}.{$DOMAIN}" = [
-        ''
-          reverse_proxy /* ${localAddr}
-        ''
-      ];
-      virtualisation.oci-containers.containers.${serviceName} = {
-        image = "ghcr.io/dictionarry-hub/profilarr:2.0.8";
-        autoStart = true;
-        environment = {
-          "PUID" = lib.toString config.users.users.${serviceName}.uid;
-          "PGID" = lib.toString config.users.groups.${groupName}.gid;
-          "TZ" = config.time.timeZone;
-          "ORIGIN" = "https://${serviceName}.${localDomain}/";
+
+      config = lib.mkIf cfg.enable {
+        users.users.${serviceName} = {
+          isSystemUser = true;
+          group = groupName;
+          uid = toInt containerIdentity.uid;
         };
-        volumes = [
-          "/etc/localtime:/etc/localtime:ro"
-          "${mediaCfg.configRoot}/${serviceName}:/config"
+        my.localDns.records = [
+          { hostname = cfg.hostName; }
         ];
-        ports = [
-          "${localAddr}:6868/tcp"
+        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
+          ''
+            reverse_proxy /* ${localAddr}
+          ''
         ];
-        labels = {
-          "com.centurylinklabs.watchtower.enable" = "true";
+        virtualisation.oci-containers.containers.${serviceName} = {
+          image = "ghcr.io/dictionarry-hub/profilarr:2.0.8";
+          autoStart = true;
+          environment = {
+            "PUID" = lib.toString config.users.users.${serviceName}.uid;
+            "PGID" = lib.toString config.users.groups.${groupName}.gid;
+            "TZ" = config.time.timeZone;
+            "ORIGIN" = if cfg.origin != null then cfg.origin else "https://${cfg.hostName}.${localDomain}/";
+          };
+          volumes = [
+            "/etc/localtime:/etc/localtime:ro"
+            "${mediaCfg.configRoot}/${serviceName}:/config"
+          ];
+          ports = [
+            "${localAddr}:6868/tcp"
+          ];
+          labels = {
+            "com.centurylinklabs.watchtower.enable" = "true";
+          };
+          log-driver = "journald";
+          extraOptions = [
+            "--network-alias=${serviceName}"
+          ];
         };
-        log-driver = "journald";
-        extraOptions = [
-          "--network-alias=${serviceName}"
-        ];
       };
     };
 }

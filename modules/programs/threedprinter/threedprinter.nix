@@ -4,8 +4,13 @@
 }:
 {
   flake.modules.nixos.threedprinter =
-    { pkgs, ... }:
     {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    lib.mkIf config.my.host.features.threedprinter {
       environment.systemPackages = with pkgs; [
         cura-appimage
         orca-slicer

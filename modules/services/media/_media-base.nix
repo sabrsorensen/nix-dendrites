@@ -5,14 +5,11 @@
 }:
 let
   mediaCfg = config.my.media;
-  apexRoutes =
-    mediaCfg.caddy.apexRoutes
-    ++ lib.optional (mediaCfg.caddy.apexBackend != null) ''
-      reverse_proxy /* ${mediaCfg.caddy.apexBackend}
-    '';
 in
 {
   options.my.media = {
+    enable = lib.mkEnableOption "media service stack";
+
     configRoot = lib.mkOption {
       type = lib.types.str;
       default = "/opt";
@@ -56,32 +53,19 @@ in
       default = { };
       description = "Host-specific UID/GID assignments used as the source of truth for media workloads.";
     };
-
-    caddy = {
-      apexBackend = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = null;
-        description = "Fallback backend for the apex media site.";
-      };
-
-      apexRoutes = lib.mkOption {
-        type = lib.types.listOf lib.types.lines;
-        default = [ ];
-        description = "Route fragments appended to the apex media Caddy site before the fallback backend.";
-      };
-
-      virtualHosts = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.listOf lib.types.lines);
-        default = { };
-        description = "Additional media-owned Caddy virtual hosts keyed by hostname.";
-      };
-    };
   };
 
-  config = {
-    my.caddy.apexRoutes = apexRoutes;
-    my.caddy.virtualHosts = lib.mapAttrs (_: routes: {
-      inherit routes;
-    }) mediaCfg.caddy.virtualHosts;
+  config = lib.mkIf mediaCfg.enable {
+    assertions =
+      let
+        identities = builtins.attrValues mediaCfg.containerIdentities;
+        uids = map (identity: identity.uid) identities;
+      in
+      [
+        {
+          assertion = lib.length uids == lib.length (lib.unique uids);
+          message = "my.media.containerIdentities must assign a unique UID to each service.";
+        }
+      ];
   };
 }

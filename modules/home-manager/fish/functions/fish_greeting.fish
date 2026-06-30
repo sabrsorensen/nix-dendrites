@@ -16,20 +16,20 @@ function fish_greeting -d "Custom fish shell greeting"
         echo ""
     end
 
-    if not which fortune >/dev/null
+    if not command -sq fortune
         echo "Install fortune"
     end
-    if not which cowsay >/dev/null
+    if not command -sq cowsay
         echo "Install cowsay"
     end
-    if not which lolcat >/dev/null
+    if not command -sq lolcat
         echo "Install lolcat"
     end
 
     set -l toon (random choice {default,bud-frogs,dragon,dragon-and-cow,elephant,moose,stegosaurus,tux,vader})
-    if which lolcat >/dev/null
+    if command -sq lolcat
         fortune -s | cowsay -f $toon | lolcat
-    else if which fortune >/dev/null
+    else if command -sq fortune
         fortune -s | cowsay -f $toon
     else
         echo "Something fishy going on around here ..."

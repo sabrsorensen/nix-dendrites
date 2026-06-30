@@ -11,7 +11,7 @@
       ...
     }:
     let
-      cfg = config.services.dhcp-coredns;
+      cfg = config.my.services."dhcp-coredns";
       publishedDnsRecords = config.my.localDns.publishedRecords;
       zoneStaticRecords = cfg.staticRecords ++ publishedDnsRecords;
       networkConfig = config.systemConstants.network;
@@ -43,7 +43,7 @@
     {
       imports = [ inputs.self.modules.nixos.dhcp-failover ];
 
-      options.services.dhcp-coredns = {
+      options.my.services."dhcp-coredns" = {
         enable = lib.mkEnableOption "DHCP + CoreDNS local DNS stack";
 
         interface = lib.mkOption {
@@ -105,7 +105,7 @@
             assertion =
               builtins.length (lib.unique (map (record: record.hostname) zoneStaticRecords))
               == builtins.length zoneStaticRecords;
-            message = "services.dhcp-coredns static/published DNS records contain duplicate hostnames.";
+            message = "my.services.\"dhcp-coredns\" static/published DNS records contain duplicate hostnames.";
           }
         ];
 

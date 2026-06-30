@@ -7,14 +7,20 @@
       ...
     }:
     let
-      # WSL is the declarative source of truth for VS Code config here.
-      # Home Manager renders the Linux-side Code/User tree, then the sync
+      flavor = config.my.editor.packageFlavor;
+      product = import ./_product.nix {
+        inherit flavor;
+      };
+      # WSL is the declarative source of truth for editor config here.
+      # Home Manager renders the Linux-side User tree, then the sync
       # script mirrors the managed files into the writable Windows profile.
-      cfg = config.my.vscode.windowsInterop;
-      vscodeCfg = config.programs.vscode;
-      linuxUserDir = "${config.xdg.configHome}/Code/User";
-      exportRoot = "${config.xdg.stateHome}/vscode-sync";
-      exportUserDir = "${exportRoot}/Code/User";
+      cfg = config.my.editor.windowsInterop;
+      vscodeCfg = if flavor == "vscodium" then config.programs.vscodium else config.programs.vscode;
+      extensionsHomePath =
+        if flavor == "vscodium" then ".vscode-oss/extensions" else ".vscode/extensions";
+      linuxUserDir = "${config.xdg.configHome}/${product.configDirName}/User";
+      exportRoot = "${config.xdg.stateHome}/${product.stateDirName}-sync";
+      exportUserDir = "${exportRoot}/${product.configDirName}/User";
       managedPaths = [
         "settings.json"
         "keybindings.json"
@@ -44,7 +50,7 @@
         lib.concatStringsSep "\n" extensionIds + "\n"
       );
       syncScript = pkgs.writeShellApplication {
-        name = "vscode-sync-windows";
+        name = "editor-sync-windows";
         runtimeInputs = with pkgs; [
           coreutils
           findutils
@@ -60,7 +66,7 @@
           fi
 
           if [ "$#" -ne 0 ]; then
-            echo "Usage: vscode-sync-windows [--install-extensions]" >&2
+            echo "Usage: editor-sync-windows [--install-extensions]" >&2
             exit 1
           fi
 
@@ -79,15 +85,16 @@
               return 1
             fi
 
-            wslpath -u "$appdata_win/Code/User"
+            wslpath -u "$appdata_win/${product.windowsConfigDirName}/User"
           }
 
           sync_managed_path() {
             src_root="$1"
             dst_root="$2"
             rel_path="$3"
+            dst_path="''${dst_root:?}/''${rel_path:?}"
 
-            rm -rf "$dst_root/$rel_path"
+            rm -rf -- "$dst_path"
             if [ -e "$src_root/$rel_path" ]; then
               mkdir -p "$dst_root/$(dirname "$rel_path")"
               cp -RL "$src_root/$rel_path" "$dst_root/$rel_path"
@@ -113,21 +120,21 @@
               return 0
             fi
 
-            if ! where.exe code.cmd >/dev/null 2>&1; then
-              echo "code.cmd not found on the Windows PATH; skipping extension install." >&2
+            if ! where.exe ${lib.escapeShellArg product.windowsCli} >/dev/null 2>&1; then
+              echo "${product.windowsCli} not found on the Windows PATH; skipping extension install." >&2
               return 0
             fi
 
             while IFS= read -r extension_id; do
               if [ -n "$extension_id" ]; then
-                cmd.exe /d /c code.cmd --install-extension "$extension_id" --force >/dev/null
+                cmd.exe /d /c ${lib.escapeShellArg product.windowsCli} --install-extension "$extension_id" --force >/dev/null
               fi
             done < ${extensionIdsFile}
           }
 
           windows_user_dir="$(resolve_windows_user_dir || true)"
           if [ -z "$windows_user_dir" ]; then
-            echo "Unable to resolve Windows VS Code User directory; skipping sync." >&2
+            echo "Unable to resolve Windows ${product.windowsConfigDirName} User directory; skipping sync." >&2
             exit 0
           fi
 
@@ -143,9 +150,9 @@
       };
     in
     {
-      options.my.vscode.windowsInterop = {
+      options.my.editor.windowsInterop = {
         syncToWindows =
-          lib.mkEnableOption "sync Home Manager VS Code files from WSL into the Windows VS Code profile"
+          lib.mkEnableOption "sync Home Manager editor files from WSL into the Windows editor profile"
           // {
             default = true;
           };
@@ -153,23 +160,29 @@
         targetUserDir = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = null;
-          description = "Override for the Windows VS Code User directory as a WSL/Linux path. When null, it is derived from %APPDATA%.";
+          description = "Override for the Windows editor User directory as a WSL/Linux path. When null, it is derived from %APPDATA%.";
         };
       };
 
       config = {
-        programs.vscode = {
-          package = lib.mkForce null;
-        };
-
         home.packages = [ syncScript ];
+        # WSL keeps extensions installed in the Windows editor. Keep the
+        # declarative extension list for sync/install metadata, but avoid
+        # materializing a Linux-side immutable extensions tree.
+        home.file.${extensionsHomePath}.source = lib.mkForce pkgs.emptyDirectory;
 
-        home.activation.syncVscodeToWindows = lib.hm.dag.entryAfter [ "writeBoundary" ] (
+        home.activation.syncEditorToWindows = lib.hm.dag.entryAfter [ "writeBoundary" ] (
           lib.optionalString (cfg.syncToWindows && vscodeCfg.enable) ''
-            # Keep Windows VS Code config aligned with the HM-managed WSL export.
+            # Keep Windows editor config aligned with the HM-managed WSL export.
             run ${lib.getExe syncScript}
           ''
         );
+        programs.vscode = lib.mkIf (flavor == "vscode") {
+          package = lib.mkForce null;
+        };
+        programs.vscodium = lib.mkIf (flavor == "vscodium") {
+          package = lib.mkForce null;
+        };
       };
     };
 }

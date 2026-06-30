@@ -1,7 +1,9 @@
 {
   inputs,
+  descriptor,
   lib,
   host,
+  steamdeck,
 }:
 bootMode:
 {
@@ -10,11 +12,12 @@ bootMode:
   ...
 }:
 let
-  mkBaseModule = import ./base-module.nix { inherit host; };
+  mkBaseModule = import ./base-module.nix { inherit descriptor host; };
   system = pkgs.stdenv.hostPlatform.system;
   isDualBoot = bootMode == "dual";
   steamUser = host.users.steam.name;
-  installerUser = host.users.installer.name;
+  installer = host.users.installer;
+  installerUser = installer.name;
   diskConfigFile =
     if isDualBoot then "steamdeck-dualboot-disk-config.nix" else "steamdeck-singleboot-disk-config.nix";
   diskConfigPath =
@@ -31,10 +34,10 @@ mkBaseModule {
     inputs.nix-flatpak.nixosModules.nix-flatpak
     inputs.jovian-nixos.nixosModules.default
     (inputs.nixpkgs + "/nixos/modules/installer/cd-dvd/installation-cd-graphical-calamares-plasma6.nix")
-    ../../../system/settings/host-context/host-context.nix
-    (import ../_platform/steamdeck/steamdeck-hw-config.nix bootMode)
-    (import ../_platform/steamdeck/steamdeck-steam.nix { inherit steamUser; })
-    ../_platform/steamdeck/steamdeck-system.nix
+    inputs.self.modules.nixos.host-context
+    (steamdeck.mkHwConfig bootMode)
+    (steamdeck.mkSteamModule { inherit steamUser; })
+    inputs.self.modules.nixos.steamdeck-system
   ];
   extraConfig = {
     nixpkgs.config.allowUnfree = true;
@@ -104,9 +107,9 @@ mkBaseModule {
 
     users.users.${installerUser} = {
       isNormalUser = true;
-      description = "Steam Deck Installer User";
-      extraGroups = host.users.steam.extraGroups;
-      password = "jovian";
+      description = installer.description;
+      extraGroups = installer.extraGroups;
+      password = installer.password;
       shell = pkgs.bash;
     }
     // lib.optionalAttrs isDualBoot {

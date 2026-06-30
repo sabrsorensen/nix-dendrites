@@ -23,6 +23,36 @@
         default = domainDefault;
         description = domainDescription;
       };
+
+      formFactor = lib.mkOption {
+        type = lib.types.nullOr (
+          lib.types.enum [
+            "desktop"
+            "laptop"
+            "handheld"
+            "server"
+            "vm"
+          ]
+        );
+        default = null;
+        description = "Physical or operational form factor used for shared module behavior.";
+      };
+
+      lifecycle.mode = lib.mkOption {
+        type = lib.types.enum [
+          "system"
+          "bootstrap"
+          "installer"
+        ];
+        default = "system";
+        description = "Operational lifecycle mode for this host configuration.";
+      };
+
+      tags = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Freeform host tags for cross-cutting grouping and exceptions.";
+      };
     }
     // lib.optionalAttrs includeAddress {
       address = lib.mkOption {
@@ -88,6 +118,85 @@
         };
 
         hasTray = lib.mkEnableOption "Syncthing tray support on this host";
+      };
+
+      features = {
+        gui = lib.mkEnableOption "graphical local session support on this host";
+        bluetooth = lib.mkEnableOption "Bluetooth support on this host";
+        wifi = lib.mkEnableOption "Wi-Fi support on this host";
+        firmware = lib.mkEnableOption "device firmware management and redistributable firmware support on this host";
+        nix-ld = lib.mkEnableOption "nix-ld compatibility support on this host";
+        nvidia = lib.mkEnableOption "NVIDIA graphics support on this host";
+        flatpak = lib.mkEnableOption "Flatpak support on this host";
+        containers = lib.mkEnableOption "Container runtime support on this host";
+        steam = lib.mkEnableOption "Steam or Steam-adjacent gaming support on this host";
+        wine = lib.mkEnableOption "Wine and related Windows compatibility tools on this host";
+        deskflow = lib.mkEnableOption "Deskflow keyboard and mouse sharing support on this host";
+        minecraft = lib.mkEnableOption "Minecraft launcher and related local access on this host";
+        threedprinter = lib.mkEnableOption "3D printing tools on this host";
+        zsa = lib.mkEnableOption "ZSA keyboard tooling on this host";
+      };
+
+      is = {
+        workstation = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Derived workstation flag for modules.";
+        };
+
+        server = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Derived server flag for modules.";
+        };
+
+        builder = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Derived builder flag for modules.";
+        };
+
+        desktop = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Derived physical desktop flag for modules.";
+        };
+
+        laptop = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Derived laptop flag for modules.";
+        };
+
+        handheld = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Derived handheld flag for modules.";
+        };
+
+        steamdeck = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Derived Steam Deck flag for modules.";
+        };
+
+        rpi = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Derived Raspberry Pi flag for modules.";
+        };
+
+        wsl = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Derived WSL flag for modules.";
+        };
+
+        headless = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Derived headless flag for modules.";
+        };
       };
 
       ssh.enableNixBlocks = lib.mkEnableOption "nix-remote SSH blocks on this host";

@@ -162,64 +162,76 @@
       };
     in
     {
-      my.localDns.records = [
-        { hostname = subdomain; }
-      ];
+      options.my.services.ankerctl.enable = lib.mkEnableOption "Ankerctl printer service";
 
-      my.caddy.virtualHosts."${subdomain}.{$DOMAIN}".routes = [
-        ''
-          basic_auth /* {
-              sorenssa {$ANKERCTL_PASSWORD}
-          }
-          reverse_proxy /* ${localAddr}
-        ''
-      ];
+      config = lib.mkIf config.my.services.ankerctl.enable {
+        my.localDns.records = [
+          { hostname = subdomain; }
+        ];
 
-      systemd.tmpfiles.rules = [
-        "d ${dataDir} 0750 ${toString containerUid} ${toString containerGid} -"
-        "d ${capturesDir} 0750 ${toString containerUid} ${toString containerGid} -"
-        "d ${logsDir} 0750 ${toString containerUid} ${toString containerGid} -"
-        "d ${tempDir} 1777 ${toString containerUid} ${toString containerGid} -"
-      ];
+        my.caddy.virtualHosts."${subdomain}.{$DOMAIN}".routes = [
+          ''
+            basic_auth /* {
+                sorenssa {$ANKERCTL_PASSWORD}
+            }
+            reverse_proxy /* ${localAddr}
+          ''
+        ];
 
-      sops.secrets = lib.optionalAttrs hasAnkerctlEnv {
-        ${ankerctlEnvSecret} = {
-          owner = "root";
-          group = "root";
-          mode = "0400";
-          format = "dotenv";
-          sopsFile = "${inputs.nix-secrets}/env_files/ankerctl.env";
-          key = "";
+        networking.firewall = {
+          allowedTCPPorts = [ port ];
+          allowedUDPPorts = [
+            32100
+            32108
+          ];
         };
-      };
 
-      virtualisation.oci-containers.containers.${serviceName} = {
-        autoStart = true;
-        image = imageName;
-        imageFile = image;
-        environment = {
-          "ANKERCTL_LOG_DIR" = "/logs";
-          "FLASK_HOST" = host;
-          "FLASK_PORT" = toString port;
-          "TEMP" = "/tmp";
-          "TIMELAPSE_CAPTURES_DIR" = "/captures";
-          "TMP" = "/tmp";
-          "TMPDIR" = "/tmp";
+        systemd.tmpfiles.rules = [
+          "d ${dataDir} 0750 ${toString containerUid} ${toString containerGid} -"
+          "d ${capturesDir} 0750 ${toString containerUid} ${toString containerGid} -"
+          "d ${logsDir} 0750 ${toString containerUid} ${toString containerGid} -"
+          "d ${tempDir} 1777 ${toString containerUid} ${toString containerGid} -"
+        ];
+
+        sops.secrets = lib.optionalAttrs hasAnkerctlEnv {
+          ${ankerctlEnvSecret} = {
+            owner = "root";
+            group = "root";
+            mode = "0400";
+            format = "dotenv";
+            sopsFile = "${inputs.nix-secrets}/env_files/ankerctl.env";
+            key = "";
+          };
         };
-        environmentFiles = lib.optionals hasAnkerctlEnv [
-          config.sops.secrets.${ankerctlEnvSecret}.path
-        ];
-        extraOptions = [
-          "--network=host"
-          "--pull=never"
-        ];
-        log-driver = "journald";
-        volumes = [
-          "${dataDir}:${containerConfigDir}:rw"
-          "${capturesDir}:/captures:rw"
-          "${logsDir}:/logs:rw"
-          "${tempDir}:/tmp:rw"
-        ];
+
+        virtualisation.oci-containers.containers.${serviceName} = {
+          autoStart = true;
+          image = imageName;
+          imageFile = image;
+          environment = {
+            "ANKERCTL_LOG_DIR" = "/logs";
+            "FLASK_HOST" = host;
+            "FLASK_PORT" = toString port;
+            "TEMP" = "/tmp";
+            "TIMELAPSE_CAPTURES_DIR" = "/captures";
+            "TMP" = "/tmp";
+            "TMPDIR" = "/tmp";
+          };
+          environmentFiles = lib.optionals hasAnkerctlEnv [
+            config.sops.secrets.${ankerctlEnvSecret}.path
+          ];
+          extraOptions = [
+            "--network=host"
+            "--pull=never"
+          ];
+          log-driver = "journald";
+          volumes = [
+            "${dataDir}:${containerConfigDir}:rw"
+            "${capturesDir}:/captures:rw"
+            "${logsDir}:/logs:rw"
+            "${tempDir}:/tmp:rw"
+          ];
+        };
       };
     };
 }

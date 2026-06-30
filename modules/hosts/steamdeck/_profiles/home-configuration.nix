@@ -1,5 +1,6 @@
 {
   inputs,
+  descriptor,
   host,
 }:
 # Home Manager only owns the SteamOS userland on this host. Anything wired in
@@ -7,16 +8,16 @@
 # ownership of the underlying SteamOS install.
 inputs.self.lib.mkHomeManager {
   system = "x86_64-linux";
-  name = "deck@${host.primaryHostName}";
+  name = descriptor.home.configurationName;
   username = "deck";
   homeDirectory = "/home/deck";
   stateVersion = "26.05";
-  hostName = host.primaryHostName;
-  hostContext = host.context;
+  hostName = descriptor.hostName;
+  hostContext = descriptor.config;
   modules = [
     inputs.self.modules.homeManager.home
-    inputs.self.modules.homeManager.sam-secrets
-    inputs.self.modules.homeManager.${host.primaryHostName}
+    inputs.self.modules.homeManager.sam-home-base
+    inputs.self.modules.homeManager.${descriptor.home.moduleName}
   ];
   extraConfig =
     {

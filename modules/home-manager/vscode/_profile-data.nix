@@ -42,15 +42,8 @@ let
     "snyk.securityAtInception.autoConfigureSnykMcpServer" = true;
     "snyk.securityAtInception.executionFrequency" = "On Code Generation";
   }
-  // pkgs.lib.optionalAttrs config.my.vscode.higi.runCodexInWsl {
+  // pkgs.lib.optionalAttrs config.my.editor.higi.runCodexInWsl {
     "chatgpt.runCodexInWindowsSubsystemForLinux" = true;
-  };
-
-  nixSettings = {
-    "[nix]" = {
-      "editor.tabSize" = 2;
-      "editor.indentSize" = "tabSize";
-    };
   };
 
   pythonSettings = {
@@ -64,7 +57,6 @@ in
     gitHubExts
     higiExts
     higiSettings
-    nixSettings
     pythonExts
     pythonSettings
     sqlExts

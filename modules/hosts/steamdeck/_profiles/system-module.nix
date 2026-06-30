@@ -1,32 +1,35 @@
 {
   inputs,
+  descriptor,
   lib,
   host,
+  steamdeck,
 }:
 bootMode:
 { config, pkgs, ... }:
 let
-  mkBaseModule = import ./base-module.nix { inherit host; };
-  mkSecretsSshKeyFiles = inputs.self.lib.mkSecretsSshKeyFiles;
+  mkBaseModule = import ./base-module.nix { inherit descriptor host; };
+  sshKeyHelpers = import ../../_ssh-key-helpers.nix { inherit config; };
   steamUser = host.users.steam.name;
 in
 mkBaseModule {
   inherit bootMode;
   lifecycle = "system";
-  extraImports = with inputs.self.modules.nixos; [
-    samCli
-    system-cli
-    disko
-    deploy-defaults
-    inputs.nix-flatpak.nixosModules.nix-flatpak
-    inputs.jovian-nixos.nixosModules.default
-    ../_platform/decky/decky-plugins.nix
-    (import ../_platform/decky/steamdeck-decky.nix { inherit steamUser; })
-    ../_platform/decky/steamdeck-plugins.nix
-    (import ../_platform/steamdeck/steamdeck-hw-config.nix bootMode)
-    (import ../_platform/steamdeck/steamdeck-steam.nix { inherit steamUser; })
-    ../_platform/steamdeck/steamdeck-system.nix
-  ];
+  extraImports =
+    descriptor.nixos.imports
+    ++ (with inputs.self.modules.nixos; [
+      system-cli
+      disko
+      deploy-defaults
+      inputs.nix-flatpak.nixosModules.nix-flatpak
+      inputs.jovian-nixos.nixosModules.default
+      steamdeck-decky-plugins
+      (steamdeck.mkDeckyModule { inherit steamUser; })
+      steamdeck-plugins
+      (steamdeck.mkHwConfig bootMode)
+      (steamdeck.mkSteamModule { inherit steamUser; })
+      steamdeck-system
+    ]);
   extraConfig = {
     my.host.deploy.enableRemoteUser = true;
 
@@ -35,17 +38,17 @@ mkBaseModule {
       extraGroups = host.users.steam.extraGroups;
       uid = lib.mkForce 1000;
       hashedPasswordFile = config.sops.secrets.hashed_password.path;
-      openssh.authorizedKeys.keyFiles = mkSecretsSshKeyFiles host.users.steam.authorizedKeyPaths;
+      openssh.authorizedKeys.keyFiles = sshKeyHelpers.mkBuildSecretSshKeyFiles host.users.steam.authorizedKeyPaths;
     };
 
     users.groups.${steamUser}.gid = lib.mkForce 1000;
 
     users.users.nix-remote = lib.mkIf config.my.host.deploy.enableRemoteUser {
-      openssh.authorizedKeys.keyFiles = mkSecretsSshKeyFiles host.users.nixRemote.authorizedKeyPaths;
+      openssh.authorizedKeys.keyFiles = sshKeyHelpers.mkBuildSecretSshKeyFiles host.users.nixRemote.authorizedKeyPaths;
     };
 
     home-manager.users.${steamUser}.imports = [
-      inputs.self.modules.homeManager.${host.primaryHostName}
+      inputs.self.modules.homeManager.${descriptor.home.moduleName}
     ];
 
     networking.firewall.allowedTCPPorts = [

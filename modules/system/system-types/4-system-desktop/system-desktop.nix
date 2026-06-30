@@ -1,9 +1,10 @@
 {
   inputs,
+  lib,
   ...
 }:
 {
-  # expansion of cli system for desktop use
+  # expansion of cli system for shared desktop/session foundations
 
   flake.modules.nixos.system-desktop = {
     imports = with inputs.self.modules.nixos; [
@@ -12,19 +13,15 @@
       plymouth
       wayland
       audio
-      zsa
-      cross-compile
       appimage
-      deskflow
-      threedprinter
-      minecraft
-      steam
+      kde
+      xserver
     ];
+
+    my.services.printing.enable = lib.mkDefault true;
   };
 
   flake.modules.homeManager.system-desktop = {
-    imports = with inputs.self.modules.homeManager; [
-      "graphical-home"
-    ];
+    imports = [ inputs.self.modules.homeManager."graphical-home" ];
   };
 }

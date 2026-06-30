@@ -1,4 +1,5 @@
 {
+  inputs,
   steamUser ? "sam",
 }:
 {
@@ -9,9 +10,7 @@
 }:
 let
   cfg = config.jovian.decky-loader;
-  writeSourceReplacementScript = import ../../../../../lib/write-source-replacement-script.nix {
-    inherit pkgs;
-  };
+  writeSourceReplacementScript = inputs.self.lib.shared.writeSourceReplacementScript pkgs;
   systemctlActions = [
     "is-active"
     "daemon-reload"

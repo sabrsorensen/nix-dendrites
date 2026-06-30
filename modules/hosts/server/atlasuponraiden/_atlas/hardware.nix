@@ -23,7 +23,10 @@
       systemd.enable = true;
       verbose = false;
     };
-    kernelModules = [ "kvm-intel" ];
+    kernelModules = [
+      "kvm-intel"
+      "i915"
+    ];
     # ------------------------
     # Bootloader with dual ESP
     # ------------------------

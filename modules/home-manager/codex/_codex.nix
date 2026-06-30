@@ -13,7 +13,7 @@
     let
       system = pkgs.stdenv.hostPlatform.system;
       codexPackage = inputs.codex-nix.packages.${system}.default;
-      secretWrapArgsFromSpecs = import ../../../lib/secret-wrap-args.nix { inherit lib; };
+      secretWrapArgsFromSpecs = inputs.self.lib.shared.secretWrapArgsFromSpecs;
       optionalSecretPath =
         name:
         if (config ? sops) && builtins.hasAttr name config.sops.secrets then
@@ -100,7 +100,7 @@
 
           mcp_servers = {
             Atlassian = {
-              url = "https://mcp.atlassian.com/v1/mcp";
+              url = "https://mcp.atlassian.com/v1/mcp/authv2";
             };
             AZDOLocal = {
               command = "npx";

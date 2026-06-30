@@ -16,5 +16,11 @@
     };
   };
 
-  imports = lib.optionals (inputs ? nixos-wsl && inputs ? nix-work-secrets) [ ./_wsl.nix ];
+  flake.modules.nixos.wsl-base = lib.mkIf (inputs ? nixos-wsl && inputs ? nix-work-secrets) {
+    imports = [
+      inputs.nixos-wsl.nixosModules.wsl
+      ./_base-module.nix
+      (import ./_certs-module.nix { inherit inputs lib; })
+    ];
+  };
 }

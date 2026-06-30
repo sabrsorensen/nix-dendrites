@@ -2,17 +2,19 @@
   config,
   inventory ? { },
   lib,
+  packageFlavor,
   pkgs,
-  selectedBakedTheme,
+  selectedTheme,
   vscodePackage,
   ...
 }:
 let
-  themeData = import ./_theme-data.nix { inherit selectedBakedTheme; };
+  themeData = import ./_theme-data.nix { inherit selectedTheme; };
   sharedConfig = import ./_shared-config.nix {
     inherit
       inventory
       lib
+      packageFlavor
       pkgs
       vscodePackage
       ;
@@ -29,7 +31,6 @@ in
     gitHubExts
     higiExts
     higiSettings
-    nixSettings
     pythonExts
     pythonSettings
     sqlExts

@@ -20,15 +20,24 @@
       final: prev:
       (if inputs ? nur then inputs.nur.overlays.default final prev else { })
       // (inputs.nix4vscode.overlays.forVscode final prev)
-      // (if inputs ? decky-packages then inputs.decky-packages.overlays.default final prev else { })
+      // (import ../../../../steamdeck-packages/_packages.nix {
+        pkgs = final;
+        writeSourceReplacementScript = inputs.self.lib.shared.writeSourceReplacementScript;
+      })
       // {
         local = withSystem prev.stdenv.hostPlatform.system ({ config, ... }: config.packages);
         vscode-partyowl84 =
           inputs.partyowl84-vscode-theme.packages.${prev.stdenv.hostPlatform.system}.vscode-partyowl84;
+        vscodium-partyowl84 =
+          inputs.partyowl84-vscode-theme.packages.${prev.stdenv.hostPlatform.system}.vscodium-partyowl84;
         vscode-synthwave-blues =
           inputs.synthwave-blues-vscode-theme.packages.${prev.stdenv.hostPlatform.system}.vscode-synthwave-blues;
+        vscodium-synthwave-blues =
+          inputs.synthwave-blues-vscode-theme.packages.${prev.stdenv.hostPlatform.system}.vscodium-synthwave-blues;
         vscode-synthwave-84 =
           inputs.synthwave-84-vscode-theme.packages.${prev.stdenv.hostPlatform.system}.vscode-synthwave84;
+        vscodium-synthwave-84 =
+          inputs.synthwave-84-vscode-theme.packages.${prev.stdenv.hostPlatform.system}.vscodium-synthwave84;
       };
   };
 

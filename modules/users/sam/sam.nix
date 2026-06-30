@@ -1,89 +1,40 @@
 {
   inputs,
   lib,
-  self,
   ...
 }:
 
 let
   username = "sam";
+  userHelpers = import ../_module-helpers.nix { inherit inputs lib; };
 in
-{
-  flake.homeConfigurations = inputs.self.lib.mkHomeManager "x86_64-linux" "sam";
-
-  flake.modules = lib.mkMerge [
-    (self.lib.factory.user username true)
+userHelpers.mkUserFamily {
+  inherit username;
+  homeConfigurationSystem = "x86_64-linux";
+  variants = [
     {
-      nixos."${username}" =
-        { lib, ... }:
-        {
-          imports = with inputs.self.modules.nixos; [
-            sam-system-base
-            sam-system-private
-            podman
-          ];
-
-          users.users."${username}".extraGroups = lib.mkAfter [ "podman" ];
-        };
+      homeImports = with inputs.self.modules.homeManager; [
+        sam-home-base
+        sam-home-desktop
+      ];
+      extraUserConfig.extraGroups = [
+        "wheel"
+        "podman"
+      ];
     }
 
     {
-      nixos.samCli =
-        {
-          pkgs,
-          ...
-        }:
-        {
-          imports = with inputs.self.modules.nixos; [
-            sam-system-base
-            sam-system-private
-          ];
-
-          users.groups."${username}" = { };
-          users.users."${username}" = {
-            isNormalUser = true;
-            home = "/home/${username}";
-            extraGroups = [
-              "media"
-              "podman"
-              "wheel"
-            ];
-            shell = pkgs.bash;
-            group = username;
-          };
-
-          home-manager.users."${username}" = {
-            imports = [
-              inputs.self.modules.homeManager.samCli
-            ];
-          };
-
-          programs.fish.enable = true;
-        };
-    }
-
-    {
-      homeManager."${username}" =
-        { ... }:
-        {
-          imports = with inputs.self.modules.homeManager; [
-            sam-home-base
-            sam-home-graphical
-            sam-home-private
-          ];
-        };
-    }
-
-    {
-      homeManager.samCli =
-        { ... }:
-        {
-          imports = with inputs.self.modules.homeManager; [
-            home
-            sam-home-base
-            sam-home-private
-          ];
-        };
+      systemModuleName = "sam-system-cli";
+      homeModuleName = "sam-home-cli";
+      homeImports = with inputs.self.modules.homeManager; [
+        home
+        sam-home-base
+      ];
+      extraUserConfig.extraGroups = [
+        "media"
+        "podman"
+        "wheel"
+      ];
     }
   ];
 }

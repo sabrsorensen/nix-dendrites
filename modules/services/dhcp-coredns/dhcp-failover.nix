@@ -7,10 +7,7 @@
       ...
     }:
     let
-      dhcpCoreDnsEnabled =
-        lib.hasAttrByPath [ "services" "dhcp-coredns" "enable" ] config
-        && config.services.dhcp-coredns.enable;
-      cfg = config.services.dhcp-coredns.failover;
+      cfg = config.my.services."dhcp-coredns".failover;
       localDomain = config.systemConstants.domain;
       systemctl = "${config.systemd.package}/bin/systemctl";
 
@@ -80,7 +77,7 @@
       '';
     in
     {
-      options.services.dhcp-coredns.failover = {
+      options.my.services."dhcp-coredns".failover = {
         enable = lib.mkEnableOption "DHCP failover monitor";
 
         peerName = lib.mkOption {
@@ -102,7 +99,7 @@
         };
       };
 
-      config = lib.mkIf (dhcpCoreDnsEnabled && cfg.enable) {
+      config = lib.mkIf (config.my.services."dhcp-coredns".enable && cfg.enable) {
         systemd.services.dhcp-failover = {
           description = "DHCP Failover Monitor";
           after = [

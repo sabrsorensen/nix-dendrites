@@ -6,31 +6,45 @@
       pkgs,
       ...
     }:
+    let
+      cfg = config.my.services.scrutiny;
+    in
     {
-      environment.systemPackages = with pkgs; [
-        smartmontools
-      ];
+      options.my.services.scrutiny = {
+        enable = lib.mkEnableOption "Scrutiny SMART monitoring service";
 
-      my.localDns.records = [
-        { hostname = "scrutiny"; }
-      ];
+        hostName = lib.mkOption {
+          type = lib.types.str;
+          default = "scrutiny";
+        };
+      };
 
-      my.caddy.virtualHosts."scrutiny.{$DOMAIN}".routes = [
-        ''
-          basic_auth /* {
-              sorenssa {$SCRUTINY_PASSWORD}
-          }
-          reverse_proxy /* ${config.services.scrutiny.settings.web.listen.host}:${lib.toString config.services.scrutiny.settings.web.listen.port}
-        ''
-      ];
-      # Note: make sure /var/log/smartd exists and is writable by scrutiny
-      services.scrutiny = {
-        enable = true;
-        openFirewall = false;
-        influxdb.enable = true;
-        settings = {
-          web.listen = {
-            host = "127.0.0.1";
+      config = lib.mkIf cfg.enable {
+        environment.systemPackages = with pkgs; [
+          smartmontools
+        ];
+
+        my.localDns.records = [
+          { hostname = cfg.hostName; }
+        ];
+
+        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
+          ''
+            basic_auth /* {
+                sorenssa {$SCRUTINY_PASSWORD}
+            }
+            reverse_proxy /* ${config.services.scrutiny.settings.web.listen.host}:${lib.toString config.services.scrutiny.settings.web.listen.port}
+          ''
+        ];
+        # Note: make sure /var/log/smartd exists and is writable by scrutiny
+        services.scrutiny = {
+          enable = true;
+          openFirewall = false;
+          influxdb.enable = true;
+          settings = {
+            web.listen = {
+              host = "127.0.0.1";
+            };
           };
         };
       };

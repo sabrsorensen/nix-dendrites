@@ -7,8 +7,9 @@
       ...
     }:
     let
+      enableMcp = config.my.host.is.laptop || config.my.host.is.desktop;
     in
-    {
+    lib.mkIf enableMcp {
       home.packages = with pkgs; ([
         nodejs
       ]);

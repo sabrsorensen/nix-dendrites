@@ -12,7 +12,6 @@
     }:
     let
       ryceeAddonAttrByPname = {
-        adnauseam = "adnauseam";
         "bitwarden-password-manager" = "bitwarden";
         "dark-mode-webextension" = "dark-mode-webextension";
         decentraleyes = "decentraleyes";
@@ -25,6 +24,7 @@
         "refined-github-" = "refined-github";
         "return-youtube-dislikes" = "return-youtube-dislikes";
         sidebery = "sidebery";
+        "ublock-origin" = "ublock-origin";
       };
 
       customAddonPnames = [
@@ -98,7 +98,7 @@
         }) cssFiles
       );
     in
-    {
+    lib.mkIf config.my.host.features.gui {
       home.file = homeFileAttrs;
 
       programs.firefox = {
@@ -146,6 +146,21 @@
                   }
                 ];
                 definedAliases = [ "@gh" ];
+              };
+              "MyNixOS" = {
+                urls = [
+                  {
+                    template = "https://mynixos.com/search";
+                    params = [
+                      {
+                        name = "q";
+                        value = "{searchTerms}";
+                      }
+                    ];
+                  }
+                ];
+                icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+                definedAliases = [ "@mn" ];
               };
               "Nix Packages" = {
                 urls = [

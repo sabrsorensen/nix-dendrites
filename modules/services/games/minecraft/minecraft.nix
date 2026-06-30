@@ -1,6 +1,11 @@
 {
   flake.modules.nixos.minecraft-server =
-    { pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     let
       geyserVersion = "2.10.1";
       geyserBuild = "1164";
@@ -17,55 +22,54 @@
         url = "https://download.geysermc.org/v2/projects/floodgate/versions/${floodgateVersion}/builds/${floodgateBuild}/downloads/spigot";
         hash = "sha256-ZR31ephvY1BqEcLyxrJxR+3snFkJT6ffzCGhMdqKEDA=";
       };
-      paperPlugins = pkgs.linkFarm "minecraft-paper-plugins" [
-        {
-          name = "Geyser-Spigot.jar";
-          path = geyserSpigot;
-        }
-        {
-          name = "floodgate-spigot.jar";
-          path = floodgateSpigot;
-        }
-      ];
+      paperPlugins = pkgs.runCommandLocal "minecraft-paper-plugins" { } ''
+        mkdir -p "$out"
+        cp ${geyserSpigot} "$out/Geyser-Spigot.jar"
+        cp ${floodgateSpigot} "$out/floodgate-spigot.jar"
+      '';
     in
     {
-      virtualisation.oci-containers.containers."mc-bc" = {
-        image = "pugmatt/bedrock-connect";
-        volumes = [
-          "/opt/minecraft/bedrock-connect/config.yml:/docker/brc/config.yml:rw"
-          "/opt/minecraft/bedrock-connect/custom_servers.json:/app/custom_servers.json:rw"
-          "/opt/minecraft/bedrock-connect/players:/app/players:rw"
-        ];
-        ports = [
-          "19132:19132/udp"
-        ];
-        log-driver = "journald";
-        extraOptions = [
-          "--network-alias=mc-bc"
-        ];
-      };
+      options.my.services.minecraft.enable = lib.mkEnableOption "Minecraft server stack";
 
-      virtualisation.oci-containers.containers."mc-java" = {
-        image = "itzg/minecraft-server";
-        environment = {
-          "EULA" = "TRUE";
-          "SERVER_NAME" = "Hendoboom Zone";
-          "TYPE" = "PAPER";
-          "TZ" = "America/Boise";
-          "VERSION" = "1.21.8";
+      config = lib.mkIf config.my.services.minecraft.enable {
+        virtualisation.oci-containers.containers."mc-bc" = {
+          image = "pugmatt/bedrock-connect";
+          volumes = [
+            "/opt/minecraft/bedrock-connect/config.yml:/docker/brc/config.yml:rw"
+            "/opt/minecraft/bedrock-connect/custom_servers.json:/app/custom_servers.json:rw"
+            "/opt/minecraft/bedrock-connect/players:/app/players:rw"
+          ];
+          ports = [
+            "19132:19132/udp"
+          ];
+          log-driver = "journald";
+          extraOptions = [
+            "--network-alias=mc-bc"
+          ];
         };
-        volumes = [
-          "/opt/minecraft/minecraft-server/data:/data:rw"
-          "${paperPlugins}:/plugins:ro"
-        ];
-        ports = [
-          "25565:25565/tcp"
-          "19133:19132/udp"
-        ];
-        log-driver = "journald";
-        extraOptions = [
-          "--network-alias=mc-java"
-        ];
+
+        virtualisation.oci-containers.containers."mc-java" = {
+          image = "itzg/minecraft-server";
+          environment = {
+            "EULA" = "TRUE";
+            "SERVER_NAME" = "Hendoboom Zone";
+            "TYPE" = "PAPER";
+            "TZ" = "America/Boise";
+            "VERSION" = "1.21.8";
+          };
+          volumes = [
+            "/opt/minecraft/minecraft-server/data:/data:rw"
+            "${paperPlugins}:/plugins:ro"
+          ];
+          ports = [
+            "25565:25565/tcp"
+            "19133:19132/udp"
+          ];
+          log-driver = "journald";
+          extraOptions = [
+            "--network-alias=mc-java"
+          ];
+        };
       };
     };
 }

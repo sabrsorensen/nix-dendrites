@@ -1,4 +1,19 @@
 {
+  inputs,
+  ...
+}:
+{
+  flake.modules.nixos.syncthing =
+    { config, lib, ... }:
+    let
+      shouldOpenPorts = config.my.host.syncthing.mode == "home";
+    in
+    {
+      config = lib.mkIf shouldOpenPorts {
+        services.syncthing.openDefaultPorts = true;
+      };
+    };
+
   flake.modules.homeManager.syncthing =
     {
       config,
@@ -10,11 +25,11 @@
     let
       hostCfg = if osConfig ? my && osConfig.my ? host then osConfig.my.host else config.my.host;
       hostName = hostCfg.name;
-      isSteamDeck = hostCfg.roles.steamdeck;
+      isSteamDeck = hostCfg.is.steamdeck;
       shouldEnable = hostCfg.syncthing.mode == "home";
       shouldWarnServer = hostCfg.syncthing.mode == "system";
       shouldHaveTray = hostCfg.syncthing.hasTray;
-      syncthingCommonOptions = import ../../../lib/syncthing-common-options.nix;
+      syncthingCommonOptions = inputs.self.lib.shared.syncthingCommonOptions;
 
       allDevices = config.my.syncthing.devices;
       allFolders = config.my.syncthing.folders;
@@ -45,6 +60,8 @@
           ];
         }
         (lib.mkIf (config.my.syncthing.enable && shouldEnable) {
+          sops.secrets.syncthing_gui_password = { };
+
           services.syncthing = {
             enable = true;
             #guiAddress = "0.0.0.0:8384";

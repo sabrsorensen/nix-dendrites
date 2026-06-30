@@ -5,8 +5,13 @@
 }:
 {
   flake.modules.nixos.zsa =
-    { pkgs, ... }:
     {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    lib.mkIf config.my.host.features.zsa {
       # Enable ZSA keyboard support
       hardware.keyboard.zsa.enable = true;
       environment.systemPackages = with pkgs; [
