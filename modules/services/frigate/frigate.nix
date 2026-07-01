@@ -4,27 +4,13 @@
     {
       config,
       lib,
-      pkgs,
       ...
     }:
     let
       cfg = config.my.services.frigate;
-      pathSegment = cfg.pathSegment;
-      frigateExternalListen = lib.attrByPath [
-        "services"
-        "frigate"
-        "settings"
-        "networking"
-        "listen"
-        "external"
-      ] 8971 config;
-      frigateProxyTarget =
-        if builtins.isInt frigateExternalListen then
-          "127.0.0.1:${lib.toString frigateExternalListen}"
-        else if lib.hasInfix ":" frigateExternalListen then
-          frigateExternalListen
-        else
-          "127.0.0.1:${frigateExternalListen}";
+      localDomain = config.systemConstants.domain;
+      publicHost = "${cfg.siteHostName}.${localDomain}";
+      nginxPort = 8972;
     in
     {
       options.my.services.frigate = {
@@ -44,56 +30,35 @@
       config = lib.mkIf cfg.enable {
         assertions = [
           {
-            assertion = cfg.siteHostName != null || cfg.pathSegment != null;
-            message = "my.services.frigate.pathSegment must be set when my.services.frigate.siteHostName is null.";
+            assertion = cfg.siteHostName != null;
+            message = "my.services.frigate.siteHostName must be set. Frigate is currently supported only behind its dedicated Caddy subdomain.";
+          }
+          {
+            assertion = cfg.pathSegment == null;
+            message = "my.services.frigate.pathSegment is not supported. Frigate should be published through a dedicated subdomain-backed Caddy proxy to nginx.";
           }
         ];
 
-        my.caddy =
-          if cfg.siteHostName == null then
-            {
-              apexRoutes = [
-                ''
-                  redir /${pathSegment} /${pathSegment}/
-                  reverse_proxy /${pathSegment}/* ${frigateProxyTarget} {
-                    header_up X-Ingress-Path /${pathSegment}
-                  }
-                ''
-              ];
-            }
-          else
-            {
-              virtualHosts."${cfg.siteHostName}.{$DOMAIN}".routes = [
-                ''
-                  reverse_proxy /* ${frigateProxyTarget}
-                ''
-              ];
-            };
+        my.caddy.virtualHosts."${cfg.siteHostName}.{$DOMAIN}".routes = [
+          ''
+            reverse_proxy /* 127.0.0.1:${lib.toString nginxPort}
+          ''
+        ];
 
-        my.localDns.records = lib.optional (cfg.siteHostName != null) {
-          hostname = cfg.siteHostName;
-        };
+        my.localDns.records = [
+          { hostname = cfg.siteHostName; }
+        ];
 
-        services.nginx = lib.mkForce {
-          enable = false;
-        };
-
-        systemd.services.nginx = lib.mkForce {
-          description = "Disabled nginx stub for Frigate";
-          wantedBy = [ ];
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = "${pkgs.coreutils}/bin/true";
-          };
-        };
+        services.nginx.virtualHosts.${publicHost}.listen = lib.mkForce [
+          {
+            addr = "127.0.0.1";
+            port = nginxPort;
+          }
+        ];
 
         services.frigate = {
           enable = true;
-          # Upstream Frigate currently requires hostname because its module
-          # unconditionally defines an nginx vhost. We satisfy that contract
-          # with a dummy name and keep nginx disabled because this repo
-          # publishes Frigate through Caddy instead.
-          hostname = "frigate.internal.invalid";
+          hostname = publicHost;
           settings = {
 
           };
