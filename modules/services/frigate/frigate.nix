@@ -4,6 +4,7 @@
     {
       config,
       lib,
+      pkgs,
       ...
     }:
     let
@@ -73,7 +74,18 @@
           hostname = cfg.siteHostName;
         };
 
-        services.nginx.enable = lib.mkForce false;
+        services.nginx = lib.mkForce {
+          enable = false;
+        };
+
+        systemd.services.nginx = lib.mkForce {
+          description = "Disabled nginx stub for Frigate";
+          wantedBy = [ ];
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "${pkgs.coreutils}/bin/true";
+          };
+        };
 
         services.frigate = {
           enable = true;
