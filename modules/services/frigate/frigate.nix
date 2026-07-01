@@ -73,8 +73,15 @@
           hostname = cfg.siteHostName;
         };
 
+        services.nginx.enable = lib.mkForce false;
+
         services.frigate = {
           enable = true;
+          # Upstream Frigate currently requires hostname because its module
+          # unconditionally defines an nginx vhost. We satisfy that contract
+          # with a dummy name and keep nginx disabled because this repo
+          # publishes Frigate through Caddy instead.
+          hostname = "frigate.internal.invalid";
           settings = {
 
           };
