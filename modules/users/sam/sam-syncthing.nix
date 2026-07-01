@@ -39,7 +39,10 @@
         "ZaphodBeeblebrox"
       ];
       mobileDevices = [ "No-phone" ];
-      gamingDevices = [ "EmeraldEcho" "EmeraldEchoSteamOS" ];
+      gamingDevices = [
+        "EmeraldEcho"
+        "EmeraldEchoSteamOS"
+      ];
       nonGamingDevices = serverDevices ++ desktopDevices ++ mobileDevices;
     in
     {
