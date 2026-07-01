@@ -68,6 +68,7 @@ in
         "samba"
         "apprise"
         "atuin-server"
+        "frigate"
         "immich"
         "mealie"
         "scrutiny"

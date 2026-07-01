@@ -18,6 +18,7 @@
     my.services = {
       apprise.enable = true;
       atuin.enable = true;
+      frigate.enable = true;
       immich.enable = true;
       mealie.enable = true;
       monitoring = {
