@@ -1,3 +1,4 @@
+{ inputs, ... }:
 let
   genericPackages =
     {
@@ -6,6 +7,17 @@ let
       pkgs,
       ...
     }:
+    let
+      system = pkgs.stdenv.hostPlatform.system;
+      hasLocalFlake = config.my.host.deploy.localFlakePath != null;
+      localFlakeToolPackages = lib.optionals hasLocalFlake [
+        pkgs.just
+        inputs.self.formatter.${system}
+        inputs.self.packages.${system}.write-flake
+        inputs.self.packages.${system}.write-inputs
+        inputs.self.packages.${system}.write-lock
+      ];
+    in
     {
       environment.systemPackages =
         with pkgs;
@@ -15,7 +27,7 @@ let
           home-manager
           cowsay
         ]
-        ++ lib.optionals (config.my.host.deploy.localFlakePath != null) [ just ];
+        ++ localFlakeToolPackages;
     };
 in
 {

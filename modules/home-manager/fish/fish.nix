@@ -352,18 +352,91 @@
           nhSwitch =
             if hasNixFlake then
               if sleepySystem then
-                "inhibitSleep nh os switch ${nixFlakePath} --keep-going $argv"
+                ''
+                  if test (count $argv) -ge 1; and contains -- $argv[1] -j --max-jobs
+                      inhibitSleep nh os switch ${nixFlakePath} --keep-going -- $argv
+                  else
+                      inhibitSleep nh os switch ${nixFlakePath} --keep-going $argv
+                  end
+                ''
               else
-                "nh os switch ${nixFlakePath} --keep-going $argv"
+                ''
+                  if test (count $argv) -ge 1; and contains -- $argv[1] -j --max-jobs
+                      nh os switch ${nixFlakePath} --keep-going -- $argv
+                  else
+                      nh os switch ${nixFlakePath} --keep-going $argv
+                  end
+                ''
             else
               null;
           nhs = if hasNixFlake then "nhSwitch" else null;
           nhSwitchUpgrade =
             if hasNixFlake then
-              if sleepySystem then
-                "inhibitSleep nh os switch ${nixFlakePath} --update --keep-going $argv"
-              else
-                "nh os switch ${nixFlakePath} --update --keep-going $argv"
+              ''
+                if not test -d ${lib.escapeShellArg nixFlakePath}
+                    echo "Local flake path does not exist: ${nixFlakePath}"
+                    return 1
+                end
+
+                pushd ${lib.escapeShellArg nixFlakePath} >/dev/null
+                or return $status
+
+                set update_status 0
+
+                if ${if sleepySystem then "true" else "false"}
+                    inhibitSleep nix flake update
+                else
+                    nix flake update
+                end
+                set update_status $status
+
+                if test $update_status -eq 0
+                    set max_passes 10
+                    for pass in (seq $max_passes)
+                        set before_state (sha256sum flake.nix flake.lock 2>/dev/null | string collect)
+
+                        if ${if sleepySystem then "true" else "false"}
+                            inhibitSleep nix run .#write-flake
+                        else
+                            nix run .#write-flake
+                        end
+                        set update_status $status
+                        if test $update_status -ne 0
+                            break
+                        end
+
+                        set after_state (sha256sum flake.nix flake.lock 2>/dev/null | string collect)
+                        if test "$before_state" = "$after_state"
+                            break
+                        end
+
+                        if test $pass -eq $max_passes
+                            echo "write-flake did not settle after $max_passes passes"
+                            set update_status 1
+                        end
+                    end
+                end
+
+                popd >/dev/null
+
+                if test $update_status -ne 0
+                    return $update_status
+                end
+
+                if test (count $argv) -ge 1; and contains -- $argv[1] -j --max-jobs
+                    if ${if sleepySystem then "true" else "false"}
+                        inhibitSleep nh os switch ${nixFlakePath} --keep-going -- $argv
+                    else
+                        nh os switch ${nixFlakePath} --keep-going -- $argv
+                    end
+                else
+                    if ${if sleepySystem then "true" else "false"}
+                        inhibitSleep nh os switch ${nixFlakePath} --keep-going $argv
+                    else
+                        nh os switch ${nixFlakePath} --keep-going $argv
+                    end
+                end
+              ''
             else
               null;
           nhsu = if hasNixFlake then "nhSwitchUpgrade" else null;
