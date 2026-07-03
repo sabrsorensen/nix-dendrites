@@ -8,7 +8,11 @@
   # https://github.com/nix-community/impermanence
 
   flake-file.inputs = {
-    impermanence.url = "github:nix-community/impermanence";
+    impermanence = {
+      url = "https://flakehub.com/f/nix-community/impermanence/*";
+      inputs.home-manager.follows = "home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   imports = lib.optional (inputs ? impermanence) ./_impermanence.nix;

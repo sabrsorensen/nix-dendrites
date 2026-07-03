@@ -7,6 +7,7 @@
   flake-file.inputs = {
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL";
+      inputs.flake-compat.follows = "flake-compat";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

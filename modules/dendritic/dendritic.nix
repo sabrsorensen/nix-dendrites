@@ -4,6 +4,12 @@
 
   flake-file.inputs = {
     flake-file.url = "github:vic/flake-file";
+    flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/*";
+    flake-utils.url = "https://flakehub.com/f/numtide/flake-utils/*";
+    flake-parts = {
+      url = "https://flakehub.com/f/hercules-ci/flake-parts/*";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
     # Use Determinate's cooled-down Nixpkgs feed as the repo-wide default.
     nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
   };

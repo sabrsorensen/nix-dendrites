@@ -2,7 +2,7 @@
 {
   flake-file.inputs = {
     treefmt-nix = {
-      url = lib.mkDefault "github:numtide/treefmt-nix";
+      url = lib.mkDefault "https://flakehub.com/f/numtide/treefmt-nix/*";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

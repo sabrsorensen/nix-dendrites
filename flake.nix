@@ -9,11 +9,17 @@
     armory-runtime-nixpkgs.url = "github:NixOS/nixpkgs/752b6a95db93f03d6901304f760bd452b4b7db41";
     codex-nix = {
       url = "github:sadjow/codex-cli-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     demlo = {
       url = "github:sabrsorensen/demlo/v3.8.1";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
     disko = {
@@ -24,11 +30,13 @@
       url = "github:MrOtherGuy/firefox-csshacks";
       flake = false;
     };
+    flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/*";
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
-      url = "github:hercules-ci/flake-parts";
+      url = "https://flakehub.com/f/hercules-ci/flake-parts/*";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+    flake-utils.url = "https://flakehub.com/f/numtide/flake-utils/*";
     gitignore = {
       url = "github:hyrfilm/gitignore";
       flake = false;
@@ -37,7 +45,13 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    impermanence.url = "github:nix-community/impermanence";
+    impermanence = {
+      url = "https://flakehub.com/f/nix-community/impermanence/*";
+      inputs = {
+        home-manager.follows = "home-manager";
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
     import-tree.url = "github:vic/import-tree";
     jovian-nixos = {
       url = "github:Jovian-Experiments/Jovian-NixOS";
@@ -45,7 +59,10 @@
     };
     lazyvim = {
       url = "github:pfassina/lazyvim-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     nix-auto-follow = {
       url = "github:fzakaria/nix-auto-follow";
@@ -69,15 +86,27 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
-    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
+    nixos-raspberrypi = {
+      url = "github:nvmd/nixos-raspberrypi/main";
+      inputs = {
+        flake-compat.follows = "flake-compat";
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        flake-compat.follows = "flake-compat";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
     nur = {
       url = "github:nix-community/NUR";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        flake-parts.follows = "flake-parts";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     packages = {
       url = "path:./packages";
@@ -85,23 +114,32 @@
     };
     partyowl84-vscode-theme = {
       url = "github:sabrsorensen/partyowl84-vscode-theme";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     pkgs-by-name-for-flake-parts.url = "github:drupol/pkgs-by-name-for-flake-parts";
     sops-nix = {
-      url = "github:Mic92/sops-nix";
+      url = "https://flakehub.com/f/Mic92/sops-nix/*";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     synthwave-84-vscode-theme = {
       url = "github:sabrsorensen/nix-synthwave-vscode";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     synthwave-blues-vscode-theme = {
       url = "github:sabrsorensen/synthwave-blues-vscode-theme";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     treefmt-nix = {
-      url = "github:numtide/treefmt-nix";
+      url = "https://flakehub.com/f/numtide/treefmt-nix/*";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

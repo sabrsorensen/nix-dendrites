@@ -6,6 +6,7 @@
 {
   flake-file.inputs.demlo = {
     url = "github:sabrsorensen/demlo/v3.8.1";
+    inputs.flake-utils.follows = "flake-utils";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 

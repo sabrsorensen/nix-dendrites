@@ -6,7 +6,7 @@
 {
   flake-file.inputs = {
     sops-nix = {
-      url = "github:Mic92/sops-nix";
+      url = "https://flakehub.com/f/Mic92/sops-nix/*";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-secrets = {

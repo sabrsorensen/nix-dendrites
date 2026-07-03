@@ -54,7 +54,9 @@ in
       efi.canTouchEfiVariables = true;
       systemd-boot = {
         enable = true;
-        configurationLimit = 5;
+        # Steam Deck ESPs are small enough that retaining many NixOS
+        # generations quickly crowds out kernels and initrds.
+        configurationLimit = 2;
         consoleMode = "5";
         extraEntries = lib.mkIf isDualBoot {
           "steamos.conf" = ''

@@ -12,6 +12,7 @@
 
     nur = {
       url = "github:nix-community/NUR";
+      inputs.flake-parts.follows = "flake-parts";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

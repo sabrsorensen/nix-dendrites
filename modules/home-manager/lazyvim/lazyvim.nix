@@ -6,6 +6,7 @@
 {
   flake-file.inputs.lazyvim = {
     url = "github:pfassina/lazyvim-nix";
+    inputs.flake-utils.follows = "flake-utils";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
