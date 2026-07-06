@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -132,6 +133,10 @@ class ReservationsEditor(QMainWindow):
         super().__init__()
         self.leases_json_path = Path(leases_json_path)
         self.subnet = ipaddress.IPv4Network(subnet, strict=False)
+        self.default_item_background = QColor(255, 255, 255)
+        self.default_item_foreground = QColor(0, 0, 0)
+        self.duplicate_item_background = QColor(255, 199, 206)
+        self.duplicate_item_foreground = QColor(156, 0, 6)
         self.setWindowTitle(f"Kea/CoreDNS Reservations Editor - {self.leases_json_path}")
         self.resize(1000, 800)
         self.init_ui()
@@ -263,7 +268,12 @@ class ReservationsEditor(QMainWindow):
             for col in range(self.table.columnCount()):
                 item = self.table.item(row, col)
                 if item is not None:
-                    item.setBackground(Qt.red if is_duplicate else Qt.white)
+                    item.setBackground(
+                        self.duplicate_item_background if is_duplicate else self.default_item_background
+                    )
+                    item.setForeground(
+                        self.duplicate_item_foreground if is_duplicate else self.default_item_foreground
+                    )
 
         self.validate_table(show=True)
         self.visualize_subnet()
