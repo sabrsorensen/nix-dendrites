@@ -66,6 +66,7 @@ in
         "caddy"
         "syncthing-server"
         "samba"
+        "attic"
         "apprise"
         "atuin-server"
         "frigate"
