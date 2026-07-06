@@ -18,7 +18,6 @@
           hunspell
           hunspellDicts.en_US
           # libreoffice-qt6
-          gimp3-with-plugins
         ];
       })
     ];
