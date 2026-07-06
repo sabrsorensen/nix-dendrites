@@ -146,7 +146,7 @@
             if printf '%s\n' "$base_name" | grep -Eq '${targetBasenamesPattern}'; then
               matched_paths["$output_path"]=1
             fi
-          done < <(printf '%s\n' $OUT_PATHS)
+          done < <(printf '%s\n' "$OUT_PATHS")
 
           if [ "''${#matched_paths[@]}" -eq 0 ]; then
             exit 0
