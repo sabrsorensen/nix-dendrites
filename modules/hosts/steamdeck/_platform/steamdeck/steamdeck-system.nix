@@ -28,6 +28,10 @@
       builders-use-substitutes = true;
       cores = 0;
       download-buffer-size = 1073741824;
+      extra-substituters = [ "https://jovian-experiments.cachix.org" ];
+      extra-trusted-public-keys = [
+        "jovian-experiments.cachix.org-1:lwPS3KgK5sJlI2B9KBY4VpbWNGbAjCcKVkUyqfzVrJE="
+      ];
       experimental-features = [
         "nix-command"
         "flakes"
