@@ -12,6 +12,8 @@ descriptorHelpers.mkWorkstationDescriptor {
   identityFile = "~/.ssh/kamino_id_ed25519";
   nixIdentityFile = "~/.ssh/nix_kamino_id_ed25519";
   hostModule = hostModules.nixos.kamino;
+  homeProfileNames = [ "sam-home-office" ];
+  nixosProfileNames = [ "bitwarden" ];
   config.roles.builder = true;
   config.features = {
     containers = true;

@@ -144,6 +144,12 @@
           description = "Derived workstation flag for modules.";
         };
 
+        desktopSession = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Derived flag for hosts that should use the standard desktop-session stack.";
+        };
+
         server = lib.mkOption {
           type = lib.types.bool;
           default = false;

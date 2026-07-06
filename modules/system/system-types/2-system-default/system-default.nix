@@ -11,11 +11,33 @@
       [
         system-minimal
         home-manager
+        ssh
+        syncthing
+        firmware
+        cli-tools
+        nix-index
         nix-ld
         secrets-base
         secrets-context
         system-secrets
         locale
+        audio
+        appimage
+        kde
+        printing
+        plymouth
+        podman
+        wayland
+        xserver
+        zsa
+        cross-compile
+        bluetooth
+        deskflow
+        threedprinter
+        minecraft
+        steam
+        nvidia
+        wine
       ]
       ++ (with inputs.self.modules.generic; [
         pkgs-by-name

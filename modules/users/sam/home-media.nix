@@ -2,9 +2,12 @@
   inputs,
   ...
 }:
+let
+  hm = inputs.self.modules.homeManager;
+in
 {
   flake.modules.homeManager.sam-home-media = {
-    imports = with inputs.self.modules.homeManager; [
+    imports = with hm; [
       beets
       demlo
     ];

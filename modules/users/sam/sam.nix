@@ -5,6 +5,7 @@
 }:
 
 let
+  hm = inputs.self.modules.homeManager;
   username = "sam";
   userHelpers = import ../_module-helpers.nix { inherit inputs lib; };
 in
@@ -13,9 +14,13 @@ userHelpers.mkUserFamily {
   homeConfigurationSystem = "x86_64-linux";
   variants = [
     {
-      homeImports = with inputs.self.modules.homeManager; [
-        sam-home-base
-        sam-home-desktop
+      homeImports = [
+        hm.sam-home-base
+        hm.bitwarden
+        hm."graphical-home"
+        hm."sam-home-communications"
+        hm."sam-home-media-clients"
+        hm."sam-home-device-tools"
       ];
       extraUserConfig.extraGroups = [
         "wheel"
@@ -26,7 +31,7 @@ userHelpers.mkUserFamily {
     {
       systemModuleName = "sam-system-cli";
       homeModuleName = "sam-home-cli";
-      homeImports = with inputs.self.modules.homeManager; [
+      homeImports = with hm; [
         home
         sam-home-base
       ];

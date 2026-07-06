@@ -2,13 +2,16 @@
   inputs,
   ...
 }:
+let
+  nixos = inputs.self.modules.nixos;
+in
 {
   flake.modules.nixos.deploy-defaults =
     { ... }:
     {
       imports = [
-        inputs.self.modules.nixos."deploy-builder-defaults"
-        inputs.self.modules.nixos."deploy-local-defaults"
+        nixos."deploy-builder-defaults"
+        nixos."deploy-local-defaults"
       ];
     };
 }

@@ -46,7 +46,6 @@
         [
           home
           sam-home-base
-          vscode
           mcp-work
           codex
           "${inputs.nix-work-secrets}/modules/sam-secrets-private.nix"

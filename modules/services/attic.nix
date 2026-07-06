@@ -64,12 +64,11 @@
 
           echo "Attic cache is ready."
           echo "Cache endpoint: $public_cache_endpoint"
+          ${pkgs.attic-client}/bin/attic cache info "$cache_name"
           echo
           echo "Add these settings to consumers after first bootstrap:"
           echo "  nix.settings.extra-substituters = [ \\\"$public_cache_endpoint\\\" ];"
-          echo "  nix.settings.extra-trusted-public-keys = [ \\\"<cache public key>\\\" ];"
-          echo
-          echo "If you need the public key and 'attic cache info' still errors, query it manually after the bootstrap issue is resolved."
+          echo "  nix.settings.extra-trusted-public-keys = [ \\\"$( ${pkgs.attic-client}/bin/attic cache info \"$cache_name\" | sed -n 's/^ *Public Key: //p' )\\\" ];"
         '';
       };
       pushScript = pkgs.writeShellApplication {

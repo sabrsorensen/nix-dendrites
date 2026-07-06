@@ -3,16 +3,19 @@
   lib,
   ...
 }:
+let
+  nixos = inputs.self.modules.nixos;
+in
 {
   flake.modules.nixos."bootstrap-base" =
     { lib, ... }:
     {
-      imports = with inputs.self.modules.nixos; [
+      imports = with nixos; [
         system-minimal
         ssh
         cli-tools
         secrets-base
-        inputs.self.modules.nixos."bootstrap-enroll"
+        nixos."bootstrap-enroll"
       ];
 
       my.host = {

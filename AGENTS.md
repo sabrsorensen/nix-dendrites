@@ -56,9 +56,14 @@ Use these buckets consistently:
 - `my.host.tags`: sparse escape hatch for grouping and exceptions.
 - `my.host.is.*`: derived read-side booleans for module authors.
 
-`features.gui` means the host is expected to run a local graphical session.
-Use it for shared desktop/session behavior, not merely as a marker that some
+`features.gui` means the host is expected to run some local graphical
+environment. That includes non-traditional desktop hosts such as Steam Deck.
+Use it for broad local-GUI behavior, not merely as a marker that some
 graphical applications happen to be installed.
+
+`my.host.is.desktopSession` is the narrower derived flag for the standard
+desktop-session stack. Prefer it when a module assumes a conventional desktop
+session shape rather than merely "some local GUI exists".
 
 Prefer module conditions against `my.host.is.*` or `my.host.features.*`.
 Avoid growing new ad hoc host-name checks unless the behavior is truly a
@@ -69,6 +74,7 @@ Rule of thumb:
 - use `my.host.is.*` for broad class decisions
 - use `my.host.features.*` for capability or policy toggles
 - use `my.host.roles.*` and `my.host.formFactor` to define hosts, not to read them directly in most modules
+- use `my.host.is.desktopSession` when a module assumes the normal desktop-session stack instead of broad GUI presence
 
 For server classification, treat `roles.server` as the authoritative host
 declaration. `formFactor = "server"` is still useful metadata, but module code

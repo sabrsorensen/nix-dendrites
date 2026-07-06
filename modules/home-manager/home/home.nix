@@ -2,24 +2,33 @@
   inputs,
   ...
 }:
+let
+  hm = inputs.self.modules.homeManager;
+in
 {
   flake.modules.homeManager.home =
     { lib, ... }:
     {
       imports =
-        with inputs.self.modules.homeManager;
+        with hm;
         [
           system-default
           bash
+          fish
           git
+          github-cli
           gpg
+          mcp
           nix-index
           shell
           ssh
           starship
           syncthing
+          tmux
+          vim
+          vscode
         ]
-        ++ [ inputs.self.modules.homeManager.host-context ];
+        ++ [ hm.host-context ];
 
       home.sessionVariables = {
         XDG_CONFIG_HOME = lib.mkDefault "$HOME/.config";

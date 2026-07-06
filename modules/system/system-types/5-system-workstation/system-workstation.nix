@@ -2,30 +2,19 @@
   inputs,
   ...
 }:
+let
+  hm = inputs.self.modules.homeManager;
+  nixos = inputs.self.modules.nixos;
+in
 {
   flake.modules.nixos.system-workstation = {
-    nixpkgs.config.permittedInsecurePackages = [
-      # Bitwarden Desktop currently depends on this Electron release.
-      "electron-39.8.10"
-    ];
-
-    imports = with inputs.self.modules.nixos; [
+    imports = with nixos; [
       system-desktop
-      podman
-      zsa
-      cross-compile
-      bluetooth
-      deskflow
       flatpak
-      threedprinter
-      minecraft
-      steam
-      nvidia
-      wine
     ];
   };
 
   flake.modules.homeManager.system-workstation = {
-    imports = [ inputs.self.modules.homeManager.system-desktop ];
+    imports = [ hm.system-desktop ];
   };
 }

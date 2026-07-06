@@ -3,21 +3,18 @@
   lib,
   ...
 }:
+let
+  hm = inputs.self.modules.homeManager;
+in
 {
   flake.modules.homeManager.sam-home-base =
     { pkgs, ... }:
     {
-      imports = with inputs.self.modules.homeManager; [
-        firefox
-        fish
-        github-cli
+      imports = with hm; [
         #lazyvim
-        mcp
         sam-git
         sam-secrets
         sam-syncthing
-        tmux
-        vim
       ];
 
       home.username = lib.mkDefault "sam";

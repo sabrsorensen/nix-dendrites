@@ -2,6 +2,10 @@
   inputs,
   ...
 }:
+let
+  generic = inputs.self.modules.generic;
+  nixos = inputs.self.modules.nixos;
+in
 {
   # default settings needed for all nixosConfigurations
 
@@ -43,8 +47,8 @@
     in
     {
       imports = [
-        inputs.self.modules.generic.systemConstants
-        inputs.self.modules.nixos.host-context
+        generic.systemConstants
+        nixos.host-context
       ];
 
       #nixpkgs.config.allowUnfree = true;

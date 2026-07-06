@@ -62,10 +62,13 @@ semantics, not in ad hoc host wiring.
 
 WSL is treated as its own environment, not as a VM.
 
-`features.gui` should mean "this host is expected to run a local graphical
-session". It is broader than "has some GUI apps installed", and it is the
-right gate for shared desktop/session modules such as Firefox, audio, Wayland,
-KDE, and other local-user GUI defaults.
+`features.gui` should mean "this host is expected to run some local graphical
+environment". It is broader than "has some GUI apps installed", and it
+includes non-traditional desktop GUI hosts such as Steam Deck.
+
+Use `my.host.is.desktopSession` for the narrower "standard desktop-session
+stack applies here" case. That is the better gate for modules that assume the
+conventional desktop-session shape rather than merely "some local GUI exists".
 
 ## Regenerating `flake.nix`
 
@@ -121,6 +124,11 @@ The current shared NixOS bundle layering is:
   shared desktop/session foundations layered on `system-cli`
 - `system-workstation`
   workstation-oriented extras layered on `system-desktop`
+
+In practice, the repo now distinguishes:
+
+- broad local-GUI defaults gated by `features.gui`
+- narrower desktop-session assumptions gated by `my.host.is.desktopSession`
 
 The current shared Home Manager layering is:
 

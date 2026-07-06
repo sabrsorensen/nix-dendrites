@@ -74,6 +74,9 @@ in
       config = {
         my.host.is = {
           workstation = lib.mkDefault (config.my.host.roles.workstation || config.my.host.features.gui);
+          desktopSession = lib.mkDefault (
+            config.my.host.features.gui && !config.my.host.roles.steamdeck && !config.my.host.roles.wsl
+          );
           server = lib.mkDefault (config.my.host.roles.server || config.my.host.formFactor == "server");
           builder = lib.mkDefault config.my.host.roles.builder;
           desktop = lib.mkDefault (config.my.host.formFactor == "desktop");

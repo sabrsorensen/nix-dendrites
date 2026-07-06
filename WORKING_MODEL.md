@@ -78,10 +78,25 @@ The current NixOS bundle intent is:
 - `system-workstation`
   workstation-oriented extras layered on `system-desktop`
 
+One important boundary inside that model is:
+
+- `my.host.features.gui`
+  broad "local graphical environment exists" signal
+- `my.host.is.desktopSession`
+  narrower "standard desktop-session stack applies here" signal
+
+That distinction matters because Steam Deck is a GUI host, but not every
+desktop/session module should treat it like a normal x86 desktop.
+
 One concrete consequence is that SSH should not be treated as an automatic
 property of every `system-cli` host. Shared service modules should prefer to
 gate from host facts and deploy metadata instead of assuming that a broad
 profile implies a daemon.
+
+Another concrete consequence is that modules like `xserver` should prefer
+`my.host.is.desktopSession`, while modules like KDE, Plymouth, or other
+general local-GUI defaults may still reasonably gate from `features.gui`
+when that behavior also applies to Steam Deck-style hosts.
 
 This is the intended layering:
 
@@ -206,9 +221,54 @@ What remains is mostly opportunistic cleanup:
 
 - further narrowing of broad shared bundles when they still carry policy that
   should live in a more specific layer
+- continuing to separate broad GUI defaults from narrower desktop-session
+  assumptions when a module still conflates them
 - occasional promotion of repeated host-local exceptions into named shared
   profiles
 - documentation updates when the intended boundaries change
+
+## Migration Boundary
+
+The remaining work should be evaluated against two buckets: things that are
+"done enough" and should stay explicit, and things that are still worth a
+small cleanup pass.
+
+### Done Enough, Leave Alone
+
+- flake-level auto-discovery of modules through `import-tree`
+- descriptor-driven x86 host registration and output plumbing
+- explicit host-local assembly for hardware, filesystems, boot, secrets, and
+  host identity
+- platform/lifecycle families such as Steam Deck and RPi
+- cohesive stack/profile assemblers such as `media-server`,
+  `monitoring-stack`, `sam-home-work`, and similar work/private/personal
+  policy bundles
+- thin but useful vocabulary profiles such as `system-cli`,
+  `system-desktop`, and `system-workstation`
+- the broad `features.gui` versus narrower `my.host.is.desktopSession`
+  distinction
+
+These are not migration debt merely because they are still explicit. They are
+the correct places for intentional coupling or platform-specific assembly.
+
+### Small Remaining Cleanup Candidates
+
+- service modules that still need a cleaner `my.services.*` activation surface
+  or clearer separation from stack-level activation
+- any new GUI/session modules that still conflate broad GUI presence with
+  standard desktop-session assumptions
+- Sam-specific bundles only when a split would clarify a real boundary rather
+  than just create more names
+- repeated host-local policy that starts appearing in more than one place and
+  should be promoted into a named shared profile
+- future workstation-side music/media workflows, if they move beyond the
+  current Atlas-owned model, so they gain an explicit option/data model rather
+  than ad hoc personal bundle growth
+
+The repo should not chase a literal "every module imported into every host"
+end state. The useful target is: broadly import reusable leaf modules that can
+self-gate safely, and keep explicit assemblers where the behavior is
+intentionally coupled.
 
 ## Services Audit
 
