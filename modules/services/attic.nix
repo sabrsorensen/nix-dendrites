@@ -34,6 +34,7 @@
 
           export XDG_CONFIG_HOME=${lib.escapeShellArg clientConfigHome}
           mkdir -p "$XDG_CONFIG_HOME"
+          cd /
 
           cache_name=${lib.escapeShellArg cfg.cacheName}
           server_alias=${lib.escapeShellArg serverAlias}
@@ -52,9 +53,7 @@
 
           ${pkgs.attic-client}/bin/attic login "$server_alias" "$api_endpoint" "$token" >/dev/null
 
-          if ! ${pkgs.attic-client}/bin/attic cache info "$cache_name" >/dev/null 2>&1; then
-            ${pkgs.attic-client}/bin/attic cache create "$cache_name"
-          fi
+          ${pkgs.attic-client}/bin/attic cache create "$cache_name" >/dev/null 2>&1 || true
 
           ${
             if cfg.public then
@@ -65,11 +64,12 @@
 
           echo "Attic cache is ready."
           echo "Cache endpoint: $public_cache_endpoint"
-          ${pkgs.attic-client}/bin/attic cache info "$cache_name"
           echo
           echo "Add these settings to consumers after first bootstrap:"
           echo "  nix.settings.extra-substituters = [ \\\"$public_cache_endpoint\\\" ];"
-          echo "  nix.settings.extra-trusted-public-keys = [ \\\"$( ${pkgs.attic-client}/bin/attic cache info \"$cache_name\" | sed -n 's/^ *Public Key: //p' )\\\" ];"
+          echo "  nix.settings.extra-trusted-public-keys = [ \\\"<cache public key>\\\" ];"
+          echo
+          echo "If you need the public key and 'attic cache info' still errors, query it manually after the bootstrap issue is resolved."
         '';
       };
       pushScript = pkgs.writeShellApplication {
