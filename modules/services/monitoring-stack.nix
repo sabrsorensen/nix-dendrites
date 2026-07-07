@@ -35,22 +35,7 @@
         );
       grafanaDashboard = pkgs.writeText "grafana-atlas-host-overview.json" (
         builtins.toJSON {
-          annotations = {
-            list = [
-              {
-                builtIn = 1;
-                datasource = {
-                  type = "grafana";
-                  uid = "-- Grafana --";
-                };
-                enable = true;
-                hide = true;
-                iconColor = "rgba(0, 211, 255, 1)";
-                name = "Annotations & Alerts";
-                type = "dashboard";
-              }
-            ];
-          };
+          annotations.list = [ ];
           editable = true;
           fiscalYearStartMonth = 0;
           graphTooltip = 0;
