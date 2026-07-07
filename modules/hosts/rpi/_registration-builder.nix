@@ -171,8 +171,8 @@ rec {
         samAuthorizedKeyPaths = descriptor.users.primary.authorizedKeys.sam;
         nixRemoteAuthorizedKeyPaths = descriptor.users.primary.authorizedKeys.nixRemote;
       };
-      peer = descriptor.network.failoverPeer or null;
       dhcpCoredns = descriptor.services.dhcpCoredns or { };
+      peer = dhcpCoredns.failoverPeer or null;
     in
     lib.mkMerge [
       baseModule

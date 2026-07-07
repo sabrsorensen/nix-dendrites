@@ -221,8 +221,7 @@ shape directly for:
 - `Nevarro`
 - `NixPi`
 
-Exact parity has now been confirmed between the canonical family and the
-preserved `_old` reference family for:
+Exact parity was confirmed against the preserved reference family for:
 
 - `Coruscant`
 - `Ferrix`
@@ -233,36 +232,27 @@ preserved `_old` reference family for:
 - `Naboo`
 - `Nevarro`
 
-The prior family has been archived under `-old` file names, with the top-level
-family entry points moved under `modules/hosts/rpi/_old/` to keep import-tree
-from loading both families at once.
+That archived family has now been removed after successful deployment of the
+canonical tree.
 
 The validated comparison method is:
 
 - construct an alternate flake that disables the canonical `modules/hosts/rpi`
   family entry points
-- import `modules/hosts/rpi/_old/rpi-old.nix` under the original host names
+- import the preserved reference family under the original host names
 - compare canonical and old outputs under identical inventory names
 
 That detail matters because aliasing old hosts under temporary `Old*` names
 perturbs shared host inventory and changes Home Manager-generated SSH config,
 which creates a false build mismatch.
 
-The remaining migration stance is now:
-
-- keep the `_old` RPi tree as the reference implementation
-- keep the compatibility surface that allows `_old` to evaluate
-- defer `_old` removal until `Naboo` and `Nevarro` have been successfully
-  deployed from the canonical family
-
 At this point, the canonical RPi family is model-aligned with the x86 families
-to the intended degree for this migration. The remaining work is operational
-confidence and eventual cleanup, not family-model redesign.
+to the intended degree for this migration, and the migration cleanup is
+complete.
 
 The current expected validation status is:
 
 - the suffix-free canonical RPi outputs are the promoted unified family
-- all current RPi hosts and NixPi lifecycle outputs have exact parity with
-  `_old`
-- the archived `-old` files remain available as reference material until
-  post-deployment cleanup
+- all current RPi hosts and NixPi lifecycle outputs matched the reference
+  family before cutover
+- the `_old` tree and its compatibility shims have been removed

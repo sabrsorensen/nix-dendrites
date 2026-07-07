@@ -105,26 +105,6 @@ rec {
           probeDomains = localDns.secureDeployProbeDomains;
         };
       };
-      compatFailoverPeer =
-        if
-          normalizedServices.dhcpCoredns == null
-          || normalizedServices.dhcpCoredns.failoverPeer or null == null
-        then
-          null
-        else
-          normalizedServices.dhcpCoredns.failoverPeer
-          // {
-            probeDomains = localDns.secureDeployProbeDomains;
-          };
-      compatUser =
-        if normalizedPrimaryUser == null then
-          null
-        else
-          {
-            name = normalizedPrimaryUser.name;
-            ssh = normalizedPrimaryUser.ssh or { };
-            authorizedKeys = normalizedPrimaryUser.authorizedKeys or { };
-          };
     in
     {
       inherit
@@ -137,21 +117,10 @@ rec {
       my.host = myHost;
       nixos.imports = resolvedNixosImports;
       inventory = aarch64Helpers.mkAarch64Inventory inventoryArgs;
-      network =
-        normalizedNetwork
-        // lib.optionalAttrs (normalizedServices.dhcpCoredns != null) {
-          localDomainApexIp = normalizedServices.dhcpCoredns.localDomainApexIp;
-        }
-        // lib.optionalAttrs (compatFailoverPeer != null) {
-          failoverPeer = compatFailoverPeer;
-        };
-      localDnsRecords = normalizedNetwork.localDnsRecords;
+      network = normalizedNetwork;
       deploy = normalizedDeploy;
       services = normalizedServices;
       outputs = normalizedOutputs;
       users = normalizedUsers;
-    }
-    // lib.optionalAttrs (compatUser != null) {
-      user = compatUser;
     };
 }

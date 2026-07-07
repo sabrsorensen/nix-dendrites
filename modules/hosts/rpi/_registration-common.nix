@@ -20,19 +20,14 @@ rec {
     {
       descriptor,
     }:
-    if descriptor ? outputs && descriptor.outputs ? bootstrap then
-      descriptor.outputs.bootstrap
-    else
-      descriptor.bootstrap or null;
+    descriptor.outputs.bootstrap;
 
   descriptorImage =
     {
       descriptor,
     }:
-    if descriptor ? outputs && descriptor.outputs ? image && descriptor.outputs.image.enable then
+    if descriptor.outputs.image.enable then
       descriptor.outputs.image
-    else if descriptor ? image then
-      descriptor.image // { enable = true; }
     else
       {
         enable = false;
@@ -43,22 +38,14 @@ rec {
     {
       descriptor,
     }:
-    if descriptor.network ? mode then
-      descriptor.network.mode
-    else if descriptor.network ? dhcp && descriptor.network.dhcp then
-      "dhcp"
-    else if descriptor ? kind && descriptor.kind == "dhcp" then
-      "dhcp"
-    else
-      "static";
+    descriptor.network.mode;
 
   descriptorIsServiceHost =
     {
       descriptor,
     }:
     descriptor.deploy.method or null == "secure"
-    || (descriptor.services.roles or [ ]) != [ ]
-    || (descriptor ? kind && descriptor.kind == "service");
+    || descriptor.services.roles != [ ];
 
   mergeHostFacts =
     {
@@ -91,10 +78,7 @@ rec {
           })
           {
             primaryInteractiveUser =
-              if descriptor ? users && descriptor.users ? primary then
-                descriptor.users.primary.name
-              else
-                descriptor.user.name;
+              descriptor.users.primary.name;
             formFactor = "server";
             roles = {
               server = true;
@@ -135,10 +119,7 @@ rec {
       descriptor = descriptor;
       generated = {
         primaryInteractiveUser =
-          if descriptor ? users && descriptor.users ? primary then
-            descriptor.users.primary.name
-          else
-            descriptor.user.name;
+          descriptor.users.primary.name;
         formFactor = "server";
         roles = {
           server = true;
