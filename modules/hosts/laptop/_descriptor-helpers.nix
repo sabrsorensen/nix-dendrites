@@ -65,6 +65,7 @@ in
       } config;
       defaultNixosImports = [ hostModules.nixos.sam ];
       defaultSystemType = "system-workstation";
+      defaultHomeSystemType = "system-workstation";
       deployRemoteMethod = "switch";
     };
 }

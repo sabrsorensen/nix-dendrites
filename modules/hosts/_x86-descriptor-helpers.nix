@@ -68,6 +68,7 @@ rec {
       homeImports ? [ ],
       nixosImports,
       systemType ? null,
+      homeSystemType ? null,
       config ? { },
       inventory,
       user ? null,
@@ -75,7 +76,11 @@ rec {
       bootstrap ? null,
     }:
     let
-      homeSystemTypeModule = lib.attrByPath [ "homeManager" systemType ] null hostModules;
+      homeSystemTypeModule =
+        if homeSystemType == null then
+          null
+        else
+          lib.attrByPath [ "homeManager" homeSystemType ] null hostModules;
     in
     {
       inherit
@@ -111,7 +116,9 @@ rec {
       nixosImports ? [ ],
       extraImports ? [ ],
       systemType ? null,
+      homeSystemType ? null,
       defaultSystemType ? null,
+      defaultHomeSystemType ? null,
       defaultNixosImports ? [ ],
       enableSystemdBoot ? false,
       enableDisko ? false,
@@ -123,6 +130,7 @@ rec {
     }:
     let
       resolvedSystemType = if systemType != null then systemType else defaultSystemType;
+      resolvedHomeSystemType = if homeSystemType != null then homeSystemType else defaultHomeSystemType;
       resolvedHomeImports = defaultHomeImports ++ homeImports;
       resolvedNixosImports =
         defaultNixosImports
@@ -157,6 +165,7 @@ rec {
       homeImports = resolvedHomeImports;
       nixosImports = resolvedNixosImports;
       systemType = resolvedSystemType;
+      homeSystemType = resolvedHomeSystemType;
       inventory = mkX86Inventory {
         inherit
           name

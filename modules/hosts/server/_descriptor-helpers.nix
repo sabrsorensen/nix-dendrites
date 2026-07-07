@@ -55,6 +55,7 @@ in
       } config;
       defaultHomeImports = lib.optional (userName == "sam") hostModules.homeManager."sam-home-personal";
       defaultSystemType = "system-cli";
+      defaultHomeSystemType = null;
       defaultNixosImports = [
         hostModules.nixos."sam-system-cli"
         hostModules.nixos.deploy-defaults
