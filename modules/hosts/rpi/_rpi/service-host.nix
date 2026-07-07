@@ -36,6 +36,10 @@ in
   users.users.sam.openssh.authorizedKeys.keyFiles =
     sshKeyHelpers.mkBuildSecretSshKeyFiles samAuthorizedKeyPaths;
 
+  home-manager.users.sam.imports = [
+    inputs.self.modules.homeManager.host-context
+  ];
+
   users.users.nix-remote = lib.mkIf config.my.host.deploy.enableRemoteUser {
     openssh.authorizedKeys.keyFiles = sshKeyHelpers.mkBuildSecretSshKeyFiles nixRemoteAuthorizedKeyPaths;
   };
