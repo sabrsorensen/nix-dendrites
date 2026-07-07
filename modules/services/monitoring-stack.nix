@@ -45,23 +45,31 @@
                 uid = grafanaDatasourceUid;
               };
               fieldConfig.defaults = {
+                color.mode = "thresholds";
+                max = 100;
                 min = 0;
-                thresholds.mode = "absolute";
-                thresholds.steps = [
-                  {
-                    color = "red";
-                    value = null;
-                  }
-                  {
-                    color = "green";
-                    value = 1;
-                  }
-                ];
-                unit = "short";
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "orange";
+                      value = 70;
+                    }
+                    {
+                      color = "red";
+                      value = 90;
+                    }
+                  ];
+                };
+                unit = "percent";
               };
               gridPos = {
                 h = 5;
-                w = 8;
+                w = 6;
                 x = 0;
                 y = 0;
               };
@@ -80,13 +88,419 @@
               };
               targets = [
                 {
-                  expr = "sum(up{job=\"node\"})";
+                  expr = "100 * (1 - avg(rate(node_cpu_seconds_total{job=\"node\",mode=\"idle\"}[5m])))";
                   instant = true;
+                  legendFormat = "CPU";
                   refId = "A";
                 }
               ];
-              title = "Node Exporter Up";
+              title = "CPU Usage";
               type = "stat";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "thresholds";
+                max = 100;
+                min = 0;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "orange";
+                      value = 75;
+                    }
+                    {
+                      color = "red";
+                      value = 90;
+                    }
+                  ];
+                };
+                unit = "percent";
+              };
+              gridPos = {
+                h = 5;
+                w = 6;
+                x = 6;
+                y = 0;
+              };
+              id = 2;
+              options = {
+                colorMode = "background";
+                graphMode = "none";
+                justifyMode = "center";
+                orientation = "auto";
+                reduceOptions = {
+                  calcs = [ "lastNotNull" ];
+                  fields = "";
+                  values = false;
+                };
+                textMode = "value";
+              };
+              targets = [
+                {
+                  expr = "100 * (1 - (node_memory_MemAvailable_bytes{job=\"node\"} / node_memory_MemTotal_bytes{job=\"node\"}))";
+                  instant = true;
+                  legendFormat = "Memory";
+                  refId = "A";
+                }
+              ];
+              title = "Memory Usage";
+              type = "stat";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "thresholds";
+                max = 100;
+                min = 0;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "orange";
+                      value = 70;
+                    }
+                    {
+                      color = "red";
+                      value = 90;
+                    }
+                  ];
+                };
+                unit = "percent";
+              };
+              gridPos = {
+                h = 5;
+                w = 6;
+                x = 12;
+                y = 0;
+              };
+              id = 3;
+              options = {
+                colorMode = "background";
+                graphMode = "none";
+                justifyMode = "center";
+                orientation = "auto";
+                reduceOptions = {
+                  calcs = [ "lastNotNull" ];
+                  fields = "";
+                  values = false;
+                };
+                textMode = "value";
+              };
+              targets = [
+                {
+                  expr = "100 * (1 - (node_filesystem_avail_bytes{job=\"node\",mountpoint=\"/\",fstype!~\"tmpfs|squashfs|overlay\"} / node_filesystem_size_bytes{job=\"node\",mountpoint=\"/\",fstype!~\"tmpfs|squashfs|overlay\"}))";
+                  instant = true;
+                  legendFormat = "/";
+                  refId = "A";
+                }
+              ];
+              title = "Root Disk Usage";
+              type = "stat";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "thresholds";
+                min = 0;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "red";
+                      value = 1;
+                    }
+                  ];
+                };
+                unit = "none";
+              };
+              gridPos = {
+                h = 5;
+                w = 6;
+                x = 18;
+                y = 0;
+              };
+              id = 4;
+              options = {
+                colorMode = "background";
+                graphMode = "none";
+                justifyMode = "center";
+                orientation = "auto";
+                reduceOptions = {
+                  calcs = [ "lastNotNull" ];
+                  fields = "";
+                  values = false;
+                };
+                textMode = "value";
+              };
+              targets = [
+                {
+                  expr = "sum(node_systemd_unit_state{job=\"node\",state=\"failed\",type=\"service\"})";
+                  instant = true;
+                  legendFormat = "failed";
+                  refId = "A";
+                }
+              ];
+              title = "Failed Services";
+              type = "stat";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                unit = "short";
+              };
+              gridPos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 5;
+              };
+              id = 5;
+              options = {
+                legend = {
+                  displayMode = "list";
+                  placement = "bottom";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "single";
+                  sort = "none";
+                };
+              };
+              targets = [
+                {
+                  expr = "node_load1{job=\"node\"}";
+                  legendFormat = "load1";
+                  refId = "A";
+                }
+                {
+                  expr = "node_load5{job=\"node\"}";
+                  legendFormat = "load5";
+                  refId = "B";
+                }
+                {
+                  expr = "node_load15{job=\"node\"}";
+                  legendFormat = "load15";
+                  refId = "C";
+                }
+              ];
+              title = "System Load";
+              type = "timeseries";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                unit = "bytes";
+              };
+              gridPos = {
+                h = 8;
+                w = 12;
+                x = 12;
+                y = 5;
+              };
+              id = 6;
+              options = {
+                legend = {
+                  displayMode = "list";
+                  placement = "bottom";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "single";
+                  sort = "none";
+                };
+              };
+              targets = [
+                {
+                  expr = "rate(node_network_receive_bytes_total{job=\"node\",device!=\"lo\"}[5m])";
+                  legendFormat = "{{device}} rx";
+                  refId = "A";
+                }
+                {
+                  expr = "rate(node_network_transmit_bytes_total{job=\"node\",device!=\"lo\"}[5m])";
+                  legendFormat = "{{device}} tx";
+                  refId = "B";
+                }
+              ];
+              title = "Network Throughput";
+              type = "timeseries";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "thresholds";
+                min = 0;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                  ];
+                };
+                unit = "none";
+              };
+              gridPos = {
+                h = 6;
+                w = 8;
+                x = 0;
+                y = 13;
+              };
+              id = 7;
+              options = {
+                colorMode = "value";
+                graphMode = "none";
+                justifyMode = "center";
+                orientation = "auto";
+                reduceOptions = {
+                  calcs = [ "lastNotNull" ];
+                  fields = "";
+                  values = false;
+                };
+                textMode = "value";
+              };
+              targets = [
+                {
+                  expr = "sum(node_systemd_unit_state{job=\"node\",state=\"active\",type=\"service\"})";
+                  instant = true;
+                  legendFormat = "active";
+                  refId = "A";
+                }
+              ];
+              title = "Active Services";
+              type = "stat";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                decimals = 1;
+                unit = "percent";
+              };
+              gridPos = {
+                h = 6;
+                w = 16;
+                x = 8;
+                y = 13;
+              };
+              id = 8;
+              options = {
+                legend = {
+                  displayMode = "table";
+                  placement = "right";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "single";
+                  sort = "none";
+                };
+              };
+              targets = [
+                {
+                  expr = "100 * (1 - (node_filesystem_avail_bytes{job=\"node\",mountpoint!~\"/(run|sys|proc)($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs\"} / node_filesystem_size_bytes{job=\"node\",mountpoint!~\"/(run|sys|proc)($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs\"}))";
+                  legendFormat = "{{mountpoint}}";
+                  refId = "A";
+                }
+              ];
+              title = "Filesystem Usage";
+              type = "timeseries";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                decimals = 1;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "orange";
+                      value = 70;
+                    }
+                    {
+                      color = "red";
+                      value = 85;
+                    }
+                  ];
+                };
+                unit = "celsius";
+              };
+              gridPos = {
+                h = 8;
+                w = 24;
+                x = 0;
+                y = 19;
+              };
+              id = 9;
+              options = {
+                legend = {
+                  displayMode = "table";
+                  placement = "right";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "multi";
+                  sort = "desc";
+                };
+              };
+              targets = [
+                {
+                  expr = "node_hwmon_temp_celsius{job=\"node\"}";
+                  legendFormat = "{{chip}} {{sensor}}";
+                  refId = "A";
+                }
+                {
+                  expr = "smartctl_device_temperature{job=\"smartctl\"}";
+                  legendFormat = "{{device}} drive";
+                  refId = "B";
+                }
+              ];
+              title = "Hardware Temperatures";
+              type = "timeseries";
             }
           ];
           refresh = "30s";
@@ -102,7 +516,7 @@
             to = "now";
           };
           timezone = "browser";
-          title = "Atlas Host Overview (Minimal)";
+          title = "Atlas Host Overview";
           uid = "atlas-host-overview";
           version = 1;
         }
