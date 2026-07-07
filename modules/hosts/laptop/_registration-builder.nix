@@ -3,7 +3,7 @@
   lib,
 }:
 let
-  x86Builder = import ../_x86-registration-builder.nix { inherit inputs; };
+  x86Builder = import ../common/registration/_x86.nix { inherit inputs; };
   mkBootstrapModule =
     descriptor:
     {
@@ -11,7 +11,7 @@ let
       ...
     }:
     let
-      shared = inputs.self.lib.shared;
+      secrets = inputs.self.lib.secrets;
       bootstrap = descriptor.bootstrap;
       bootstrapUser = bootstrap.user or { };
       hasNvidia = lib.attrByPath [ "features" "nvidia" ] false descriptor.config;
@@ -47,7 +47,7 @@ let
       users.users.${descriptor.user.name} = {
         isNormalUser = true;
         extraGroups = bootstrapUser.extraGroups or [ "wheel" ];
-        openssh.authorizedKeys.keyFiles = shared.mkSecretsSshKeyFiles bootstrap.authorizedKeyPaths;
+        openssh.authorizedKeys.keyFiles = secrets.mkSecretsSshKeyFiles bootstrap.authorizedKeyPaths;
       }
       // lib.optionalAttrs (bootstrapUser ? initialPassword) {
         initialPassword = bootstrapUser.initialPassword;
@@ -67,7 +67,7 @@ rec {
     descriptor:
     { config, ... }:
     let
-      sshKeyHelpers = import ../_ssh-key-helpers.nix { inherit config; };
+      sshKeyHelpers = import ../common/_ssh.nix { inherit config; };
       nixRemoteAuthorizedKeyPaths = lib.attrByPath [ "user" "authorizedKeys" "nixRemote" ] [ ] descriptor;
     in
     {

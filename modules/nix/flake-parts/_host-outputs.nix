@@ -5,7 +5,7 @@
   ...
 }:
 let
-  outputHelpers = import ./_output-helpers.nix { inherit inputs lib; };
+  outputHelpers = import ./_host-output-helpers.nix { inherit inputs lib; };
 in
 {
   perSystem =

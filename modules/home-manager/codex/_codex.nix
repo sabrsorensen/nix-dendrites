@@ -13,7 +13,7 @@
     let
       system = pkgs.stdenv.hostPlatform.system;
       codexPackage = inputs.codex-nix.packages.${system}.default;
-      secretWrapArgsFromSpecs = inputs.self.lib.shared.secretWrapArgsFromSpecs;
+      secretWrapArgsFromSpecs = inputs.self.lib.secrets.secretWrapArgsFromSpecs;
       optionalSecretPath =
         name:
         if (config ? sops) && builtins.hasAttr name config.sops.secrets then

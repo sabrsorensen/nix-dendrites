@@ -28,7 +28,6 @@ rec {
           mkStaticModule {
             hostName = common.descriptorHostName {
               inherit descriptor;
-              fallbackToName = true;
             };
             address = descriptor.network.address;
             nameservers = descriptor.network.nameservers or [ ];
@@ -39,7 +38,6 @@ rec {
         (mkBootstrapBaseModule (
           common.descriptorHostName {
             inherit descriptor;
-            fallbackToName = true;
           }
         ))
       ]
@@ -53,7 +51,6 @@ rec {
           {
             hostName = common.descriptorHostName {
               inherit descriptor;
-              fallbackToName = true;
             };
             useDHCP = true;
             interfaces.end0.useDHCP = true;
@@ -83,19 +80,16 @@ rec {
   mkHostModule =
     descriptor:
     if
-      common.descriptorIsServiceHost {
-        inherit descriptor;
-      }
-    then
-      mkServiceHostModuleFromDescriptor descriptor
-    else if
       common.descriptorNetworkMode {
         inherit descriptor;
-      } == "dhcp"
+      } == "static"
+      && !(common.descriptorIsServiceHost { inherit descriptor; })
     then
-      mkDhcpHostModule descriptor
+      mkStaticHostModule descriptor
+    else if common.descriptorIsServiceHost { inherit descriptor; } then
+      mkServiceHostModuleFromDescriptor descriptor
     else
-      mkStaticHostModule descriptor;
+      mkDhcpHostModule descriptor;
 
   mkStaticHostModule =
     descriptor:
@@ -103,7 +97,6 @@ rec {
       static = mkStaticModule {
         hostName = common.descriptorHostName {
           inherit descriptor;
-          fallbackToName = true;
         };
         address = descriptor.network.address;
       };
@@ -113,7 +106,6 @@ rec {
         (mkBaseModule (
           common.descriptorHostName {
             inherit descriptor;
-            fallbackToName = true;
           }
         ))
         descriptor.config
@@ -125,7 +117,7 @@ rec {
       my.host = common.mkStaticHostFacts {
         inherit descriptor;
       };
-      my.localDns.records = descriptor.network.localDnsRecords;
+      my.localDns.records = descriptor.localDnsRecords or [ ];
 
       boot.kernel.sysctl = lib.mkForce { };
     };
@@ -135,7 +127,6 @@ rec {
       (mkBaseModule (
         common.descriptorHostName {
           inherit descriptor;
-          fallbackToName = true;
         }
       ))
       descriptor.config
@@ -145,7 +136,6 @@ rec {
     networking = {
       hostName = common.descriptorHostName {
         inherit descriptor;
-        fallbackToName = true;
       };
       useDHCP = true;
       interfaces.end0.useDHCP = true;
@@ -168,11 +158,10 @@ rec {
         address = descriptor.network.address;
         nameservers = descriptor.network.nameservers;
         serviceImports = descriptor.nixos.imports;
-        samAuthorizedKeyPaths = descriptor.users.primary.authorizedKeys.sam;
-        nixRemoteAuthorizedKeyPaths = descriptor.users.primary.authorizedKeys.nixRemote;
+        samAuthorizedKeyPaths = descriptor.user.authorizedKeys.sam;
+        nixRemoteAuthorizedKeyPaths = descriptor.user.authorizedKeys.nixRemote;
       };
       peer = descriptor.network.failoverPeer or null;
-      dhcpCoredns = descriptor.services.dhcpCoredns or { };
     in
     lib.mkMerge [
       baseModule
@@ -187,15 +176,15 @@ rec {
         my.services."dhcp-coredns" = {
           enable = true;
           interface = "end0";
-          localDomainApexIp = dhcpCoredns.localDomainApexIp;
+          localDomainApexIp = descriptor.network.localDomainApexIp;
           upstreamServers = [
             "1.1.1.1"
             "9.9.9.9"
           ];
           staticRecords = staticDnsRecords;
         }
-        // lib.optionalAttrs (dhcpCoredns ? startKeaOnBoot) {
-          startKeaOnBoot = dhcpCoredns.startKeaOnBoot;
+        // lib.optionalAttrs (descriptor ? startKeaOnBoot) {
+          startKeaOnBoot = descriptor.startKeaOnBoot;
         }
         // lib.optionalAttrs (peer != null) {
           failover = {
@@ -245,21 +234,48 @@ rec {
           );
   };
 
-  mkDhcpHostRegistration =
-    descriptor:
-    let
-      image = common.descriptorImage {
-        inherit descriptor;
-      };
-    in
-    {
-      flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
-      flake.modules.nixos = {
-        ${descriptor.name} = mkDhcpHostModule descriptor;
-      }
-      // lib.optionalAttrs image.enable {
-        ${image.name} = mkImageModule descriptor.name;
-      }
+  mkDhcpHostRegistration = descriptor: {
+    flake.modules.nixos = {
+      ${descriptor.name} = mkDhcpHostModule descriptor;
+      ${
+        (common.descriptorImage {
+          inherit descriptor;
+        }).name
+      } =
+        mkImageModule descriptor.name;
+    }
+    //
+      lib.optionalAttrs
+        (
+          common.descriptorBootstrap {
+            inherit descriptor;
+          } != null
+        )
+        {
+          ${
+            (common.descriptorBootstrap {
+              inherit descriptor;
+            }).configurationName
+          } =
+            mkBootstrapHostModule descriptor;
+          ${
+            (common.descriptorBootstrap {
+              inherit descriptor;
+            }).imageName
+          } =
+            mkBootstrapImageModule
+              (common.descriptorBootstrap {
+                inherit descriptor;
+              }).configurationName;
+        };
+    flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
+    flake.nixosConfigurations =
+      inputs.self.lib.mkNixos "aarch64-linux" descriptor.name
+      //
+        inputs.self.lib.mkNixos "aarch64-linux"
+          (common.descriptorImage {
+            inherit descriptor;
+          }).name
       //
         lib.optionalAttrs
           (
@@ -267,48 +283,20 @@ rec {
               inherit descriptor;
             } != null
           )
-          {
-            ${
+          (
+            inputs.self.lib.mkNixos "aarch64-linux"
               (common.descriptorBootstrap {
                 inherit descriptor;
               }).configurationName
-            } =
-              mkBootstrapHostModule descriptor;
-            ${
-              (common.descriptorBootstrap {
-                inherit descriptor;
-              }).imageName
-            } =
-              mkBootstrapImageModule
-                (common.descriptorBootstrap {
-                  inherit descriptor;
-                }).configurationName;
-          };
-      flake.nixosConfigurations =
-        inputs.self.lib.mkNixos "aarch64-linux" descriptor.name
-        // lib.optionalAttrs image.enable (inputs.self.lib.mkNixos "aarch64-linux" image.name)
-        //
-          lib.optionalAttrs
-            (
-              common.descriptorBootstrap {
-                inherit descriptor;
-              } != null
-            )
-            (
+            //
               inputs.self.lib.mkNixos "aarch64-linux"
                 (common.descriptorBootstrap {
                   inherit descriptor;
-                }).configurationName
-              //
-                inputs.self.lib.mkNixos "aarch64-linux"
-                  (common.descriptorBootstrap {
-                    inherit descriptor;
-                  }).imageName
-            );
-    };
+                }).imageName
+          );
+  };
 
   mkServiceHostRegistration = descriptor: {
-    flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
     flake.modules.nixos = {
       ${descriptor.name} = mkServiceHostModuleFromDescriptor descriptor;
     }
@@ -336,6 +324,7 @@ rec {
                 inherit descriptor;
               }).configurationName;
         };
+    flake.lib.hostInventory.${descriptor.name} = descriptor.inventory;
     flake.nixosConfigurations =
       inputs.self.lib.mkNixos "aarch64-linux" descriptor.name
       //
@@ -361,17 +350,14 @@ rec {
   mkRegisteredHost =
     descriptor:
     if
-      common.descriptorIsServiceHost {
-        inherit descriptor;
-      }
-    then
-      mkServiceHostRegistration descriptor
-    else if
       common.descriptorNetworkMode {
         inherit descriptor;
-      } == "dhcp"
+      } == "static"
+      && !(common.descriptorIsServiceHost { inherit descriptor; })
     then
-      mkDhcpHostRegistration descriptor
+      mkStaticHostRegistration descriptor
+    else if common.descriptorIsServiceHost { inherit descriptor; } then
+      mkServiceHostRegistration descriptor
     else
-      mkStaticHostRegistration descriptor;
+      mkDhcpHostRegistration descriptor;
 }

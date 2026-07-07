@@ -4,7 +4,7 @@
   ...
 }:
 let
-  x86Builder = import ../_x86-registration-builder.nix { inherit inputs; };
+  x86Builder = import ../common/registration/_x86.nix { inherit inputs; };
 in
 rec {
   mkHostModule =

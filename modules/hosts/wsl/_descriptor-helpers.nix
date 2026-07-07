@@ -5,7 +5,7 @@
 }:
 let
   hm = inputs.self.modules.homeManager;
-  x86Helpers = import ../_x86-descriptor-helpers.nix { inherit inputs lib; };
+  x86Helpers = import ../common/descriptors/_x86.nix { inherit inputs lib; };
 in
 {
   mkWslDescriptor =

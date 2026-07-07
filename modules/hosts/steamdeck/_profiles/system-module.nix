@@ -9,7 +9,7 @@ bootMode:
 { config, pkgs, ... }:
 let
   mkBaseModule = import ./base-module.nix { inherit descriptor host; };
-  sshKeyHelpers = import ../../_ssh-key-helpers.nix { inherit config; };
+  sshKeyHelpers = import ../../common/_ssh.nix { inherit config; };
   steamUser = host.users.steam.name;
 in
 mkBaseModule {

@@ -13,7 +13,7 @@
     let
       cfg = config.my.services.syncthing.server;
       hostName = config.networking.hostName;
-      syncthingCommonOptions = inputs.self.lib.shared.syncthingCommonOptions;
+      syncthingCommonOptions = inputs.self.lib.syncthing.commonOptions;
       serverUser = config.my.syncthing.serverUser;
 
       # Import the same device/folder definitions that Home Manager uses

@@ -29,7 +29,7 @@
       shouldEnable = hostCfg.syncthing.mode == "home";
       shouldWarnServer = hostCfg.syncthing.mode == "system";
       shouldHaveTray = hostCfg.syncthing.hasTray;
-      syncthingCommonOptions = inputs.self.lib.shared.syncthingCommonOptions;
+      syncthingCommonOptions = inputs.self.lib.syncthing.commonOptions;
 
       allDevices = config.my.syncthing.devices;
       allFolders = config.my.syncthing.folders;

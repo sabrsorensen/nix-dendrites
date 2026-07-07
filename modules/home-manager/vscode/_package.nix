@@ -6,7 +6,7 @@
   ...
 }:
 let
-  secretWrapArgsFromSpecs = inputs.self.lib.shared.secretWrapArgsFromSpecs;
+  secretWrapArgsFromSpecs = inputs.self.lib.secrets.secretWrapArgsFromSpecs;
   product = import ./_product.nix {
     flavor = config.my.editor.packageFlavor;
   };

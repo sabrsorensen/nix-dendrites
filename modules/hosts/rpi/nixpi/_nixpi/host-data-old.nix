@@ -5,20 +5,15 @@
 }:
 let
   network = builtins.fromJSON (builtins.readFile "${inputs.nix-secrets}/network.json");
-  descriptorHelpers = import ../../_descriptor-helpers.nix { inherit inputs lib network; };
+  descriptorHelpers = import ../../_descriptor-helpers-old.nix { inherit inputs lib network; };
 in
-descriptorHelpers.mkRpiDescriptor {
+descriptorHelpers.mkDhcpDescriptor {
   name = "NixPi";
   outputName = "nixpi";
+  imageName = "NixPiImage";
+  imageOutputName = "nixpi-image";
   hostName = "nixpi";
   configuration = "NixPi";
-  network.mode = "dhcp";
-  outputs.image = {
-    enable = true;
-    name = "NixPiImage";
-    outputName = "nixpi-image";
-    configuration = "NixPiImage";
-  };
   bootstrap = {
     configurationName = "NixPiBootstrap";
     outputName = "nixpi-bootstrap";

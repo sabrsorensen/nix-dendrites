@@ -49,9 +49,9 @@ descriptorHelpers.mkServerDescriptor {
   builder = inputs.self.lib.mkInventoryBuilder {
     hostName = "AtlasUponRaiden";
     sshKey = "/root/.ssh/nix_atlasuponraiden_id_ed25519";
-    systems = inputs.self.lib.shared.site.atlas.supportedSystems;
-    maxJobs = inputs.self.lib.shared.site.atlas.maxJobs;
-    speedFactor = inputs.self.lib.shared.site.atlas.speedFactor;
-    supportedFeatures = inputs.self.lib.shared.site.atlas.systemFeatures;
+    systems = inputs.self.lib.site.atlas.supportedSystems;
+    maxJobs = inputs.self.lib.site.atlas.maxJobs;
+    speedFactor = inputs.self.lib.site.atlas.speedFactor;
+    supportedFeatures = inputs.self.lib.site.atlas.systemFeatures;
   };
 }

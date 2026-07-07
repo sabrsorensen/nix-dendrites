@@ -5,7 +5,7 @@
   ...
 }:
 let
-  hostContextOptions = inputs.self.lib.shared.hostContextOptions;
+  hostContextOptions = inputs.self.lib.hostContext.options;
 in
 {
   flake.modules.nixos.host-context =

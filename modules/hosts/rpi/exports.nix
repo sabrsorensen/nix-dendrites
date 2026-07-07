@@ -15,5 +15,4 @@ let
 in
 {
   flake.lib.rpi = registrationBuilder;
-  flake.modules.nixos.rpi-base = ./_rpi/base.nix;
 }

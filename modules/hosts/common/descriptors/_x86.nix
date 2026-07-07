@@ -91,7 +91,8 @@ rec {
         bootstrap
         ;
       home.imports = homeImports ++ lib.optionals (homeSystemTypeModule != null) [ homeSystemTypeModule ];
-      nixos.imports = nixosImports ++ lib.optionals (systemType != null) [ hostModules.nixos.${systemType} ];
+      nixos.imports =
+        nixosImports ++ lib.optionals (systemType != null) [ hostModules.nixos.${systemType} ];
     }
     // lib.optionalAttrs (user != null) {
       inherit user;

@@ -11,5 +11,5 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  imports = [ ./_outputs.nix ];
+  imports = [ ../nix/flake-parts/_host-outputs.nix ];
 }

@@ -5,7 +5,7 @@
 }:
 let
   hostModules = inputs.self.modules;
-  x86Helpers = import ../_x86-descriptor-helpers.nix { inherit inputs lib; };
+  x86Helpers = import ../common/descriptors/_x86.nix { inherit inputs lib; };
 in
 {
   mkWorkstationDescriptor =

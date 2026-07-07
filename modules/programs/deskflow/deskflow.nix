@@ -27,8 +27,8 @@
       services.xserver = {
         # Set US Qwerty as default for KDE Plasma (for Deskflow compatibility)
         xkb = {
-          layout = "us";
-          variant = "";
+          layout = lib.mkDefault "us";
+          variant = lib.mkDefault "";
         };
       };
     };

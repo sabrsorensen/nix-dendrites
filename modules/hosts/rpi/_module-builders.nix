@@ -37,6 +37,9 @@
       }
       inputs.self.modules.nixos.system-cli
       ./_rpi/base.nix
+      {
+        home-manager.users.sam.imports = [ inputs.self.modules.homeManager.host-context ];
+      }
     ];
 
     virtualisation.docker.enable = lib.mkForce false;

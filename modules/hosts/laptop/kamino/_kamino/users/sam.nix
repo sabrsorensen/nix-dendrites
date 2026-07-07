@@ -1,4 +1,4 @@
-(import ../../../../_sam-user-module.nix {
+(import ../../../../common/users/_sam.nix {
   autoLogin = true;
   authorizedKeyPaths = [ "zaphodbeeblebrox/kamino" ];
 })

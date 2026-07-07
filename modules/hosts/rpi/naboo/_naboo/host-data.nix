@@ -7,44 +7,78 @@ let
   network = builtins.fromJSON (builtins.readFile "${inputs.nix-secrets}/network.json");
   descriptorHelpers = import ../../_descriptor-helpers.nix { inherit inputs lib network; };
 in
-descriptorHelpers.mkServiceDescriptor {
+descriptorHelpers.mkRpiDescriptor {
   name = "Naboo";
   outputName = "naboo";
-  imageName = "NabooImage";
-  imageOutputName = "naboo-image";
+  hostName = "Naboo";
   configuration = "Naboo";
-  address = network.naboo;
-  nameservers = [
-    network.nevarro
-    "1.1.1.1"
-    "9.9.9.9"
-  ];
-  localDomainApexIp = network.atlasuponraiden;
-  identityFile = "~/.ssh/naboo_id_ed25519";
-  nixIdentityFile = "~/.ssh/nix_naboo_id_ed25519";
-  authorizedKeys = {
-    sam = [
-      "atlasuponraiden/naboo"
-      "kamino/naboo"
-      "zaphodbeeblebrox/naboo"
-    ];
-    nixRemote = [
-      "atlasuponraiden/naboo_nix"
-      "kamino/naboo_nix"
-      "zaphodbeeblebrox/naboo_nix"
+  network = {
+    mode = "static";
+    address = network.naboo;
+    nameservers = [
+      network.nevarro
+      "1.1.1.1"
+      "9.9.9.9"
     ];
   };
-  securePeer = {
-    name = "Nevarro";
-    ip = network.nevarro;
+  deploy = {
+    method = "secure";
+    secure.peer = {
+      name = "Nevarro";
+      ip = network.nevarro;
+    };
   };
-  failoverPeer = {
-    name = "Nevarro";
-    ip = network.nevarro;
+  services = {
+    roles = [
+      "blocky-dns"
+      "dhcp-standby"
+    ];
+    imports = with inputs.self.modules.nixos; [
+      blocky
+      dhcp-coredns
+    ];
+    blocky.enable = true;
+    dhcpCoredns = {
+      localDomainApexIp = network.atlasuponraiden;
+      failoverPeer = {
+        name = "Nevarro";
+        ip = network.nevarro;
+      };
+      startKeaOnBoot = false;
+    };
   };
-  serviceRoles = [
-    "blocky-dns"
-    "dhcp-standby"
-  ];
-  startKeaOnBoot = false;
+  outputs.image = {
+    enable = true;
+    name = "NabooImage";
+    outputName = "naboo-image";
+    configuration = "NabooImage";
+  };
+  users.primary = {
+    name = "sam";
+    ssh = {
+      identityFile = "~/.ssh/naboo_id_ed25519";
+      nixIdentityFile = "~/.ssh/nix_naboo_id_ed25519";
+    };
+    authorizedKeys = {
+      sam = [
+        "atlasuponraiden/naboo"
+        "kamino/naboo"
+        "zaphodbeeblebrox/naboo"
+      ];
+      nixRemote = [
+        "atlasuponraiden/naboo_nix"
+        "kamino/naboo_nix"
+        "zaphodbeeblebrox/naboo_nix"
+      ];
+    };
+  };
+  myHost = {
+    primaryInteractiveUser = "sam";
+    formFactor = "server";
+    roles = {
+      server = true;
+      rpi = true;
+      serviceHost = true;
+    };
+  };
 }

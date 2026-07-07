@@ -45,7 +45,7 @@ in
                 {
                   my.host = hostContext // {
                     name = hostName;
-                    domain = inputs.self.lib.shared.site.domain or null;
+                    domain = inputs.self.lib.site.domain or null;
                   };
                   home.username = args.username;
                   home.homeDirectory = args.homeDirectory;
@@ -62,7 +62,7 @@ in
             config.allowUnfree = true;
           };
           extraSpecialArgs = {
-            inventory = inputs.self.lib.shared.mkHomeManagerInventory inputs.self.lib.hostInventory;
+            inventory = inputs.self.lib.deploy.mkHomeManagerInventory inputs.self.lib.hostInventory;
           }
           // extraSpecialArgs;
           modules =

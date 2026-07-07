@@ -7,7 +7,6 @@ let
   inherit (inputs.self.lib)
     mkInventoryDeploy
     mkInventoryHost
-    mkInventorySecureDeploy
     mkInventorySsh
     mkInventorySshBase
     mkInventorySshNix
@@ -19,35 +18,30 @@ in
     {
       name,
       configuration,
+      collections ? [ "checks" ],
     }:
     mkNixosOutputs {
       system = "aarch64-linux";
-      inherit name configuration;
+      inherit
+        name
+        configuration
+        collections
+        ;
     };
 
   mkAarch64Inventory =
     {
       outputs,
-      deployRemoteMethod,
       userName ? null,
       identityFile ? null,
       nixIdentityFile ? null,
+      deployRemoteMethod ? null,
       secureDeploy ? null,
       extraInventory ? { },
     }:
     mkInventoryHost (
       {
         inherit outputs;
-        deploy =
-          if secureDeploy == null then
-            mkInventoryDeploy {
-              remoteMethod = deployRemoteMethod;
-            }
-          else
-            mkInventoryDeploy {
-              remoteMethod = deployRemoteMethod;
-              secure = mkInventorySecureDeploy secureDeploy;
-            };
       }
       // lib.optionalAttrs (userName != null && identityFile != null && nixIdentityFile != null) {
         ssh = mkInventorySsh {
@@ -58,6 +52,12 @@ in
           nix = mkInventorySshNix {
             identityFile = nixIdentityFile;
           };
+        };
+      }
+      // lib.optionalAttrs (deployRemoteMethod != null) {
+        deploy = mkInventoryDeploy {
+          remoteMethod = deployRemoteMethod;
+          secure = secureDeploy;
         };
       }
       // extraInventory

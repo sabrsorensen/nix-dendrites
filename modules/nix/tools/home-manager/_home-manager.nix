@@ -10,7 +10,7 @@ let
         verbose = true;
         useUserPackages = true;
         useGlobalPkgs = true;
-        extraSpecialArgs.inventory = inputs.self.lib.shared.mkHomeManagerInventory inputs.self.lib.hostInventory;
+        extraSpecialArgs.inventory = inputs.self.lib.deploy.mkHomeManagerInventory inputs.self.lib.hostInventory;
         sharedModules = [
           {
             my.host = {

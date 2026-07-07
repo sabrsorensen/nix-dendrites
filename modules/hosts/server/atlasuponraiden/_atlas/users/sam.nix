@@ -1,4 +1,10 @@
-(import ../../../../_sam-user-module.nix {
+(import ../../../../common/users/_sam.nix {
+  extraGroups = [
+    "dialout"
+    "docker"
+    "networkmanager"
+    "users"
+  ];
   authorizedKeyPaths = [
     "kamino/atlas"
     "no-phone/atlas"

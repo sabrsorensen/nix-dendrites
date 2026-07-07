@@ -22,7 +22,7 @@
       // (inputs.nix4vscode.overlays.forVscode final prev)
       // (import ../../../../steamdeck-packages/_packages.nix {
         pkgs = final;
-        writeSourceReplacementScript = inputs.self.lib.shared.writeSourceReplacementScript;
+        writeSourceReplacementScript = inputs.self.lib.scripts.writeSourceReplacementScript;
       })
       // {
         local = withSystem prev.stdenv.hostPlatform.system ({ config, ... }: config.packages);

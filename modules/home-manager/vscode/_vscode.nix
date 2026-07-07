@@ -224,9 +224,11 @@
 
       config = lib.mkIf enableVscode ({
         my.editor.packageFlavor = lib.mkDefault (if config.my.host.is.wsl then "vscode" else "vscodium");
-        home.packages = lib.optionals config.my.editor.installLocalDotnetSdk [
-          pkgs.dotnetCorePackages.sdk_10_0-bin
-        ] ++ lib.optionals cfg.profiles.stm32 [ pkgs.stm32cubemx ];
+        home.packages =
+          lib.optionals config.my.editor.installLocalDotnetSdk [
+            pkgs.dotnetCorePackages.sdk_10_0-bin
+          ]
+          ++ lib.optionals cfg.profiles.stm32 [ pkgs.stm32cubemx ];
         programs.vscode = lib.mkIf (cfg.packageFlavor == "vscode") editorProgramConfig;
         programs.vscodium = lib.mkIf (cfg.packageFlavor == "vscodium") editorProgramConfig;
       });

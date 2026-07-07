@@ -10,7 +10,7 @@
 }:
 let
   cfg = config.jovian.decky-loader;
-  writeSourceReplacementScript = inputs.self.lib.shared.writeSourceReplacementScript pkgs;
+  writeSourceReplacementScript = inputs.self.lib.scripts.writeSourceReplacementScript pkgs;
   systemctlActions = [
     "is-active"
     "daemon-reload"

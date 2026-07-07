@@ -13,7 +13,7 @@
   ...
 }:
 let
-  sshKeyHelpers = import ../_ssh-key-helpers.nix { inherit config; };
+  sshKeyHelpers = import ../_ssh.nix { inherit config; };
 in
 {
   users.users.sam = {

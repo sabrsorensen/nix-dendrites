@@ -4,222 +4,154 @@
   network,
 }:
 let
-  aarch64Helpers = import ../_aarch64-descriptor-helpers.nix { inherit inputs lib; };
+  aarch64Helpers = import ../common/descriptors/_aarch64.nix { inherit inputs lib; };
+  common = import ./_descriptor-common.nix { inherit inputs lib aarch64Helpers; };
   defaultNixosImports = [ inputs.self.modules.nixos."sam-system-cli" ];
   inherit (inputs.self.lib)
     localDns
     ;
 in
 rec {
-  mkStaticDescriptor =
+  mkRpiDescriptor =
     {
-      address,
-      config ? { },
-      configuration,
-      hostName,
-      localDnsRecords ? [ ],
       name,
-      systemType ? null,
       outputName,
+      configuration,
+      hostName ? name,
+      systemType ? null,
       extraImports ? [ ],
+      config ? { },
+      myHost ? { },
+      network ? { },
+      deploy ? { },
+      services ? { },
+      outputs ? { },
+      users ? { },
       bootstrap ? null,
     }:
     let
-      resolvedNixosImports =
-        defaultNixosImports
-        ++ extraImports
-        ++ lib.optionals (systemType != null) [ inputs.self.modules.nixos.${systemType} ];
-    in
-    {
-      kind = "static";
-      inherit
-        bootstrap
-        config
-        localDnsRecords
-        name
-        outputName
-        ;
-      nixos.imports = resolvedNixosImports;
-      network = {
-        inherit address hostName;
-      };
-      inventory = aarch64Helpers.mkAarch64Inventory {
-        deployRemoteMethod = "switch";
-        outputs = aarch64Helpers.mkAarch64Outputs {
-          name = outputName;
-          inherit configuration;
-        };
-      };
-    };
-
-  mkDhcpDescriptor =
-    {
-      config ? { },
-      configuration,
-      hostName,
-      imageName,
-      imageOutputName,
-      name,
-      systemType ? null,
-      outputName,
-      extraImports ? [ ],
-      bootstrap ? null,
-    }:
-    let
-      resolvedNixosImports =
-        defaultNixosImports
-        ++ extraImports
-        ++ lib.optionals (systemType != null) [ inputs.self.modules.nixos.${systemType} ];
-    in
-    {
-      kind = "dhcp";
-      inherit
-        bootstrap
-        config
-        name
-        outputName
-        ;
-      nixos.imports = resolvedNixosImports;
-      image = {
-        name = imageName;
-        outputName = imageOutputName;
-      };
-      network = {
+      normalizedNetwork = {
+        mode = "static";
         inherit hostName;
         address = null;
-        dhcp = true;
+        nameservers = [ ];
+        localDnsRecords = [ ];
+      }
+      // network;
+      normalizedDeploy = {
+        method = "switch";
+        remoteUser = null;
+        secure = null;
+      }
+      // deploy;
+      normalizedServices = {
+        roles = [ ];
+        imports = [ ];
+        blocky = {
+          enable = false;
+        };
+        dhcpCoredns = null;
+      }
+      // services;
+      normalizedOutputs = {
+        system.enable = true;
+        image = {
+          enable = false;
+          name = null;
+          outputName = null;
+          configuration = null;
+        };
+        bootstrap = bootstrap;
+      }
+      // outputs;
+      normalizedPrimaryUser = users.primary or null;
+      normalizedUsers = {
+        primary = normalizedPrimaryUser;
       };
-      inventory = aarch64Helpers.mkAarch64Inventory {
-        deployRemoteMethod = "switch";
-        outputs =
-          aarch64Helpers.mkAarch64Outputs {
-            name = outputName;
-            inherit configuration;
-          }
-          ++ builtins.map (output: output // { buildProduct = "sdImage"; }) (
-            aarch64Helpers.mkAarch64Outputs {
-              name = imageOutputName;
-              configuration = imageName;
-            }
-          )
-          ++ lib.optionals (bootstrap != null) (
-            aarch64Helpers.mkAarch64Outputs {
-              name = bootstrap.outputName;
-              configuration = bootstrap.configurationName;
-            }
-            ++ builtins.map (output: output // { buildProduct = "sdImage"; }) (
-              aarch64Helpers.mkAarch64Outputs {
-                name = bootstrap.imageOutputName;
-                configuration = bootstrap.imageName;
-              }
-            )
-          );
+      resolvedNixosImports = common.mkResolvedImports {
+        inherit systemType extraImports;
+        inherit defaultNixosImports;
+        serviceImports = normalizedServices.imports;
       };
-    };
-
-  mkServiceDescriptor =
-    {
-      address,
-      authorizedKeys,
-      config ? { },
-      configuration,
-      failoverPeer ? null,
-      imageName,
-      imageOutputName,
-      identityFile,
-      localDomainApexIp,
-      name,
-      nameservers,
-      nixIdentityFile,
-      outputName,
-      securePeer,
-      serviceRoles,
-      startKeaOnBoot ? null,
-      userName ? "sam",
-      systemType ? null,
-      extraImports ? [ ],
-      bootstrap ? null,
-    }:
-    let
-      resolvedNixosImports =
-        (with inputs.self.modules.nixos; [
-          blocky
-          dhcp-coredns
-        ])
-        ++ defaultNixosImports
-        ++ extraImports
-        ++ lib.optionals (systemType != null) [ inputs.self.modules.nixos.${systemType} ];
+      resolvedConfig =
+        lib.optionalAttrs normalizedServices.blocky.enable {
+          my.services.blocky.enable = true;
+        }
+        // config;
+      isService = normalizedDeploy.method == "secure" || normalizedServices.roles != [ ];
+      inventoryOutputs =
+        aarch64Helpers.mkAarch64Outputs {
+          name = outputName;
+          inherit configuration;
+        }
+        ++ common.mkImageInventoryOutputs normalizedOutputs.image
+        ++ common.mkBootstrapInventoryOutputs normalizedOutputs.bootstrap;
+      inventoryArgs = {
+        outputs = inventoryOutputs;
+        deployRemoteMethod = normalizedDeploy.method;
+        extraInventory = lib.optionalAttrs (normalizedServices.roles != [ ]) {
+          serviceRoles = normalizedServices.roles;
+        };
+      }
+      // lib.optionalAttrs (normalizedPrimaryUser != null && normalizedPrimaryUser ? ssh) {
+        userName = normalizedPrimaryUser.name;
+        identityFile = normalizedPrimaryUser.ssh.identityFile;
+        nixIdentityFile = normalizedPrimaryUser.ssh.nixIdentityFile;
+      }
+      // lib.optionalAttrs (normalizedDeploy.secure != null) {
+        secureDeploy = {
+          peerName = normalizedDeploy.secure.peer.name;
+          peerIp = normalizedDeploy.secure.peer.ip;
+          probeDomains = localDns.secureDeployProbeDomains;
+        };
+      };
+      compatFailoverPeer =
+        if
+          normalizedServices.dhcpCoredns == null
+          || normalizedServices.dhcpCoredns.failoverPeer or null == null
+        then
+          null
+        else
+          normalizedServices.dhcpCoredns.failoverPeer
+          // {
+            probeDomains = localDns.secureDeployProbeDomains;
+          };
+      compatUser =
+        if normalizedPrimaryUser == null then
+          null
+        else
+          {
+            name = normalizedPrimaryUser.name;
+            ssh = normalizedPrimaryUser.ssh or { };
+            authorizedKeys = normalizedPrimaryUser.authorizedKeys or { };
+          };
     in
     {
-      kind = "service";
       inherit
         bootstrap
+        hostName
         name
         outputName
         ;
-      config = lib.recursiveUpdate {
-        my.services.blocky.enable = true;
-      } config;
-      image = {
-        name = imageName;
-        outputName = imageOutputName;
-      };
-      user = {
-        name = userName;
-        ssh = {
-          inherit identityFile nixIdentityFile;
-        };
-        inherit authorizedKeys;
-      };
-      network = {
-        inherit address localDomainApexIp nameservers;
-      }
-      // (
-        if failoverPeer == null then
-          { }
-        else
-          {
-            failoverPeer = failoverPeer // {
-              probeDomains = localDns.secureDeployProbeDomains;
-            };
-          }
-      );
+      config = resolvedConfig;
+      my.host = myHost;
       nixos.imports = resolvedNixosImports;
-      inventory = aarch64Helpers.mkAarch64Inventory {
-        inherit userName identityFile nixIdentityFile;
-        deployRemoteMethod = "secure";
-        secureDeploy = {
-          peerName = securePeer.name;
-          peerIp = securePeer.ip;
-          probeDomains = localDns.secureDeployProbeDomains;
+      inventory = aarch64Helpers.mkAarch64Inventory inventoryArgs;
+      network =
+        normalizedNetwork
+        // lib.optionalAttrs (normalizedServices.dhcpCoredns != null) {
+          localDomainApexIp = normalizedServices.dhcpCoredns.localDomainApexIp;
+        }
+        // lib.optionalAttrs (compatFailoverPeer != null) {
+          failoverPeer = compatFailoverPeer;
         };
-        extraInventory = {
-          inherit serviceRoles;
-        };
-        outputs =
-          aarch64Helpers.mkAarch64Outputs {
-            name = outputName;
-            inherit configuration;
-          }
-          ++ builtins.map (output: output // { buildProduct = "sdImage"; }) (
-            aarch64Helpers.mkAarch64Outputs {
-              name = imageOutputName;
-              configuration = imageName;
-            }
-          )
-          ++ lib.optionals (bootstrap != null) (
-            aarch64Helpers.mkAarch64Outputs {
-              name = bootstrap.outputName;
-              configuration = bootstrap.configurationName;
-            }
-            ++ builtins.map (output: output // { buildProduct = "sdImage"; }) (
-              aarch64Helpers.mkAarch64Outputs {
-                name = bootstrap.imageOutputName;
-                configuration = bootstrap.imageName;
-              }
-            )
-          );
-      };
+      localDnsRecords = normalizedNetwork.localDnsRecords;
+      deploy = normalizedDeploy;
+      services = normalizedServices;
+      outputs = normalizedOutputs;
+      users = normalizedUsers;
     }
-    // (if startKeaOnBoot == null then { } else { inherit startKeaOnBoot; });
+    // lib.optionalAttrs (compatUser != null) {
+      user = compatUser;
+    };
 }

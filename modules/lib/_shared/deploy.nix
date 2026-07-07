@@ -11,12 +11,12 @@ let
     "dhcp-primary" = [ "dhcp-coredns-kea" ];
     "dhcp-standby" = [ "dhcp-failover.timer" ];
   };
+  expandServiceRoles =
+    roles: lib.unique (lib.concatLists (map (role: serviceRoleUnits.${role} or [ ]) roles));
 in
 {
   inherit serviceRoleUnits;
-
-  expandServiceRoles =
-    roles: lib.unique (lib.concatLists (map (role: serviceRoleUnits.${role} or [ ]) roles));
+  inherit expandServiceRoles;
 
   mkHomeManagerInventory =
     inventory:
@@ -32,8 +32,8 @@ in
             in
             secureCfg
             // {
-              peerServices = inputs.self.lib.shared.expandServiceRoles (peerCfg.serviceRoles or [ ]);
-              targetServices = inputs.self.lib.shared.expandServiceRoles (host.serviceRoles or [ ]);
+              peerServices = expandServiceRoles (peerCfg.serviceRoles or [ ]);
+              targetServices = expandServiceRoles (host.serviceRoles or [ ]);
             };
         };
       }
