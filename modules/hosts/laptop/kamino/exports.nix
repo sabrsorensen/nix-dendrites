@@ -32,7 +32,6 @@ in
         (import ./_kamino/boot.nix {
           inherit rootLuksUuid swapLuksUuid;
         })
-        ./_kamino/desktop.nix
         ./_kamino/users/sam.nix
       ];
     };

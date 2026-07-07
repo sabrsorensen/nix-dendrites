@@ -55,7 +55,6 @@ mkBaseModule {
     networking.firewall.allowedTCPPorts = [
       24800
     ];
-    networking.firewall.allowedUDPPorts = [ 24800 ];
 
     environment.systemPackages = host.systemPackages pkgs;
     services.flatpak.packages = [
