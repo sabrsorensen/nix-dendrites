@@ -75,4 +75,13 @@ descriptorHelpers.mkRpiDescriptor {
       serviceHost = true;
     };
   };
+  config.services.prometheus.exporters.node = {
+    enable = true;
+    listenAddress = "0.0.0.0";
+    openFirewall = true;
+    enabledCollectors = [
+      "hwmon"
+      "systemd"
+    ];
+  };
 }

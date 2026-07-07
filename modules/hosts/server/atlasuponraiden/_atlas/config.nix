@@ -32,6 +32,10 @@
           "naboo"
           "nevarro"
         ];
+        nodeTargets = [
+          "naboo"
+          "nevarro"
+        ];
       };
       podman.enable = true;
       samba.enable = true;

@@ -17,6 +17,10 @@
       grafanaDatasourceUid = "prometheus";
       blockyMetricsPort = 4000;
       blockyPrometheusPath = "/metrics";
+      serviceNoiseRegex =
+        "^(systemd-|dbus|polkit|NetworkManager|wpa_supplicant|nftables|user@|getty@|serial-getty@|nix-daemon|systemd-networkd|systemd-timesyncd|systemd-journald|systemd-resolved|systemd-udevd|systemd-logind|systemd-rfkill|systemd-random-seed|systemd-tmpfiles-|systemd-sysctl|systemd-update-utmp|kmod-static-nodes|modprobe@|sys-kernel-config.mount|sys-fs-fuse-connections.mount).*$";
+      remoteInterestingServiceRegex =
+        "^(blocky|coredns|dhcp-coredns-kea|dhcp-coredns-prepare|dhcp-failover|sshd|tailscaled|node-exporter|prometheus-node-exporter).*$";
       blockyTargetConfigs = map (hostName: {
         targets = [ "${hostName}.${localDomain}:${toString blockyMetricsPort}" ];
         labels = {
@@ -24,6 +28,11 @@
           service = "blocky";
         };
       }) cfg.blockyTargets;
+      nodeExporterPort = 9100;
+      nodeTargetConfigs = map (hostName: {
+        targets = [ "${hostName}.${localDomain}:${toString nodeExporterPort}" ];
+        labels.host = hostName;
+      }) cfg.nodeTargets;
       maybeBasicAuthLines =
         routePrefix:
         lib.optionals (cfg.basicAuthPasswordEnvVar != null) [
@@ -818,6 +827,418 @@
           version = 1;
         }
       );
+      grafanaRpiServicesDashboard = pkgs.writeText "grafana-rpi-services-overview.json" (
+        builtins.toJSON {
+          annotations.list = [ ];
+          editable = true;
+          id = null;
+          panels = [
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                unit = "reqps";
+              };
+              gridPos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 0;
+              };
+              id = 1;
+              options = {
+                legend = {
+                  displayMode = "list";
+                  placement = "bottom";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "single";
+                  sort = "desc";
+                };
+              };
+              targets = [
+                {
+                  expr = "sum by (host) (rate(blocky_query_total{job=\"blocky\"}[$__rate_interval]))";
+                  legendFormat = "{{host}}";
+                  refId = "A";
+                }
+              ];
+              title = "Blocky Query Rate";
+              type = "timeseries";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "thresholds";
+                max = 100;
+                min = 0;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "orange";
+                      value = 70;
+                    }
+                    {
+                      color = "red";
+                      value = 90;
+                    }
+                  ];
+                };
+                unit = "percent";
+              };
+              gridPos = {
+                h = 5;
+                w = 6;
+                x = 12;
+                y = 0;
+              };
+              id = 2;
+              options = {
+                colorMode = "background";
+                graphMode = "none";
+                justifyMode = "center";
+                orientation = "auto";
+                reduceOptions = {
+                  calcs = [ "lastNotNull" ];
+                  fields = "";
+                  values = false;
+                };
+                textMode = "value";
+              };
+              targets = [
+                {
+                  expr = "100 * (1 - avg by (host) (rate(node_cpu_seconds_total{job=\"remote-node\",mode=\"idle\"}[5m])))";
+                  instant = true;
+                  legendFormat = "{{host}}";
+                  refId = "A";
+                }
+              ];
+              title = "CPU Usage";
+              type = "stat";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "thresholds";
+                max = 100;
+                min = 0;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "orange";
+                      value = 75;
+                    }
+                    {
+                      color = "red";
+                      value = 90;
+                    }
+                  ];
+                };
+                unit = "percent";
+              };
+              gridPos = {
+                h = 5;
+                w = 6;
+                x = 18;
+                y = 0;
+              };
+              id = 3;
+              options = {
+                colorMode = "background";
+                graphMode = "none";
+                justifyMode = "center";
+                orientation = "auto";
+                reduceOptions = {
+                  calcs = [ "lastNotNull" ];
+                  fields = "";
+                  values = false;
+                };
+                textMode = "value";
+              };
+              targets = [
+                {
+                  expr = "100 * (1 - (node_memory_MemAvailable_bytes{job=\"remote-node\"} / node_memory_MemTotal_bytes{job=\"remote-node\"}))";
+                  instant = true;
+                  legendFormat = "{{host}}";
+                  refId = "A";
+                }
+              ];
+              title = "Memory Usage";
+              type = "stat";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                unit = "bytes";
+              };
+              gridPos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 8;
+              };
+              id = 4;
+              options = {
+                legend = {
+                  displayMode = "table";
+                  placement = "right";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "single";
+                  sort = "desc";
+                };
+              };
+              targets = [
+                {
+                  expr = "rate(node_network_receive_bytes_total{job=\"remote-node\",device=~\"^(en|eth|end|wl|ww)[a-zA-Z0-9._-]*$\"}[5m])";
+                  legendFormat = "{{host}} {{device}} rx";
+                  refId = "A";
+                }
+                {
+                  expr = "rate(node_network_transmit_bytes_total{job=\"remote-node\",device=~\"^(en|eth|end|wl|ww)[a-zA-Z0-9._-]*$\"}[5m])";
+                  legendFormat = "{{host}} {{device}} tx";
+                  refId = "B";
+                }
+              ];
+              title = "Network Throughput";
+              type = "timeseries";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                unit = "percent";
+                decimals = 1;
+              };
+              gridPos = {
+                h = 8;
+                w = 12;
+                x = 12;
+                y = 8;
+              };
+              id = 5;
+              options = {
+                legend = {
+                  displayMode = "table";
+                  placement = "right";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "single";
+                  sort = "none";
+                };
+              };
+              targets = [
+                {
+                  expr = "100 * (1 - (node_filesystem_avail_bytes{job=\"remote-node\",mountpoint!~\"^/(run|sys|proc)($|/)|^/var/run($|/)|^/var/lib/(docker|containers)($|/)|^/nix/store($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs|fuse.mergerfs\"} / node_filesystem_size_bytes{job=\"remote-node\",mountpoint!~\"^/(run|sys|proc)($|/)|^/var/run($|/)|^/var/lib/(docker|containers)($|/)|^/nix/store($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs|fuse.mergerfs\"}))";
+                  legendFormat = "{{host}} {{mountpoint}}";
+                  refId = "A";
+                }
+              ];
+              title = "Filesystem Usage";
+              type = "timeseries";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                unit = "celsius";
+                decimals = 1;
+              };
+              gridPos = {
+                h = 8;
+                w = 24;
+                x = 0;
+                y = 16;
+              };
+              id = 6;
+              options = {
+                legend = {
+                  displayMode = "table";
+                  placement = "right";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "multi";
+                  sort = "desc";
+                };
+              };
+              targets = [
+                {
+                  expr = "(node_hwmon_temp_celsius{job=\"remote-node\",chip=~\".*(coretemp|k10temp|zenpower|cpu).*\",sensor=~\"(Package id 0|Tctl|Tdie|temp1)\"}) or (node_hwmon_temp_celsius{job=\"remote-node\",chip=~\".*(jc42|spd|dimm|mem).*\"}) or (node_hwmon_temp_celsius{job=\"remote-node\",chip=~\".*nvme.*\"})";
+                  legendFormat = "{{host}} {{chip}} {{sensor}}";
+                  refId = "A";
+                }
+                {
+                  expr = "smartctl_device_temperature{job=\"smartctl\"}";
+                  legendFormat = "{{device}} drive";
+                  refId = "B";
+                }
+              ];
+              title = "Hardware Temperatures";
+              type = "timeseries";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              gridPos = {
+                h = 10;
+                w = 12;
+                x = 0;
+                y = 24;
+              };
+              id = 7;
+              options = {
+                cellHeight = "sm";
+                footer = {
+                  enablePagination = true;
+                  fields = "";
+                  reducer = [ "sum" ];
+                  show = false;
+                };
+                showHeader = true;
+              };
+              targets = [
+                {
+                  expr = "max by (host, name) (node_systemd_unit_state{job=\"remote-node\",state=\"active\",name=~\".+\\\\.service\",name!~\"${serviceNoiseRegex}\",name=~\"${remoteInterestingServiceRegex}\"})";
+                  format = "table";
+                  instant = true;
+                  refId = "A";
+                }
+              ];
+              title = "Key Active Service Units";
+              transformations = [
+                {
+                  id = "organize";
+                  options = {
+                    excludeByName = {
+                      "Time" = true;
+                      "Value" = false;
+                      "__name__" = true;
+                      "instance" = true;
+                      "job" = true;
+                    };
+                    indexByName = {
+                      "host" = 0;
+                      "name" = 1;
+                      "Value" = 2;
+                    };
+                    renameByName = {
+                      "Value" = "active";
+                    };
+                  };
+                }
+              ];
+              type = "table";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              gridPos = {
+                h = 10;
+                w = 12;
+                x = 12;
+                y = 24;
+              };
+              id = 8;
+              options = {
+                cellHeight = "sm";
+                footer = {
+                  enablePagination = true;
+                  fields = "";
+                  reducer = [ "sum" ];
+                  show = false;
+                };
+                showHeader = true;
+              };
+              targets = [
+                {
+                  expr = "max by (host, name) (node_systemd_unit_state{job=\"remote-node\",state=\"failed\",name=~\".+\\\\.service\",name!~\"${serviceNoiseRegex}\"})";
+                  format = "table";
+                  instant = true;
+                  refId = "A";
+                }
+              ];
+              title = "Failed Service Units";
+              transformations = [
+                {
+                  id = "organize";
+                  options = {
+                    excludeByName = {
+                      "Time" = true;
+                      "Value" = false;
+                      "__name__" = true;
+                      "instance" = true;
+                      "job" = true;
+                    };
+                    indexByName = {
+                      "host" = 0;
+                      "name" = 1;
+                      "Value" = 2;
+                    };
+                    renameByName = {
+                      "Value" = "failed";
+                    };
+                  };
+                }
+              ];
+              type = "table";
+            }
+          ];
+          refresh = "30s";
+          schemaVersion = 39;
+          tags = [
+            "rpi"
+            "naboo"
+            "nevarro"
+            "prometheus"
+          ];
+          templating.list = [ ];
+          time = {
+            from = "now-6h";
+            to = "now";
+          };
+          timezone = "browser";
+          title = "Naboo and Nevarro Overview";
+          uid = "naboo-nevarro-overview";
+          version = 1;
+        }
+      );
     in
     {
       options.my.services.monitoring = {
@@ -853,6 +1274,12 @@
           type = lib.types.listOf lib.types.str;
           default = [ ];
           description = "Hostnames whose Blocky Prometheus endpoints should be scraped by Atlas.";
+        };
+
+        nodeTargets = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = "Hostnames whose node-exporter endpoints should be scraped by Atlas under a remote-node job.";
         };
       };
 
@@ -918,6 +1345,10 @@
                       name = "blocky-dns-overview.json";
                       path = grafanaBlockyDashboard;
                     }
+                    {
+                      name = "naboo-nevarro-overview.json";
+                      path = grafanaRpiServicesDashboard;
+                    }
                   ];
                   orgId = 1;
                   type = "file";
@@ -982,6 +1413,12 @@
                   targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ];
                 }
               ];
+            }
+          ]
+          ++ lib.optionals (cfg.nodeTargets != [ ]) [
+            {
+              job_name = "remote-node";
+              static_configs = nodeTargetConfigs;
             }
           ]
           ++ lib.optionals (cfg.blockyTargets != [ ]) [
