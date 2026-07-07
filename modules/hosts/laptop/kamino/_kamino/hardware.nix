@@ -7,6 +7,7 @@
   nixpkgs.hostPlatform = "x86_64-linux";
   boot = {
     extraModulePackages = [ ];
+    loader.efi.canTouchEfiVariables = true;
     initrd = {
       availableKernelModules = [
         "xhci_pci"
@@ -25,7 +26,12 @@
         nvidiaBusId = "PCI:108@0:0:0";
       };
     };
-  }
+  };
+
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
+  nix.buildMachines = [ ];
+  nix.distributedBuilds = true;
 
   services.xserver.videoDrivers = [
     "nvidia"

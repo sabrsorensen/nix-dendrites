@@ -27,15 +27,4 @@ descriptorHelpers.mkWorkstationDescriptor {
     zsa = true;
   };
   enableSystemdBoot = true;
-  bootstrap = {
-    configurationName = "KaminoBootstrap";
-    outputName = "kamino-bootstrap";
-    finalConfigName = "Kamino";
-    authorizedKeyPaths = [ "zaphodbeeblebrox/kamino" ];
-    nixos.imports = [ inputs.self.modules.nixos.kaminoBootstrap ];
-    user.extraGroups = [
-      "wheel"
-      "networkmanager"
-    ];
-  };
 }

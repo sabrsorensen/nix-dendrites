@@ -25,28 +25,21 @@ in
     kamino = {
       imports = [
         ./_kamino/hardware.nix
-        (import ./_kamino/filesystem.nix {
-          inherit bootUuid rootFsUuid swapUuid;
-        })
+        (
+          { lib, ... }:
+          import ./_kamino/filesystem.nix {
+            inherit
+              lib
+              bootUuid
+              rootFsUuid
+              rootLuksUuid
+              swapLuksUuid
+              swapUuid
+              ;
+          }
+        )
         ./_kamino/network.nix
-        (import ./_kamino/boot.nix {
-          inherit rootLuksUuid swapLuksUuid;
-        })
         ./_kamino/users/sam.nix
-      ];
-    };
-
-    kaminoBootstrap = {
-      imports = [
-        ./_kamino/hardware.nix
-        (import ./_kamino/filesystem.nix {
-          inherit bootUuid rootFsUuid swapUuid;
-        })
-        ./_kamino/network.nix
-        (import ./_kamino/boot.nix {
-          inherit rootLuksUuid swapLuksUuid;
-        })
-        inputs.self.modules.nixos.systemd-boot
       ];
     };
   };
