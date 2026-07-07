@@ -52,10 +52,6 @@ mkBaseModule {
       inputs.self.modules.homeManager.${descriptor.home.moduleName}
     ];
 
-    networking.firewall.allowedTCPPorts = [
-      24800
-    ];
-
     environment.systemPackages = host.systemPackages pkgs;
     services.flatpak.packages = [
       "io.github.Geocld.XStreamingDesktop"

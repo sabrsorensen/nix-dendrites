@@ -11,6 +11,7 @@
     formFactor = "handheld";
     roles.steamdeck = true;
     features = {
+      deskflow = true;
       firmware = true;
       gui = true;
       noson = true;
@@ -67,7 +68,6 @@
 
   systemPackages =
     pkgs: with pkgs; [
-      deskflow
       rclone
       signal-desktop
       vlc
