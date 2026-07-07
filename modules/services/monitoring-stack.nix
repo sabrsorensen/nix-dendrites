@@ -404,14 +404,15 @@
               };
               targets = [
                 {
-                  expr = "sum(node_systemd_unit_state{job=\"node\",state=\"active\",name=~\".+\\\\.service\"})";
+                  expr = "max by (name) (node_systemd_unit_state{job=\"node\",state=\"active\",name=~\".+\\\\.service\"})";
+                  format = "table";
                   instant = true;
-                  legendFormat = "active";
+                  legendFormat = "{{name}}";
                   refId = "A";
                 }
               ];
-              title = "Active Services";
-              type = "stat";
+              title = "Active Service Units";
+              type = "table";
             }
             {
               datasource = {
@@ -443,7 +444,7 @@
               };
               targets = [
                 {
-                  expr = "100 * (1 - (node_filesystem_avail_bytes{job=\"node\",mountpoint!~\"^/(run|sys|proc)($|/)|^/var/lib/(docker|containers)($|/)|^/nix/store($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs|fuse.mergerfs\"} / node_filesystem_size_bytes{job=\"node\",mountpoint!~\"^/(run|sys|proc)($|/)|^/var/lib/(docker|containers)($|/)|^/nix/store($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs|fuse.mergerfs\"}))";
+                  expr = "100 * (1 - (node_filesystem_avail_bytes{job=\"node\",mountpoint!~\"^/(run|sys|proc)($|/)|^/var/run($|/)|^/var/lib/(docker|containers)($|/)|^/nix/store($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs|fuse.mergerfs\"} / node_filesystem_size_bytes{job=\"node\",mountpoint!~\"^/(run|sys|proc)($|/)|^/var/run($|/)|^/var/lib/(docker|containers)($|/)|^/nix/store($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs|fuse.mergerfs\"}))";
                   legendFormat = "{{mountpoint}}";
                   refId = "A";
                 }
@@ -498,7 +499,7 @@
               };
               targets = [
                 {
-                  expr = "node_hwmon_temp_celsius{job=\"node\",chip=~\".*(coretemp|k10temp|zenpower|cpu|jc42|spd|dimm|mem).*\"}";
+                  expr = "(node_hwmon_temp_celsius{job=\"node\",chip=~\".*(coretemp|k10temp|zenpower|cpu).*\",sensor=~\"(Package id 0|Tctl|Tdie|temp1)\"}) or (node_hwmon_temp_celsius{job=\"node\",chip=~\".*(jc42|spd|dimm|mem).*\"}) or (node_hwmon_temp_celsius{job=\"node\",chip=~\".*nvme.*\"})";
                   legendFormat = "{{chip}} {{sensor}}";
                   refId = "A";
                 }
