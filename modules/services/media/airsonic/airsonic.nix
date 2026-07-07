@@ -11,7 +11,7 @@
       toInt = value: if builtins.isInt value then value else builtins.fromJSON value;
       groupName = "media";
       localAddr = "127.0.0.1:4040";
-      mediaCfg = config.my.media;
+      mediaCfg = config.my.services.media;
       serviceName = "airsonic";
       containerIdentity =
         lib.attrByPath

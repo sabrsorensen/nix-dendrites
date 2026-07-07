@@ -4,10 +4,10 @@
   ...
 }:
 let
-  mediaCfg = config.my.media;
+  mediaCfg = config.my.services.media;
 in
 {
-  options.my.media = {
+  options.my.services.media = {
     enable = lib.mkEnableOption "media service stack";
 
     configRoot = lib.mkOption {
@@ -64,7 +64,7 @@ in
       [
         {
           assertion = lib.length uids == lib.length (lib.unique uids);
-          message = "my.media.containerIdentities must assign a unique UID to each service.";
+          message = "my.services.media.containerIdentities must assign a unique UID to each service.";
         }
       ];
   };

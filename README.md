@@ -51,10 +51,8 @@ The design goal is:
 
 For x86 host families, the preferred descriptor API is:
 
-- `homeProfileNames` for reusable Home Manager profile bundles
-- `nixosProfileNames` for reusable NixOS profile bundles such as `system-workstation`, `system-desktop`, `system-cli`, and `system-work-dev`
-- `homeImports` only for true host-local HM exceptions
-- `extraImports` only for true host-local NixOS exceptions
+- `systemType` for the primary shared NixOS base layer such as `system-workstation`, `system-cli`, or `system-work-dev`
+- host facts under `my.host.*` for shared module behavior
 
 Laptop, server, and WSL all use the same shared x86 descriptor and registration
 mechanics. Their intended differences are in default profiles and environment

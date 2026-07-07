@@ -10,7 +10,7 @@
       toInt = value: if builtins.isInt value then value else builtins.fromJSON value;
       localDomain = config.systemConstants.domain;
       groupName = "media";
-      mediaCfg = config.my.media;
+      mediaCfg = config.my.services.media;
       plexIdentity = lib.attrByPath [ "plex" ] {
         uid = 2104;
         gid = 2096;

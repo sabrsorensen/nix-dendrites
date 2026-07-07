@@ -7,7 +7,7 @@
     }:
     let
       cfg = config.my.services.gonic;
-      mediaCfg = config.my.media;
+      mediaCfg = config.my.services.media;
       serviceName = "gonic";
     in
     {

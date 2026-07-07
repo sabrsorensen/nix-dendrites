@@ -5,15 +5,21 @@ let
   scriptFiles = builtins.attrNames (lib.filterAttrs (_name: type: type == "regular") scriptEntries);
 in
 {
-  flake.modules.homeManager.demlo = {
-    xdg.configFile = {
-      "demlo/config.lua".source = ./demlo/config.lua;
-    }
-    // builtins.listToAttrs (
-      map (name: {
-        name = "demlo/scripts/${name}";
-        value.source = scriptDir + "/${name}";
-      }) scriptFiles
-    );
-  };
+  flake.modules.homeManager.demlo =
+    {
+      lib,
+      config,
+      ...
+    }:
+    lib.mkIf config.my.host.features.musicTagging {
+      xdg.configFile = {
+        "demlo/config.lua".source = ./demlo/config.lua;
+      }
+      // builtins.listToAttrs (
+        map (name: {
+          name = "demlo/scripts/${name}";
+          value.source = scriptDir + "/${name}";
+        }) scriptFiles
+      );
+    };
 }

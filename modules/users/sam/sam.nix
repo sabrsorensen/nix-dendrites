@@ -16,11 +16,7 @@ userHelpers.mkUserFamily {
     {
       homeImports = [
         hm.sam-home-base
-        hm.bitwarden
         hm."graphical-home"
-        hm."sam-home-communications"
-        hm."sam-home-media-clients"
-        hm."sam-home-device-tools"
       ];
       extraUserConfig.extraGroups = [
         "wheel"

@@ -66,9 +66,8 @@ rec {
       name,
       hostName ? name,
       homeImports ? [ ],
-      homeProfileNames ? [ ],
       nixosImports,
-      nixosProfileNames ? [ ],
+      systemType ? null,
       config ? { },
       inventory,
       user ? null,
@@ -83,8 +82,8 @@ rec {
         inventory
         bootstrap
         ;
-      home.imports = homeImports ++ map (name: hostModules.homeManager.${name}) homeProfileNames;
-      nixos.imports = nixosImports ++ map (name: hostModules.nixos.${name}) nixosProfileNames;
+      home.imports = homeImports;
+      nixos.imports = nixosImports ++ lib.optionals (systemType != null) [ hostModules.nixos.${systemType} ];
     }
     // lib.optionalAttrs (user != null) {
       inherit user;
@@ -105,12 +104,12 @@ rec {
       nixIdentityFile ? null,
       authorizedKeys ? { },
       homeImports ? [ ],
-      homeProfileNames ? [ ],
-      defaultHomeProfileNames ? [ ],
+      defaultHomeImports ? [ ],
       nixosImports ? [ ],
       extraImports ? [ ],
-      nixosProfileNames ? [ ],
-      defaultNixosProfileNames ? [ ],
+      systemType ? null,
+      defaultSystemType ? null,
+      defaultNixosImports ? [ ],
       enableSystemdBoot ? false,
       enableDisko ? false,
       localDnsRecords ? [ ],
@@ -120,12 +119,15 @@ rec {
       bootstrap ? null,
     }:
     let
-      resolvedHomeProfileNames = defaultHomeProfileNames ++ homeProfileNames;
-      resolvedNixosProfileNames =
-        defaultNixosProfileNames
-        ++ nixosProfileNames
-        ++ lib.optionals enableSystemdBoot [ "systemd-boot" ]
-        ++ lib.optionals enableDisko [ "disko" ];
+      resolvedSystemType = if systemType != null then systemType else defaultSystemType;
+      resolvedHomeImports = defaultHomeImports ++ homeImports;
+      resolvedNixosImports =
+        defaultNixosImports
+        ++ nixosImports
+        ++ [ hostModule ]
+        ++ extraImports
+        ++ lib.optionals enableSystemdBoot [ hostModules.nixos."systemd-boot" ]
+        ++ lib.optionals enableDisko [ hostModules.nixos.disko ];
       user =
         if userName != null && identityFile != null && nixIdentityFile != null then
           {
@@ -148,11 +150,10 @@ rec {
         user
         localDnsRecords
         bootstrap
-        homeImports
         ;
-      homeProfileNames = resolvedHomeProfileNames;
-      nixosImports = nixosImports ++ [ hostModule ] ++ extraImports;
-      nixosProfileNames = resolvedNixosProfileNames;
+      homeImports = resolvedHomeImports;
+      nixosImports = resolvedNixosImports;
+      systemType = resolvedSystemType;
       inventory = mkX86Inventory {
         inherit
           name

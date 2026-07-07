@@ -52,51 +52,53 @@
         ]
       );
 
-      my = {
-        buildSecretRoot = lib.mkForce inputs.nix-work-secrets;
-        gitSecretRoot = lib.mkForce inputs.nix-work-secrets;
-        gpgKeysDir = lib.mkForce "${inputs.nix-work-secrets}/gpg-keys";
-      };
-
-      my.editor = {
-        installLocalDotnetSdk = lib.mkDefault true;
-        profiles = {
-          higiLlp = lib.mkDefault true;
-          python = lib.mkDefault true;
-          stm32 = lib.mkDefault true;
+      config = lib.mkIf config.my.host.is.wsl {
+        my = {
+          buildSecretRoot = lib.mkForce inputs.nix-work-secrets;
+          gitSecretRoot = lib.mkForce inputs.nix-work-secrets;
+          gpgKeysDir = lib.mkForce "${inputs.nix-work-secrets}/gpg-keys";
         };
-      };
 
-      home.packages =
-        with pkgs;
-        lib.filter (pkg: pkg != null) [
-          git
-          dotnetCombined
-          azureCliWithDevOps
-          (if pkgs ? pulumi then pulumi else null)
-          (if pkgs ? uv then uv else null)
-          (if pkgs ? nodejs then nodejs else null)
-        ];
+        my.editor = {
+          installLocalDotnetSdk = lib.mkDefault true;
+          profiles = {
+            higiLlp = lib.mkDefault true;
+            python = lib.mkDefault true;
+            stm32 = lib.mkDefault true;
+          };
+        };
 
-      sops.templates.nuget-higi-config = lib.mkIf hasNuGetSecrets {
-        path = nugetConfigPath;
-        mode = "0600";
-        content = ''
-          <?xml version="1.0" encoding="utf-8"?>
-          <configuration>
-            <packageSources>
-              <clear />
-              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
-              <add key="higi" value="${config.sops.placeholder.nuget_higi_source_url}" />
-            </packageSources>
-            <packageSourceCredentials>
-              <higi>
-                <add key="Username" value="${config.sops.placeholder.nuget_higi_username}" />
-                <add key="ClearTextPassword" value="${config.sops.placeholder.nuget_higi_token}" />
-              </higi>
-            </packageSourceCredentials>
-          </configuration>
-        '';
+        home.packages =
+          with pkgs;
+          lib.filter (pkg: pkg != null) [
+            git
+            dotnetCombined
+            azureCliWithDevOps
+            (if pkgs ? pulumi then pulumi else null)
+            (if pkgs ? uv then uv else null)
+            (if pkgs ? nodejs then nodejs else null)
+          ];
+
+        sops.templates.nuget-higi-config = lib.mkIf hasNuGetSecrets {
+          path = nugetConfigPath;
+          mode = "0600";
+          content = ''
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <packageSources>
+                <clear />
+                <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+                <add key="higi" value="${config.sops.placeholder.nuget_higi_source_url}" />
+              </packageSources>
+              <packageSourceCredentials>
+                <higi>
+                  <add key="Username" value="${config.sops.placeholder.nuget_higi_username}" />
+                  <add key="ClearTextPassword" value="${config.sops.placeholder.nuget_higi_token}" />
+                </higi>
+              </packageSourceCredentials>
+            </configuration>
+          '';
+        };
       };
     };
 }

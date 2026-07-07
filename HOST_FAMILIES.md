@@ -29,14 +29,14 @@ Preferred x86 descriptor fields:
 
 - `config`
   host facts and environment semantics under `my.host.*`
-- `homeProfileNames`
-  shared Home Manager profiles by name
-- `nixosProfileNames`
-  shared NixOS profiles by name
-- `homeImports`
-  true host-local HM exceptions only
-- `extraImports`
-  true host-local NixOS exceptions only
+- `systemType`
+  the primary shared NixOS base layer such as `system-workstation`,
+  `system-cli`, or `system-work-dev`
+
+Ordinary x86 descriptors should usually stop there. Shared Home Manager
+modules and leaf NixOS modules should be imported broadly by family/default
+layers and self-gate from `my.host.*` or their own option surfaces instead of
+growing new host-local import lists.
 
 ### Laptop
 
@@ -46,9 +46,10 @@ Typical defaults:
 
 - `sam`
 - `system-workstation`
-- `sam-home-personal`
 - `enableSystemdBoot`
 - optional `enableDisko`
+- broad shared Home Manager layers plus Sam policy modules gated from
+  `my.host.*`
 
 ### Server
 
@@ -58,11 +59,11 @@ Typical defaults:
 
 - `sam-system-cli`
 - `system-cli`
-- service bundles such as `caddy`, `syncthing-server`, `media-server`
-- `sam-home-personal`
-- optional shared HM profiles such as `sam-home-media`
+- explicit stack selectors only where the services are intentionally coupled,
+  such as `media-server` or monitoring/service stacks
 - `enableSystemdBoot`
 - optional `enableDisko`
+- broad shared Home Manager layers plus any self-gating Sam policy modules
 
 ### WSL
 
@@ -72,8 +73,7 @@ Typical defaults:
 
 - `nixosWsl`
 - `system-work-dev`
-- `sam-home-work`
-- `sam-home-work-wsl`
+- broad-imported work modules that self-gate from `my.host.is.wsl`
 
 WSL should stay aligned with x86 descriptor plumbing, but it does not need to
 pretend it is a laptop or server.

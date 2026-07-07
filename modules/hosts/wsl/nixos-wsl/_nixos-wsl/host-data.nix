@@ -10,9 +10,5 @@ descriptorHelpers.mkWslDescriptor {
   name = "NixOS-WSL";
   outputName = "nixos-wsl";
   hostModule = inputs.self.modules.nixos.nixosWsl;
-  nixosProfileNames = [ "system-work-dev" ];
-  homeProfileNames = [
-    "sam-home-work"
-    "sam-home-work-wsl"
-  ];
+  systemType = "system-work-dev";
 }

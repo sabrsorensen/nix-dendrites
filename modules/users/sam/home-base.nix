@@ -8,7 +8,12 @@ let
 in
 {
   flake.modules.homeManager.sam-home-base =
-    { pkgs, ... }:
+    {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
     {
       imports = with hm; [
         #lazyvim
@@ -26,6 +31,15 @@ in
         lolcat
         mediainfo
         nerd-fonts.caskaydia-cove
+      ]
+      ++ lib.optionals (config.my.host.features.gui && !config.my.host.is.wsl) [
+        clementine
+        discord
+        ferdium
+        noson
+        plex-desktop
+        signal-desktop
+        vlc
       ];
     };
 }

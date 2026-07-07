@@ -55,6 +55,8 @@ let
           tmux
           home-manager
           cowsay
+          p7zip
+          rclone
         ]
         ++ localFlakeToolPackages;
     };

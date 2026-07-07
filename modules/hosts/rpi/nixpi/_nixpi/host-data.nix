@@ -14,7 +14,6 @@ descriptorHelpers.mkDhcpDescriptor {
   imageOutputName = "nixpi-image";
   hostName = "nixpi";
   configuration = "NixPi";
-  nixosProfileNames = [ "sam-system-cli" ];
   bootstrap = {
     configurationName = "NixPiBootstrap";
     outputName = "nixpi-bootstrap";

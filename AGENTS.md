@@ -52,7 +52,7 @@ Use these buckets consistently:
 
 - `my.host.roles.*`: broad intent and environment class such as workstation, server, rpi, steamdeck, wsl.
 - `my.host.formFactor`: physical or operational shape such as `laptop`, `desktop`, `handheld`, `server`, `vm`.
-- `my.host.features.*`: concrete capabilities or policy toggles such as `gui`, `bluetooth`, `firmware`, `nix-ld`, `nvidia`, `flatpak`, `steam`, `wine`, `deskflow`, `minecraft`, `threedprinter`, `zsa`.
+- `my.host.features.*`: concrete capabilities or policy toggles such as `gui`, `bluetooth`, `firmware`, `nix-ld`, `nvidia`, `flatpak`, `steam`, `wine`, `deskflow`, `minecraft`, `threedprinter`, `zsa`, `bitwarden`, `office`, `musicTagging`.
 - `my.host.tags`: sparse escape hatch for grouping and exceptions.
 - `my.host.is.*`: derived read-side booleans for module authors.
 
@@ -120,7 +120,7 @@ Poor candidates for blind auto-import:
 When a service needs reverse-proxy publication, prefer publishing intent
 through `my.caddy.virtualHosts` or `my.caddy.apexRoutes`.
 
-Keep `my.media.*` for genuinely shared media-stack facts such as storage
+Keep `my.services.media.*` for genuinely shared media-stack facts such as storage
 roots, container identities, and media-specific network conventions, not as
 a second generic routing namespace.
 
@@ -164,24 +164,24 @@ rather than being pushed back down into the generic `home` or
 
 ## Host Structure
 
-For x86-style host families, prefer a descriptor-level profile API over
+For x86-style host families, prefer a descriptor-level system-type API over
 host-local wrapper modules.
 
 The current preferred split is:
 
-- `homeProfileNames`: named shared Home Manager profiles such as `sam-home-personal`, `sam-home-media`, `sam-home-work`, `sam-home-work-wsl`
-- `nixosProfileNames`: named shared NixOS profiles such as `system-workstation`, `system-desktop`, `system-cli`, `system-work-dev`
-- `homeImports`: rare escape hatch for true one-off Home Manager modules
-- `extraImports`: rare escape hatch for true one-off NixOS modules
+- `systemType`: single shared NixOS base layer such as `system-workstation`, `system-cli`, `system-work-dev`
+- host facts under `my.host.*`: the normal way to drive shared module behavior
 
 Rule of thumb:
 
-- prefer `*ProfileNames` for reusable policy and capability bundles
-- use raw `*Imports` only when the module is genuinely host-specific and not yet worth promoting
+- prefer `systemType` for the primary shared system shape
+- prefer host facts plus self-gating over adding new descriptor escape hatches
 - avoid reintroducing host-local `HostHome` wrapper modules unless they carry real host-only behavior that cannot be expressed as shared profiles yet
 
-The remaining `extraImports` usage inside Steam Deck `_profiles/*` is internal
-family assembly, not a model to copy into ordinary host descriptors.
+Current ordinary host descriptors should need only `systemType` plus host
+facts/features. The remaining raw `extraImports` usage inside Steam Deck
+`_profiles/*` is internal family assembly, not a model to copy into ordinary
+host descriptors.
 
 For x86-style hosts, prefer setting `networking.hostName` from the descriptor
 via the registration builders. Do not restate the hostname in per-host network
@@ -256,3 +256,7 @@ the work progresses.
 - leave enough state in notes, summaries, or docs that recovery after a crash is straightforward
 
 Prefer short, factual plan updates over long narrative status logs.
+
+Before patching an existing file, read its current contents from disk in the
+current repo state. Do not patch from memory or from an earlier snapshot after
+other edits have landed.

@@ -4,6 +4,7 @@
   ...
 }:
 let
+  hostModules = inputs.self.modules;
   x86Helpers = import ../_x86-descriptor-helpers.nix { inherit inputs lib; };
 in
 {
@@ -15,14 +16,11 @@ in
       hostModule,
       identityFile,
       nixIdentityFile,
-      homeImports ? [ ],
-      homeProfileNames ? [ ],
       localDnsRecords ? [ ],
       config ? { },
       userName ? "sam",
       authorizedKeys ? { },
-      extraImports ? [ ],
-      nixosProfileNames ? [ ],
+      systemType ? null,
       enableSystemdBoot ? false,
       enableDisko ? false,
       builder ? null,
@@ -37,13 +35,10 @@ in
         hostModule
         identityFile
         nixIdentityFile
-        homeImports
-        homeProfileNames
         localDnsRecords
         authorizedKeys
         userName
-        extraImports
-        nixosProfileNames
+        systemType
         enableSystemdBoot
         enableDisko
         builder
@@ -58,26 +53,27 @@ in
           nix-ld = true;
         };
       } config;
-      defaultHomeProfileNames = lib.optional (userName == "sam") "sam-home-personal";
-      defaultNixosProfileNames = [
-        "sam-system-cli"
-        "deploy-defaults"
-        "system-cli"
-        "caddy"
-        "syncthing-server"
-        "samba"
-        "attic"
-        "apprise"
-        "atuin-server"
-        "frigate"
-        "immich"
-        "mealie"
-        "scrutiny"
-        "podman"
-        "ankerctl"
-        "minecraft-server"
-        "cross-compile"
-        "media-server"
+      defaultHomeImports = lib.optional (userName == "sam") hostModules.homeManager."sam-home-personal";
+      defaultSystemType = "system-cli";
+      defaultNixosImports = [
+        hostModules.nixos."sam-system-cli"
+        hostModules.nixos.deploy-defaults
+        hostModules.nixos.caddy
+        hostModules.nixos."syncthing-server"
+        hostModules.nixos.samba
+        hostModules.nixos.attic
+        hostModules.nixos.apprise
+        hostModules.nixos."atuin-server"
+        hostModules.nixos.frigate
+        hostModules.nixos.immich
+        hostModules.nixos."media-server"
+        hostModules.nixos.mealie
+        hostModules.nixos."monitoring-stack"
+        hostModules.nixos.scrutiny
+        hostModules.nixos.podman
+        hostModules.nixos.ankerctl
+        hostModules.nixos."minecraft-server"
+        hostModules.nixos."cross-compile"
       ];
       deployRemoteMethod = "switch";
     };

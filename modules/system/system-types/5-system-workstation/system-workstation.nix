@@ -10,11 +10,16 @@ in
   flake.modules.nixos.system-workstation = {
     imports = with nixos; [
       system-desktop
+      bitwarden
       flatpak
     ];
   };
 
   flake.modules.homeManager.system-workstation = {
-    imports = [ hm.system-desktop ];
+    imports = with hm; [
+      system-desktop
+      bitwarden
+      office
+    ];
   };
 }

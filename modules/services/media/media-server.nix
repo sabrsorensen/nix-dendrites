@@ -29,7 +29,7 @@
         sonarr
       ]);
 
-      config = lib.mkIf config.my.media.enable {
+      config = lib.mkIf config.my.services.media.enable {
         my.services = {
           airsonic.enable = lib.mkDefault true;
           "arr-sync".enable = lib.mkDefault true;

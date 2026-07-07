@@ -5,6 +5,7 @@
 }:
 let
   aarch64Helpers = import ../_aarch64-descriptor-helpers.nix { inherit inputs lib; };
+  defaultNixosImports = [ inputs.self.modules.nixos."sam-system-cli" ];
   inherit (inputs.self.lib)
     localDns
     ;
@@ -18,14 +19,16 @@ rec {
       hostName,
       localDnsRecords ? [ ],
       name,
-      nixosProfileNames ? [ ],
+      systemType ? null,
       outputName,
       extraImports ? [ ],
       bootstrap ? null,
     }:
     let
       resolvedNixosImports =
-        extraImports ++ map (profileName: inputs.self.modules.nixos.${profileName}) nixosProfileNames;
+        defaultNixosImports
+        ++ extraImports
+        ++ lib.optionals (systemType != null) [ inputs.self.modules.nixos.${systemType} ];
     in
     {
       kind = "static";
@@ -57,14 +60,16 @@ rec {
       imageName,
       imageOutputName,
       name,
-      nixosProfileNames ? [ ],
+      systemType ? null,
       outputName,
       extraImports ? [ ],
       bootstrap ? null,
     }:
     let
       resolvedNixosImports =
-        extraImports ++ map (profileName: inputs.self.modules.nixos.${profileName}) nixosProfileNames;
+        defaultNixosImports
+        ++ extraImports
+        ++ lib.optionals (systemType != null) [ inputs.self.modules.nixos.${systemType} ];
     in
     {
       kind = "dhcp";
@@ -131,7 +136,7 @@ rec {
       serviceRoles,
       startKeaOnBoot ? null,
       userName ? "sam",
-      nixosProfileNames ? [ ],
+      systemType ? null,
       extraImports ? [ ],
       bootstrap ? null,
     }:
@@ -141,8 +146,9 @@ rec {
           blocky
           dhcp-coredns
         ])
+        ++ defaultNixosImports
         ++ extraImports
-        ++ map (profileName: inputs.self.modules.nixos.${profileName}) nixosProfileNames;
+        ++ lib.optionals (systemType != null) [ inputs.self.modules.nixos.${systemType} ];
     in
     {
       kind = "service";

@@ -14,7 +14,6 @@ descriptorHelpers.mkSteamdeckDescriptor {
   hostName = host.hostName;
   config = host.config;
   homeOutputName = "home-deck-emeraldecho";
-  nixosProfileNames = [ "sam-system-cli" ];
   platformHost = host;
   platformRegistration = import ./registration.nix { inherit inputs lib; };
 }

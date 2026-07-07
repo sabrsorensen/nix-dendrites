@@ -14,13 +14,14 @@ descriptorHelpers.mkServerDescriptor {
   hostModule = hostModules.nixos.atlasUponRaiden;
   identityFile = "~/.ssh/atlasuponraiden_id_ed25519";
   nixIdentityFile = "~/.ssh/nix_atlasuponraiden_id_ed25519";
-  homeProfileNames = [ "sam-home-media" ];
-  nixosProfileNames = [ "monitoring-stack" ];
   localDnsRecords = [
     { hostname = "atlas"; }
   ];
   config = lib.recursiveUpdate atlasConfig.host {
-    features.containers = true;
+    features = {
+      containers = true;
+      musicTagging = true;
+    };
   };
   enableSystemdBoot = true;
   enableDisko = true;

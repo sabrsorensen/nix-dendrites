@@ -4,6 +4,7 @@
   ...
 }:
 let
+  hm = inputs.self.modules.homeManager;
   x86Helpers = import ../_x86-descriptor-helpers.nix { inherit inputs lib; };
 in
 {
@@ -12,23 +13,17 @@ in
       name,
       hostName ? name,
       outputName,
-      homeImports ? [ ],
-      homeProfileNames ? [ ],
       hostModule,
-      extraImports ? [ ],
-      nixosProfileNames ? [ ],
+      systemType ? null,
       config ? { },
     }:
     x86Helpers.mkProfiledX86Descriptor {
       inherit
         name
         hostName
-        homeImports
-        homeProfileNames
         outputName
         hostModule
-        extraImports
-        nixosProfileNames
+        systemType
         ;
       config = lib.recursiveUpdate {
         primaryInteractiveUser = lib.mkDefault "sam";
@@ -44,6 +39,10 @@ in
         };
         syncthing.mode = "disabled";
       } config;
+      defaultHomeImports = [
+        hm."sam-home-work"
+        hm."sam-home-work-wsl"
+      ];
       deployRemoteMethod = null;
     };
 }

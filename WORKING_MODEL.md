@@ -60,10 +60,7 @@ machinery even though they keep different defaults.
 The preferred x86 descriptor surface is:
 
 - `config` for host facts under `my.host.*`
-- `homeProfileNames` for reusable HM profile bundles
-- `nixosProfileNames` for reusable NixOS profile bundles
-- `homeImports` for rare host-local HM exceptions
-- `extraImports` for rare host-local NixOS exceptions
+- `systemType` for the primary shared NixOS base layer
 
 In practice, laptop descriptors should usually target `system-workstation`,
 while `system-desktop` should stay closer to shared desktop/session
@@ -146,7 +143,7 @@ When working on media services:
 That said, the long-term direction is for `media-server` to be the stack
 assembler and for leaf services to expose their own `my.services.<name>`
 switches. A child service should not need to infer activation solely from
-`my.media.enable` once it has a meaningful standalone option surface.
+`my.services.media.enable` once it has a meaningful standalone option surface.
 
 ### Private helpers belong on `_` paths
 
@@ -189,7 +186,7 @@ Reasonably reconcilable:
 
 - laptop, server, and WSL descriptor/profile plumbing
 - shared x86 boot/install toggles
-- shared user/home profile selection
+- shared user/home policy selection
 
 Intentionally specialized:
 
@@ -224,7 +221,7 @@ What remains is mostly opportunistic cleanup:
 - continuing to separate broad GUI defaults from narrower desktop-session
   assumptions when a module still conflates them
 - occasional promotion of repeated host-local exceptions into named shared
-  profiles
+  defaults or self-gating modules
 - documentation updates when the intended boundaries change
 
 ## Migration Boundary
@@ -240,10 +237,10 @@ small cleanup pass.
 - explicit host-local assembly for hardware, filesystems, boot, secrets, and
   host identity
 - platform/lifecycle families such as Steam Deck and RPi
-- cohesive stack/profile assemblers such as `media-server`,
+- cohesive stack assemblers such as `media-server`,
   `monitoring-stack`, `sam-home-work`, and similar work/private/personal
   policy bundles
-- thin but useful vocabulary profiles such as `system-cli`,
+- thin but useful vocabulary layers such as `system-cli`,
   `system-desktop`, and `system-workstation`
 - the broad `features.gui` versus narrower `my.host.is.desktopSession`
   distinction
@@ -260,7 +257,7 @@ the correct places for intentional coupling or platform-specific assembly.
 - Sam-specific bundles only when a split would clarify a real boundary rather
   than just create more names
 - repeated host-local policy that starts appearing in more than one place and
-  should be promoted into a named shared profile
+  should be promoted into a named shared default or self-gating module
 - future workstation-side music/media workflows, if they move beyond the
   current Atlas-owned model, so they gain an explicit option/data model rather
   than ad hoc personal bundle growth
@@ -287,7 +284,7 @@ Current service-module buckets:
 
 The media subtree is currently the largest mixed case:
 
-- `my.media.*` already acts as a stack-level subsystem API
+- `my.services.media.*` already acts as a stack-level subsystem API
 - leaf activation is now centered on `my.services.<name>.enable`
 - media leaves now publish routing directly to `my.caddy.*`
 - `_media-base.nix` now owns shared media facts and assertions only
@@ -303,16 +300,17 @@ The media subtree is currently the largest mixed case:
   4. host-local files provide instance data such as paths, UID/GID pins,
      DNS names, or credentials
 
-After the current audit, the main remaining raw `extraImports` usage is inside
-Steam Deck lifecycle assembly modules. That is intentional internal family
-plumbing, not a preferred host-descriptor pattern.
+After the current audit, ordinary hosts should usually only need
+`systemType` plus host facts/features. The main remaining raw import escape
+hatches are inside Steam Deck lifecycle assembly modules. That is intentional
+internal family plumbing, not a preferred host-descriptor pattern.
 
 ## Practical Guidance
 
 When adding or changing something, default to these questions:
 
 1. Is this a leaf declaration or a shared aggregation concern?
-2. Does this belong in `my.host`, `my.caddy`, `my.media`, or `my.localDns` instead of a raw service attribute?
+2. Does this belong in `my.host`, `my.caddy`, `my.services.media`, or `my.localDns` instead of a raw service attribute?
 3. Is this specific to one host, one subsystem, or cross-cutting enough to belong in shared schema/lib?
 4. If this is helper logic, should it live on an `_` path so `import-tree` ignores it?
 5. If this introduces topology, should host inventory know about it?

@@ -11,7 +11,7 @@
       localDomain = config.systemConstants.domain;
       groupName = "media";
       localAddr = "127.0.0.1:6868";
-      mediaCfg = config.my.media;
+      mediaCfg = config.my.services.media;
       serviceName = "profilarr";
       containerIdentity =
         lib.attrByPath

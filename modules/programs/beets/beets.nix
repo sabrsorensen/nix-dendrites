@@ -1,7 +1,12 @@
 {
   flake.modules.homeManager.beets =
-    { pkgs, ... }:
     {
+      pkgs,
+      lib,
+      config,
+      ...
+    }:
+    lib.mkIf config.my.host.features.musicTagging {
       home.packages = with pkgs; [
         beets
       ];

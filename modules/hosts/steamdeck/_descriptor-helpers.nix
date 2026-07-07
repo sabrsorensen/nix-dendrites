@@ -2,6 +2,9 @@
   inputs,
   ...
 }:
+let
+  defaultNixosImports = [ inputs.self.modules.nixos."sam-system-cli" ];
+in
 {
   mkSteamdeckDescriptor =
     {
@@ -13,7 +16,6 @@
       homeOutputName,
       homeConfigurationName ? "deck@${hostName}",
       homeModuleName ? homeOutputName,
-      nixosProfileNames ? [ ],
       extraImports ? [ ],
       platformHost,
       platformRegistration,
@@ -27,8 +29,7 @@
       user.ssh = {
         inherit identityFile nixIdentityFile;
       };
-      nixos.imports =
-        extraImports ++ map (profileName: inputs.self.modules.nixos.${profileName}) nixosProfileNames;
+      nixos.imports = defaultNixosImports ++ extraImports;
       home = {
         outputName = homeOutputName;
         configurationName = homeConfigurationName;

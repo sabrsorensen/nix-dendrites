@@ -4,7 +4,7 @@
   ...
 }:
 {
-  my.media = {
+  my.services.media = {
     enable = true;
     dataRoot = lib.mkDefault "/AnomalyRealm/media";
     dnsServers = lib.mkDefault [

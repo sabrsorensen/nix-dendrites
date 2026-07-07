@@ -11,7 +11,7 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.media.enable {
+    lib.mkIf config.my.services.media.enable {
       environment.systemPackages = [
         inputs.demlo.packages.${pkgs.stdenv.hostPlatform.system}.default
       ];

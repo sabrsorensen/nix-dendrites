@@ -4,6 +4,7 @@
   ...
 }:
 let
+  hostModules = inputs.self.modules;
   x86Helpers = import ../_x86-descriptor-helpers.nix { inherit inputs lib; };
 in
 {
@@ -12,15 +13,12 @@ in
       name,
       hostName ? name,
       outputName ? lib.strings.toLower name,
-      homeImports ? [ ],
-      homeProfileNames ? [ ],
       hostModule,
       identityFile,
       nixIdentityFile,
       userName ? "sam",
       authorizedKeys ? { },
-      extraImports ? [ ],
-      nixosProfileNames ? [ ],
+      systemType ? null,
       enableSystemdBoot ? false,
       enableDisko ? false,
       config ? { },
@@ -36,14 +34,12 @@ in
         nixIdentityFile
         userName
         authorizedKeys
-        homeImports
-        extraImports
-        nixosProfileNames
+        systemType
         enableSystemdBoot
         enableDisko
         bootstrap
         ;
-      defaultHomeProfileNames = lib.optional (userName == "sam") "sam-home-personal";
+      defaultHomeImports = lib.optional (userName == "sam") hostModules.homeManager."sam-home-personal";
       config = lib.recursiveUpdate {
         primaryInteractiveUser = userName;
         formFactor = "laptop";
@@ -67,10 +63,8 @@ in
           hasTray = true;
         };
       } config;
-      defaultNixosProfileNames = [
-        "sam"
-        "system-workstation"
-      ];
+      defaultNixosImports = [ hostModules.nixos.sam ];
+      defaultSystemType = "system-workstation";
       deployRemoteMethod = "switch";
     };
 }

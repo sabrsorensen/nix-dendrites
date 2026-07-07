@@ -10,7 +10,7 @@
       toInt = value: if builtins.isInt value then value else builtins.fromJSON value;
       groupName = "media";
       localAddr = "127.0.0.1:81";
-      mediaCfg = config.my.media;
+      mediaCfg = config.my.services.media;
       serviceName = "organizr";
       containerIdentity =
         lib.attrByPath
