@@ -14,7 +14,25 @@
       localDomain = config.systemConstants.domain;
     in
     {
-      options.my.services.blocky.enable = lib.mkEnableOption "Blocky DNS service";
+      options.my.services.blocky = {
+        enable = lib.mkEnableOption "Blocky DNS service";
+
+        prometheus = {
+          enable = lib.mkEnableOption "Prometheus metrics endpoint for Blocky";
+
+          httpPort = lib.mkOption {
+            type = lib.types.port;
+            default = 4000;
+            description = "HTTP port used by Blocky for Prometheus metrics.";
+          };
+
+          path = lib.mkOption {
+            type = lib.types.str;
+            default = "/metrics";
+            description = "HTTP path used by Blocky to expose Prometheus metrics.";
+          };
+        };
+      };
 
       config = lib.mkIf cfg.enable {
         services.blocky = {
@@ -22,7 +40,12 @@
           settings = {
             ports = {
               dns = 53;
-              http = 4000;
+              http = cfg.prometheus.httpPort;
+            };
+
+            prometheus = lib.mkIf cfg.prometheus.enable {
+              enable = true;
+              path = cfg.prometheus.path;
             };
 
             upstreams.groups.default = [
@@ -68,7 +91,7 @@
           wants = [ "coredns.service" ];
         };
 
-        networking.firewall.allowedTCPPorts = [ 53 ];
+        networking.firewall.allowedTCPPorts = [ 53 ] ++ lib.optionals cfg.prometheus.enable [ cfg.prometheus.httpPort ];
         networking.firewall.allowedUDPPorts = [ 53 ];
       };
     };

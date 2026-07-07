@@ -15,6 +15,15 @@
       prometheusVirtualHost = "${cfg.prometheusHostName}.{$DOMAIN}";
       grafanaRootUrl = "https://${grafanaDomain}/";
       grafanaDatasourceUid = "prometheus";
+      blockyMetricsPort = 4000;
+      blockyPrometheusPath = "/metrics";
+      blockyTargetConfigs = map (hostName: {
+        targets = [ "${hostName}.${localDomain}:${toString blockyMetricsPort}" ];
+        labels = {
+          host = hostName;
+          service = "blocky";
+        };
+      }) cfg.blockyTargets;
       maybeBasicAuthLines =
         routePrefix:
         lib.optionals (cfg.basicAuthPasswordEnvVar != null) [
@@ -257,7 +266,7 @@
               };
               targets = [
                 {
-                  expr = "sum(node_systemd_unit_state{job=\"node\",state=\"failed\",type=\"service\"})";
+                  expr = "sum(node_systemd_unit_state{job=\"node\",state=\"failed\",name=~\".+\\\\.service\"})";
                   instant = true;
                   legendFormat = "failed";
                   refId = "A";
@@ -342,12 +351,12 @@
               };
               targets = [
                 {
-                  expr = "rate(node_network_receive_bytes_total{job=\"node\",device!=\"lo\"}[5m])";
+                  expr = "rate(node_network_receive_bytes_total{job=\"node\",device=~\"^(en|eth|end|wl|ww)[a-zA-Z0-9._-]*$\"}[5m])";
                   legendFormat = "{{device}} rx";
                   refId = "A";
                 }
                 {
-                  expr = "rate(node_network_transmit_bytes_total{job=\"node\",device!=\"lo\"}[5m])";
+                  expr = "rate(node_network_transmit_bytes_total{job=\"node\",device=~\"^(en|eth|end|wl|ww)[a-zA-Z0-9._-]*$\"}[5m])";
                   legendFormat = "{{device}} tx";
                   refId = "B";
                 }
@@ -395,7 +404,7 @@
               };
               targets = [
                 {
-                  expr = "sum(node_systemd_unit_state{job=\"node\",state=\"active\",type=\"service\"})";
+                  expr = "sum(node_systemd_unit_state{job=\"node\",state=\"active\",name=~\".+\\\\.service\"})";
                   instant = true;
                   legendFormat = "active";
                   refId = "A";
@@ -434,7 +443,7 @@
               };
               targets = [
                 {
-                  expr = "100 * (1 - (node_filesystem_avail_bytes{job=\"node\",mountpoint!~\"/(run|sys|proc)($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs\"} / node_filesystem_size_bytes{job=\"node\",mountpoint!~\"/(run|sys|proc)($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs\"}))";
+                  expr = "100 * (1 - (node_filesystem_avail_bytes{job=\"node\",mountpoint!~\"^/(run|sys|proc)($|/)|^/var/lib/(docker|containers)($|/)|^/nix/store($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs|fuse.mergerfs\"} / node_filesystem_size_bytes{job=\"node\",mountpoint!~\"^/(run|sys|proc)($|/)|^/var/lib/(docker|containers)($|/)|^/nix/store($|/)\",fstype!~\"tmpfs|squashfs|overlay|nsfs|fuse.lxcfs|tracefs|fuse.mergerfs\"}))";
                   legendFormat = "{{mountpoint}}";
                   refId = "A";
                 }
@@ -489,7 +498,7 @@
               };
               targets = [
                 {
-                  expr = "node_hwmon_temp_celsius{job=\"node\"}";
+                  expr = "node_hwmon_temp_celsius{job=\"node\",chip=~\".*(coretemp|k10temp|zenpower|cpu|jc42|spd|dimm|mem).*\"}";
                   legendFormat = "{{chip}} {{sensor}}";
                   refId = "A";
                 }
@@ -518,6 +527,293 @@
           timezone = "browser";
           title = "Atlas Host Overview";
           uid = "atlas-host-overview";
+          version = 1;
+        }
+      );
+      grafanaBlockyDashboard = pkgs.writeText "grafana-blocky-overview.json" (
+        builtins.toJSON {
+          annotations.list = [ ];
+          editable = true;
+          id = null;
+          panels = [
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                unit = "reqps";
+              };
+              gridPos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 0;
+              };
+              id = 1;
+              options = {
+                legend = {
+                  displayMode = "list";
+                  placement = "bottom";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "single";
+                  sort = "desc";
+                };
+              };
+              targets = [
+                {
+                  expr = "sum by (host) (rate(blocky_query_total{job=\"blocky\"}[$__rate_interval]))";
+                  legendFormat = "{{host}}";
+                  refId = "A";
+                }
+              ];
+              title = "DNS Query Rate";
+              type = "timeseries";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "thresholds";
+                max = 1;
+                min = 0;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "red";
+                      value = null;
+                    }
+                    {
+                      color = "orange";
+                      value = 0.25;
+                    }
+                    {
+                      color = "green";
+                      value = 0.5;
+                    }
+                  ];
+                };
+                unit = "percentunit";
+              };
+              gridPos = {
+                h = 8;
+                w = 6;
+                x = 12;
+                y = 0;
+              };
+              id = 2;
+              options = {
+                colorMode = "background";
+                graphMode = "none";
+                justifyMode = "center";
+                orientation = "auto";
+                reduceOptions = {
+                  calcs = [ "lastNotNull" ];
+                  fields = "";
+                  values = false;
+                };
+                textMode = "value";
+              };
+              targets = [
+                {
+                  expr = "sum(increase(blocky_cache_hits_total{job=\"blocky\"}[$__range])) / (sum(increase(blocky_cache_hits_total{job=\"blocky\"}[$__range])) + sum(increase(blocky_cache_misses_total{job=\"blocky\"}[$__range])))";
+                  instant = true;
+                  refId = "A";
+                }
+              ];
+              title = "Cache Hit Ratio";
+              type = "stat";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "thresholds";
+                max = 1;
+                min = 0;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "orange";
+                      value = 0.1;
+                    }
+                    {
+                      color = "red";
+                      value = 0.25;
+                    }
+                  ];
+                };
+                unit = "percentunit";
+              };
+              gridPos = {
+                h = 8;
+                w = 6;
+                x = 18;
+                y = 0;
+              };
+              id = 3;
+              options = {
+                colorMode = "background";
+                graphMode = "none";
+                justifyMode = "center";
+                orientation = "auto";
+                reduceOptions = {
+                  calcs = [ "lastNotNull" ];
+                  fields = "";
+                  values = false;
+                };
+                textMode = "value";
+              };
+              targets = [
+                {
+                  expr = "sum(increase(blocky_response_total{job=\"blocky\",response_type=\"BLOCKED\"}[$__range])) / sum(increase(blocky_query_total{job=\"blocky\"}[$__range]))";
+                  instant = true;
+                  refId = "A";
+                }
+              ];
+              title = "Blocked Query Ratio";
+              type = "stat";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                unit = "s";
+              };
+              gridPos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 8;
+              };
+              id = 4;
+              options = {
+                legend = {
+                  displayMode = "list";
+                  placement = "bottom";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "single";
+                  sort = "desc";
+                };
+              };
+              targets = [
+                {
+                  expr = "((sum by (host) (rate(blocky_request_duration_seconds_sum{job=\"blocky\"}[$__rate_interval])) / sum by (host) (rate(blocky_request_duration_seconds_count{job=\"blocky\"}[$__rate_interval])))) or ((sum by (host) (rate(blocky_request_duration_ms_sum{job=\"blocky\"}[$__rate_interval])) / sum by (host) (rate(blocky_request_duration_ms_count{job=\"blocky\"}[$__rate_interval])) / 1000))";
+                  legendFormat = "{{host}}";
+                  refId = "A";
+                }
+              ];
+              title = "Average Response Time";
+              type = "timeseries";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                unit = "reqps";
+              };
+              gridPos = {
+                h = 8;
+                w = 12;
+                x = 12;
+                y = 8;
+              };
+              id = 5;
+              options = {
+                legend = {
+                  displayMode = "table";
+                  placement = "right";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "multi";
+                  sort = "desc";
+                };
+              };
+              targets = [
+                {
+                  expr = "sum by (host, response_type) (rate(blocky_response_total{job=\"blocky\"}[$__rate_interval]))";
+                  legendFormat = "{{host}} {{response_type}}";
+                  refId = "A";
+                }
+              ];
+              title = "Responses by Type";
+              type = "timeseries";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "palette-classic";
+                unit = "none";
+              };
+              gridPos = {
+                h = 8;
+                w = 24;
+                x = 0;
+                y = 16;
+              };
+              id = 6;
+              options = {
+                legend = {
+                  displayMode = "table";
+                  placement = "right";
+                  showLegend = true;
+                };
+                tooltip = {
+                  mode = "multi";
+                  sort = "desc";
+                };
+              };
+              targets = [
+                {
+                  expr = "sum by (host, question_type) (rate(blocky_query_total{job=\"blocky\"}[$__rate_interval]))";
+                  legendFormat = "{{host}} {{question_type}}";
+                  refId = "A";
+                }
+              ];
+              title = "Queries by Type";
+              type = "timeseries";
+            }
+          ];
+          refresh = "30s";
+          schemaVersion = 39;
+          tags = [
+            "blocky"
+            "dns"
+            "prometheus"
+          ];
+          templating.list = [ ];
+          time = {
+            from = "now-6h";
+            to = "now";
+          };
+          timezone = "browser";
+          title = "Blocky DNS Overview";
+          uid = "blocky-dns-overview";
           version = 1;
         }
       );
@@ -550,6 +846,12 @@
         enableSmartctlExporter = lib.mkOption {
           type = lib.types.bool;
           default = true;
+        };
+
+        blockyTargets = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = "Hostnames whose Blocky Prometheus endpoints should be scraped by Atlas.";
         };
       };
 
@@ -610,6 +912,10 @@
                     {
                       name = "atlas-host-overview.json";
                       path = grafanaDashboard;
+                    }
+                    {
+                      name = "blocky-dns-overview.json";
+                      path = grafanaBlockyDashboard;
                     }
                   ];
                   orgId = 1;
@@ -675,6 +981,13 @@
                   targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ];
                 }
               ];
+            }
+          ]
+          ++ lib.optionals (cfg.blockyTargets != [ ]) [
+            {
+              job_name = "blocky";
+              metrics_path = blockyPrometheusPath;
+              static_configs = blockyTargetConfigs;
             }
           ]
           ++ lib.optional cfg.enableSmartctlExporter {

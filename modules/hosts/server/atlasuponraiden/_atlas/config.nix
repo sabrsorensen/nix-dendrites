@@ -28,6 +28,10 @@
       monitoring = {
         enable = true;
         basicAuthPasswordEnvVar = "SCRUTINY_PASSWORD";
+        blockyTargets = [
+          "naboo"
+          "nevarro"
+        ];
       };
       podman.enable = true;
       samba.enable = true;

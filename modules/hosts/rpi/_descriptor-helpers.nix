@@ -74,8 +74,8 @@ rec {
         serviceImports = normalizedServices.imports;
       };
       resolvedConfig =
-        lib.optionalAttrs normalizedServices.blocky.enable {
-          my.services.blocky.enable = true;
+        lib.optionalAttrs (normalizedServices.blocky != { }) {
+          my.services.blocky = normalizedServices.blocky;
         }
         // config;
       isService = normalizedDeploy.method == "secure" || normalizedServices.roles != [ ];

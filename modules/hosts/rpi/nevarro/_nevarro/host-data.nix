@@ -38,6 +38,7 @@ descriptorHelpers.mkRpiDescriptor {
       dhcp-coredns
     ];
     blocky.enable = true;
+    blocky.prometheus.enable = true;
     dhcpCoredns.localDomainApexIp = network.atlasuponraiden;
   };
   outputs.image = {
