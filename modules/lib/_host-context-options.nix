@@ -136,6 +136,7 @@
         threedprinter = lib.mkEnableOption "3D printing tools on this host";
         zsa = lib.mkEnableOption "ZSA keyboard tooling on this host";
         bitwarden = lib.mkEnableOption "Bitwarden desktop support on this host";
+        noson = lib.mkEnableOption "Noson Sonos controller support on this host";
         musicTagging = lib.mkEnableOption "Music tagging and library cleanup tools on this host";
         office = lib.mkEnableOption "Office and creative desktop tools on this host";
       };

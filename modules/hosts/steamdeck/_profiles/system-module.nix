@@ -48,12 +48,11 @@ mkBaseModule {
     };
 
     home-manager.users.${steamUser}.imports = [
+      inputs.self.modules.homeManager.host-context
       inputs.self.modules.homeManager.${descriptor.home.moduleName}
     ];
 
     networking.firewall.allowedTCPPorts = [
-      1400
-      3400
       24800
     ];
     networking.firewall.allowedUDPPorts = [ 24800 ];

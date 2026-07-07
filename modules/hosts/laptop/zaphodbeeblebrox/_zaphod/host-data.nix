@@ -20,6 +20,7 @@ descriptorHelpers.mkWorkstationDescriptor {
     flatpak = true;
     minecraft = true;
     nvidia = true;
+    noson = true;
     office = true;
     steam = true;
     threedprinter = true;

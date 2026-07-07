@@ -36,7 +36,6 @@ in
         clementine
         discord
         ferdium
-        noson
         plex-desktop
         signal-desktop
         vlc

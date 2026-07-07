@@ -13,6 +13,7 @@
     features = {
       firmware = true;
       gui = true;
+      noson = true;
     };
     deploy = {
       canDeployRemotely = false;
@@ -67,7 +68,6 @@
   systemPackages =
     pkgs: with pkgs; [
       deskflow
-      noson
       rclone
       signal-desktop
       vlc
@@ -76,7 +76,6 @@
   homePackages =
     pkgs: with pkgs; [
       ferdium
-      noson
       p7zip
       rclone
       signal-desktop

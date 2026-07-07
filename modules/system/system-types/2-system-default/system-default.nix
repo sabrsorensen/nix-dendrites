@@ -24,6 +24,7 @@
         audio
         appimage
         kde
+        noson
         printing
         plymouth
         podman
@@ -49,6 +50,7 @@
       with inputs.self.modules.homeManager;
       [
         system-minimal
+        noson
         secrets-base
         secrets-context
       ]
