@@ -105,6 +105,19 @@ rec {
           probeDomains = localDns.secureDeployProbeDomains;
         };
       };
+      normalizedDhcpCoredns =
+        if
+          normalizedServices.dhcpCoredns == null
+          || normalizedServices.dhcpCoredns.failoverPeer or null == null
+        then
+          normalizedServices.dhcpCoredns
+        else
+          normalizedServices.dhcpCoredns
+          // {
+            failoverPeer = normalizedServices.dhcpCoredns.failoverPeer // {
+              probeDomains = localDns.secureDeployProbeDomains;
+            };
+          };
     in
     {
       inherit
@@ -119,7 +132,9 @@ rec {
       inventory = aarch64Helpers.mkAarch64Inventory inventoryArgs;
       network = normalizedNetwork;
       deploy = normalizedDeploy;
-      services = normalizedServices;
+      services = normalizedServices // {
+        dhcpCoredns = normalizedDhcpCoredns;
+      };
       outputs = normalizedOutputs;
       users = normalizedUsers;
     };
