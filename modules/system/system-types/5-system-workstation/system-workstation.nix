@@ -17,7 +17,6 @@ in
 
   flake.modules.homeManager.system-workstation = {
     imports = with hm; [
-      system-desktop
       bitwarden
       office
     ];

@@ -27,8 +27,7 @@ in
           tmux
           vim
           vscode
-        ]
-        ++ [ hm.host-context ];
+        ];
 
       home.sessionVariables = {
         XDG_CONFIG_HOME = lib.mkDefault "$HOME/.config";

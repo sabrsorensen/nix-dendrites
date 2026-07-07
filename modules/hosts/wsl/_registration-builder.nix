@@ -19,8 +19,9 @@ rec {
       my.host = descriptor.config;
 
       home-manager.users.${username} = {
-        imports = [
-          inputs.self.modules.homeManager.${descriptor.name}
+        imports = with inputs.self.modules.homeManager; [
+          host-context
+          (builtins.getAttr descriptor.name inputs.self.modules.homeManager)
         ];
         home.username = lib.mkDefault username;
         home.homeDirectory = lib.mkDefault "/home/${username}";

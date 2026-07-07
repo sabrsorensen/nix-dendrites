@@ -74,6 +74,9 @@ rec {
       localDnsRecords ? [ ],
       bootstrap ? null,
     }:
+    let
+      homeSystemTypeModule = lib.attrByPath [ "homeManager" systemType ] null hostModules;
+    in
     {
       inherit
         name
@@ -82,7 +85,7 @@ rec {
         inventory
         bootstrap
         ;
-      home.imports = homeImports;
+      home.imports = homeImports ++ lib.optionals (homeSystemTypeModule != null) [ homeSystemTypeModule ];
       nixos.imports = nixosImports ++ lib.optionals (systemType != null) [ hostModules.nixos.${systemType} ];
     }
     // lib.optionalAttrs (user != null) {

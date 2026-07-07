@@ -72,8 +72,9 @@ rec {
           };
 
       home-manager.users.${descriptor.user.name} = {
-        imports = [
-          inputs.self.modules.homeManager.${descriptor.name}
+        imports = with inputs.self.modules.homeManager; [
+          host-context
+          (builtins.getAttr descriptor.name inputs.self.modules.homeManager)
         ];
         my.syncthing.enable = lib.mkForce false;
       };

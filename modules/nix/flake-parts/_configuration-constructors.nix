@@ -2,6 +2,9 @@
   inputs,
   lib,
 }:
+let
+  hm = inputs.self.modules.homeManager;
+in
 {
   mkNixos = system: name: {
     ${name} = inputs.nixpkgs.lib.nixosSystem {
@@ -66,6 +69,7 @@
             lib.optionals (inputs ? determinate) [
               inputs.determinate.homeManagerModules.default
             ]
+            ++ [ hm.host-context ]
             ++ baseModules
             ++ [
               { nixpkgs.config.allowUnfree = true; }
