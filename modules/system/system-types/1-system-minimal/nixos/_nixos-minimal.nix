@@ -126,6 +126,7 @@ in
         ps
         python3
         ripgrep
+        uv
         vim
         wget
       ];

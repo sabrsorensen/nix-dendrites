@@ -33,7 +33,6 @@ in
           inherit rootLuksUuid swapLuksUuid;
         })
         ./_kamino/desktop.nix
-        ./_kamino/packages.nix
         ./_kamino/users/sam.nix
       ];
     };
