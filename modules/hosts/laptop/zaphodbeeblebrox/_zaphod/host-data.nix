@@ -12,10 +12,7 @@ descriptorHelpers.mkWorkstationDescriptor {
   identityFile = "~/.ssh/zaphod_id_ed25519";
   nixIdentityFile = "~/.ssh/nix_zaphodbeeblebrox_id_ed25519";
   hostModule = hostModules.nixos.zaphodBeeblebrox;
-  homeProfileNames = [
-    "sam-home-office"
-    "sam-home-creative"
-  ];
+  homeImports = [ hostModules.homeManager.office ];
   nixosProfileNames = [ "bitwarden" ];
   config.roles.builder = true;
   config.features = {
