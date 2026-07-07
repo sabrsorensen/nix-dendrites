@@ -74,7 +74,7 @@ rec {
         serviceImports = normalizedServices.imports;
       };
       resolvedConfig =
-        lib.optionalAttrs (normalizedServices.blocky != { }) {
+        lib.optionalAttrs (normalizedServices.blocky.enable or false) {
           my.services.blocky = normalizedServices.blocky;
         }
         // config;
