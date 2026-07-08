@@ -85,13 +85,13 @@
             "gpt-5.4" = "gpt-5.5";
           };
           personality = "pragmatic";
-          projects."/home/ssorensen/src/nix-dendrites" = {
+          projects."/home/ssorensen/src/" = {
             trust_level = "trusted";
           };
-          projects."/home/ssorensen/src/*" = {
+          projects."/home/ssorensen/higi/" = {
             trust_level = "trusted";
           };
-          projects."/home/ssorensen/higi/*" = {
+          projects."/mnt/c/Users/ssorensen/src/higi" = {
             trust_level = "trusted";
           };
           tui.model_availability_nux = {

@@ -33,12 +33,22 @@
           pkgs.azure-cli
         else
           null;
+      azureArtifactsCredentialProvider =
+        if pkgs ? azure-artifacts-credprovider then pkgs.azure-artifacts-credprovider else null;
+      azureArtifactsCredentialProviderNuGetPlugin =
+        if azureArtifactsCredentialProvider != null then
+          pkgs.runCommand "azure-artifacts-credprovider-nuget-plugin" { } ''
+            mkdir -p "$out"
+            cp -rs ${azureArtifactsCredentialProvider}/lib/azure-artifacts-credprovider/. "$out/"
+            rm "$out/CredentialProvider.Microsoft"
+            ln -s ${azureArtifactsCredentialProvider}/bin/CredentialProvider.Microsoft "$out/CredentialProvider.Microsoft"
+          ''
+        else
+          null;
       nugetConfigDir = "${config.home.homeDirectory}/.nuget/NuGet";
       nugetConfigPath = "${nugetConfigDir}/NuGet.Config";
-      hasNuGetSecrets =
-        config.sops.secrets ? nuget_higi_source_url
-        && config.sops.secrets ? nuget_higi_username
-        && config.sops.secrets ? nuget_higi_token;
+      nugetPluginDir = "${config.home.homeDirectory}/.nuget/plugins/netcore/CredentialProvider.Microsoft";
+      hasNuGetSourceUrl = config.sops.secrets ? nuget_higi_source_url;
     in
     {
       imports = (
@@ -74,12 +84,18 @@
             git
             dotnetCombined
             azureCliWithDevOps
+            azureArtifactsCredentialProvider
             (if pkgs ? pulumi then pulumi else null)
             (if pkgs ? uv then uv else null)
             (if pkgs ? nodejs then nodejs else null)
           ];
 
-        sops.templates.nuget-higi-config = lib.mkIf hasNuGetSecrets {
+        home.file.${nugetPluginDir} = lib.mkIf (azureArtifactsCredentialProvider != null) {
+          source = azureArtifactsCredentialProviderNuGetPlugin;
+          recursive = true;
+        };
+
+        sops.templates.nuget-higi-config = lib.mkIf hasNuGetSourceUrl {
           path = nugetConfigPath;
           mode = "0600";
           content = ''
@@ -90,12 +106,6 @@
                 <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
                 <add key="higi" value="${config.sops.placeholder.nuget_higi_source_url}" />
               </packageSources>
-              <packageSourceCredentials>
-                <higi>
-                  <add key="Username" value="${config.sops.placeholder.nuget_higi_username}" />
-                  <add key="ClearTextPassword" value="${config.sops.placeholder.nuget_higi_token}" />
-                </higi>
-              </packageSourceCredentials>
             </configuration>
           '';
         };
