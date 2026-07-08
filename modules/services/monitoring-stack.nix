@@ -509,14 +509,39 @@
               };
               targets = [
                 {
-                  expr = "(node_hwmon_temp_celsius{job=\"node\",chip=~\".*(coretemp|k10temp|zenpower|cpu).*\",sensor=~\"(Package id 0|Tctl|Tdie|temp1)\"}) or (node_hwmon_temp_celsius{job=\"node\",chip=~\".*(jc42|spd|dimm|mem).*\"}) or (node_hwmon_temp_celsius{job=\"node\",chip=~\".*nvme.*\"})";
-                  legendFormat = "{{chip}} {{sensor}}";
+                  expr = "node_hwmon_temp_celsius{job=\"node\",chip=\"platform_coretemp_0\",sensor=\"temp1\"}";
+                  legendFormat = "CPU temp";
                   refId = "A";
                 }
                 {
-                  expr = "smartctl_device_temperature{job=\"smartctl\"}";
-                  legendFormat = "{{device}} drive";
+                  expr = "node_hwmon_temp_celsius{job=\"node\",chip=\"nvme_nvme0\",sensor=\"temp1\"}";
+                  legendFormat = "nvme0 temp";
                   refId = "B";
+                }
+                {
+                  expr = "node_hwmon_temp_celsius{job=\"node\",chip=\"nvme_nvme1\",sensor=\"temp1\"}";
+                  legendFormat = "nvme1 temp";
+                  refId = "C";
+                }
+                {
+                  expr = "node_hwmon_temp_celsius{job=\"node\",chip=~\".*(coretemp|k10temp|zenpower|cpu).*\",sensor=~\"(Package id 0|Tctl|Tdie|temp1)\",chip!=\"platform_coretemp_0\"}";
+                  legendFormat = "{{chip}} {{sensor}}";
+                  refId = "D";
+                }
+                {
+                  expr = "node_hwmon_temp_celsius{job=\"node\",chip=~\".*(jc42|spd|dimm|mem).*\"}";
+                  legendFormat = "{{chip}} {{sensor}}";
+                  refId = "E";
+                }
+                {
+                  expr = "node_hwmon_temp_celsius{job=\"node\",chip=~\".*nvme.*\",chip!~\"nvme_nvme[01]\"}";
+                  legendFormat = "{{chip}} {{sensor}}";
+                  refId = "F";
+                }
+                {
+                  expr = "smartctl_device_temperature{job=\"smartctl\"}";
+                  legendFormat = "{{device}}";
+                  refId = "G";
                 }
               ];
               title = "Hardware Temperatures";
@@ -1132,14 +1157,39 @@
               };
               targets = [
                 {
-                  expr = "(node_hwmon_temp_celsius{job=\"remote-node\",chip=~\".*(coretemp|k10temp|zenpower|cpu).*\",sensor=~\"(Package id 0|Tctl|Tdie|temp1)\"}) or (node_hwmon_temp_celsius{job=\"remote-node\",chip=~\".*(jc42|spd|dimm|mem).*\"}) or (node_hwmon_temp_celsius{job=\"remote-node\",chip=~\".*nvme.*\"})";
-                  legendFormat = "{{host}} {{chip}} {{sensor}}";
+                  expr = "node_hwmon_temp_celsius{job=\"remote-node\",chip=\"platform_coretemp_0\",sensor=\"temp1\"}";
+                  legendFormat = "{{host}} CPU temp";
                   refId = "A";
                 }
                 {
-                  expr = "smartctl_device_temperature{job=\"remote-smartctl\"}";
-                  legendFormat = "{{host}} {{device}} drive";
+                  expr = "node_hwmon_temp_celsius{job=\"remote-node\",chip=\"nvme_nvme0\",sensor=\"temp1\"}";
+                  legendFormat = "{{host}} nvme0 temp";
                   refId = "B";
+                }
+                {
+                  expr = "node_hwmon_temp_celsius{job=\"remote-node\",chip=\"nvme_nvme1\",sensor=\"temp1\"}";
+                  legendFormat = "{{host}} nvme1 temp";
+                  refId = "C";
+                }
+                {
+                  expr = "node_hwmon_temp_celsius{job=\"remote-node\",chip=~\".*(coretemp|k10temp|zenpower|cpu).*\",sensor=~\"(Package id 0|Tctl|Tdie|temp1)\",chip!=\"platform_coretemp_0\"}";
+                  legendFormat = "{{host}} {{chip}} {{sensor}}";
+                  refId = "D";
+                }
+                {
+                  expr = "node_hwmon_temp_celsius{job=\"remote-node\",chip=~\".*(jc42|spd|dimm|mem).*\"}";
+                  legendFormat = "{{host}} {{chip}} {{sensor}}";
+                  refId = "E";
+                }
+                {
+                  expr = "node_hwmon_temp_celsius{job=\"remote-node\",chip=~\".*nvme.*\",chip!~\"nvme_nvme[01]\"}";
+                  legendFormat = "{{host}} {{chip}} {{sensor}}";
+                  refId = "F";
+                }
+                {
+                  expr = "smartctl_device_temperature{job=\"remote-smartctl\"}";
+                  legendFormat = "{{host}} {{device}}";
+                  refId = "G";
                 }
               ];
               title = "Hardware Temperatures";
