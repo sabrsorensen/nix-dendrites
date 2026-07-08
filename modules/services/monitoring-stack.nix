@@ -17,12 +17,6 @@
       grafanaDatasourceUid = "prometheus";
       blockyMetricsPort = 4000;
       blockyPrometheusPath = "/metrics";
-      serviceNoiseRegex =
-        "^(systemd-|dbus|polkit|NetworkManager|wpa_supplicant|nftables|user@|getty@|serial-getty@|nix-daemon|systemd-networkd|systemd-timesyncd|systemd-journald|systemd-resolved|systemd-udevd|systemd-logind|systemd-rfkill|systemd-random-seed|systemd-tmpfiles-|systemd-sysctl|systemd-update-utmp|kmod-static-nodes|modprobe@|sys-kernel-config.mount|sys-fs-fuse-connections.mount).*$";
-      atlasInterestingServiceRegex =
-        "^(ankerctl|apprise|atticd|atuin-server|caddy|frigate|grafana|immich.*|mealie|minecraft.*|podman.*|prometheus|scrutiny|smbd|nmbd|syncthing.*|sshd|tailscaled).*$";
-      remoteInterestingServiceRegex =
-        "^(blocky|coredns|dhcp-coredns-kea|dhcp-coredns-prepare|dhcp-failover|sshd|tailscaled|node-exporter|prometheus-node-exporter).*$";
       blockyTargetConfigs = map (hostName: {
         targets = [ "${hostName}.${localDomain}:${toString blockyMetricsPort}" ];
         labels = {
@@ -420,7 +414,7 @@
               };
               targets = [
                 {
-                  expr = "max by (name) (node_systemd_unit_state{job=\"node\",state=\"active\",name=~\".+\\\\.service\",name!~\"${serviceNoiseRegex}\",name=~\"${atlasInterestingServiceRegex}\"})";
+                  expr = "max by (name) (node_systemd_unit_state{job=\"node\",state=\"active\",name=~\".+\\\\.service\"})";
                   format = "table";
                   instant = true;
                   legendFormat = "{{name}}";
@@ -560,8 +554,26 @@
               };
               fieldConfig.defaults = {
                 color.mode = "thresholds";
-                unit = "reqps";
-                decimals = 1;
+                max = 1;
+                min = 0;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "red";
+                      value = null;
+                    }
+                    {
+                      color = "orange";
+                      value = 0.25;
+                    }
+                    {
+                      color = "green";
+                      value = 0.5;
+                    }
+                  ];
+                };
+                unit = "percentunit";
               };
               gridPos = {
                 h = 5;
@@ -584,60 +596,12 @@
               };
               targets = [
                 {
-                  expr = "sum(rate(blocky_query_total{job=\"blocky\",host=\"naboo\"}[$__rate_interval]))";
-                  legendFormat = "naboo";
-                  refId = "A";
-                }
-              ];
-              title = "Naboo Query Rate";
-              type = "stat";
-            }
-            {
-              datasource = {
-                type = "prometheus";
-                uid = grafanaDatasourceUid;
-              };
-              fieldConfig.defaults = {
-                color.mode = "thresholds";
-                unit = "reqps";
-                decimals = 1;
-                thresholds = {
-                  mode = "absolute";
-                  steps = [
-                    {
-                      color = "blue";
-                      value = null;
-                    }
-                  ];
-                };
-              };
-              gridPos = {
-                h = 5;
-                w = 6;
-                x = 6;
-                y = 0;
-              };
-              id = 2;
-              options = {
-                colorMode = "background";
-                graphMode = "area";
-                justifyMode = "center";
-                orientation = "auto";
-                reduceOptions = {
-                  calcs = [ "lastNotNull" ];
-                  fields = "";
-                  values = false;
-                };
-                textMode = "value";
-              };
-              targets = [
-                {
-                  expr = "sum(rate(blocky_query_total{job=\"blocky\",host=\"nevarro\"}[$__rate_interval]))";
+                  expr = "sum(increase(blocky_cache_hits_total{job=\"blocky\"}[$__range])) / (sum(increase(blocky_cache_hits_total{job=\"blocky\"}[$__range])) + sum(increase(blocky_cache_misses_total{job=\"blocky\"}[$__range])))";
                   instant = true;
                   refId = "A";
                 }
               ];
-              title = "Nevarro Query Rate";
+              title = "Cache Hit Ratio";
               type = "stat";
             }
             {
@@ -669,9 +633,66 @@
                 unit = "percentunit";
               };
               gridPos = {
-                h = 8;
+                h = 5;
                 w = 6;
-                x = 18;
+                x = 6;
+                y = 0;
+              };
+              id = 2;
+              options = {
+                colorMode = "background";
+                graphMode = "area";
+                justifyMode = "center";
+                orientation = "auto";
+                reduceOptions = {
+                  calcs = [ "lastNotNull" ];
+                  fields = "";
+                  values = false;
+                };
+                textMode = "value";
+              };
+              targets = [
+                {
+                  expr = "sum(increase(blocky_response_total{job=\"blocky\",response_type=\"BLOCKED\"}[$__range])) / sum(increase(blocky_query_total{job=\"blocky\"}[$__range]))";
+                  instant = true;
+                  refId = "A";
+                }
+              ];
+              title = "Blocked Query Ratio";
+              type = "stat";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = grafanaDatasourceUid;
+              };
+              fieldConfig.defaults = {
+                color.mode = "thresholds";
+                max = 1;
+                min = 0;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "green";
+                      value = null;
+                    }
+                    {
+                      color = "orange";
+                      value = 0.1;
+                    }
+                    {
+                      color = "red";
+                      value = 0.25;
+                    }
+                  ];
+                };
+                unit = "percentunit";
+              };
+              gridPos = {
+                h = 5;
+                w = 6;
+                x = 12;
                 y = 0;
               };
               id = 3;
@@ -689,12 +710,12 @@
               };
               targets = [
                 {
-                  expr = "(sum(rate(blocky_request_duration_seconds_sum{job=\"blocky\",host=\"naboo\"}[$__rate_interval])) / sum(rate(blocky_request_duration_seconds_count{job=\"blocky\",host=\"naboo\"}[$__rate_interval]))) or (sum(rate(blocky_request_duration_ms_sum{job=\"blocky\",host=\"naboo\"}[$__rate_interval])) / sum(rate(blocky_request_duration_ms_count{job=\"blocky\",host=\"naboo\"}[$__rate_interval])) / 1000)";
+                  expr = "(sum(rate(blocky_request_duration_seconds_sum{job=\"blocky\"}[$__rate_interval])) / sum(rate(blocky_request_duration_seconds_count{job=\"blocky\"}[$__rate_interval]))) or (sum(rate(blocky_request_duration_ms_sum{job=\"blocky\"}[$__rate_interval])) / sum(rate(blocky_request_duration_ms_count{job=\"blocky\"}[$__rate_interval])) / 1000)";
                   instant = true;
                   refId = "A";
                 }
               ];
-              title = "Naboo Avg Response Time";
+              title = "Average Response Time";
               type = "stat";
             }
             {
@@ -703,11 +724,25 @@
                 uid = grafanaDatasourceUid;
               };
               fieldConfig.defaults = {
-                color.mode = "palette-classic";
-                unit = "s";
+                color.mode = "thresholds";
+                min = 0;
+                thresholds = {
+                  mode = "absolute";
+                  steps = [
+                    {
+                      color = "red";
+                      value = null;
+                    }
+                    {
+                      color = "green";
+                      value = 1;
+                    }
+                  ];
+                };
+                unit = "none";
               };
               gridPos = {
-                h = 8;
+                h = 5;
                 w = 6;
                 x = 18;
                 y = 0;
@@ -715,7 +750,7 @@
               id = 4;
               options = {
                 colorMode = "background";
-                graphMode = "area";
+                graphMode = "none";
                 justifyMode = "center";
                 orientation = "auto";
                 reduceOptions = {
@@ -727,12 +762,12 @@
               };
               targets = [
                 {
-                  expr = "(sum(rate(blocky_request_duration_seconds_sum{job=\"blocky\",host=\"nevarro\"}[$__rate_interval])) / sum(rate(blocky_request_duration_seconds_count{job=\"blocky\",host=\"nevarro\"}[$__rate_interval]))) or (sum(rate(blocky_request_duration_ms_sum{job=\"blocky\",host=\"nevarro\"}[$__rate_interval])) / sum(rate(blocky_request_duration_ms_count{job=\"blocky\",host=\"nevarro\"}[$__rate_interval])) / 1000)";
+                  expr = "sum(blocky_blocking_enabled{job=\"blocky\"})";
                   instant = true;
                   refId = "A";
                 }
               ];
-              title = "Nevarro Avg Response Time";
+              title = "Blocking Enabled";
               type = "stat";
             }
             {
@@ -747,8 +782,8 @@
               gridPos = {
                 h = 8;
                 w = 12;
-                x = 12;
-                y = 8;
+                x = 0;
+                y = 5;
               };
               id = 5;
               options = {
@@ -764,12 +799,12 @@
               };
               targets = [
                 {
-                  expr = "sum by (response_type) (rate(blocky_response_total{job=\"blocky\",host=\"naboo\"}[$__rate_interval]))";
-                  legendFormat = "naboo {{response_type}}";
+                  expr = "sum by (response_type) (rate(blocky_response_total{job=\"blocky\"}[$__rate_interval]))";
+                  legendFormat = "{{response_type}}";
                   refId = "A";
                 }
               ];
-              title = "Naboo Responses by Type";
+              title = "Responses by Type";
               type = "timeseries";
             }
             {
@@ -783,9 +818,9 @@
               };
               gridPos = {
                 h = 8;
-                w = 24;
-                x = 0;
-                y = 16;
+                w = 12;
+                x = 12;
+                y = 5;
               };
               id = 6;
               options = {
@@ -801,12 +836,12 @@
               };
               targets = [
                 {
-                  expr = "sum by (response_type) (rate(blocky_response_total{job=\"blocky\",host=\"nevarro\"}[$__rate_interval]))";
-                  legendFormat = "nevarro {{response_type}}";
+                  expr = "sum(rate(blocky_query_total{job=\"blocky\"}[$__rate_interval]))";
+                  legendFormat = "queries";
                   refId = "A";
                 }
               ];
-              title = "Nevarro Responses by Type";
+              title = "DNS Query Rate";
               type = "timeseries";
             }
           ];
@@ -1134,13 +1169,13 @@
               };
               targets = [
                 {
-                  expr = "max by (host, name) (node_systemd_unit_state{job=\"remote-node\",state=\"active\",name=~\".+\\\\.service\",name!~\"${serviceNoiseRegex}\",name=~\"${remoteInterestingServiceRegex}\"})";
+                  expr = "max by (host, name) (node_systemd_unit_state{job=\"remote-node\",state=\"active\",name=~\".+\\\\.service\"})";
                   format = "table";
                   instant = true;
                   refId = "A";
                 }
               ];
-              title = "Key Active Service Units";
+              title = "Active Service Units";
               transformations = [
                 {
                   id = "organize";
@@ -1189,7 +1224,7 @@
               };
               targets = [
                 {
-                  expr = "max by (host, name) (node_systemd_unit_state{job=\"remote-node\",state=\"failed\",name=~\".+\\\\.service\",name!~\"${serviceNoiseRegex}\"})";
+                  expr = "max by (host, name) (node_systemd_unit_state{job=\"remote-node\",state=\"failed\",name=~\".+\\\\.service\"})";
                   format = "table";
                   instant = true;
                   refId = "A";
