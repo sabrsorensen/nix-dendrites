@@ -36,6 +36,10 @@
           "naboo"
           "nevarro"
         ];
+        smartctlTargets = [
+          "naboo"
+          "nevarro"
+        ];
       };
       podman.enable = true;
       samba.enable = true;
