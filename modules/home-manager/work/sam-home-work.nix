@@ -19,6 +19,7 @@
         pkgs.dotnetCorePackages.sdk_10_0-bin
         pkgs.dotnetCorePackages.sdk_11_0-bin
       ];
+      dotnetRoot = "${dotnetCombined}/share/dotnet";
       azureDevOpsExtension =
         if pkgs ? azure-cli && pkgs.azure-cli ? extensions && pkgs.azure-cli.extensions ? azure-devops then
           pkgs.azure-cli.extensions.azure-devops.overrideAttrs (old: {
@@ -89,6 +90,12 @@
             (if pkgs ? uv then uv else null)
             (if pkgs ? nodejs then nodejs else null)
           ];
+
+        home.sessionVariables = {
+          DOTNET_ROOT = dotnetRoot;
+          DOTNET_ROOT_X64 = dotnetRoot;
+          DOTNET_SDK_VULNERABILITY_CHECK_DISABLE = "true";
+        };
 
         home.file.${nugetPluginDir} = lib.mkIf (azureArtifactsCredentialProvider != null) {
           source = azureArtifactsCredentialProviderNuGetPlugin;
