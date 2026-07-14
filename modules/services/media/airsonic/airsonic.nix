@@ -52,7 +52,7 @@
           ''
         ];
         virtualisation.oci-containers.containers.${serviceName} = {
-          image = "lscr.io/linuxserver/airsonic-advanced:11.1.4-ls183";
+          image = "ghcr.io/airsonic-pulse/airsonic-pulse:13.2.0";
           autoStart = true;
           environment = {
             "PUID" = lib.toString config.users.users.${serviceName}.uid;

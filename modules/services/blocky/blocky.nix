@@ -102,7 +102,10 @@
           wants = [ "coredns.service" ];
         };
 
-        networking.firewall.allowedTCPPorts = [ 53 ] ++ lib.optionals cfg.prometheus.enable [ cfg.prometheus.httpPort ];
+        networking.firewall.allowedTCPPorts = [
+          53
+        ]
+        ++ lib.optionals cfg.prometheus.enable [ cfg.prometheus.httpPort ];
         networking.firewall.allowedUDPPorts = [ 53 ];
       };
     };

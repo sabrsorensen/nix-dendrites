@@ -234,7 +234,6 @@ in
       "pnpm-9.15.9"
     ];
 
-
     # Decky integrates with Steam's embedded browser and expects this toggle to
     # exist before startup on some hosts.
     systemd.services.steam-cef-debug = lib.mkIf config.jovian.decky-loader.enable {

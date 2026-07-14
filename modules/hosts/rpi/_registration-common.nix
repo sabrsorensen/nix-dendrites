@@ -44,8 +44,7 @@ rec {
     {
       descriptor,
     }:
-    descriptor.deploy.method or null == "secure"
-    || descriptor.services.roles != [ ];
+    descriptor.deploy.method or null == "secure" || descriptor.services.roles != [ ];
 
   mergeHostFacts =
     {
@@ -77,8 +76,7 @@ rec {
             inherit descriptor;
           })
           {
-            primaryInteractiveUser =
-              descriptor.users.primary.name;
+            primaryInteractiveUser = descriptor.users.primary.name;
             formFactor = "server";
             roles = {
               server = true;
@@ -118,8 +116,7 @@ rec {
     mergeHostFacts {
       descriptor = descriptor;
       generated = {
-        primaryInteractiveUser =
-          descriptor.users.primary.name;
+        primaryInteractiveUser = descriptor.users.primary.name;
         formFactor = "server";
         roles = {
           server = true;
