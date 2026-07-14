@@ -6,6 +6,7 @@
     {
       config,
       lib,
+      pkgs,
       ...
     }:
     let
@@ -35,6 +36,9 @@
       };
 
       config = lib.mkIf cfg.enable {
+        environment.systemPackages = with pkgs; [
+          blocky.out
+        ];
         services.blocky = {
           enable = true;
           settings = {
@@ -79,6 +83,13 @@
                   "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/ultimate.txt"
                   "https://raw.githubusercontent.com/kboghdady/youTube_ads_4_pi-hole/master/youtubelist.txt"
                   "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro.txt"
+                ];
+              };
+              allowlists = {
+                ads = [
+                  "|
+                    *.amplitude.com
+                    *.looker.com"
                 ];
               };
               clientGroupsBlock.default = [ "ads" ];
