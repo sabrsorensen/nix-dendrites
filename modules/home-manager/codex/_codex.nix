@@ -78,7 +78,7 @@
         package = codexWrapped;
         enableMcpIntegration = true;
         settings = {
-          model = "gpt-5.4";
+          model = "gpt-5.6-terra";
           model_reasoning_effort = "medium";
           notice.model_migrations = {
             "gpt-5.3-codex" = "gpt-5.5";
@@ -88,7 +88,13 @@
           projects."/home/ssorensen/src/" = {
             trust_level = "trusted";
           };
+          projects."/home/ssorensen/src/nix-dendrites" = {
+            trust_level = "trusted";
+          };
           projects."/home/ssorensen/higi/" = {
+            trust_level = "trusted";
+          };
+          projects."/home/ssorensen/higi/airflow_docker" = {
             trust_level = "trusted";
           };
           projects."/mnt/c/Users/ssorensen/src/higi" = {
@@ -96,6 +102,7 @@
           };
           tui.model_availability_nux = {
             "gpt-5.5" = 1;
+            "gpt-5.6-sol" = 1;
           };
 
           mcp_servers = {
