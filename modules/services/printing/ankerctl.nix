@@ -61,7 +61,7 @@
 
         virtualisation.oci-containers.containers.${serviceName} = {
           autoStart = true;
-          image = "ghcr.io/sabrsorensen/ankerctl:chore-publish-region-image";
+          image = "ghcr.io/django1982/ankermake-m5-protocol:1.11.0";
           environment = {
             ANKERCTL_LOG_DIR = "/logs";
             TIMELAPSE_CAPTURES_DIR = "/captures";
@@ -72,7 +72,7 @@
           extraOptions = [ "--network=host" ];
           log-driver = "journald";
           volumes = [
-            "${dataDir}:/root/.ankerctl:rw"
+            "${dataDir}:/home/ankerctl/.config/ankerctl:rw"
             "${capturesDir}:/captures:rw"
             "${logsDir}:/logs:rw"
           ];
