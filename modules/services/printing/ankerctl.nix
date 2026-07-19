@@ -61,7 +61,7 @@
 
         virtualisation.oci-containers.containers.${serviceName} = {
           autoStart = true;
-          image = "ghcr.io/django1982/ankerctl:latest";
+          image = "ghcr.io/sabrsorensen/ankerctl:chore-publish-region-image";
           environment = {
             ANKERCTL_LOG_DIR = "/logs";
             TIMELAPSE_CAPTURES_DIR = "/captures";
