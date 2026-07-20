@@ -42,11 +42,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784171300,
-        "narHash": "sha256-LiWzndOW88994z4SCnenv+2rKe/ryEgvWSsBjFpNvrc=",
+        "lastModified": 1784484188,
+        "narHash": "sha256-FM9Iwr775hfEdUwJsqRuKbi5QqR0JeYuWEyVrgF6C7s=",
         "owner": "sadjow",
         "repo": "codex-cli-nix",
-        "rev": "c4b3fc9d761797a813b5f8b1d38a9a81cdba6e45",
+        "rev": "fa13e0c1f4d0792481e68e057db31f26242de73b",
         "type": "github"
       },
       "original": {
@@ -319,11 +319,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784129366,
-        "narHash": "sha256-N5JiyICSeQF14x+OQebNyPpYowOT9Rs1iKyeCylSzOA=",
+        "lastModified": 1784546264,
+        "narHash": "sha256-jxVr5EHMYAOkFvS2k0abIvt6NqyshyWmiHHzV17sT2g=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "165228b0efefc3e635e5174020c40ea64271dc25",
+        "rev": "e3dea8e4792b09a6c0eb5836b0284ad05b1acba0",
         "type": "github"
       },
       "original": {
@@ -378,11 +378,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784115741,
-        "narHash": "sha256-zZRuJpeoEsH1X4MN+kVla0A2G2LzdpAUNqViRJHmyXE=",
+        "lastModified": 1784364424,
+        "narHash": "sha256-Q+wMaCtO9j03RndXahlnPS+W1yNMZmpZJXwrXcP9icY=",
         "owner": "Jovian-Experiments",
         "repo": "Jovian-NixOS",
-        "rev": "69b458491084c117e6db8761aa52597e67446296",
+        "rev": "835c5d5e24107c45eb45cc792d206ec01604b465",
         "type": "github"
       },
       "original": {
@@ -499,11 +499,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783864904,
-        "narHash": "sha256-BQxN5UMg9FOevAsgBRwPxfxlh51Puj+dNn/8Dsi3sPM=",
+        "lastModified": 1784440659,
+        "narHash": "sha256-Q5kNLlWngt7TaIIZoxDKWMHjiSaNRVqr70FqWCRRfr4=",
         "owner": "nix-community",
         "repo": "nix-index-database",
-        "rev": "1111b9bc836afb7e31a7014e8d1272de9b1c917d",
+        "rev": "4f8d52a3598b0dc7db7a5e7b419e3edd9d1ecfdb",
         "type": "github"
       },
       "original": {
@@ -552,11 +552,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1784258018,
-        "narHash": "sha256-2i4aEy0r4iWY6yQ/fNXHxK0KWeHJ0DRantnx71VisP4=",
+        "lastModified": 1784519327,
+        "narHash": "sha256-YzBWw26UxG1/1fKrPjl4Dj7K8jmwsg0hrsPdLACcI+A=",
         "owner": "nix-community",
         "repo": "nix4vscode",
-        "rev": "b49269888ef1910d9d9032e61461531ce663b5c8",
+        "rev": "cb6dddbe29fe02a6e542a6570af1f2a733b3d3a7",
         "type": "github"
       },
       "original": {
@@ -756,11 +756,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784317432,
-        "narHash": "sha256-lawVkDvT+zx9alUwTLAlowpOb6l33e8AGP9iZfDI/cs=",
+        "lastModified": 1784573366,
+        "narHash": "sha256-XURC27U9wePAmVu1bIXUT99rhY7WDxBYkDYr8j6UgQQ=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "211fe1148071eab9ec9fa5396609552e9584cb3a",
+        "rev": "3bdee36a0c19e0b1b60c1270c8e4b55982d55c01",
         "type": "github"
       },
       "original": {
@@ -977,12 +977,12 @@
         ]
       },
       "locked": {
-        "lastModified": 1780220602,
-        "narHash": "sha256-eynAfOmbmxJnkp7YewvCEbShNnnYJ9gLLqkzsYtBPeM=",
-        "rev": "db947814a175b7ca6ded66e21383d938df01c227",
-        "revCount": 551,
+        "lastModified": 1784369104,
+        "narHash": "sha256-47cxbcZODibHv3rELFQ9vZly0vUNkND/atn/U7HLeb0=",
+        "rev": "df3c0640565d04a0261253cdd89fce78ec50168a",
+        "revCount": 553,
         "type": "tarball",
-        "url": "https://api.flakehub.com/f/pinned/numtide/treefmt-nix/0.1.551%2Brev-db947814a175b7ca6ded66e21383d938df01c227/019e7f2a-5e41-70b0-9bdf-b9baf788b0e6/source.tar.gz"
+        "url": "https://api.flakehub.com/f/pinned/numtide/treefmt-nix/0.1.553%2Brev-df3c0640565d04a0261253cdd89fce78ec50168a/019f765a-822a-7a83-8dc1-c19f2adba321/source.tar.gz"
       },
       "original": {
         "type": "tarball",
