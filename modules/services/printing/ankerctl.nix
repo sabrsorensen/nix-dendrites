@@ -13,8 +13,6 @@
       dataDir = "/opt/ankerctl/config";
       capturesDir = "/opt/ankerctl/captures";
       logsDir = "/opt/ankerctl/logs";
-      ankerctlEnvSecret = "ankerctl-env";
-      hasAnkerctlEnv = builtins.pathExists "${inputs.nix-secrets}/env_files/ankerctl.env";
     in
     {
       options.my.services.ankerctl.enable = lib.mkEnableOption "Ankerctl printer service";
@@ -48,17 +46,6 @@
           "d ${logsDir} 0750 1000 1000 -"
         ];
 
-        sops.secrets = lib.optionalAttrs hasAnkerctlEnv {
-          ${ankerctlEnvSecret} = {
-            owner = "root";
-            group = "root";
-            mode = "0400";
-            format = "dotenv";
-            sopsFile = "${inputs.nix-secrets}/env_files/ankerctl.env";
-            key = "";
-          };
-        };
-
         virtualisation.oci-containers.containers.${serviceName} = {
           autoStart = true;
           image = "ghcr.io/django1982/ankermake-m5-protocol:1.11.0";
@@ -66,11 +53,13 @@
             ANKERCTL_LOG_DIR = "/logs";
             TIMELAPSE_CAPTURES_DIR = "/captures";
           };
-          environmentFiles = lib.optionals hasAnkerctlEnv [
-            config.sops.secrets.${ankerctlEnvSecret}.path
+          environmentFiles = [
           ];
           extraOptions = [ "--network=host" ];
           log-driver = "journald";
+          ports = [
+            "0.0.0.0:${lib.toString port}:${lib.toString port}"
+          ];
           volumes = [
             "${dataDir}:/home/ankerctl/.config/ankerctl:rw"
             "${capturesDir}:/captures:rw"

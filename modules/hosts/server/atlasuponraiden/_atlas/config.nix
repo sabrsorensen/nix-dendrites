@@ -20,7 +20,7 @@
       ankerctl.enable = true;
       apprise.enable = true;
       atuin.enable = true;
-      frigate.enable = true;
+      frigate.enable = false;
       immich.enable = true;
       immich.mediaLocation = "/AnomalyRealm/media/photos";
       mealie.enable = true;

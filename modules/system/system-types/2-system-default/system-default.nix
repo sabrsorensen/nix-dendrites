@@ -27,6 +27,7 @@
         noson
         printing
         plymouth
+        docker
         podman
         wayland
         xserver
