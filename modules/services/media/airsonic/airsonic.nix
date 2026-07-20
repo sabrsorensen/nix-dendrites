@@ -58,16 +58,16 @@
             "PUID" = lib.toString config.users.users.${serviceName}.uid;
             "PGID" = lib.toString config.users.groups.${groupName}.gid;
             "JAVA_OPTS" =
-              "-Xmx256m -Xms256m -Dserver.forward-headers-strategy=framework -Dserver.context-path=/${cfg.pathSegment}/";
+              "-Xmx2048m -Xms1024m -Dserver.forward-headers-strategy=framework -Dserver.context-path=/${cfg.pathSegment}/";
             "CONTEXT_PATH" = "/${cfg.pathSegment}";
             "TZ" = config.time.timeZone;
             "LOG4J_FORMAT_MSG_NO_LOOKUPS" = "true";
           };
           volumes = [
             "/etc/localtime:/etc/localtime:ro"
-            "${mediaCfg.configRoot}/${serviceName}:/config"
-            "${mediaCfg.dataRoot}/music/ready_to_stream:/media"
+            "${mediaCfg.configRoot}/${serviceName}:/var/airsonic"
             "${mediaCfg.dataRoot}/music/ready_to_stream:/music"
+            "${mediaCfg.dataRoot}/music/untagged_imports:/music/untagged_imports"
             "${mediaCfg.dataRoot}/music/source_files/Google Music/:/old_google_music"
             "${mediaCfg.dataRoot}/music/podcasts:/podcasts"
             "${mediaCfg.dataRoot}/music/playlists:/playlists"
@@ -76,7 +76,6 @@
             "${localAddr}:4040/tcp"
           ];
           labels = {
-            "com.centurylinklabs.watchtower.enable" = "true";
           };
           log-driver = "journald";
           extraOptions = [
