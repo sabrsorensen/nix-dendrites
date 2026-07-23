@@ -54,6 +54,10 @@ in
             builder = true;
           };
           features = {
+            docker = true;
+            firmware = true;
+            gdrive = true;
+            nix-ld = true;
             podman = true;
             musicTagging = true;
           };
@@ -90,7 +94,10 @@ in
         };
         # Bootstrap deliberately leaves this disabled.
         my.deployment = {
+          canDeployRemotely = true;
           enableRemoteUser = true;
+          localFlakePath = "/home/sam/src/nix-dendrites";
+          sleepy = false;
           authorizedKeyFiles = [
             "${inputs.nix-secrets}/ssh-keys/kamino/atlas_nix.pub"
             "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/atlas_nix.pub"

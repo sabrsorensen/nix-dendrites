@@ -66,6 +66,7 @@
         inputs.self.packages.${system}.write-inputs
         inputs.self.packages.${system}.write-lock
         inputs.self.packages.${system}.update-firefox-addons
+        inputs.nix-auto-follow.packages.${system}.default
       ]
       ++ lib.optionals hasLocalGuiFlake [ leasesEditor ]
       ++ lib.optionals (pkgs.stdenv.hostPlatform.system == "x86_64-linux") [ pkgs.intel-gpu-tools ];

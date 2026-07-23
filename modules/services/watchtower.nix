@@ -10,7 +10,10 @@
         }
       ];
 
-      virtualisation.podman.dockerSocket.enable = true;
+      # Watchtower talks to Podman's native socket below.  Do not also expose
+      # Podman's Docker-compatible /run/docker.sock: on Atlas, Docker owns
+      # that path as well, and current NixOS correctly rejects both services
+      # attempting to provide it.
       virtualisation.oci-containers.containers.watchtower = {
         image = "nickfedor/watchtower";
         autoStart = true;

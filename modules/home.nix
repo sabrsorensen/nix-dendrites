@@ -43,6 +43,7 @@ in
       homeDirectory = "/home/${username}";
       deployment = config.my.deployment;
       canDeployRemotely = deployment.canDeployRemotely && deployment.localFlakePath != null;
+      hasPodman = host.features.podman;
       inhibitSleep = deployment.sleepy;
       systemdInhibit = lib.getExe' pkgs.systemd "systemd-inhibit";
       nixProfile = "$HOME/.nix-profile/etc/profile.d/nix.sh";
@@ -325,7 +326,59 @@ in
           fish = {
             enable = true;
             generateCompletions = true;
-            functions = lib.mkIf canDeployRemotely {
+            plugins = lib.mkIf (!host.roles.wsl) [
+              {
+                name = "fish-ssh-agent";
+                src = pkgs.fetchFromGitHub {
+                  owner = "danhper";
+                  repo = "fish-ssh-agent";
+                  rev = "f10d95775352931796fd17f54e6bf2f910163d1b";
+                  hash = "sha256-cFroQ7PSBZ5BhXzZEKTKHnEAuEu8W9rFrGZAb8vTgIE=";
+                };
+              }
+              {
+                name = "to-fish";
+                src = pkgs.fetchFromGitHub {
+                  owner = "joehillen";
+                  repo = "to-fish";
+                  rev = "b94c2e5756b4646051fe64ad8cd36eda33405f8a";
+                  hash = "sha256-jQGYFON13XhjX+Xrnd8kglco8xRJ9G7kkGmswtuEgZw=";
+                };
+              }
+            ];
+            interactiveShellInit = lib.mkIf (!host.roles.wsl) ''
+              if command -sq gpg
+                set -gx GPG_TTY (tty)
+              end
+            '';
+            functions = {
+              ls = "command ls -la --color=auto $argv";
+              fish_greeting = ''
+                if not command -sq fortune
+                  echo "Install fortune"
+                end
+                if not command -sq cowsay
+                  echo "Install cowsay"
+                end
+                if not command -sq lolcat
+                  echo "Install lolcat"
+                end
+                set -l toon (random choice {default,bud-frogs,dragon,dragon-and-cow,elephant,moose,stegosaurus,tux,vader})
+                if command -sq lolcat
+                  fortune -s | cowsay -f $toon | lolcat
+                else if command -sq fortune
+                  fortune -s | cowsay -f $toon
+                else
+                  echo "Something fishy going on around here ..."
+                end
+              '';
+              inhibitSleep = ''
+                echo "🔒 Inhibiting sleep for: $argv"
+                echo -ne "\033]0;$argv\007"
+                systemd-inhibit --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who="$USER" --why=nixos-rebuild --mode=block $argv
+              '';
+            }
+            // lib.optionalAttrs canDeployRemotely {
               nhs = ''
                 if ${if inhibitSleep then "true" else "false"}
                   ${systemdInhibit} --what=shutdown:sleep:idle --who=nhs --why="NixOS local switch" --mode=block nh os switch ${deployment.localFlakePath} --keep-going $argv
@@ -437,6 +490,93 @@ in
                   nh os switch ${deployment.localFlakePath} -H $target --target-host "nix-"(string lower $target) --update --keep-going $argv[2..-1]
                 end
               '';
+            }
+            // lib.optionalAttrs hasPodman {
+              podmanSystem = "sudo podman $argv";
+              pds = "podmanSystem";
+              podmanSystemPs = "sudo podman ps --format 'table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.RunningFor}}'";
+              podmanSystemPsAll = "sudo podman ps -a --format 'table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.RunningFor}}'";
+              podmanUserPs = "podman ps --format 'table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.RunningFor}}'";
+              podmanUserPsAll = "podman ps -a --format 'table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.RunningFor}}'";
+              pps = "podmanSystemPs";
+              ppsa = "podmanSystemPsAll";
+              ppu = "podmanUserPs";
+              ppua = "podmanUserPsAll";
+              dps = "podmanSystemPsAll";
+              podmanUnitName = ''
+                set name $argv[1]
+                if test -z "$name"
+                  return 1
+                end
+                if string match -q 'podman-*.service' -- "$name"
+                  echo "$name"
+                else if string match -q '*.service' -- "$name"
+                  echo "podman-"(string replace -r '\\.service$' "" -- "$name")".service"
+                else
+                  echo "podman-$name.service"
+                end
+              '';
+              podmanContainerName = ''
+                set unit (podmanUnitName $argv[1])
+                or return 1
+                string replace -r '^podman-(.*)\\.service$' '$1' -- "$unit"
+              '';
+              podmanServices = "systemctl list-units --type=service --all 'podman-*.service'";
+              pcs = "podmanServices";
+              podmanServiceStatus = ''
+                for name in $argv
+                  set unit (podmanUnitName $name)
+                  or return 1
+                  sudo systemctl status $unit
+                end
+              '';
+              podmanServiceLogs = ''
+                for name in $argv
+                  set unit (podmanUnitName $name)
+                  or return 1
+                  sudo journalctl -u $unit -f
+                end
+              '';
+              podmanServicePull = ''
+                if test (count $argv) -eq 0
+                  echo "Usage: podmanServicePull <container|service> [...]"
+                  return 1
+                end
+                for name in $argv
+                  set container (podmanContainerName $name)
+                  or return 1
+                  set image (sudo podman inspect --format '{{.ImageName}}' $container 2>/dev/null)
+                  if test -z "$image"
+                    echo "No existing rootful container found for $name" >&2
+                    return 1
+                  end
+                  echo "Pulling $image"
+                  sudo podman pull $image
+                  or return $status
+                end
+              '';
+              podmanServiceUp = ''
+                if test (count $argv) -eq 0
+                  echo "Usage: podmanServiceUp <container|service> [...]"
+                  return 1
+                end
+                for name in $argv
+                  set unit (podmanUnitName $name)
+                  or return 1
+                  if sudo systemctl is-active --quiet $unit
+                    sudo systemctl restart $unit
+                  else
+                    sudo systemctl start $unit
+                  end
+                  or return $status
+                end
+              '';
+              pcss = "podmanServiceStatus";
+              pcsl = "podmanServiceLogs";
+              pcp = "podmanServicePull";
+              pcu = "podmanServiceUp";
+              dcp = "podmanServicePull";
+              dcu = "podmanServiceUp";
             };
           };
           atuin = lib.mkIf isNativePersonal {

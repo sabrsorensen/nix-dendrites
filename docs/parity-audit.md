@@ -164,7 +164,7 @@ behavior.
 | Syncthing | ported | `modules/services/syncthing.nix` restores the Atlas system service and secret-backed topology, including the original folder paths/labels and Emerald Echo SteamOS membership, plus Home Manager clients on Kamino, ZaphodBeeblebrox, and Emerald Echo with filtered folders, the GUI credential secret, and the predecessor tray policy. |
 | Firefox | ported | `modules/firefox.nix` restores the GUI-gated CSS files, policies, search aliases, preferences, MIME defaults, NUR add-ons, and pinned custom XPIs. `nix flake check --no-build` evaluates the graphical host path. |
 | graphical-home, Konsole | ported | The shared profile restores the predecessor media/font and GUI desktop packages, its portable policy, the GUI-gated Night Owl Konsole scheme, and the desktop VSCodium default/Nix/Python/STM32 profiles. |
-| GDrive | ported | `modules/gdrive.nix` restores the per-host SOPS-backed rclone remote and `~/gdrive` mount for the two predecessor laptop Sam profiles. |
+| GDrive | ported | `modules/gdrive.nix` restores the per-host SOPS-backed rclone remote and `~/gdrive` mount for the predecessor's Sam profiles that enabled it, including Atlas and the two laptops. |
 | GitHub CLI | ported | The common Sam profile enables GitHub CLI and its Git credential helper; WSL inherits the same behavior. |
 | VS Code/VSCodium | ported | `modules/vscode.nix` supplies the GUI-laptop VSCodium package, Marketplace extension resolver, default extensions, Vim/editor settings, privacy policy, Nix/Python/STM32 profiles, and host-selected Party Owl/Synthwave Blues/SynthWave 84 themes. `wsl-vscode.nix` synchronizes the predecessor's managed common/Higi/Nix Windows Code policy, snippets, MCP configuration, and full extension-ID inventory for on-demand Windows installation while retaining an empty Linux extension tree. The predecessor's generated Windows-profile `extensions.json` files embedded immutable Linux store paths, so they are intentionally not copied into Windows; mutable database connections remain Windows application state and are intentionally not declared. |
 | LazyVim | ported, disabled | `modules/lazyvim.nix` registers the full integration behind an off-by-default host fact. |
@@ -290,7 +290,7 @@ treated as regressions.
 | --- | --- | --- |
 | `airsonic`, `arr-sync`, `bazarr`, `deluge`, `flaresolverr`, `gonic`, `jellyfin`, `ombi`, `organizr`, `plex`, `profilarr`, `prowlarr`, `radarr`, `sonarr` | corresponding `media/**` modules | **Equivalent.** Container/service payloads, paths, proxy routes, identities, and Arr 4K systemd units match. The old `_arr` helper was inlined; added tmpfiles rules make required state explicit. |
 | `media-network` | `media/_podman-network.nix` | **Verified equivalent.** The network is now created for either Deluge or Watchtower, every current consumer, and both consumers order after it. |
-| `watchtower` | `containers/watchtower/watchtower.nix` | **Verified equivalent with intentional Podman adaptation.** It uses Podman’s Docker-compatible socket and asserts Podman; standalone operation now has the required media network and ordering. |
+| `watchtower` | `containers/watchtower/watchtower.nix` | **Verified equivalent with intentional Podman adaptation.** It mounts Podman's native socket at Watchtower's Docker-socket path and asserts Podman; standalone operation now has the required media network and ordering. It does not enable Podman's competing Docker-compatible host socket, because Atlas also retains Docker and current NixOS correctly rejects two providers for that socket. |
 | `apprise` | `notifications/apprise/apprise.nix` | **Verified equivalent.** Hostname, configuration directory, and attachment directory options have been restored. |
 | `gotify`, `ntfy`, `atuin`, `ankerctl`, `frigate` | corresponding notification/printing/service modules | **Equivalent.** Their publication, authentication, listener, and runtime settings match after moving enablement to host facts. |
 | `blocky` | `blocky/blocky.nix` | **Verified equivalent.** Configurable Prometheus enablement/port/path, conditional firewall exposure, and CoreDNS ordering are restored; Naboo and Nevarro explicitly enable metrics as before. |
@@ -339,7 +339,7 @@ live key, connectivity, and remote-switch validation outstanding.
 | `audio`, `bluetooth`, `firmware`, `nix-ld`, `zsa`, `desktop` KDE policy, `appimage`, `deskflow`, `docker`, `flatpak`, `minecraft` tools, `threedprinter`, `steam` | **Equivalent.** Direct comparison found only self-gating/formatting changes or the deliberate central unfree-package collector. |
 | `bitwarden`, `noson`, `office` | **Verified equivalent.** The restored desktop Sam profile receives these through Home Manager, matching the predecessor user scope. |
 | `wine` | **Verified equivalent.** Packages, Nixpkgs policy, fonts, 32-bit graphics/audio, dconf, and the OpenLDAP test workaround match. |
-| `podman` | **Equivalent base runtime.** It enables Podman and selects it as the OCI backend. Consumers that require the Docker socket are explicitly handled by Watchtower and NetBird and are tracked in their service rows. |
+| `podman` | **Equivalent base runtime.** It enables Podman and selects it as the OCI backend. Watchtower uses Podman's native socket directly, so it remains compatible with Atlas retaining Docker. |
 | `nvidia` | **Verified equivalent.** The generic Intel microcode default is restored alongside the driver, graphics, PRIME, and unfree policy. |
 | `music-tagging` | **Verified equivalent declarative behavior.** Atlas runtime access to the music library remains to be exercised. |
 | `impermanence` | **Verified equivalent.** System paths, FUSE policy, persistence helper, and shared Home Manager hook match. |
@@ -400,5 +400,5 @@ as the current package's `config.yaml`. Firefox custom add-ons retain the
 predecessor's generated JSON-to-Nix model, now exposed as the repository
 package `update-firefox-addons` (`nix run .#update-firefox-addons`) rather than
 a Fish function. The package is installed on local-checkout hosts alongside
-the formatter and flake-writing tools, without embedding a machine-specific
-checkout path.
+`nix-auto-follow`, the formatter, and flake-writing tools, without embedding a
+machine-specific checkout path.

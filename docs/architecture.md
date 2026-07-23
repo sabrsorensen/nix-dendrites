@@ -173,9 +173,10 @@ substitute for `all.nix` or a general module-grouping mechanism.
 The Firefox custom-add-on source list is
 `modules/_firefox-addons.json`; refresh its committed generated package set
 with `nix run .#update-firefox-addons`. This update tool is installed on hosts
-with `my.deployment.localFlakePath`, along with the formatter and flake-writing
-tools. It performs AMO lookups only when explicitly invoked; normal evaluation
-and deployment use the pinned generated Nix file.
+with `my.deployment.localFlakePath`, along with `nix-auto-follow`, the
+formatter, and flake-writing tools. It performs AMO lookups only when
+explicitly invoked; normal evaluation and deployment use the pinned generated
+Nix file.
 
 When an input provides a NixOS module that is safe to import everywhere, use a
 public bootstrap module plus a private `/_` delayed module: the public file
