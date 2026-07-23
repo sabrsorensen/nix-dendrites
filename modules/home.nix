@@ -45,44 +45,52 @@ in
       canDeployRemotely = deployment.canDeployRemotely && deployment.localFlakePath != null;
       sshHosts = {
         atlasuponraiden = {
-          HostName = "atlasuponraiden.${domain}";
+          alias = "AtlasUponRaiden";
+          HostName = "AtlasUponRaiden.${domain}";
           User = "sam";
           IdentityFile = "~/.ssh/atlasuponraiden_id_ed25519";
         };
         kamino = {
-          HostName = "kamino.${domain}";
+          alias = "Kamino";
+          HostName = "Kamino.${domain}";
           User = "sam";
           IdentityFile = "~/.ssh/kamino_id_ed25519";
         };
         zaphodbeeblebrox = {
-          HostName = "zaphodbeeblebrox.${domain}";
+          alias = "ZaphodBeeblebrox";
+          HostName = "ZaphodBeeblebrox.${domain}";
           User = "sam";
           IdentityFile = "~/.ssh/zaphod_id_ed25519";
         };
         naboo = {
-          HostName = "naboo.${domain}";
+          alias = "Naboo";
+          HostName = "Naboo.${domain}";
           User = "sam";
           IdentityFile = "~/.ssh/naboo_id_ed25519";
         };
         nevarro = {
-          HostName = "nevarro.${domain}";
+          alias = "Nevarro";
+          HostName = "Nevarro.${domain}";
           User = "sam";
           IdentityFile = "~/.ssh/nevarro_id_ed25519";
         };
         nixpi = {
-          HostName = "nixpi.${domain}";
+          alias = "NixPi";
+          HostName = "NixPi.${domain}";
           User = "sam";
           IdentityFile = "~/.ssh/nixpi_id_ed25519";
         };
         emeraldecho = {
-          HostName = "emeraldecho.${domain}";
+          alias = "EmeraldEcho";
+          HostName = "EmeraldEcho.${domain}";
           User = "deck";
           IdentityFile = "~/.ssh/emeraldecho_id_ed25519";
         };
       };
-      sshHostBlocks = lib.mapAttrs (_: host: host // { IdentitiesOnly = true; }) (
-        lib.filterAttrs (name: _: name != lib.toLower host.name) sshHosts
-      );
+      sshHostBlocks = lib.mapAttrs' (
+        _: peer:
+        lib.nameValuePair peer.alias (builtins.removeAttrs peer [ "alias" ] // { IdentitiesOnly = true; })
+      ) (lib.filterAttrs (_: peer: peer.alias != host.name) sshHosts);
       nixSshHostBlocks =
         lib.mapAttrs'
           (
