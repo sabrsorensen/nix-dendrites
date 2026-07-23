@@ -28,7 +28,10 @@
         ];
       };
       users.groups.sam = { };
-      users.groups.media = { };
+      # All Atlas media containers share this persistent host group. Keep its
+      # GID aligned with `my.media.containerIdentities` so PUID/PGID-based
+      # images receive a concrete numeric PGID.
+      users.groups.media.gid = 2096;
       users.users.sonos = {
         isSystemUser = true;
         group = "media";
