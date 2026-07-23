@@ -41,7 +41,7 @@
           enableRemoteUser = true;
           canDeployRemotely = true;
           sleepy = true;
-          localFlakePath = "/home/sam/src/nix-dendrites-broadcast";
+          localFlakePath = "/home/sam/src/nix-dendrites";
         };
       }
     ];

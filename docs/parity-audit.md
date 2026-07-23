@@ -125,13 +125,11 @@ explicitly in the current-state and migration-status sections.
 
 Direct source comparison corrected three earlier ported labels:
 
-- **Demlo — verified equivalent.** The rewrite installs Demlo for both `musicTagging` and
-  the predecessor media-service consumer and manages all four configured Lua
-  script names plus `config.lua`. Path/cover behavior, feature/remix and genre
-  normalization, album-only track/disc cleanup, year extraction, curated
-  casing constants, Unicode-aware tokenization, Roman-numeral preservation,
-  Mac/O’ name handling, the ordinary-`Mac…` exception vocabulary, bracketed
-  feature/remix extraction, and featured-name deduplication are restored.
+- **Demlo — equivalent active command, intentional enhancement.** Atlas
+  receives the predecessor's system-wide Demlo command through its media-service
+  role. At the user's request, its `musicTagging` feature also enables separate
+  Beets and Demlo Home Manager configuration modules, activating the
+  predecessor's previously unimported user configuration.
   Remaining script differences are help/debug text rather than transformations.
 - **Impermanence — verified equivalent.** The system persistence paths, FUSE
   setting, `mkIfPersistence` helper, and shared Home Manager `home.persistence`
@@ -224,7 +222,7 @@ require a host build, boot, or activation:
 
 1. Perform the recorded runtime builds/boots and host activation checks.
 2. Perform runtime music-library validation on Atlas before relying on the
-   equivalent declarative Demlo profile.
+   Demlo command and the explicitly enabled Beets/Demlo user configuration.
 
 ## Verification closure: current state
 
@@ -243,8 +241,10 @@ because it evaluates.
 
 ### Verified partial or changed behavior
 
-- Demlo’s declarative script corpus is now equivalent; it remains subject to
-  the recorded Atlas runtime media-path validation.
+- Demlo's active system package is equivalent; it remains subject to the
+  recorded Atlas runtime media-path validation. Beets and Demlo user
+  configuration are an explicit Atlas enhancement, split into their own
+  feature modules.
 - A follow-up source review found native Sam-profile differences; the GitHub
   Nix token include, Git/GPG/SSH identity policy, Atuin/MCP clients, filtered
   user Syncthing clients, Vim/Starship/tmux configuration, and local

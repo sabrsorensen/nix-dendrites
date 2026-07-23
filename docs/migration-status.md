@@ -46,9 +46,10 @@ the delayed public/private pattern, then their configuration self-gates:
 
 - `nix-flatpak` is broadcast; only `features.flatpak` hosts declare Flatpak
   state.
-- Demlo is consumed through a delayed feature module; only
-  `features.musicTagging` hosts receive its package in Sam's Home Manager
-  profile.
+- Demlo is consumed through a delayed feature module; media-service hosts
+  receive its command system-wide. Atlas additionally enables the separated
+  Beets and Demlo Home Manager configuration modules through
+  `features.musicTagging`; this is an explicit post-parity enhancement.
 - Impermanence is broadcast as an option provider, while its persistent-state
   policy activates only for `features.impermanence` hosts.
 - Armory is an intentional, optional addition using a pinned legacy runtime.
@@ -178,10 +179,9 @@ the evaluated Steam Deck configuration. Their builds and runtime testing on
 Emerald Echo remain separate Decky-specific checks.
 
 AppImage execution is now a GUI-gated feature: graphical hosts receive the
-binfmt handler and headless hosts do not. Atlas's `musicTagging` fact now
-activates Sam's Home Manager Beets and Demlo profile, including the local
-`demlo_compat` normalization plugin vendored under `modules/assets`. Focused
-Atlas evaluation confirms the packages, configuration source, and user binding.
+binfmt handler and headless hosts do not. Atlas retains the predecessor's
+system-wide Demlo command through its media-service role and explicitly enables
+the separated Beets and Demlo Home Manager configuration modules.
 
 The latest host-edge review also restored Atlas-only SFTP access, matching its
 predecessor role as the remote deployment and build endpoint. Its evaluated

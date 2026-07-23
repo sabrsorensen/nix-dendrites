@@ -134,7 +134,7 @@ in
           # The predecessor derived this from its interactive user.  State it
           # explicitly in the broadcast host fact so `nh` and the local
           # checkout helpers remain available after the repository rename.
-          localFlakePath = "/home/ssorensen/src/nix-dendrites-broadcast";
+          localFlakePath = "/home/ssorensen/src/nix-dendrites";
         };
       }
     ];
