@@ -51,8 +51,9 @@ the delayed public/private pattern, then their configuration self-gates:
   profile.
 - Impermanence is broadcast as an option provider, while its persistent-state
   policy activates only for `features.impermanence` hosts.
-- Armory uses a pinned legacy runtime and activates only for the x86
-  `features.armory` hosts Kamino and ZaphodBeeblebrox.
+- Armory is an intentional, optional addition using a pinned legacy runtime.
+  It is currently enabled only for the x86 ZaphodBeeblebrox host; it is not a
+  predecessor-parity feature and Kamino does not receive its legacy closure.
 - The flake formatter is restored through treefmt-nix with nixfmt enabled.
 - nix-auto-follow again prunes redundant flake-input follows during generation.
 - The GUI-gated Firefox profile restores the predecessor CSS hacks, search
@@ -60,8 +61,9 @@ the delayed public/private pattern, then their configuration self-gates:
   pinned custom XPIs. It evaluates on the current graphical hosts.
 - LazyVim is registered behind `features.lazyvim`; it is deliberately disabled
   on every current host until a user opts in.
-- Jovian is broadcast through the `jovian` registry module; only
-  `roles.steamdeck` hosts receive Jovian configuration.
+- Jovian and Decky live in the private Steam Deck role bundle.  Emerald Echo
+  imports that bundle explicitly at its output boundary, so Jovian's Steam
+  overlay cannot affect ordinary x86 hosts.
 - Disko, SOPS, and Home Manager use the same delayed-input pattern.
 
 `nixos-wsl` is the deliberate exception: its upstream module is imported only

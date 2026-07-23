@@ -47,26 +47,73 @@
         .${theme};
       mkExtensions =
         ids: pkgs.nix4vscode.forVscodeVersion (themePackage.vscodeVersion or themePackage.version) ids;
-      defaultExtensions = mkExtensions [
-        "docker.docker"
-        "esbenp.prettier-vscode"
-        "evondev.indent-rainbow-palettes"
-        "github.vscode-github-actions"
-        "humao.rest-client"
-        "jeff-hykin.better-nix-syntax"
-        "LiemLB.nix-flakes"
-        "ms-azuretools.vscode-containers"
-        "ms-python.debugpy"
-        "ms-python.python"
-        "ms-python.vscode-pylance"
-        "oderwat.indent-rainbow"
-        "redhat.vscode-yaml"
-        "rimuruchan.vscode-fix-checksums-next"
-        "sabrsorensen.party-owl-84"
-        "sabrsorensen.synthwave-blues"
-        "tomoki1207.pdf"
-        "vscodevim.vim"
+      openVsxExtension =
+        {
+          publisher,
+          name,
+          version,
+          sha256,
+          url,
+        }:
+        pkgs.vscode-utils.buildVscodeExtension {
+          inherit version;
+          pname = "${publisher}-${name}";
+          src = pkgs.fetchurl {
+            inherit url sha256;
+          };
+          vscodeExtPublisher = publisher;
+          vscodeExtName = name;
+          vscodeExtUniqueId = "${publisher}.${name}";
+        };
+      vscodiumDevpodContainers = openVsxExtension {
+        publisher = "3timeslazy";
+        name = "vscodium-devpodcontainers";
+        version = "0.0.18";
+        sha256 = "156nv9xvdsbq4782d0lpg7pjm45zi36ga6d7prv2lb844jsbli22";
+        url = "https://open-vsx.org/api/3timeslazy/vscodium-devpodcontainers/0.0.18/file/3timeslazy.vscodium-devpodcontainers-0.0.18.vsix";
+      };
+      openRemoteWsl = openVsxExtension {
+        publisher = "jeanp413";
+        name = "open-remote-wsl";
+        version = "0.0.5";
+        sha256 = "0md3fmchsk5948n748m7j1zmj3hqjxy1vwbbhyrfk8pp5j55s0pi";
+        url = "https://open-vsx.org/api/jeanp413/open-remote-wsl/0.0.5/file/jeanp413.open-remote-wsl-0.0.5.vsix";
+      };
+      openRemoteSsh = openVsxExtension {
+        publisher = "jeanp413";
+        name = "open-remote-ssh";
+        version = "0.1.2";
+        sha256 = "10ankbl6gfbrgc5ghj5744g1n66cx1vpr9bbmkp1k89m9m40ahsc";
+        url = "https://open-vsx.org/api/jeanp413/open-remote-ssh/0.1.2/file/jeanp413.open-remote-ssh-0.1.2.vsix";
+      };
+      remoteExtensions = mkExtensions [ "ms-vscode.remote-explorer" ] ++ [
+        vscodiumDevpodContainers
+        openRemoteSsh
+        openRemoteWsl
       ];
+      defaultExtensions =
+        mkExtensions [
+          "bmalehorn.vscode-fish"
+          "docker.docker"
+          "esbenp.prettier-vscode"
+          "evondev.indent-rainbow-palettes"
+          "github.vscode-github-actions"
+          "humao.rest-client"
+          "jeff-hykin.better-nix-syntax"
+          "LiemLB.nix-flakes"
+          "ms-azuretools.vscode-containers"
+          "ms-python.debugpy"
+          "ms-python.python"
+          "ms-python.vscode-pylance"
+          "oderwat.indent-rainbow"
+          "redhat.vscode-yaml"
+          "rimuruchan.vscode-fix-checksums-next"
+          "sabrsorensen.party-owl-84"
+          "sabrsorensen.synthwave-blues"
+          "tomoki1207.pdf"
+          "vscodevim.vim"
+        ]
+        ++ remoteExtensions;
       pythonExtensions = mkExtensions [
         "ms-python.debugpy"
         "ms-python.python"
@@ -152,6 +199,9 @@
         "python.languageServer" = "Pylance";
         "redhat.telemetry.enabled" = false;
         "remote.env"."NODE_EXTRA_CA_CERTS" = "/etc/ssl/certs/ca-bundle.crt";
+        "remote.SSH.experimental.chat" = false;
+        "remote.SSH.showLoginTerminal" = false;
+        "remote.SSH.useLocalServer" = true;
         "search.showLineNumbers" = true;
         "search.smartCase" = true;
         "telemetry.telemetryLevel" = "off";
@@ -194,67 +244,80 @@
     in
     lib.mkIf host.features.vscode {
       nixpkgs.overlays = [ inputs.nix4vscode.overlays.forVscode ];
-      home-manager.users.sam.programs.vscodium = {
-        enable = true;
-        package = themePackage;
-        profiles.default = {
-          enableExtensionUpdateCheck = true;
-          enableUpdateCheck = true;
-          extensions = defaultExtensions;
-          keybindings = [
-            {
-              key = "shift+[ArrowRight]";
-              command = "workbench.action.nextEditor";
-            }
-            {
-              key = "shift+[ArrowLeft]";
-              command = "workbench.action.previousEditor";
-            }
-          ];
-          userSettings = defaultSettings // {
-            "vim.insertModeKeyBindings" = [
+      home-manager.users.sam = {
+        # The predecessor installed the editor's local .NET SDK and
+        # STM32CubeMX alongside these profiles.  Profiles alone only provide
+        # extensions and settings, leaving the executable path dangling.
+        home.packages = [
+          pkgs.dotnetCorePackages.sdk_10_0-bin
+          pkgs.stm32cubemx
+        ];
+        programs.vscodium = {
+          enable = true;
+          package = themePackage;
+          profiles.default = {
+            enableExtensionUpdateCheck = true;
+            enableUpdateCheck = true;
+            extensions = defaultExtensions;
+            enableMcpIntegration = true;
+            keybindings = [
               {
-                before = [
-                  "j"
-                  "j"
-                ];
-                after = [ "<Esc>" ];
+                key = "shift+[ArrowRight]";
+                command = "workbench.action.nextEditor";
+              }
+              {
+                key = "shift+[ArrowLeft]";
+                command = "workbench.action.previousEditor";
               }
             ];
-            "vim.normalModeKeyBindings" = [
-              {
-                before = [ "0" ];
-                after = [ "^" ];
-              }
-            ];
-          };
-        };
-        profiles = {
-          Nix = {
-            extensions = defaultExtensions ++ nixExtensions;
             userSettings = defaultSettings // {
-              "[nix]" = {
-                "editor.tabSize" = 2;
-                "editor.indentSize" = "tabSize";
+              "vim.insertModeKeyBindings" = [
+                {
+                  before = [
+                    "j"
+                    "j"
+                  ];
+                  after = [ "<Esc>" ];
+                }
+              ];
+              "vim.normalModeKeyBindings" = [
+                {
+                  before = [ "0" ];
+                  after = [ "^" ];
+                }
+              ];
+            };
+          };
+          profiles = {
+            Nix = {
+              extensions = defaultExtensions ++ nixExtensions;
+              enableMcpIntegration = true;
+              userSettings = defaultSettings // {
+                "[nix]" = {
+                  "editor.tabSize" = 2;
+                  "editor.indentSize" = "tabSize";
+                };
+                "editor.formatOnSave" = true;
               };
-              "editor.formatOnSave" = true;
             };
-          };
-          Python = {
-            extensions = defaultExtensions ++ pythonExtensions;
-            userSettings = defaultSettings // {
-              "[python]"."editor.formatOnType" = true;
-              "python.analysis.typeCheckingMode" = "strict";
-              "editor.formatOnSave" = true;
+            Python = {
+              extensions = defaultExtensions ++ pythonExtensions;
+              enableMcpIntegration = true;
+              userSettings = defaultSettings // {
+                "[python]"."editor.formatOnType" = true;
+                "python.analysis.typeCheckingMode" = "strict";
+                "editor.formatOnSave" = true;
+              };
             };
-          };
-          STM32 = {
-            extensions = defaultExtensions ++ stm32Extensions;
-            userSettings = defaultSettings // {
-              "stm32cube-ide-core.configuration.productSTM32CubeMX.executablePath" =
-                "/etc/profiles/per-user/sam/bin/stm32cubemx";
-              "stm32cube-ide-core.enableTelemetry" = false;
-              "editor.formatOnSave" = true;
+            STM32 = {
+              extensions = defaultExtensions ++ stm32Extensions;
+              enableMcpIntegration = true;
+              userSettings = defaultSettings // {
+                "stm32cube-ide-core.configuration.productSTM32CubeMX.executablePath" =
+                  "/etc/profiles/per-user/sam/bin/stm32cubemx";
+                "stm32cube-ide-core.enableTelemetry" = false;
+                "editor.formatOnSave" = true;
+              };
             };
           };
         };

@@ -15,7 +15,6 @@
             builder = true;
           };
           features = {
-            armory = true;
             gui = true;
             gdrive = true;
             personalMcp = true;
@@ -23,6 +22,7 @@
             firmware = true;
             nix-ld = true;
             docker = true;
+            podman = true;
             bitwarden = true;
             deskflow = true;
             flatpak = true;
