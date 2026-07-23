@@ -428,6 +428,176 @@ in
                 nhs $argv
               '';
               nhSwitchUpgrade = "nhsu $argv";
+              # These inventory-era helpers remain public command names.  The
+              # data is now intentionally small and explicit: the broadcast
+              # configuration has one standalone Home Manager output (the
+              # SteamOS side of Emerald Echo) and the same named deployment
+              # targets as the predecessor.
+              remoteDeployMethod = ''
+                switch (string lower $argv[1])
+                  case emeraldecho
+                    echo build-then-switch
+                  case naboo nevarro
+                    echo secure
+                  case '*'
+                    echo switch
+                end
+              '';
+              remoteHomeOutput = ''
+                switch (string lower $argv[1])
+                  case emeraldecho
+                    echo emeraldecho-steamos
+                end
+              '';
+              remoteHomeUser = ''
+                switch (string lower $argv[1])
+                  case atlasuponraiden emeraldecho kamino naboo nevarro zaphodbeeblebrox
+                    echo sam
+                end
+              '';
+              nhSwitchRemote = ''
+                set target_host_lower (string lower $argv[1])
+                inhibitSleep nh os switch ${deployment.localFlakePath} -H $argv[1] --target-host "nix-$target_host_lower" --keep-going $argv[2..-1]
+              '';
+              nhSwitchUpgradeRemote = ''
+                set target_host_lower (string lower $argv[1])
+                inhibitSleep nh os switch ${deployment.localFlakePath} -H $argv[1] --target-host "nix-$target_host_lower" --update --keep-going $argv[2..-1]
+              '';
+              nhBuildThenSwitchRemote = ''
+                set target_host $argv[1]
+                if test -z "$target_host"
+                  echo "Usage: <command> <target_host> [additional_args...]"
+                  return 1
+                end
+                set target_host_lower (string lower $target_host)
+                set switch_target_host "nix-$target_host_lower"
+                set ping_host "$target_host.${domain}"
+                set ssh_ping_host (ssh -G $target_host 2>/dev/null | string match -r "^[Hh]ostname " | string replace -r "^[Hh]ostname " "")
+                if test -n "$ssh_ping_host"
+                  set ping_host $ssh_ping_host
+                end
+                echo "🔨 Building $target_host locally before waiting for it to come online..."
+                inhibitSleep nh os build ${deployment.localFlakePath} -H $target_host --keep-going $argv[2..-1]
+                or return $status
+                if command -sq notify-send
+                  notify-send "Steam Deck build complete" "Turn on $target_host. Deployment will continue after it responds to ping."
+                end
+                echo "Build completed for $target_host."
+                echo "Turn on $target_host, then press Enter to start waiting for network reachability."
+                read
+                echo "Waiting for $target_host at $ping_host to respond to ping..."
+                while not ping -c 1 -W 1 $ping_host >/dev/null 2>&1
+                  sleep 5
+                end
+                echo "$target_host is reachable. Starting remote switch..."
+                inhibitSleep nh os switch ${deployment.localFlakePath} -H $target_host --target-host $switch_target_host --keep-going $argv[2..-1]
+              '';
+              nhBuildThenSwitchUpgradeRemote = ''
+                set target_host $argv[1]
+                if test -z "$target_host"
+                  echo "Usage: <command> <target_host> [additional_args...]"
+                  return 1
+                end
+                set target_host_lower (string lower $target_host)
+                set switch_target_host "nix-$target_host_lower"
+                set ping_host "$target_host.${domain}"
+                set ssh_ping_host (ssh -G $target_host 2>/dev/null | string match -r "^[Hh]ostname " | string replace -r "^[Hh]ostname " "")
+                if test -n "$ssh_ping_host"
+                  set ping_host $ssh_ping_host
+                end
+                echo "🔨 Building $target_host locally before waiting for it to come online..."
+                inhibitSleep nh os build ${deployment.localFlakePath} -H $target_host --update --keep-going $argv[2..-1]
+                or return $status
+                if command -sq notify-send
+                  notify-send "Steam Deck build complete" "Turn on $target_host. Deployment will continue after it responds to ping."
+                end
+                echo "Build completed for $target_host."
+                echo "Turn on $target_host, then press Enter to start waiting for network reachability."
+                read
+                echo "Waiting for $target_host at $ping_host to respond to ping..."
+                while not ping -c 1 -W 1 $ping_host >/dev/null 2>&1
+                  sleep 5
+                end
+                echo "$target_host is reachable. Starting remote switch..."
+                inhibitSleep nh os switch ${deployment.localFlakePath} -H $target_host --target-host $switch_target_host --update --keep-going $argv[2..-1]
+              '';
+              secureDeployConfig = ''
+                switch (string lower $argv[1])
+                  case naboo
+                    printf '%s\n' '{"peerIp":"192.168.1.4","peerName":"Nevarro","peerServices":["blocky","coredns","dhcp-coredns-kea"],"probeDomains":["naboo.${domain}","nevarro.${domain}","atlasuponraiden.${domain}"],"targetServices":["blocky","coredns","dhcp-failover.timer"]}'
+                  case nevarro
+                    printf '%s\n' '{"peerIp":"192.168.1.3","peerName":"Naboo","peerServices":["blocky","coredns","dhcp-failover.timer"],"probeDomains":["naboo.${domain}","nevarro.${domain}","atlasuponraiden.${domain}"],"targetServices":["blocky","coredns","dhcp-coredns-kea"]}'
+                  case '*'
+                    return 1
+                end
+              '';
+              secureDeployChecked = ''
+                if test (remoteDeployMethod $argv[1]) = "build-then-switch"
+                  echo "Use nhsur for Steam Deck deployment"
+                  return 1
+                end
+                secure-deploy --upgrade $argv
+              '';
+              homeManagerSwitchRemote = ''
+                set target_spec $argv[1]
+                set target_host $target_spec
+                if test -z "$target_spec"
+                  echo "Usage: <command> <target_host|user@target_host> [build_args...]"
+                  return 1
+                end
+                set remote_user ""
+                if string match -q '*@*' $target_spec
+                  set remote_user (string split -m1 '@' $target_spec)[1]
+                  set target_host (string split -m1 '@' $target_spec)[2]
+                end
+                set home_output (remoteHomeOutput $target_host)
+                if test -z "$home_output"
+                  echo "No remote Home Manager output is defined for $target_host"
+                  return 1
+                end
+                if test -z "$remote_user"
+                  set remote_user (remoteHomeUser $target_host)
+                end
+                if test -z "$remote_user"
+                  echo "No remote SSH user is defined for $target_host"
+                  return 1
+                end
+                set configured_remote_user (remoteHomeUser $target_host)
+                if test "$remote_user" = "$configured_remote_user"
+                  set remote_target "$target_host"
+                else
+                  set remote_target "$remote_user@$target_host"
+                end
+                set remote_store_url "ssh://$remote_target?remote-program=/home/$remote_user/.nix-profile/bin/nix-store"
+                set remote_method (remoteDeployMethod $target_host)
+                set ping_host "$target_host.${domain}"
+                set ssh_ping_host (ssh -G $target_host 2>/dev/null | string match -r "^[Hh]ostname " | string replace -r "^[Hh]ostname " "")
+                if test -n "$ssh_ping_host"
+                  set ping_host $ssh_ping_host
+                end
+                echo "🔨 Building $home_output locally..."
+                inhibitSleep nix build ${deployment.localFlakePath}#$home_output $argv[2..-1]
+                or return $status
+                set store_path (nix path-info ${deployment.localFlakePath}#$home_output)
+                or return $status
+                if test "$remote_method" = "build-then-switch"
+                  if command -sq notify-send
+                    notify-send "Home Manager build complete" "Turn on $target_host. Activation will continue after it responds to ping."
+                  end
+                  echo "Build completed for $target_host."
+                  echo "Turn on $target_host, then press Enter to start waiting for network reachability."
+                  read
+                  echo "Waiting for $target_host at $ping_host to respond to ping..."
+                  while not ping -c 1 -W 1 $ping_host >/dev/null 2>&1
+                    sleep 5
+                  end
+                end
+                echo "📦 Copying $home_output to $remote_target..."
+                inhibitSleep nix copy --to "$remote_store_url" ${deployment.localFlakePath}#$home_output
+                or return $status
+                echo "🚀 Activating Home Manager on $remote_target..."
+                ssh $remote_target "HOME=/home/$remote_user PATH=/home/$remote_user/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/bin:/bin:\$PATH bash -lc '$store_path/activate'"
+              '';
               cleanGenerations = ''
                 nix-collect-garbage -d
                 or return $status
