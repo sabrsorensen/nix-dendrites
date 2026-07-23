@@ -47,6 +47,8 @@
       '';
     in
     lib.mkIf (config.my.host.name == "ZaphodBeeblebrox") {
+      networking.networkmanager.enable = true;
+
       boot = {
         initrd = {
           availableKernelModules = [

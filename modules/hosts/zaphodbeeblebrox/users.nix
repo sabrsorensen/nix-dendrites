@@ -18,6 +18,7 @@
           "dialout"
           "docker"
           "networkmanager"
+          "podman"
           "users"
         ];
         hashedPasswordFile = config.sops.secrets.hashed_password.path;
