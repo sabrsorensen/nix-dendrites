@@ -43,6 +43,70 @@ in
       homeDirectory = "/home/${username}";
       deployment = config.my.deployment;
       canDeployRemotely = deployment.canDeployRemotely && deployment.localFlakePath != null;
+      sshHosts = {
+        atlasuponraiden = {
+          HostName = "atlasuponraiden.${domain}";
+          User = "sam";
+          IdentityFile = "~/.ssh/atlasuponraiden_id_ed25519";
+        };
+        kamino = {
+          HostName = "kamino.${domain}";
+          User = "sam";
+          IdentityFile = "~/.ssh/kamino_id_ed25519";
+        };
+        zaphodbeeblebrox = {
+          HostName = "zaphodbeeblebrox.${domain}";
+          User = "sam";
+          IdentityFile = "~/.ssh/zaphod_id_ed25519";
+        };
+        naboo = {
+          HostName = "naboo.${domain}";
+          User = "sam";
+          IdentityFile = "~/.ssh/naboo_id_ed25519";
+        };
+        nevarro = {
+          HostName = "nevarro.${domain}";
+          User = "sam";
+          IdentityFile = "~/.ssh/nevarro_id_ed25519";
+        };
+        nixpi = {
+          HostName = "nixpi.${domain}";
+          User = "sam";
+          IdentityFile = "~/.ssh/nixpi_id_ed25519";
+        };
+        emeraldecho = {
+          HostName = "emeraldecho.${domain}";
+          User = "deck";
+          IdentityFile = "~/.ssh/emeraldecho_id_ed25519";
+        };
+      };
+      sshHostBlocks = lib.mapAttrs (_: host: host // { IdentitiesOnly = true; }) (
+        lib.filterAttrs (name: _: name != lib.toLower host.name) sshHosts
+      );
+      nixSshHostBlocks =
+        lib.mapAttrs'
+          (
+            name: host:
+            lib.nameValuePair "nix-${name}" {
+              inherit (host) HostName;
+              User = "nix-remote";
+              IdentityFile = "~/.ssh/nix_${name}_id_ed25519";
+              IdentitiesOnly = true;
+            }
+          )
+          (
+            lib.filterAttrs (
+              name: _:
+              builtins.elem name [
+                "atlasuponraiden"
+                "emeraldecho"
+                "kamino"
+                "naboo"
+                "nevarro"
+                "zaphodbeeblebrox"
+              ]
+            ) sshHosts
+          );
       hasPodman = host.features.podman;
       inhibitSleep = deployment.sleepy;
       systemdInhibit = lib.getExe' pkgs.systemd "systemd-inhibit";
@@ -823,23 +887,8 @@ in
                 IdentitiesOnly = true;
               };
             }
-            // lib.optionalAttrs canDeployRemotely {
-              nix-atlasuponraiden = {
-                HostName = "atlasuponraiden";
-                User = "nix-remote";
-                IdentityFile = "~/.ssh/nix_atlasuponraiden_id_ed25519";
-              };
-              nix-naboo = {
-                HostName = "naboo";
-                User = "nix-remote";
-                IdentityFile = "~/.ssh/nix_naboo_id_ed25519";
-              };
-              nix-nevarro = {
-                HostName = "nevarro";
-                User = "nix-remote";
-                IdentityFile = "~/.ssh/nix_nevarro_id_ed25519";
-              };
-            };
+            // sshHostBlocks
+            // lib.optionalAttrs canDeployRemotely nixSshHostBlocks;
           };
           starship = {
             enable = true;
