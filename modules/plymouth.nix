@@ -10,6 +10,9 @@
     lib.mkIf config.my.host.features.gui {
       boot = {
         consoleLogLevel = 3;
+        # Pick the highest GOP framebuffer mode before KMS takes over.  The
+        # firmware mode kept by systemd-boot is often a low-resolution mode.
+        loader.systemd-boot.consoleMode = lib.mkDefault "max";
         kernelParams = [
           "video=1920x1080@60"
           "quiet"
