@@ -713,13 +713,19 @@ in
                     set guarded true
                 end
                 if test -n "$peer"
-                  ssh $peer 'timeout 10 dig @127.0.0.1 google.com +short >/dev/null && systemctl is-active --quiet blocky' \
-                    or begin; echo "Refusing deployment: $peer is not a healthy DNS peer"; return 1; end
-                  ssh $peer 'test ! -e /tmp/.deploy-lock' \
-                    or begin; echo "Refusing deployment: peer deployment lock is present"; return 1; end
+                  if not ssh $peer 'timeout 10 dig @127.0.0.1 google.com +short >/dev/null && systemctl is-active --quiet blocky'
+                    echo "Refusing deployment: $peer is not a healthy DNS peer"
+                    return 1
+                  end
+                  if not ssh $peer 'test ! -e /tmp/.deploy-lock'
+                    echo "Refusing deployment: peer deployment lock is present"
+                    return 1
+                  end
                 end
-                ssh $target_ssh 'test ! -e /tmp/.deploy-lock && printf "%s\\n" deploy > /tmp/.deploy-lock' \
-                  or begin; echo "Refusing deployment: target deployment lock is present or inaccessible"; return 1; end
+                if not ssh $target_ssh 'test ! -e /tmp/.deploy-lock && printf "%s\\n" deploy > /tmp/.deploy-lock'
+                  echo "Refusing deployment: target deployment lock is present or inaccessible"
+                  return 1
+                end
                 function __broadcast_deploy_cleanup --inherit-variable target_ssh
                   ssh $target_ssh 'rm -f /tmp/.deploy-lock' >/dev/null 2>&1
                 end
@@ -741,8 +747,10 @@ in
                 end
                 set -l result $status
                 if test $result -eq 0; and $guarded
-                  ssh $target_ssh 'timeout 10 dig @127.0.0.1 google.com +short >/dev/null && systemctl is-active --quiet blocky' \
-                    or begin; echo "Deployment completed, but post-deployment DNS validation failed"; set result 1; end
+                  if not ssh $target_ssh 'timeout 10 dig @127.0.0.1 google.com +short >/dev/null && systemctl is-active --quiet blocky'
+                    echo "Deployment completed, but post-deployment DNS validation failed"
+                    set result 1
+                  end
                 end
                 __broadcast_deploy_cleanup
                 functions -e __broadcast_deploy_cleanup __broadcast_deploy_cleanup_signal

@@ -5,6 +5,22 @@ let
   hostModule = {
     networking.hostName = "Naboo";
 
+    # Building the aarch64 Nix test suite locally can exceed the Pi's RAM even
+    # with a single build job.  Compressed swap provides headroom without the
+    # write amplification of a swap file on the SD card.
+    zramSwap = {
+      enable = true;
+      memoryPercent = 100;
+    };
+
+    # Naboo's normal switch workflow should build on the host so nh can show
+    # its local generation diff.  The shared deployment module otherwise
+    # routes aarch64 builds to Atlas.
+    nix = {
+      distributedBuilds = false;
+      buildMachines = [ ];
+    };
+
     my.host = {
       name = "Naboo";
       formFactor = "server";

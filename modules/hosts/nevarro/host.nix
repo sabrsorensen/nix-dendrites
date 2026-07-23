@@ -4,6 +4,13 @@ let
   hostModule = {
     networking.hostName = "Nevarro";
 
+    # Keep local aarch64 builds from exhausting RAM without adding SD-card
+    # write amplification from a disk-backed swap file.
+    zramSwap = {
+      enable = true;
+      memoryPercent = 100;
+    };
+
     my.host = {
       name = "Nevarro";
       formFactor = "server";
