@@ -12,6 +12,7 @@
       };
       users.users.sam = {
         isNormalUser = true;
+        group = "sam";
         extraGroups = [
           "wheel"
           "dialout"
@@ -22,6 +23,7 @@
         hashedPasswordFile = config.sops.secrets.hashed_password.path;
         openssh.authorizedKeys.keyFiles = [ "${inputs.nix-secrets}/ssh-keys/kamino/zaphod.pub" ];
       };
+      users.groups.sam = { };
       services.displayManager.autoLogin = {
         enable = true;
         user = "sam";

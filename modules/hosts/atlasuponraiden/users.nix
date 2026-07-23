@@ -12,6 +12,7 @@
       };
       users.users.sam = {
         isNormalUser = true;
+        group = "sam";
         extraGroups = [
           "dialout"
           "docker"
@@ -25,6 +26,7 @@
           "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/atlas.pub"
         ];
       };
+      users.groups.sam = { };
       users.groups.media = { };
       users.users.sonos = {
         isSystemUser = true;

@@ -185,7 +185,7 @@ behavior.
 | Audio, Bluetooth, firmware, locale, nix-ld, NVIDIA, ZSA | ported | Corresponding feature/platform modules exist. |
 | Plymouth and Wayland | ported | GUI-gated `modules/{plymouth,wayland}.nix` restore the Cybernetic boot theme, quiet high-resolution boot policy, and `NIXOS_OZONE_WL=1`. |
 | WSL base/certificates/work policy | verified equivalent | Output-scoped WSL modules restore interop, Docker Desktop, private CA handling, Nix trust/token settings, Fish, multi-SDK .NET, Azure/NuGet tooling, Git/GPG/SSH, Codex/MCP, and Windows editor synchronization including the stable Higi profile. |
-| Sam users, secrets, Syncthing user state | ported | The native `github_nixos_token` Nix include, generic personal Git/GPG/SSH/Atuin/MCP policy, and the filtered Syncthing Home Manager clients are restored. |
+| Sam users, secrets, Syncthing user state | ported | The native `github_nixos_token` Nix include, generic personal Git/GPG/SSH/Atuin/MCP policy, and the filtered Syncthing Home Manager clients are restored. Native and Pi/bootstrapped Sam accounts explicitly declare `sam` as their primary group before SOPS installs secrets owned by that group. |
 | Static local DNS | ported | `modules/local-dns.nix` plus service publication replaces the predecessor static/collector split. |
 | Shared deploy/site/secret-wrap helpers | replaced | Descriptor-only helpers are retired. Their resulting deployment behavior is expressed by `my.deployment` host facts and `modules/deployment.nix`; only live credential/connectivity validation remains. |
 

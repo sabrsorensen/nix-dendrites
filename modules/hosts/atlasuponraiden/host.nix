@@ -18,6 +18,7 @@ let
     };
     users.users.sam = {
       isNormalUser = true;
+      group = "sam";
       extraGroups = [
         "wheel"
         "networkmanager"
@@ -28,6 +29,7 @@ let
         "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/atlas.pub"
       ];
     };
+    users.groups.sam = { };
     services.openssh.settings = {
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
@@ -89,7 +91,6 @@ in
             samba = true;
             scrutiny = true;
             syncthing = true;
-            watchtower = true;
           };
         };
         # Bootstrap deliberately leaves this disabled.

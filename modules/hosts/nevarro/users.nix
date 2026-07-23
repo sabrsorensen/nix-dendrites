@@ -12,6 +12,7 @@
       };
       users.users.sam = {
         isNormalUser = true;
+        group = "sam";
         extraGroups = [
           "wheel"
           "video"
@@ -23,5 +24,6 @@
           "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/nevarro.pub"
         ];
       };
+      users.groups.sam = { };
     };
 }

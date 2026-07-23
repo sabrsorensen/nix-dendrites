@@ -36,6 +36,7 @@ let
     };
     users.users.sam = {
       isNormalUser = true;
+      group = "sam";
       extraGroups = [
         "wheel"
         "video"
@@ -44,6 +45,7 @@ let
         "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/kamino.pub"
       ];
     };
+    users.groups.sam = { };
     services.openssh.settings = {
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
