@@ -773,6 +773,21 @@ in
           '';
         };
 
+        # Clear locks left behind by an interrupted keyboxd/GPG process before
+        # the agent starts.  This is the predecessor's recovery path for
+        # otherwise persistent "database_open waiting for lock" failures.
+        systemd.user.services.gpg-cleanup-stale-locks = lib.mkIf isNativePersonal {
+          Unit = {
+            Description = "Remove stale GPG keybox lock files";
+            Before = [ "gpg-agent.service" ];
+          };
+          Service = {
+            Type = "oneshot";
+            ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.findutils}/bin/find %h/.gnupg -name .#lk* -delete 2>/dev/null; rm -f %h/.gnupg/public-keys.d/pubring.db.lock'";
+          };
+          Install.WantedBy = [ "gpg-agent.service" ];
+        };
+
         sops = lib.mkIf isSteamDeck {
           age.sshKeyPaths = [ "${homeDirectory}/.ssh/sops_ed25519" ];
           defaultSopsFile = "${inputs.nix-secrets}/secrets.yaml";

@@ -19,6 +19,11 @@
           "users"
         ];
         hashedPasswordFile = config.sops.secrets.hashed_password.path;
+        openssh.authorizedKeys.keyFiles = [
+          "${inputs.nix-secrets}/ssh-keys/kamino/atlas.pub"
+          "${inputs.nix-secrets}/ssh-keys/no-phone/atlas.pub"
+          "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/atlas.pub"
+        ];
       };
       users.groups.media = { };
       users.users.sonos = {
