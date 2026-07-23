@@ -82,6 +82,11 @@ descriptorHelpers.mkRpiDescriptor {
       serviceHost = true;
     };
   };
+  # Give local Nix builds headroom without writing a swap file to the SD card.
+  config.zramSwap = {
+    enable = true;
+    memoryPercent = 100;
+  };
   config.services.prometheus.exporters.node = {
     enable = true;
     listenAddress = "0.0.0.0";

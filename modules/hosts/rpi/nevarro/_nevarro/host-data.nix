@@ -75,6 +75,11 @@ descriptorHelpers.mkRpiDescriptor {
       serviceHost = true;
     };
   };
+  # Keep local builds from exhausting RAM without adding SD-card swap writes.
+  config.zramSwap = {
+    enable = true;
+    memoryPercent = 100;
+  };
   config.services.prometheus.exporters.node = {
     enable = true;
     listenAddress = "0.0.0.0";
