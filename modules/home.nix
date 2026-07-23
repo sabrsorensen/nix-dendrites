@@ -347,6 +347,11 @@ in
               }
             ];
             interactiveShellInit = lib.mkIf (!host.roles.wsl) ''
+              ${lib.optionalString canDeployRemotely ''
+                # Retained for the predecessor secure-deploy workflow and
+                # interactive scripts that consume the local checkout path.
+                set -gx DENDRITIC_FLAKE_PATH ${lib.escapeShellArg deployment.localFlakePath}
+              ''}
               if command -sq gpg
                 set -gx GPG_TTY (tty)
               end
