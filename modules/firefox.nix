@@ -73,11 +73,11 @@
         home.file = {
           "${cssRoot}/chrome/hide_tabs_toolbar_v2.css".source =
             inputs.firefox-csshacks + "/chrome/hide_tabs_toolbar_v2.css";
-          "${cssRoot}/content/css_scrollbar_width_color.css".source =
+          "${cssRoot}/chrome/css_scrollbar_width_color.css".source =
             inputs.firefox-csshacks + "/content/css_scrollbar_width_color.css";
-          "${cssRoot}/content/newtab_background_color.css".source =
+          "${cssRoot}/chrome/newtab_background_color.css".source =
             inputs.firefox-csshacks + "/content/newtab_background_color.css";
-          "${cssRoot}/content/transparent_reader_toolbar.css".source =
+          "${cssRoot}/chrome/transparent_reader_toolbar.css".source =
             inputs.firefox-csshacks + "/content/transparent_reader_toolbar.css";
         };
         programs.firefox = {
@@ -93,11 +93,11 @@
               user_pref("extensions.autoDisableScopes", 0);
               user_pref("extensions.enabledScopes", 15);
             '';
-            userChrome = "@import url(chrome/hide_tabs_toolbar_v2.css);";
+            userChrome = "@import url(hide_tabs_toolbar_v2.css);";
             userContent = ''
-              @import url(content/css_scrollbar_width_color.css);
-              @import url(content/newtab_background_color.css);
-              @import url(content/transparent_reader_toolbar.css);
+              @import url(css_scrollbar_width_color.css);
+              @import url(newtab_background_color.css);
+              @import url(transparent_reader_toolbar.css);
             '';
             extensions.packages = addons;
             search = {
