@@ -1,7 +1,4 @@
-{
-  inputs,
-  ...
-}:
+{ inputs, ... }:
 {
   flake.modules.nixos.attic =
     {
@@ -11,18 +8,15 @@
       ...
     }:
     let
-      cfg = config.my.services.attic;
-      localDomain = config.systemConstants.domain;
-      envSecretName = "atticd-env";
+      cfg = config.my.attic;
       envSecretFile = "${inputs.nix-secrets}/env_files/atticd.env";
-      hasEnvSecret = builtins.pathExists envSecretFile;
       clientConfigHome = "/var/lib/atticd/client-config";
-      localHost = "127.0.0.1";
-      localPort = 8080;
-      localApiEndpoint = "http://${localHost}:${toString localPort}";
-      publicCacheEndpoint = "https://${cfg.hostName}.${localDomain}/${cfg.cacheName}";
-      serverAlias = cfg.serverAlias;
-      bootstrapScript = pkgs.writeShellApplication {
+      domain = builtins.replaceStrings [ "\n" ] [ "" ] (
+        builtins.readFile "${inputs.nix-secrets}/domain.txt"
+      );
+      cacheEndpoint = "https://${cfg.hostName}.${domain}/${cfg.cacheName}";
+      localApiEndpoint = "http://127.0.0.1:8080";
+      bootstrap = pkgs.writeShellApplication {
         name = "attic-cache-bootstrap";
         runtimeInputs = with pkgs; [
           attic-client
@@ -31,36 +25,28 @@
         ];
         text = ''
           set -eu
-
           export XDG_CONFIG_HOME=${lib.escapeShellArg clientConfigHome}
           mkdir -p "$XDG_CONFIG_HOME"
           cd /
 
           cache_name=${lib.escapeShellArg cfg.cacheName}
-          server_alias=${lib.escapeShellArg serverAlias}
+          server_alias=${lib.escapeShellArg cfg.serverAlias}
           api_endpoint=${lib.escapeShellArg localApiEndpoint}
-          public_cache_endpoint=${lib.escapeShellArg publicCacheEndpoint}
+          public_cache_endpoint=${lib.escapeShellArg cacheEndpoint}
 
           token="$(atticd-atticadm make-token \
             --sub ${lib.escapeShellArg "atlas-bootstrap"} \
             --validity ${lib.escapeShellArg "1y"} \
-            --create-cache "${cfg.cacheName}" \
-            --pull "${cfg.cacheName}" \
-            --push "${cfg.cacheName}" \
-            --delete "${cfg.cacheName}" \
-            --configure-cache "${cfg.cacheName}" \
-            --configure-cache-retention "${cfg.cacheName}")"
+            --create-cache "$cache_name" \
+            --pull "$cache_name" \
+            --push "$cache_name" \
+            --delete "$cache_name" \
+            --configure-cache "$cache_name" \
+            --configure-cache-retention "$cache_name")"
 
           ${pkgs.attic-client}/bin/attic login "$server_alias" "$api_endpoint" "$token" >/dev/null
-
           ${pkgs.attic-client}/bin/attic cache create "$cache_name" >/dev/null 2>&1 || true
-
-          ${
-            if cfg.public then
-              "${pkgs.attic-client}/bin/attic cache configure \"$cache_name\" --public >/dev/null"
-            else
-              "true"
-          }
+          ${lib.optionalString cfg.public "${pkgs.attic-client}/bin/attic cache configure \"$cache_name\" --public >/dev/null"}
 
           echo "Attic cache is ready."
           echo "Cache endpoint: $public_cache_endpoint"
@@ -71,7 +57,7 @@
           echo "  nix.settings.extra-trusted-public-keys = [ \\\"$( ${pkgs.attic-client}/bin/attic cache info \"$cache_name\" | sed -n 's/^ *Public Key: //p' )\\\" ];"
         '';
       };
-      pushScript = pkgs.writeShellApplication {
+      push = pkgs.writeShellApplication {
         name = "attic-build-and-push";
         runtimeInputs = with pkgs; [
           attic-client
@@ -81,43 +67,35 @@
         ];
         text = ''
           set -euo pipefail
-
           export XDG_CONFIG_HOME=${lib.escapeShellArg clientConfigHome}
           mkdir -p "$XDG_CONFIG_HOME"
-
           if [ "$#" -eq 0 ]; then
             echo "usage: attic-build-and-push <installable> [<installable> ...]" >&2
             exit 2
           fi
-
-          ${lib.getExe bootstrapScript} >/dev/null
+          ${lib.getExe bootstrap} >/dev/null
 
           declare -A seen_paths=()
           store_paths=()
-
           while [ "$#" -gt 0 ]; do
-            installable="$1"
-            shift
-
+            installable="$1"; shift
             while IFS= read -r output_path; do
               while IFS= read -r store_path; do
                 if [ -z "''${seen_paths[$store_path]+x}" ]; then
                   seen_paths[$store_path]=1
                   store_paths+=("$store_path")
                 fi
-              done < <(${pkgs.nix}/bin/nix path-info --recursive "$output_path")
-            done < <(${pkgs.nix}/bin/nix build --no-link --print-out-paths "$installable")
+              done < <(nix path-info --recursive "$output_path")
+            done < <(nix build --no-link --print-out-paths "$installable")
           done
-
           if [ "''${#store_paths[@]}" -eq 0 ]; then
             echo "no store paths were produced" >&2
             exit 1
           fi
-
-          ${pkgs.attic-client}/bin/attic push ${lib.escapeShellArg cfg.cacheName} "''${store_paths[@]}"
+          attic push ${lib.escapeShellArg cfg.cacheName} "''${store_paths[@]}"
         '';
       };
-      targetBasenamesPattern = lib.concatStringsSep "|" (
+      targetPattern = lib.concatStringsSep "|" (
         map lib.escapeRegex (map lib.toLower cfg.autoPush.targetBasenames)
       );
       postBuildHook = pkgs.writeShellApplication {
@@ -131,84 +109,56 @@
         ];
         text = ''
           set -euo pipefail
-
           export XDG_CONFIG_HOME=${lib.escapeShellArg clientConfigHome}
           mkdir -p "$XDG_CONFIG_HOME"
+          [ -n "''${OUT_PATHS:-}" ] || exit 0
 
-          if [ -z "''${OUT_PATHS:-}" ]; then
-            exit 0
-          fi
-
-          declare -A matched_paths=()
+          declare -A matched_paths=() seen_paths=()
+          store_paths=()
           while IFS= read -r output_path; do
             base_name="$(basename "$output_path" | tr '[:upper:]' '[:lower:]')"
-            if printf '%s\n' "$base_name" | grep -Eq '${targetBasenamesPattern}'; then
+            if printf '%s\n' "$base_name" | grep -Eq '${targetPattern}'; then
               matched_paths["$output_path"]=1
             fi
           done < <(printf '%s\n' "$OUT_PATHS")
-
-          if [ "''${#matched_paths[@]}" -eq 0 ]; then
-            exit 0
-          fi
-
-          if ! ${lib.getExe bootstrapScript} >/dev/null 2>&1; then
-            echo "warning: Attic bootstrap failed during post-build hook" >&2
-            exit 0
-          fi
-
-          declare -A seen_paths=()
-          store_paths=()
-
+          [ "''${#matched_paths[@]}" -gt 0 ] || exit 0
+          ${lib.getExe bootstrap} >/dev/null 2>&1 || { echo "warning: Attic bootstrap failed during post-build hook" >&2; exit 0; }
           for output_path in "''${!matched_paths[@]}"; do
             while IFS= read -r store_path; do
               if [ -z "''${seen_paths[$store_path]+x}" ]; then
                 seen_paths[$store_path]=1
                 store_paths+=("$store_path")
               fi
-            done < <(${pkgs.nix}/bin/nix path-info --recursive "$output_path")
+            done < <(nix path-info --recursive "$output_path")
           done
-
-          if [ "''${#store_paths[@]}" -eq 0 ]; then
-            exit 0
-          fi
-
-          if ! ${pkgs.attic-client}/bin/attic push ${lib.escapeShellArg cfg.cacheName} "''${store_paths[@]}"; then
-            echo "warning: Attic push failed during post-build hook" >&2
-            exit 0
-          fi
+          [ "''${#store_paths[@]}" -gt 0 ] || exit 0
+          attic push ${lib.escapeShellArg cfg.cacheName} "''${store_paths[@]}" || echo "warning: Attic push failed during post-build hook" >&2
         '';
       };
     in
     {
-      options.my.services.attic = {
-        enable = lib.mkEnableOption "Attic binary cache service";
-
+      options.my.attic = {
         hostName = lib.mkOption {
           type = lib.types.str;
           default = "attic";
         };
-
         cacheName = lib.mkOption {
           type = lib.types.str;
           default = "atlas";
         };
-
         public = lib.mkOption {
           type = lib.types.bool;
           default = true;
         };
-
         serverAlias = lib.mkOption {
           type = lib.types.str;
           default = "atlas-local";
         };
-
         autoPush = {
           enable = lib.mkOption {
             type = lib.types.bool;
             default = true;
           };
-
           targetBasenames = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [
@@ -220,25 +170,16 @@
         };
       };
 
-      config = lib.mkIf cfg.enable {
+      config = lib.mkIf config.my.host.services.attic {
         assertions = [
           {
-            assertion = hasEnvSecret;
-            message = "Attic requires ${envSecretFile} with ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64=...";
+            assertion = builtins.pathExists envSecretFile;
+            message = "Attic requires ${envSecretFile} with ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64.";
           }
         ];
-
-        my.localDns.records = [
-          { hostname = cfg.hostName; }
-        ];
-
-        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
-          ''
-            reverse_proxy /* ${localHost}:${toString localPort}
-          ''
-        ];
-
-        sops.secrets.${envSecretName} = {
+        my.localDns.records = [ { hostname = cfg.hostName; } ];
+        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [ "reverse_proxy /* 127.0.0.1:8080" ];
+        sops.secrets.atticd-env = {
           owner = "root";
           group = "root";
           mode = "0400";
@@ -246,21 +187,16 @@
           sopsFile = envSecretFile;
           key = "";
         };
-
         services.atticd = {
           enable = true;
-          environmentFile = config.sops.secrets.${envSecretName}.path;
+          environmentFile = config.sops.secrets.atticd-env.path;
         };
-
-        nix.settings = lib.mkIf cfg.autoPush.enable {
-          post-build-hook = lib.getExe postBuildHook;
-        };
-
+        nix.settings = lib.mkIf cfg.autoPush.enable { post-build-hook = lib.getExe postBuildHook; };
         environment.systemPackages = [
           pkgs.attic-client
-          bootstrapScript
+          bootstrap
+          push
           postBuildHook
-          pushScript
         ];
       };
     };
