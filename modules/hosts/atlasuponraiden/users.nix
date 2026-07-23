@@ -18,6 +18,7 @@
           "docker"
           "networkmanager"
           "users"
+          "wheel"
         ];
         hashedPasswordFile = config.sops.secrets.hashed_password.path;
         openssh.authorizedKeys.keyFiles = [
