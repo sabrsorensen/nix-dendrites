@@ -292,6 +292,47 @@
             Nix = {
               extensions = defaultExtensions ++ nixExtensions;
               enableMcpIntegration = true;
+              languageSnippets = {
+                nix = {
+                  buildFirefoxXpiAddon = {
+                    prefix = [
+                      "buildFirefoxXpiAddon"
+                      "ffXpi"
+                    ];
+                    description = "Nix expression for building a Firefox XPI addon";
+                    body = [
+                      "= buildFirefoxXpiAddon {"
+                      "\tpname = \"$1\";"
+                      "\tversion = \"$2\";"
+                      "\taddonId = \"$3\";"
+                      "\turl = \"$4\";"
+                      "\tsha256 = \"\";"
+                      "\tmeta = with lib;"
+                      "\t{"
+                      "\t\thomepage = \"$5\";"
+                      "\t\tdescription = \"$6\";"
+                      "\t\tlicense = \"$7\";"
+                      "\t\tmozPermissions = [$8];"
+                      "\t\tplatforms = platforms.all;"
+                      "\t};"
+                      "};"
+                    ];
+                  };
+                };
+                json = {
+                  DhcpReservation = {
+                    prefix = [ "reservation" ];
+                    description = "Kea/CoreDNS DHCP reservation";
+                    body = [
+                      "{"
+                      "  \"ip\": \"192.168.1.$0\","
+                      "  \"hostname\": \"$2\","
+                      "  \"mac\": \"$1\""
+                      "}"
+                    ];
+                  };
+                };
+              };
               userSettings = defaultSettings // {
                 "[nix]" = {
                   "editor.tabSize" = 2;
