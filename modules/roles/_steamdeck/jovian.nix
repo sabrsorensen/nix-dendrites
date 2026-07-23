@@ -1,6 +1,6 @@
 { inputs, ... }:
-{
-  flake.modules.nixos.jovian =
+let
+  module =
     {
       config,
       lib,
@@ -137,4 +137,5 @@
         };
       };
     };
-}
+in
+module

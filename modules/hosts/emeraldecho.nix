@@ -5,6 +5,7 @@
   ...
 }:
 let
+  steamdeckRoleModule = import ../roles/_steamdeck.nix { inherit inputs; };
   steamosLibraryModule =
     { lib, ... }:
     {
@@ -276,31 +277,50 @@ in
   };
   flake.nixosConfigurations.emeraldecho = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
-    modules = builtins.attrValues config.flake.modules.nixos ++ [ hostModule ];
+    modules = builtins.attrValues config.flake.modules.nixos ++ [
+      steamdeckRoleModule
+      hostModule
+    ];
   };
   flake.nixosConfigurations."emeraldecho-dualboot" = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
-    modules = builtins.attrValues config.flake.modules.nixos ++ [ hostModule ];
+    modules = builtins.attrValues config.flake.modules.nixos ++ [
+      steamdeckRoleModule
+      hostModule
+    ];
   };
   flake.nixosConfigurations."emeraldecho-bootstrap" = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
-    modules = builtins.attrValues config.flake.modules.nixos ++ [ bootstrapModule ];
+    modules = builtins.attrValues config.flake.modules.nixos ++ [
+      steamdeckRoleModule
+      bootstrapModule
+    ];
   };
   flake.nixosConfigurations."emeraldecho-dualboot-bootstrap" = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
-    modules = builtins.attrValues config.flake.modules.nixos ++ [ bootstrapModule ];
+    modules = builtins.attrValues config.flake.modules.nixos ++ [
+      steamdeckRoleModule
+      bootstrapModule
+    ];
   };
   flake.nixosConfigurations."emeraldecho-singleboot" = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
-    modules = builtins.attrValues config.flake.modules.nixos ++ [ singleBootModule ];
+    modules = builtins.attrValues config.flake.modules.nixos ++ [
+      steamdeckRoleModule
+      singleBootModule
+    ];
   };
   flake.nixosConfigurations."emeraldecho-singleboot-bootstrap" = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
-    modules = builtins.attrValues config.flake.modules.nixos ++ [ singleBootBootstrapModule ];
+    modules = builtins.attrValues config.flake.modules.nixos ++ [
+      steamdeckRoleModule
+      singleBootBootstrapModule
+    ];
   };
   flake.nixosConfigurations."emeraldecho-installer" = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
     modules = builtins.attrValues config.flake.modules.nixos ++ [
+      steamdeckRoleModule
       installerModule
       (installerIso true)
     ];
@@ -308,6 +328,7 @@ in
   flake.nixosConfigurations."emeraldecho-dualboot-installer" = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
     modules = builtins.attrValues config.flake.modules.nixos ++ [
+      steamdeckRoleModule
       installerModule
       (installerIso true)
     ];
@@ -315,6 +336,7 @@ in
   flake.nixosConfigurations."emeraldecho-singleboot-installer" = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
     modules = builtins.attrValues config.flake.modules.nixos ++ [
+      steamdeckRoleModule
       (lib.recursiveUpdate singleBootModule installerModule)
       (installerIso false)
     ];

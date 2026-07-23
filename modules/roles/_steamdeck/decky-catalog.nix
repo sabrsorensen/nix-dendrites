@@ -1,6 +1,6 @@
 { ... }:
-{
-  flake.modules.nixos.decky-plugin-catalog =
+let
+  module =
     {
       config,
       lib,
@@ -233,4 +233,5 @@
           "decky-brightness-bar" = brightnessBar;
         };
     };
-}
+in
+module

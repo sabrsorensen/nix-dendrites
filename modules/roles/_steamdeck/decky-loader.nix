@@ -1,8 +1,8 @@
 { ... }:
-{
+let
   # Jovian provides Decky's service and option surface. Keep the base role
   # limited to the upstream loader; plugin packages are separate opt-in work.
-  flake.modules.nixos.decky =
+  module =
     {
       config,
       lib,
@@ -104,4 +104,5 @@
         DBUS_SYSTEM_BUS_ADDRESS = "unix:path=/run/dbus/system_bus_socket";
       };
     };
-}
+in
+module

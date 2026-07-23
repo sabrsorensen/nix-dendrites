@@ -112,9 +112,10 @@ and exceptional hardware quirks here. Keep broad policy out of these files.
 CPU architecture and platform integration are different concerns:
 
 - Steam Deck is `x86_64-linux`; it receives the normal x86 layer.
-- Steam Deck also has `roles.steamdeck = true`. Jovian's safe option-provider
-  module is broadcast through a bootstrap-delayed role module; only hosts with
-  that role receive Jovian configuration.
+- Steam Deck also has `roles.steamdeck = true`. Its private Steam Deck role
+  bundle imports Jovian and Decky only at Emerald Echo's output boundary; those
+  modules must not enter the universal module set because Jovian overlays the
+  ordinary Steam package with the Steam Deck runtime.
 - Raspberry Pi is an aarch64 host with `roles.rpi = true`; shared Pi defaults
   belong in an RPi-gated module, while each board's boot and network facts stay
   in its host directory.
@@ -312,8 +313,9 @@ short focused document linked here). Record:
 4. the validation that demonstrated it, when applicable.
 
 Examples include the Docker-versus-Podman split, Steam Deck being x86 plus a
-Jovian role, `imports` not being placeable behind `mkIf`, and keeping
-host-specific files together without using them as an import aggregator.
+private Jovian role bundle, `imports` not being placeable behind `mkIf`, and
+keeping host-specific files together without using them as an import
+aggregator.
 
 Do not rely on chat history, memory, or a future maintainer rediscovering the
 same failure mode. If it was expensive or surprising to learn, document it.

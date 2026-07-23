@@ -1,9 +1,9 @@
 { ... }:
-{
+let
   # Keep the Decky plugin catalogue separate from the loader role.  Plugin
   # packages can be added incrementally while this bridge handles the mutable
   # state directory required by Decky itself.
-  flake.modules.nixos.decky-plugins =
+  module =
     {
       config,
       lib,
@@ -121,4 +121,5 @@
         })
       ];
     };
-}
+in
+module
