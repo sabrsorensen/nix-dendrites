@@ -28,6 +28,8 @@ descriptorHelpers.mkServerDescriptor {
   authorizedKeys.nixRemote = [
     "kamino/atlas_nix"
     "zaphodbeeblebrox/atlas_nix"
+    "naboo/atlas_nix"
+    "nevarro/atlas_nix"
   ];
   bootstrap = {
     configurationName = "AtlasUponRaidenBootstrap";

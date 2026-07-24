@@ -36,6 +36,7 @@ descriptorHelpers.mkRpiDescriptor {
     imports = with inputs.self.modules.nixos; [
       blocky
       dhcp-coredns
+      deploy-defaults
     ];
     blocky.enable = true;
     blocky.prometheus.enable = true;
