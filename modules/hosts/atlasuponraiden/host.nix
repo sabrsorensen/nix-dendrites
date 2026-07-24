@@ -102,6 +102,8 @@ in
           authorizedKeyFiles = [
             "${inputs.nix-secrets}/ssh-keys/kamino/atlas_nix.pub"
             "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/atlas_nix.pub"
+            "${inputs.nix-secrets}/ssh-keys/naboo/atlas_nix.pub"
+            "${inputs.nix-secrets}/ssh-keys/nevarro/atlas_nix.pub"
           ];
         };
         my.immich.mediaLocation = "/AnomalyRealm/media/photos";

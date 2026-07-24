@@ -13,14 +13,6 @@ let
       memoryPercent = 100;
     };
 
-    # Naboo's normal switch workflow should build on the host so nh can show
-    # its local generation diff.  The shared deployment module otherwise
-    # routes aarch64 builds to Atlas.
-    nix = {
-      distributedBuilds = false;
-      buildMachines = [ ];
-    };
-
     my.host = {
       name = "Naboo";
       formFactor = "server";
@@ -34,7 +26,9 @@ let
       };
     };
     my.deployment = {
+      canDeployRemotely = true;
       enableRemoteUser = true;
+      localFlakePath = "/home/sam/src/nix-dendrites";
       authorizedKeyFiles = [
         "${inputs.nix-secrets}/ssh-keys/atlasuponraiden/naboo_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/kamino/naboo_nix.pub"
