@@ -27,9 +27,7 @@ let
       };
     };
     my.deployment = {
-      canDeployRemotely = true;
       enableRemoteUser = true;
-      localFlakePath = "/home/sam/src/nix-dendrites";
       authorizedKeyFiles = [
         "${inputs.nix-secrets}/ssh-keys/atlasuponraiden/naboo_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/kamino/naboo_nix.pub"
