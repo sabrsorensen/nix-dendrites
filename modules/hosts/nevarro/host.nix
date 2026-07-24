@@ -14,6 +14,7 @@ let
     my.host = {
       name = "Nevarro";
       formFactor = "server";
+      home.enable = true;
       roles = {
         server = true;
         rpi = true;

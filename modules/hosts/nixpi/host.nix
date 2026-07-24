@@ -7,6 +7,7 @@ let
     my.host = {
       name = "NixPi";
       formFactor = "server";
+      home.enable = true;
       roles.rpi = true;
     };
   };
@@ -30,6 +31,7 @@ let
     my.host = {
       name = "NixPi";
       formFactor = "server";
+      home.enable = false;
       tags = [ "bootstrap" ];
       bootstrap.finalConfigName = "nixpi";
       roles.rpi = true;

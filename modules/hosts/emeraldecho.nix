@@ -102,6 +102,7 @@ let
     my.host = {
       name = "EmeraldEcho";
       formFactor = "handheld";
+      home.enable = true;
       tags = [ "steamdeck-dualboot" ];
       roles.steamdeck = true;
       features = {
@@ -230,6 +231,7 @@ let
       "steamdeck-dualboot"
       "installer"
     ];
+    my.host.home.enable = false;
     my.deployment.enableRemoteUser = false;
     users.users.jovian = {
       isNormalUser = true;

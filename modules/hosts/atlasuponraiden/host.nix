@@ -13,6 +13,7 @@ let
       address = network.atlasuponraiden;
       formFactor = "server";
       tags = [ "bootstrap" ];
+      home.enable = false;
       bootstrap.finalConfigName = "atlasuponraiden";
       roles.server = true;
     };
@@ -51,6 +52,7 @@ in
           name = "AtlasUponRaiden";
           address = network.atlasuponraiden;
           formFactor = "server";
+          home.enable = true;
           roles = {
             server = true;
             builder = true;

@@ -9,6 +9,7 @@
         my.host = {
           name = "Kamino";
           formFactor = "laptop";
+          home.enable = true;
           roles = {
             workstation = true;
             desktop = true;

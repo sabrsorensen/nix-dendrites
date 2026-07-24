@@ -24,8 +24,8 @@ let
 in
 {
   # Home Manager is available on every NixOS evaluation through the delayed
-  # integration module.  Configure the common Sam profile on every interactive
-  # personal host; WSL and Steam Deck add their platform-specific policy below.
+  # integration module.  Each host explicitly selects whether its primary user
+  # receives this managed profile.
   flake.modules.nixos.sam-home =
     {
       config,
@@ -35,8 +35,7 @@ in
     }:
     let
       host = config.my.host;
-      enabled =
-        host.roles.wsl || host.roles.steamdeck || host.roles.workstation || host.features.musicTagging;
+      enabled = host.home.enable;
       isSteamDeck = host.roles.steamdeck;
       isNativePersonal = enabled && !host.roles.wsl && !isSteamDeck;
       username = if host.roles.wsl then "ssorensen" else "sam";

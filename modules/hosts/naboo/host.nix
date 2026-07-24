@@ -16,6 +16,7 @@ let
     my.host = {
       name = "Naboo";
       formFactor = "server";
+      home.enable = true;
       roles = {
         server = true;
         rpi = true;

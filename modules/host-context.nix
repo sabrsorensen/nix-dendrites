@@ -34,6 +34,8 @@
           description = "Sparse grouping and exception labels.";
         };
 
+        home.enable = lib.mkEnableOption "the managed Home Manager profile for this host's primary user";
+
         bootstrap.finalConfigName = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = null;

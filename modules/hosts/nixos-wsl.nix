@@ -121,6 +121,7 @@ in
         my.host = {
           name = "NixOS-WSL";
           formFactor = "vm";
+          home.enable = true;
           # These are predecessor descriptor facts.  WSL is a work machine,
           # but it remains a workstation for shared local tooling and
           # workstation-scoped policy such as printer discovery.
