@@ -70,6 +70,7 @@ descriptorHelpers.mkRpiDescriptor {
   myHost = {
     primaryInteractiveUser = "sam";
     formFactor = "server";
+    ssh.enableNixBlocks = true;
     roles = {
       server = true;
       rpi = true;
