@@ -142,8 +142,8 @@ in
           users.users.${cfg.serverUser}.extraGroups = [ "syncthing" ];
         })
         (lib.mkIf homeClient {
-          # The predecessor managed these clients through Home Manager while
-          # retaining Atlas as the sole system-managed instance.
+          # Desktop clients are managed through Home Manager; Atlas remains the
+          # sole system-managed Syncthing instance.
           services.syncthing.openDefaultPorts = true;
           home-manager.users.sam = {
             sops.defaultSopsFile = "${inputs.nix-secrets}/secrets.yaml";

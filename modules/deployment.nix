@@ -60,6 +60,7 @@
             description = "Nix remote deploy user";
             group = "nix-remote";
             home = "/home/nix-remote";
+            createHome = true;
             shell = pkgs.bash;
             hashedPasswordFile = config.sops.secrets.hashed_password.path;
             openssh.authorizedKeys.keyFiles = cfg.authorizedKeyFiles;
@@ -67,17 +68,16 @@
         };
         security.sudo.extraRules = lib.optionals enableRemoteUser [ remoteDeployRule ];
 
-        # Atlas is the predecessor's deployment and remote-build endpoint.
-        # Keep its SFTP service available for that workflow without widening
-        # access to the other SSH-enabled hosts.
+        # Atlas is the deployment and remote-build endpoint. Keep SFTP
+        # available there without widening access on other SSH hosts.
         services.openssh.allowSFTP = lib.mkIf isAtlas true;
 
         nix = {
           distributedBuilds = lib.mkDefault (!isWsl && !isAtlas);
           buildMachines = lib.mkDefault (lib.optionals (!isWsl && !isAtlas) [ atlasBuilder ]);
           settings = {
-            # Preserve the predecessor's local administrator trust boundary;
-            # the restricted deployment account is added only where declared.
+            # Keep local administration wheel-scoped; add the restricted
+            # deployment account only on hosts that declare it.
             trusted-users = lib.mkAfter ([ "@wheel" ] ++ lib.optionals enableRemoteUser [ "nix-remote" ]);
             extra-substituters = lib.mkAfter (
               lib.optionals (!isWsl && !isAtlas) [

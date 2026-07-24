@@ -54,9 +54,8 @@
       programs.nix-index.enable = false;
       security.pam.services.sshd.updateWtmp = true;
 
-      # Raspberry Pi firmware exposes these devices to the video group.  This
-      # restores the predecessor's operational access boundary without
-      # assuming every image variant has created Sam yet.
+      # Raspberry Pi firmware exposes these devices to the video group. Grant
+      # root access unconditionally and Sam access only when the account exists.
       users.users = {
         root.extraGroups = lib.mkAfter [ "video" ];
       }

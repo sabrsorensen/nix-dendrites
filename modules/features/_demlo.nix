@@ -1,10 +1,17 @@
-{ ... }:
+{ inputs, ... }:
 {
-  flake.modules.nixos.demlo-home =
-    { config, lib, ... }:
-    lib.mkIf config.my.host.features.musicTagging {
-      # The command itself is supplied system-wide by the media-consumer
-      # module. This Home Manager module owns only its user configuration.
+  flake.modules.nixos.demlo =
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    lib.mkIf config.my.musicTagging.demlo.enable {
+      environment.systemPackages = [
+        inputs.demlo.packages.${pkgs.stdenv.hostPlatform.system}.default
+      ];
+
       home-manager.users.sam.xdg.configFile = {
         "demlo/config.lua".source = ./demlo/config.lua;
         "demlo/scripts/10-tag-normalize.lua".source = ./demlo/scripts/10-tag-normalize.lua;

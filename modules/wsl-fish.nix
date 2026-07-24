@@ -10,6 +10,7 @@
     lib.mkIf config.my.host.roles.wsl (
       let
         flakePath = config.my.deployment.localFlakePath;
+        configurationName = lib.toLower config.my.host.name;
       in
       {
         home-manager.users.ssorensen.programs.fish = {
@@ -40,8 +41,7 @@
           '';
           functions = {
             ls = "command ls -la --color=auto $argv";
-            # Retain the predecessor greeting rather than silently dropping the
-            # managed Fish function when the work profile was split out.
+            # Keep the managed Fish greeting available in the work profile.
             fish_greeting = ''
               if not command -sq fortune
                 echo "Install fortune"
@@ -83,13 +83,13 @@
             '';
           }
           // lib.optionalAttrs (flakePath != null) {
-            # Local switching is independent of remote-deployment permission.
-            # The predecessor enabled these on WSL from its derived local path.
+            # A local checkout is sufficient for local switching; remote
+            # deployment permission is not required.
             nhSwitch = ''
               if test (count $argv) -ge 1; and contains -- $argv[1] -j --max-jobs
-                nh os switch ${flakePath} --keep-going -- $argv
+                nh os switch ${flakePath} -H ${configurationName} --keep-going -- $argv
               else
-                nh os switch ${flakePath} --keep-going $argv
+                nh os switch ${flakePath} -H ${configurationName} --keep-going $argv
               end
             '';
             nhs = "nhSwitch";

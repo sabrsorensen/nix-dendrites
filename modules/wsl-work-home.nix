@@ -77,8 +77,7 @@
         };
 
         # This is a Home Manager secret declaration, not a system SOPS
-        # secret.  Checking the system namespace silently omitted the
-        # predecessor's NuGet template on WSL.
+        # secret; use the Home Manager namespace for the NuGet template.
         sops.templates.nuget-higi-config =
           lib.mkIf (config.home-manager.users.ssorensen.sops.secrets ? nuget_higi_source_url)
             {

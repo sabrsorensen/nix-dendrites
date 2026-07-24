@@ -36,6 +36,7 @@ in
     let
       host = config.my.host;
       enabled = host.home.enable;
+      configurationName = lib.toLower host.name;
       isSteamDeck = host.roles.steamdeck;
       isNativePersonal = enabled && !host.roles.wsl && !isSteamDeck;
       username = if host.roles.wsl then "ssorensen" else "sam";
@@ -419,8 +420,8 @@ in
             ];
             interactiveShellInit = lib.mkIf (!host.roles.wsl) ''
               ${lib.optionalString canDeployRemotely ''
-                # Retained for the predecessor secure-deploy workflow and
-                # interactive scripts that consume the local checkout path.
+                # Make the checkout path available to deployment helpers and
+                # interactive scripts.
                 set -gx DENDRITIC_FLAKE_PATH ${lib.escapeShellArg deployment.localFlakePath}
               ''}
               if command -sq gpg
@@ -516,13 +517,13 @@ in
             // lib.optionalAttrs canDeployRemotely {
               nhs = ''
                 if ${if inhibitSleep then "true" else "false"}
-                  ${systemdInhibit} --what=shutdown:sleep:idle --who=nhs --why="NixOS local switch" --mode=block nh os switch ${deployment.localFlakePath} --keep-going $argv
+                  ${systemdInhibit} --what=shutdown:sleep:idle --who=nhs --why="NixOS local switch" --mode=block nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going $argv
                 else
-                  nh os switch ${deployment.localFlakePath} --keep-going $argv
+                  nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going $argv
                 end
               '';
-              # Keep the predecessor's explicit function names as aliases for
-              # scripts and muscle memory; nhs/nhsu remain the short forms.
+              # Keep explicit function names available for scripts and
+              # interactive use; nhs/nhsu remain the short forms.
               nhSwitch = "nhs $argv";
               nhsu = ''
                 pushd ${deployment.localFlakePath}
@@ -566,8 +567,7 @@ in
               # These inventory-era helpers remain public command names.  The
               # data is now intentionally small and explicit: the broadcast
               # configuration has one standalone Home Manager output (the
-              # SteamOS side of Emerald Echo) and the same named deployment
-              # targets as the predecessor.
+              # SteamOS side of Emerald Echo) and explicit named targets.
               remoteDeployMethod = ''
                 switch (string lower $argv[1])
                   case emeraldecho
@@ -592,11 +592,11 @@ in
               '';
               nhSwitchRemote = ''
                 set target_host_lower (string lower $argv[1])
-                inhibitSleep nh os switch ${deployment.localFlakePath} -H $argv[1] --target-host "nix-$target_host_lower" --keep-going $argv[2..-1]
+                inhibitSleep nh os switch ${deployment.localFlakePath} -H $target_host_lower --target-host "nix-$target_host_lower" --keep-going $argv[2..-1]
               '';
               nhSwitchUpgradeRemote = ''
                 set target_host_lower (string lower $argv[1])
-                inhibitSleep nh os switch ${deployment.localFlakePath} -H $argv[1] --target-host "nix-$target_host_lower" --update --keep-going $argv[2..-1]
+                inhibitSleep nh os switch ${deployment.localFlakePath} -H $target_host_lower --target-host "nix-$target_host_lower" --update --keep-going $argv[2..-1]
               '';
               nhBuildThenSwitchRemote = ''
                 set target_host $argv[1]
@@ -612,7 +612,7 @@ in
                   set ping_host $ssh_ping_host
                 end
                 echo "🔨 Building $target_host locally before waiting for it to come online..."
-                inhibitSleep nh os build ${deployment.localFlakePath} -H $target_host --keep-going $argv[2..-1]
+                inhibitSleep nh os build ${deployment.localFlakePath} -H $target_host_lower --keep-going $argv[2..-1]
                 or return $status
                 if command -sq notify-send
                   notify-send "Steam Deck build complete" "Turn on $target_host. Deployment will continue after it responds to ping."
@@ -625,7 +625,7 @@ in
                   sleep 5
                 end
                 echo "$target_host is reachable. Starting remote switch..."
-                inhibitSleep nh os switch ${deployment.localFlakePath} -H $target_host --target-host $switch_target_host --keep-going $argv[2..-1]
+                inhibitSleep nh os switch ${deployment.localFlakePath} -H $target_host_lower --target-host $switch_target_host --keep-going $argv[2..-1]
               '';
               nhBuildThenSwitchUpgradeRemote = ''
                 set target_host $argv[1]
@@ -641,7 +641,7 @@ in
                   set ping_host $ssh_ping_host
                 end
                 echo "🔨 Building $target_host locally before waiting for it to come online..."
-                inhibitSleep nh os build ${deployment.localFlakePath} -H $target_host --update --keep-going $argv[2..-1]
+                inhibitSleep nh os build ${deployment.localFlakePath} -H $target_host_lower --update --keep-going $argv[2..-1]
                 or return $status
                 if command -sq notify-send
                   notify-send "Steam Deck build complete" "Turn on $target_host. Deployment will continue after it responds to ping."
@@ -654,7 +654,7 @@ in
                   sleep 5
                 end
                 echo "$target_host is reachable. Starting remote switch..."
-                inhibitSleep nh os switch ${deployment.localFlakePath} -H $target_host --target-host $switch_target_host --update --keep-going $argv[2..-1]
+                inhibitSleep nh os switch ${deployment.localFlakePath} -H $target_host_lower --target-host $switch_target_host --update --keep-going $argv[2..-1]
               '';
               secureDeployConfig = ''
                 switch (string lower $argv[1])
@@ -744,31 +744,30 @@ in
                 or return $status
                 sudo /run/current-system/bin/switch-to-configuration boot
               '';
-              # This replaces the inventory-driven deploy wrapper.  RPi
-              # targets retain their peer-DNS and service gate; all targets
-              # use the restricted nix-* account and a target-side lock.
-              broadcast-deploy = ''
+              # The guarded RPi deployment path verifies its DNS peer before
+              # taking a target-side lock and switching the configuration.
+              secure-deploy = ''
                 set -l upgrade false
                 if test "$argv[1]" = --upgrade
                   set upgrade true
                   set -e argv[1]
                 end
                 if test (count $argv) -lt 1
-                  echo "Usage: broadcast-deploy [--upgrade] <configuration> [nh arguments...]"
+                  echo "Usage: secure-deploy [--upgrade] <Naboo|Nevarro> [nh arguments...]"
                   return 2
                 end
                 set -l target $argv[1]
                 set -l target_lower (string lower $target)
                 set -l target_ssh "nix-$target_lower"
                 set -l peer ""
-                set -l guarded false
                 switch $target_lower
                   case naboo
                     set peer nix-nevarro
-                    set guarded true
                   case nevarro
                     set peer nix-naboo
-                    set guarded true
+                  case '*'
+                    echo "secure-deploy only supports Naboo and Nevarro"
+                    return 2
                 end
                 if test -n "$peer"
                   if not ssh $peer 'timeout 10 dig @127.0.0.1 google.com +short >/dev/null && systemctl is-active --quiet blocky'
@@ -784,51 +783,80 @@ in
                   echo "Refusing deployment: target deployment lock is present or inaccessible"
                   return 1
                 end
-                function __broadcast_deploy_cleanup --inherit-variable target_ssh
+                function __secure_deploy_cleanup --inherit-variable target_ssh
                   ssh $target_ssh 'rm -f /tmp/.deploy-lock' >/dev/null 2>&1
                 end
-                function __broadcast_deploy_cleanup_signal --on-signal INT --on-signal TERM --inherit-variable target_ssh
-                  __broadcast_deploy_cleanup
+                function __secure_deploy_cleanup_signal --on-signal INT --on-signal TERM --inherit-variable target_ssh
+                  __secure_deploy_cleanup
                 end
                 if $upgrade
                   if ${if inhibitSleep then "true" else "false"}
-                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=broadcast-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target --target-host $target_ssh --update --keep-going $argv[2..-1]
+                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=secure-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --update --keep-going $argv[2..-1]
                   else
-                    nh os switch ${deployment.localFlakePath} -H $target --target-host $target_ssh --update --keep-going $argv[2..-1]
+                    nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --update --keep-going $argv[2..-1]
                   end
                 else
                   if ${if inhibitSleep then "true" else "false"}
-                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=broadcast-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target --target-host $target_ssh --keep-going $argv[2..-1]
+                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=secure-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --keep-going $argv[2..-1]
                   else
-                    nh os switch ${deployment.localFlakePath} -H $target --target-host $target_ssh --keep-going $argv[2..-1]
+                    nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --keep-going $argv[2..-1]
                   end
                 end
                 set -l result $status
-                if test $result -eq 0; and $guarded
+                if test $result -eq 0
                   if not ssh $target_ssh 'timeout 10 dig @127.0.0.1 google.com +short >/dev/null && systemctl is-active --quiet blocky'
                     echo "Deployment completed, but post-deployment DNS validation failed"
                     set result 1
                   end
                 end
-                __broadcast_deploy_cleanup
-                functions -e __broadcast_deploy_cleanup __broadcast_deploy_cleanup_signal
+                __secure_deploy_cleanup
+                functions -e __secure_deploy_cleanup __secure_deploy_cleanup_signal
                 return $result
               '';
-              # Preserve the predecessor's interactive entry points while the
-              # implementation is now driven by broadcast host facts.
-              secure-deploy = "broadcast-deploy $argv";
-              nhsr = "broadcast-deploy $argv";
-              nhsur = "broadcast-deploy --upgrade $argv";
+              remote-deploy = ''
+                set -l upgrade false
+                if test "$argv[1]" = --upgrade
+                  set upgrade true
+                  set -e argv[1]
+                end
+                if test (count $argv) -lt 1
+                  echo "Usage: remote-deploy [--upgrade] <configuration> [nh arguments...]"
+                  return 2
+                end
+                switch (remoteDeployMethod $argv[1])
+                  case secure
+                    if $upgrade
+                      secure-deploy --upgrade $argv
+                    else
+                      secure-deploy $argv
+                    end
+                  case build-then-switch
+                    if $upgrade
+                      nhBuildThenSwitchUpgradeRemote $argv
+                    else
+                      nhBuildThenSwitchRemote $argv
+                    end
+                  case '*'
+                    if $upgrade
+                      nhSwitchUpgradeRemote $argv
+                    else
+                      nhSwitchRemote $argv
+                    end
+                end
+              '';
+              nhsr = "remote-deploy $argv";
+              nhsur = "remote-deploy --upgrade $argv";
               nhsur_unsafe = ''
                 if test (count $argv) -lt 1
                   echo "Usage: nhsur_unsafe <configuration> [nh arguments...]"
                   return 2
                 end
                 set -l target $argv[1]
+                set -l target_lower (string lower $target)
                 if ${if inhibitSleep then "true" else "false"}
-                  ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=broadcast-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target --target-host "nix-"(string lower $target) --update --keep-going $argv[2..-1]
+                  ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=nhsur_unsafe --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target_lower --target-host "nix-$target_lower" --update --keep-going $argv[2..-1]
                 else
-                  nh os switch ${deployment.localFlakePath} -H $target --target-host "nix-"(string lower $target) --update --keep-going $argv[2..-1]
+                  nh os switch ${deployment.localFlakePath} -H $target_lower --target-host "nix-$target_lower" --update --keep-going $argv[2..-1]
                 end
               '';
             }
@@ -1100,8 +1128,8 @@ in
         };
 
         # Clear locks left behind by an interrupted keyboxd/GPG process before
-        # the agent starts.  This is the predecessor's recovery path for
-        # otherwise persistent "database_open waiting for lock" failures.
+        # the agent starts. This prevents persistent
+        # "database_open waiting for lock" failures after interrupted runs.
         systemd.user.services.gpg-cleanup-stale-locks = lib.mkIf isNativePersonal {
           Unit = {
             Description = "Remove stale GPG keybox lock files";
@@ -1133,8 +1161,7 @@ in
             ".local/share/breezy_vulkan/.keep".text = "";
           })
         ];
-        # Matches the predecessor common Home Manager profile and avoids
-        # generating per-user man-cache/manpath state on WSL.
+        # Avoid generating per-user man-cache/manpath state on WSL.
         programs.man.generateCaches = false;
         programs.command-not-found.enable = false;
 

@@ -22,8 +22,7 @@ let
             enable = true;
             user = "sam";
             # Jovian validates this against installed display-manager sessions.
-            # Enable Plasma below so the predecessor's Desktop Mode target is
-            # both valid and available.
+            # Enable Plasma below so Desktop Mode is both valid and available.
             desktopSession = "plasma";
             updater.splash = "jovian";
             environment = {
@@ -47,8 +46,7 @@ let
           extra-trusted-public-keys = [
             "jovian-experiments.cachix.org-1:lwPS3KgK5sJlI2B9KBY4VpbWNGbAjCcKVkUyqfzVrJE="
           ];
-          # The predecessor deliberately overrides the shared retention policy
-          # on the storage-constrained Steam Deck.
+          # The Steam Deck has limited storage, so retain fewer build outputs.
           keep-derivations = lib.mkForce false;
           keep-outputs = lib.mkForce false;
           max-jobs = "auto";

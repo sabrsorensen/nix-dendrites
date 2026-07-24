@@ -21,9 +21,9 @@
       managedPathsFile = pkgs.writeText "vscode-managed-paths.txt" (
         lib.concatStringsSep "\n" managedPaths + "\n"
       );
-      # The Windows editor owns its extension directory.  Keep the exact
-      # predecessor WSL default/Higi extension inventory as data so that it
-      # can be installed on demand without creating an immutable Linux tree.
+      # The Windows editor owns its extension directory. Keep the WSL
+      # default/Higi inventory as data for on-demand installation without an
+      # immutable Linux extension tree.
       defaultExtensionIds = [
         "docker.docker"
         "esbenp.prettier-vscode"
@@ -66,17 +66,14 @@
       extensionIdsFile = pkgs.writeText "vscode-extension-ids.txt" (
         lib.concatStringsSep "\n" extensionIds + "\n"
       );
-      # Retain the predecessor's Marketplace-resolved extension closure.  The
-      # packages are needed both as the declarative inventory and so the
-      # profile data remains reproducible, even though Windows owns the live
-      # extension directory.
+      # Resolve the extension closure from the Marketplace so profile data is
+      # reproducible, even though Windows owns the live extension directory.
       vscodePackage =
         inputs.partyowl84-vscode-theme.packages.${pkgs.stdenv.hostPlatform.system}.vscode-partyowl84;
       mkExtensions =
         ids: pkgs.nix4vscode.forVscodeVersion (vscodePackage.vscodeVersion or vscodePackage.version) ids;
-      # This is the predecessor's Windows Code policy.  Windows still owns
-      # the extension directory, but its managed User/profile tree must not
-      # be reduced merely because the delivery mechanism changed.
+      # Windows owns the extension directory, while this configuration manages
+      # its User/profile tree independently of the delivery mechanism.
       defaultSettings = {
         "[dockercompose]" = {
           "editor.autoIndent" = "advanced";
@@ -389,9 +386,8 @@
     lib.mkIf config.my.host.roles.wsl {
       nixpkgs.overlays = [ inputs.nix4vscode.overlays.forVscode ];
       home-manager.users.ssorensen = {
-        # WSL is a work profile: retain the predecessor's shared and Higi work
-        # MCPs, rather than the personal Arr client that briefly replaced the
-        # generated work mcp.json during the rewrite.
+        # WSL is a work profile, so configure the shared and Higi work MCPs
+        # instead of the personal Arr client.
         programs.mcp = {
           enable = true;
           servers = {
@@ -461,8 +457,8 @@
         };
         programs.vscode = {
           enable = true;
-          # This declares the predecessor profiles without installing a Linux
-          # Code executable; Windows remains the executable owner.
+          # Declare profiles without installing a Linux Code executable;
+          # Windows remains the executable owner.
           package = lib.mkForce null;
           profiles = {
             default.enableMcpIntegration = true;
@@ -476,18 +472,16 @@
               );
               enableMcpIntegration = true;
             };
-            # The predecessor declared these disabled profiles explicitly;
-            # retain their empty profile metadata even though WSL does not
-            # enable their extension sets.
+            # Retain empty profile metadata even though WSL does not enable
+            # these profiles' extension sets.
             Python = { };
             STM32 = { };
           };
         };
         home = {
           packages = [ syncScript ];
-          # Preserve the predecessor's explicit empty Linux extension tree.
-          # Windows Code owns the real extension directory and receives the
-          # retained inventory through editor-sync-windows on demand.
+          # Keep Linux's extension tree empty. Windows Code owns the real
+          # extension directory and receives the inventory on demand.
           file.".vscode/extensions".source = lib.mkForce pkgs.emptyDirectory;
           file.".config/Code/User/settings.json".text = builtins.toJSON (
             defaultProfileSettings

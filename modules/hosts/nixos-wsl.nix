@@ -20,8 +20,8 @@ let
           map (file: "${certDir}/${file}") (builtins.attrNames (builtins.readDir certDir))
         else
           [ ];
-      # Keep the predecessor output name so ordinary certificate policy does
-      # not look like a removed Zscaler trust bundle in generation diffs.
+      # Use a stable output name so routine certificate changes do not create
+      # a misleading replacement path.
       bundle = pkgs.runCommand "zscaler-ca-bundle.crt" { } ''
         cat ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt ${
           lib.concatMapStringsSep " " lib.escapeShellArg extraCertFiles
@@ -122,9 +122,8 @@ in
           name = "NixOS-WSL";
           formFactor = "vm";
           home.enable = true;
-          # These are predecessor descriptor facts.  WSL is a work machine,
-          # but it remains a workstation for shared local tooling and
-          # workstation-scoped policy such as printer discovery.
+          # WSL is a work machine and remains a workstation for shared local
+          # tooling and workstation-scoped policy such as printer discovery.
           roles = {
             workstation = true;
             wsl = true;
@@ -132,9 +131,8 @@ in
           features.nix-ld = true;
         };
         my.deployment = {
-          # The predecessor derived this from its interactive user.  State it
-          # explicitly in the broadcast host fact so `nh` and the local
-          # checkout helpers remain available after the repository rename.
+          # Declare the checkout explicitly so `nh` and local helpers use the
+          # intended repository path.
           localFlakePath = "/home/ssorensen/src/nix-dendrites";
         };
       }

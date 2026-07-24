@@ -47,8 +47,8 @@
         pkgs.htop
         pkgs.openssl
         pkgs.pciutils.out
-        # Keep the predecessor's `ps` package rather than substituting the
-        # broader `procps` attribute during the module reorganization.
+        # `ps` provides the expected command-line interface without pulling in
+        # the broader `procps` package attribute.
         pkgs.ps
         pkgs.python3
         pkgs.ripgrep
@@ -59,8 +59,7 @@
         pkgs.parted
       ]
       ++ lib.optionals hasLocalFlake [
-        # The predecessor exposed the flake formatter in every local checkout
-        # profile; it was lost when the CLI tools were reorganized.
+        # Local checkouts need formatting and flake-maintenance tools.
         inputs.self.formatter.${system}
         inputs.self.packages.${system}.write-flake
         inputs.self.packages.${system}.write-inputs

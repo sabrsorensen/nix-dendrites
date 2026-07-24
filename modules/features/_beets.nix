@@ -7,7 +7,7 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.features.musicTagging {
+    lib.mkIf config.my.musicTagging.beets.enable {
       home-manager.users.sam = {
         home.packages = [ pkgs.beets ];
         xdg.configFile = {

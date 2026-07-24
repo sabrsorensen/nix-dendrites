@@ -245,9 +245,8 @@
     lib.mkIf host.features.vscode {
       nixpkgs.overlays = [ inputs.nix4vscode.overlays.forVscode ];
       home-manager.users.sam = {
-        # The predecessor installed the editor's local .NET SDK and
-        # STM32CubeMX alongside these profiles.  Profiles alone only provide
-        # extensions and settings, leaving the executable path dangling.
+        # The profiles use the local .NET SDK and STM32CubeMX; install both so
+        # configured commands resolve to real executables.
         home.packages = [
           pkgs.dotnetCorePackages.sdk_10_0-bin
           pkgs.stm32cubemx
