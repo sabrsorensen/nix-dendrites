@@ -17,7 +17,8 @@
       isAtlas = config.my.host.name == "AtlasUponRaiden";
       isWsl = config.my.host.roles.wsl;
       atlasBuilder = {
-        hostName = "atlasuponraiden";
+        hostName = "AtlasUponRaiden";
+        protocol = "ssh-ng";
         sshUser = "nix-remote";
         sshKey = "/root/.ssh/nix_atlasuponraiden_id_ed25519";
         systems = [
@@ -81,7 +82,7 @@
             trusted-users = lib.mkAfter ([ "@wheel" ] ++ lib.optionals enableRemoteUser [ "nix-remote" ]);
             extra-substituters = lib.mkAfter (
               lib.optionals (!isWsl && !isAtlas) [
-                "ssh-ng://nix-remote@atlasuponraiden?ssh-key=/root/.ssh/nix_atlasuponraiden_id_ed25519"
+                "ssh-ng://nix-remote@AtlasUponRaiden?ssh-key=/root/.ssh/nix_atlasuponraiden_id_ed25519"
               ]
             );
           };
