@@ -221,9 +221,40 @@ in
         services.coredns = {
           enable = true;
           config = ''
-            mail.${domain}:${dnsPort} { forward . ${lib.concatStringsSep " " cfg.upstreamServers}; cache 60 }
-            ${domain}:${dnsPort} { file ${stateDir}/${domain}.zone ${domain}; forward . ${lib.concatStringsSep " " cfg.upstreamServers}; cache 60 }
-            .:${dnsPort} { ${dnsBind} file ${stateDir}/${domain}.zone ${domain}; forward . ${lib.concatStringsSep " " cfg.upstreamServers}; cache 60 }
+            mail.${domain}:${dnsPort} {
+              log
+              errors
+              forward . ${lib.concatStringsSep " " cfg.upstreamServers}
+              cache 60
+            }
+
+            ${domain}:${dnsPort} {
+              log
+              errors
+              ${lib.optionalString (cfg.localDomainApexIp != null) ''
+                hosts {
+                  ${cfg.localDomainApexIp} ${domain}
+                  ${cfg.localDomainApexIp} @
+                  fallthrough
+                }
+              ''}
+              file ${stateDir}/${domain}.zone ${domain}
+              forward . ${lib.concatStringsSep " " cfg.upstreamServers}
+              cache 60
+            }
+
+            .:${dnsPort} {
+              log
+              errors
+              ${lib.optionalString (dnsBind != "") dnsBind}
+              hosts {
+                ${network.gateway} home-gw.${domain}
+                fallthrough
+              }
+              file ${stateDir}/${domain}.zone ${domain}
+              forward . ${lib.concatStringsSep " " cfg.upstreamServers}
+              cache 60
+            }
           '';
         };
         systemd.services.dhcp-coredns-sync = {
