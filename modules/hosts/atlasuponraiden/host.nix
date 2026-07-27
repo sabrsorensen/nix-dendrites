@@ -95,6 +95,7 @@ in
             syncthing = true;
           };
         };
+        my.localDns.records = [ { hostname = "atlas"; } ];
         # Bootstrap deliberately leaves this disabled.
         my.deployment = {
           canDeployRemotely = true;

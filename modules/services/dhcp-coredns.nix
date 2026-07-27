@@ -16,8 +16,7 @@ in
     let
       cfg = config.my.dhcpCoredns;
       enabled = config.my.host.services.dhcpCoredns;
-      publishedDnsRecords = inputs.self.lib.localDns.publishedRecords;
-      zoneStaticRecords = cfg.staticRecords ++ publishedDnsRecords;
+      zoneStaticRecords = cfg.staticRecords ++ inputs.self.lib.localDns.staticRecords;
       networkConfig = network;
       localDomain = domain;
 
