@@ -759,6 +759,9 @@ in
                 set -l target $argv[1]
                 set -l target_lower (string lower $target)
                 set -l target_ssh "nix-$target_lower"
+                # Keep deployment on Nix's compatible SSH store transport.
+                # The Atlas remote builder continues to use SSH-ng.
+                set -l target_store "ssh://$target_ssh"
                 set -l peer ""
                 switch $target_lower
                   case naboo
@@ -791,15 +794,15 @@ in
                 end
                 if $upgrade
                   if ${if inhibitSleep then "true" else "false"}
-                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=secure-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --update --keep-going $argv[2..-1]
+                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=secure-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_store --update --keep-going $argv[2..-1]
                   else
-                    nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --update --keep-going $argv[2..-1]
+                    nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_store --update --keep-going $argv[2..-1]
                   end
                 else
                   if ${if inhibitSleep then "true" else "false"}
-                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=secure-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --keep-going $argv[2..-1]
+                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=secure-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_store --keep-going $argv[2..-1]
                   else
-                    nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --keep-going $argv[2..-1]
+                    nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_store --keep-going $argv[2..-1]
                   end
                 end
                 set -l result $status
