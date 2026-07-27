@@ -67,6 +67,11 @@
             openssh.authorizedKeys.keyFiles = cfg.authorizedKeyFiles;
           };
         };
+        # Ensure an existing deployment account also gains its declared home
+        # directory when this option is introduced after the account exists.
+        systemd.tmpfiles.rules = lib.optionals enableRemoteUser [
+          "d /home/nix-remote 0750 nix-remote nix-remote -"
+        ];
         security.sudo.extraRules = lib.optionals enableRemoteUser [ remoteDeployRule ];
 
         # Atlas is the deployment and remote-build endpoint. Keep SFTP
