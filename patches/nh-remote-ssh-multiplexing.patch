@@ -1,0 +1,23 @@
+diff --git a/crates/nh-remote/src/remote.rs b/crates/nh-remote/src/remote.rs
+index 1111111..2222222 100644
+--- a/crates/nh-remote/src/remote.rs
++++ b/crates/nh-remote/src/remote.rs
+@@ -657,17 +657,8 @@ impl std::fmt::Display for RemoteHost {
+ /// Get the default SSH options for connection multiplexing.
+ /// Includes a `ControlPath` pointing to our control socket directory.
+ fn get_default_ssh_opts() -> Vec<String> {
+-  let control_dir = get_ssh_control_dir();
+-  let control_path = control_dir.join("ssh-%n");
+-
+-  vec![
+-    "-o".to_string(),
+-    "ControlMaster=auto".to_string(),
+-    "-o".to_string(),
+-    format!("ControlPath={}", control_path.display()),
+-    "-o".to_string(),
+-    "ControlPersist=60".to_string(),
+-  ]
++  // Nix's SSH stores manage their own control socket.  Supplying a second
++  // ControlMaster through NIX_SSHOPTS can corrupt the ssh-ng handshake.
++  Vec::new()
+ }

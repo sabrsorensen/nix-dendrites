@@ -16,6 +16,9 @@
       enableRemoteUser = cfg.enableRemoteUser && hasHashedPasswordSecret;
       isAtlas = config.my.host.name == "AtlasUponRaiden";
       isWsl = config.my.host.roles.wsl;
+      nhWithoutNestedSshMultiplexing = pkgs.nh.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [ ../patches/nh-remote-ssh-multiplexing.patch ];
+      });
       atlasBuilder = {
         hostName = "AtlasUponRaiden";
         protocol = "ssh-ng";
@@ -91,6 +94,7 @@
 
         programs.nh = lib.mkIf (cfg.localFlakePath != null) {
           enable = true;
+          package = if cfg.canDeployRemotely then nhWithoutNestedSshMultiplexing else pkgs.nh;
           clean.enable = true;
           clean.extraArgs = "--keep-since 4d --keep 3";
           flake = cfg.localFlakePath;
