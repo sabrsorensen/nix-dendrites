@@ -80,7 +80,7 @@ in
         ];
         virtualisation.oci-containers.containers = {
           plex = {
-            image = "lscr.io/linuxserver/plex:1.43.2.10687-563d026ea-ls307";
+            image = "lscr.io/linuxserver/plex:latest";
             autoStart = true;
             environment = {
               ADVERTISE_IP = "https://${cfg.hostName}.${domain}/";
@@ -110,6 +110,7 @@ in
               "32469:32469/tcp"
             ];
             labels."com.centurylinklabs.watchtower.enable" = "false";
+            pull = "always";
             log-driver = "journald";
             extraOptions = [
               "--device=/dev/dri:/dev/dri:rwm"
