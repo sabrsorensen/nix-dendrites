@@ -1,12 +1,12 @@
 { inputs, ... }:
 {
   flake.modules.nixos.determinate =
-    { ... }:
+    { config, ... }:
     {
       imports = [ inputs.determinate.nixosModules.default ];
 
-      # Determinate owns the daemon on every NixOS output, including WSL. Keep
-      # NixOS's Nix module enabled: Determinate redirects its generated
-      # nix.conf to nix.custom.conf, which its daemon includes.
+      # The upstream module defaults to enabled, so explicitly connect its
+      # daemon switch to the host feature.  The feature defaults to false.
+      determinate.enable = config.my.host.features.determinateNix;
     };
 }

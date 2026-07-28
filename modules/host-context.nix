@@ -63,6 +63,7 @@
           flatpak = lib.mkEnableOption "Flatpak";
           docker = lib.mkEnableOption "Docker container runtime";
           podman = lib.mkEnableOption "Podman container runtime";
+          determinateNix = lib.mkEnableOption "Determinate Nix daemon";
           steam = lib.mkEnableOption "Steam";
           wine = lib.mkEnableOption "Wine";
           deskflow = lib.mkEnableOption "Deskflow";

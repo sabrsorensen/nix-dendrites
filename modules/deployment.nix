@@ -16,21 +16,6 @@
       enableRemoteUser = cfg.enableRemoteUser && hasHashedPasswordSecret;
       isAtlas = config.my.host.name == "AtlasUponRaiden";
       isWsl = config.my.host.roles.wsl;
-      # nh 4.4.1 adds remote DIX snapshot queries.  Those queries currently
-      # fail against our ssh-ng deployment stores, after the build completes.
-      # Keep the previously deployed 4.4.0 until that upstream regression is
-      # resolved, while retaining ssh-ng for remote builders and deployment.
-      nh440Unwrapped = pkgs."nh-unwrapped".overrideAttrs (old: {
-        version = "4.4.0";
-        src = pkgs.fetchFromGitHub {
-          owner = "nix-community";
-          repo = "nh";
-          tag = "v4.4.0";
-          hash = "sha256-ebAi5ODaNRfhKISPPchWoI6FZNO2v+lEyvua7e5OOZo=";
-        };
-        cargoHash = "sha256-dRSueVz0BeWwYpMBO1KUUeRoa/CdCWsKPRw0Zeulfe8=";
-      });
-      nh440 = pkgs.nh.override { "nh-unwrapped" = nh440Unwrapped; };
       atlasBuilder = {
         hostName = "AtlasUponRaiden";
         protocol = "ssh-ng";
@@ -106,7 +91,7 @@
 
         programs.nh = lib.mkIf (cfg.localFlakePath != null) {
           enable = true;
-          package = nh440;
+          package = pkgs.nh;
           clean.enable = true;
           clean.extraArgs = "--keep-since 4d --keep 3";
           flake = cfg.localFlakePath;
