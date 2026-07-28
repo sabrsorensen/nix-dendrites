@@ -51,6 +51,10 @@
     in
     lib.mkIf config.my.host.is.rpi {
       environment.systemPackages = [ update ];
+      environment.etc."update-nix-index.sh" = {
+        source = lib.getExe update;
+        mode = "0755";
+      };
       environment.shellAliases.update-nix-index = lib.getExe update;
       systemd.services.update-nix-index = {
         description = "Update nix-index database";

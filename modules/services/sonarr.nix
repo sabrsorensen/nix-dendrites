@@ -18,7 +18,6 @@
       };
 
       config = lib.mkIf config.my.host.services.sonarr {
-        systemd.tmpfiles.rules = [ "d /var/lib/sonarr4k 0750 sonarr media -" ];
         my.caddy.apexRoutes = [
           ''
             redir /${cfg.pathSegment} /${cfg.pathSegment}/

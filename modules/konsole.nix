@@ -16,7 +16,7 @@
         sha256 = "sha256-OxoH+Z50MbnhAmaLO9EO+gfzDqj6YUWLlM+oz92Wuio=";
       };
     in
-    lib.mkIf config.my.host.features.gui {
+    lib.mkIf (config.my.host.features.gui && config.my.host.home.enable) {
       home-manager.users.${username}.home.file.".local/share/konsole/NightOwl.colorscheme".source =
         "${nightOwl}/NightOwl.colorscheme";
     };

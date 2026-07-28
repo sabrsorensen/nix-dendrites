@@ -12,6 +12,7 @@
         builtins.elem config.my.host.name [
           "Naboo"
           "Nevarro"
+          "NixPi"
         ]
         || builtins.elem "bootstrap" config.my.host.tags;
     in
@@ -33,6 +34,11 @@
         "console=serial0,115200n8"
         "console=tty1"
       ];
+      # Pi kernels reject some of NixOS's generic hardening defaults (notably
+      # vm.mmap_rnd_bits).  Keep the RPi sysctl surface empty, as in the
+      # established Pi configuration, rather than letting systemd-sysctl fail
+      # during activation.
+      boot.kernel.sysctl = lib.mkForce { };
       boot.zfs.forceImportRoot = false;
 
       fileSystems."/" = {

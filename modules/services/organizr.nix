@@ -23,9 +23,6 @@
           group = "media";
           uid = toInt identity.uid;
         };
-        systemd.tmpfiles.rules = [
-          "d ${config.my.media.configRoot}/${serviceName} 0750 ${serviceName} media -"
-        ];
         my.caddy.apexRoutes = lib.mkIf config.my.organizr.setAsApexBackend (
           lib.mkAfter [
             "reverse_proxy /* 127.0.0.1:81"

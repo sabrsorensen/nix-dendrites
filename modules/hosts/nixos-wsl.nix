@@ -51,7 +51,10 @@ let
         };
       };
 
-      users.users.${username}.extraGroups = [ "docker" ];
+      users.users.${username} = {
+        description = "Sam";
+        extraGroups = [ "docker" ];
+      };
       services.openssh.openFirewall = lib.mkForce false;
       programs.nix-ld.libraries = with pkgs; [
         icu

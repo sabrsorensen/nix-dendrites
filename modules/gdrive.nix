@@ -10,7 +10,7 @@
       tokenName = "rclone/gdrive/${lib.strings.toLower host.name}_token";
       secretFile = "${inputs.nix-secrets}/rclone/gdrive.yaml";
     in
-    lib.mkIf host.features.gdrive {
+    lib.mkIf (host.features.gdrive && host.home.enable) {
       home-manager.users.${username} = { config, ... }: {
         # The personal hosts keep the age identity in Sam's SSH directory;
         # without this explicit Home Manager key source sops-nix cannot start

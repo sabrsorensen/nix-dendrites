@@ -26,7 +26,11 @@ in
 
       config = lib.mkIf config.my.host.services.ntfy {
         my.localDns.records = [ { hostname = cfg.hostName; } ];
-        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [ "reverse_proxy /* 127.0.0.1:6839" ];
+        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
+          ''
+            reverse_proxy /* 127.0.0.1:6839
+          ''
+        ];
         services.ntfy-sh = {
           enable = true;
           settings = {

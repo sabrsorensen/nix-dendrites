@@ -38,11 +38,15 @@ in
       enabled = host.home.enable;
       configurationName = lib.toLower host.name;
       isSteamDeck = host.roles.steamdeck;
+      isManagedPersonal = enabled && !host.roles.wsl;
       isNativePersonal = enabled && !host.roles.wsl && !isSteamDeck;
+      hasUserSops = enabled && !host.roles.rpi;
       username = if host.roles.wsl then "ssorensen" else "sam";
       homeDirectory = "/home/${username}";
       deployment = config.my.deployment;
-      canDeployRemotely = deployment.canDeployRemotely && deployment.localFlakePath != null;
+      hasLocalFlake = deployment.localFlakePath != null;
+      hasLocalNhs = hasLocalFlake;
+      canDeployRemotely = deployment.canDeployRemotely && hasLocalFlake;
       sshHosts = {
         atlasuponraiden = {
           alias = "AtlasUponRaiden";
@@ -209,7 +213,7 @@ in
         home = {
           username = lib.mkForce username;
           homeDirectory = lib.mkForce homeDirectory;
-          stateVersion = "26.11";
+          stateVersion = "26.05";
           packages =
             with pkgs;
             [
@@ -231,8 +235,15 @@ in
               plex-desktop
               signal-desktop
               vlc
-            ];
-          sessionVariables.XDG_CONFIG_HOME = lib.mkDefault "$HOME/.config";
+            ]
+            # The personal Arr MCP is launched through npx.
+            ++ lib.optionals host.features.personalMcp [ nodejs ];
+          sessionVariables = {
+            XDG_CONFIG_HOME = lib.mkDefault "$HOME/.config";
+          }
+          // lib.optionalAttrs hasUserSops {
+            SOPS_AGE_KEY_CMD = "${pkgs.ssh-to-age}/bin/ssh-to-age -private-key < ${homeDirectory}/.ssh/sops_ed25519";
+          };
         };
         programs = {
           home-manager.enable = true;
@@ -249,7 +260,7 @@ in
           git = {
             enable = true;
             settings = {
-              user = lib.mkIf isNativePersonal {
+              user = lib.mkIf isManagedPersonal {
                 name = gitValue "git/name.txt";
                 email = gitValue "git/email.txt";
                 signingKey = gitValue "gpg-keys/signing-key-hash.txt";
@@ -260,10 +271,16 @@ in
                 ci = "commit -p -v";
                 ai = "add -p -v";
                 br = "branch";
+                sync-develop = "!git switch develop && git fetch upstream && git merge --ff-only upstream/develop && git push origin develop";
+                sync-release = "!git switch release && git fetch upstream && git merge --ff-only upstream/release && git push origin release";
+                sync-main = "!git switch main && git fetch upstream && git merge --ff-only upstream/main && git push origin main";
+                sync-master = "!git switch master && git fetch upstream && git merge --ff-only upstream/master && git push origin master";
                 lg = "log --graph --all --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative";
                 di = "diff --color-words";
+                alias = "!git config --list | grep 'alias\\.' | sed 's/alias\\.\\([^=]*\\)=\\(.*\\)/\\1\\\t => \\2/' | sort";
               };
               branch.sort = "-committerdate";
+              column.ui = "auto";
               color = {
                 ui = "auto";
                 interactive = "auto";
@@ -317,7 +334,7 @@ in
               gpg.program = "gpg";
             };
           };
-          gpg = lib.mkIf isNativePersonal {
+          gpg = lib.mkIf isManagedPersonal {
             enable = true;
             mutableKeys = true;
             mutableTrust = true;
@@ -362,7 +379,10 @@ in
           vim = lib.mkIf (!host.roles.wsl) {
             enable = true;
             defaultEditor = true;
-            plugins = [ pkgs.vimPlugins.vim-fish ] ++ lib.optionals isNativePersonal [ (vimNightOwl pkgs) ];
+            plugins = [
+              pkgs.vimPlugins.vim-fish
+              (vimNightOwl pkgs)
+            ];
             extraConfig = ''
               set expandtab ignorecase number smartcase
               set shiftwidth=4 tabstop=4 softtabstop=4
@@ -370,6 +390,8 @@ in
               set scrolloff=10 sidescrolloff=10
               imap jj <ESC>
               map 0 ^
+              set nocompatible
+              filetype off
               set smartindent smarttab cindent showmatch ruler
               syntax on
               set pastetoggle=<F4>
@@ -381,9 +403,16 @@ in
               set wildignore=*.o,*~,*.pyc,*.hi
               set matchtime=2 display+=lastline autoread laststatus=2
               autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+              function! HasPaste()
+                if &paste
+                  return 'PASTE MODE  '
+                endif
+                return \'\'
+              endfunction
               filetype plugin indent on
               if has("termguicolors") | set termguicolors | endif
-              ${lib.optionalString isNativePersonal "colorscheme night-owl"}
+              colorscheme night-owl
+              let g:lightline = { 'colorscheme': 'nightowl' }
             '';
           };
           bash = {
@@ -435,6 +464,8 @@ in
                 set -gx GPG_TTY (tty)
               end
             '';
+            # Every host with a local checkout uses this one `nh*` command
+            # surface.  Keeping it here avoids overlapping WSL aliases.
             functions = {
               ls = "command ls -la --color=auto $argv";
               fish_greeting = ''
@@ -520,18 +551,32 @@ in
                 echo -ne "\033]0;$argv\007"
                 systemd-inhibit --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who="$USER" --why=nixos-rebuild --mode=block $argv
               '';
+              cleanGenerations = ''
+                nix-collect-garbage -d
+                or return $status
+                sudo nix-collect-garbage -d
+                or return $status
+                sudo nix store gc
+                or return $status
+                sudo nix store optimise
+                or return $status
+                sudo /run/current-system/bin/switch-to-configuration boot
+              '';
             }
-            // lib.optionalAttrs canDeployRemotely {
+            // lib.optionalAttrs hasLocalNhs {
               nhs = ''
-                if ${if inhibitSleep then "true" else "false"}
+                if test (count $argv) -ge 1; and contains -- $argv[1] -j --max-jobs
+                  if ${if inhibitSleep then "true" else "false"}
+                    ${systemdInhibit} --what=shutdown:sleep:idle --who=nhs --why="NixOS local switch" --mode=block nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going -- $argv
+                  else
+                    nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going -- $argv
+                  end
+                else if ${if inhibitSleep then "true" else "false"}
                   ${systemdInhibit} --what=shutdown:sleep:idle --who=nhs --why="NixOS local switch" --mode=block nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going $argv
                 else
                   nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going $argv
                 end
               '';
-              # Keep explicit function names available for scripts and
-              # interactive use; nhs/nhsu remain the short forms.
-              nhSwitch = "nhs $argv";
               updateFirefoxCustomAddons = "update-firefox-addons ${deployment.localFlakePath}";
               nhsu = ''
                 pushd ${deployment.localFlakePath}
@@ -571,11 +616,11 @@ in
                 or return $update_status
                 nhs $argv
               '';
-              nhSwitchUpgrade = "nhsu $argv";
-              # These inventory-era helpers remain public command names.  The
-              # data is now intentionally small and explicit: the broadcast
-              # configuration has one standalone Home Manager output (the
-              # SteamOS side of Emerald Echo) and explicit named targets.
+            }
+            // lib.optionalAttrs canDeployRemotely {
+              # These compatibility helper names remain available to existing
+              # scripts.  Their small explicit target map covers the standalone
+              # Emerald Echo Home Manager output and named deployment targets.
               remoteDeployMethod = ''
                 switch (string lower $argv[1])
                   case emeraldecho
@@ -741,17 +786,6 @@ in
                 echo "🚀 Activating Home Manager on $remote_target..."
                 ssh $remote_target "HOME=/home/$remote_user PATH=/home/$remote_user/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/usr/bin:/bin:\$PATH bash -lc '$store_path/activate'"
               '';
-              cleanGenerations = ''
-                nix-collect-garbage -d
-                or return $status
-                sudo nix-collect-garbage -d
-                or return $status
-                sudo nix store gc
-                or return $status
-                sudo nix store optimise
-                or return $status
-                sudo /run/current-system/bin/switch-to-configuration boot
-              '';
               # The guarded RPi deployment path verifies its DNS peer before
               # taking a target-side lock and switching the configuration.
               secure-deploy = ''
@@ -793,7 +827,6 @@ in
                 set -l probe_domains (printf '%s\n' "$config_json" | jq -r '.probeDomains[]')
                 set -l peer_services (printf '%s\n' "$config_json" | jq -r '.peerServices[]')
                 set -l target_services (printf '%s\n' "$config_json" | jq -r '.targetServices[]')
-                set -l target_store "ssh://$target_ssh"
                 set -l peer_ssh "nix-"(string lower $peer_name)
                 function __secure_deploy_service_cmd
                   set checks
@@ -824,15 +857,6 @@ in
                     return 1
                   end
                 end
-                if ssh $peer_ssh 'test -f /tmp/.deploy-lock' 2>/dev/null
-                  echo "❌ ERROR: Deployment already in progress on $peer_name!"
-                  functions -e __secure_deploy_service_cmd
-                  return 1
-                end
-                if not ssh $lock_host 'test ! -e /tmp/.deploy-lock && printf "%s\\n" deploy > /tmp/.deploy-lock'
-                  echo "Refusing deployment: target deployment lock is present or inaccessible"
-                  return 1
-                end
                 function __secure_deploy_cleanup --inherit-variable lock_host
                   ssh $lock_host 'rm -f /tmp/.deploy-lock' >/dev/null 2>&1
                 end
@@ -842,17 +866,28 @@ in
                 function __secure_deploy_cleanup_exit --on-event fish_exit --inherit-variable lock_host
                   __secure_deploy_cleanup
                 end
+                if ssh $peer_ssh 'test -f /tmp/.deploy-lock' 2>/dev/null
+                  echo "❌ ERROR: Deployment already in progress on $peer_name!"
+                  functions -e __secure_deploy_cleanup __secure_deploy_cleanup_signal __secure_deploy_cleanup_exit __secure_deploy_service_cmd
+                  return 1
+                end
+                if not ssh $lock_host 'printf "%s: Deploying from %s\\n" "$(date)" "$(hostname)" > /tmp/.deploy-lock'
+                  echo "Refusing deployment: target deployment lock is present or inaccessible"
+                  __secure_deploy_cleanup
+                  functions -e __secure_deploy_cleanup __secure_deploy_cleanup_signal __secure_deploy_cleanup_exit __secure_deploy_service_cmd
+                  return 1
+                end
                 if $upgrade
                   if ${if inhibitSleep then "true" else "false"}
-                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=secure-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_store --update --keep-going $additional_args
+                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=secure-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --update --keep-going $additional_args
                   else
-                    nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_store --update --keep-going $additional_args
+                    nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --update --keep-going $additional_args
                   end
                 else
                   if ${if inhibitSleep then "true" else "false"}
-                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=secure-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_store --keep-going $additional_args
+                    ${systemdInhibit} --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who=secure-deploy --why="NixOS remote deployment" --mode=block nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --keep-going $additional_args
                   else
-                    nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_store --keep-going $additional_args
+                    nh os switch ${deployment.localFlakePath} -H $target_lower --target-host $target_ssh --keep-going $additional_args
                   end
                 end
                 set -l result $status
@@ -1057,7 +1092,7 @@ in
               theme.name = "marine";
             };
           };
-          ssh = lib.mkIf isNativePersonal {
+          ssh = lib.mkIf isManagedPersonal {
             enable = true;
             enableDefaultConfig = false;
             settings = {
@@ -1147,6 +1182,7 @@ in
                 format = "[\\[](dimmed blue)[$symbol$branch]($style)[\\]](dimmed blue)";
                 symbol = " ";
               };
+              git_status.disabled = false;
               dotnet = {
                 symbol = ".NET";
                 disabled = false;
@@ -1201,7 +1237,7 @@ in
             '';
           };
         };
-        services.gpg-agent = lib.mkIf isNativePersonal {
+        services.gpg-agent = lib.mkIf isManagedPersonal {
           enable = true;
           defaultCacheTtl = 1800;
           maxCacheTtl = 7200;
@@ -1218,7 +1254,7 @@ in
         # Clear locks left behind by an interrupted keyboxd/GPG process before
         # the agent starts. This prevents persistent
         # "database_open waiting for lock" failures after interrupted runs.
-        systemd.user.services.gpg-cleanup-stale-locks = lib.mkIf isNativePersonal {
+        systemd.user.services.gpg-cleanup-stale-locks = lib.mkIf isManagedPersonal {
           Unit = {
             Description = "Remove stale GPG keybox lock files";
             Before = [ "gpg-agent.service" ];
@@ -1230,10 +1266,14 @@ in
           Install.WantedBy = [ "gpg-agent.service" ];
         };
 
-        sops = lib.mkIf isSteamDeck {
-          age.sshKeyPaths = [ "${homeDirectory}/.ssh/sops_ed25519" ];
-          defaultSopsFile = "${inputs.nix-secrets}/secrets.yaml";
-        };
+        sops = lib.mkIf hasUserSops (
+          {
+            age.sshKeyPaths = lib.mkForce [ "${homeDirectory}/.ssh/sops_ed25519" ];
+          }
+          // lib.optionalAttrs isSteamDeck {
+            defaultSopsFile = "${inputs.nix-secrets}/secrets.yaml";
+          }
+        );
 
         xdg = lib.mkIf isSteamDeck {
           enable = true;
@@ -1247,6 +1287,16 @@ in
             ".local/share/gamescope/reshade/Shaders/.keep".text = "";
             ".local/share/gamescope/reshade/Textures/.keep".text = "";
             ".local/share/breezy_vulkan/.keep".text = "";
+            "Desktop/return-to-gaming.desktop".text = ''
+              [Desktop Entry]
+              Name=${returnToGamingEntry.name}
+              Exec=${returnToGamingEntry.exec}
+              Icon=${returnToGamingEntry.icon}
+              Terminal=${if returnToGamingEntry.terminal then "true" else "false"}
+              Type=Application
+              Categories=${builtins.concatStringsSep ";" returnToGamingEntry.categories};
+              Comment=${returnToGamingEntry.comment}
+            '';
           })
         ];
         # Avoid generating per-user man-cache/manpath state on WSL.

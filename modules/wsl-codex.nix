@@ -47,7 +47,10 @@
             }
           ];
       wrappedCodex = pkgs.symlinkJoin {
-        name = "codex-wrapped";
+        # Home Manager selects config.toml for Codex >= 0.2.0 by inspecting
+        # the package version.  Preserve the wrapped CLI's version metadata
+        # instead of making it look like an unversioned legacy package.
+        name = "codex-wrapped-${lib.getVersion codexPackage}";
         paths = [ codexPackage ];
         nativeBuildInputs = [ pkgs.makeWrapper ];
         postBuild = ''
@@ -55,7 +58,7 @@
         '';
       };
     in
-    lib.mkIf config.my.host.roles.wsl {
+    lib.mkIf (config.my.host.roles.wsl && config.my.host.home.enable) {
       home-manager.users.ssorensen = {
         home.packages = [
           pkgs.bubblewrap

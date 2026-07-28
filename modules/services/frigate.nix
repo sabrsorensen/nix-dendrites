@@ -39,7 +39,9 @@ in
         ];
 
         my.caddy.virtualHosts."${cfg.siteHostName}.{$DOMAIN}".routes = [
-          "reverse_proxy /* 127.0.0.1:${toString nginxPort}"
+          ''
+            reverse_proxy /* 127.0.0.1:${toString nginxPort}
+          ''
         ];
         my.localDns.records = [ { hostname = cfg.siteHostName; } ];
         services.nginx.virtualHosts.${publicHost}.listen = lib.mkForce [

@@ -6,7 +6,9 @@
       services.openssh = {
         enable = true;
         openFirewall = true;
-        allowSFTP = lib.mkDefault false;
+        # Atlas is the deployment and remote-build endpoint.  The other SSH
+        # hosts expose only their normal shell service.
+        allowSFTP = lib.mkDefault (config.my.host.name == "AtlasUponRaiden");
         settings = {
           PasswordAuthentication = lib.mkDefault false;
           KbdInteractiveAuthentication = lib.mkDefault false;

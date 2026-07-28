@@ -46,7 +46,7 @@
         else
           null;
     in
-    lib.mkIf config.my.host.roles.wsl {
+    lib.mkIf (config.my.host.roles.wsl && config.my.host.home.enable) {
       # Required by the retained multi-SDK work toolchain.  Keep this narrow
       # and host-gated rather than relaxing package policy globally.
       nixpkgs.config.permittedInsecurePackages = [

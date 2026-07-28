@@ -36,6 +36,7 @@ let
           remotePlay.openFirewall = true;
           localNetworkGameTransfers.openFirewall = true;
         };
+        programs.partition-manager.enable = true;
         services.desktopManager.plasma6.enable = true;
         services.xserver.xkb = {
           layout = "us";
@@ -63,6 +64,10 @@ let
             "steam-unwrapped"
           ];
         environment = {
+          plasma6.excludePackages = with pkgs.kdePackages; [
+            elisa
+            kate
+          ];
           systemPackages = with pkgs; [
             age
             curl
@@ -70,6 +75,8 @@ let
             git
             htop
             jupiter-dock-updater-bin
+            kdePackages.kcalc
+            kdePackages.krdc
             lm_sensors.bin
             maliit-keyboard
             nix-output-monitor

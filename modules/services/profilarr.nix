@@ -36,11 +36,12 @@ in
           group = "media";
           uid = toInt identity.uid;
         };
-        systemd.tmpfiles.rules = [
-          "d ${config.my.media.configRoot}/${serviceName} 0750 ${serviceName} media -"
-        ];
         my.localDns.records = [ { hostname = cfg.hostName; } ];
-        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [ "reverse_proxy /* 127.0.0.1:6868" ];
+        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
+          ''
+            reverse_proxy /* 127.0.0.1:6868
+          ''
+        ];
         virtualisation.oci-containers.containers.${serviceName} = {
           image = "ghcr.io/dictionarry-hub/profilarr:2.0.8";
           autoStart = true;

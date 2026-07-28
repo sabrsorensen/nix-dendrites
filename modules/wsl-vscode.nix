@@ -383,7 +383,7 @@
         '';
       };
     in
-    lib.mkIf config.my.host.roles.wsl {
+    lib.mkIf (config.my.host.roles.wsl && config.my.host.home.enable) {
       nixpkgs.overlays = [ inputs.nix4vscode.overlays.forVscode ];
       home-manager.users.ssorensen = {
         # WSL is a work profile, so configure the shared and Higi work MCPs

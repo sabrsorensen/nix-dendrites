@@ -33,6 +33,7 @@ in
           efi.canTouchEfiVariables = true;
           systemd-boot = {
             enable = true;
+            consoleMode = "max";
             extraInstallCommands = ''
               if [ -d /boot2 ]; then
                 ${pkgs.rsync}/bin/rsync -a --delete /boot/ /boot2/

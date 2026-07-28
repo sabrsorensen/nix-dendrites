@@ -27,9 +27,18 @@ in
       };
       config = lib.mkIf config.my.host.services.mealie {
         my.localDns.records = [ { hostname = cfg.hostName; } ];
-        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
-          "reverse_proxy /* 127.0.0.1:${lib.toString config.services.mealie.port}"
-        ];
+        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}" = {
+          logFormat = ''
+            output stdout
+            format console
+            level DEBUG
+          '';
+          routes = [
+            ''
+              reverse_proxy /* 127.0.0.1:${lib.toString config.services.mealie.port}
+            ''
+          ];
+        };
         services.mealie = {
           enable = true;
           listenAddress = "127.0.0.1";

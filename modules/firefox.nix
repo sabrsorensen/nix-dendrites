@@ -11,7 +11,7 @@
     }:
     let
       host = config.my.host;
-      enabled = host.features.gui;
+      enabled = host.features.gui && host.home.enable;
       username = if host.roles.wsl then "ssorensen" else "sam";
       profileName = username;
       buildMozillaXpiAddon =
@@ -71,13 +71,13 @@
       nixpkgs.overlays = [ inputs.nur.overlays.default ];
       home-manager.users.${username} = {
         home.file = {
-          "${cssRoot}/chrome/hide_tabs_toolbar_v2.css".source =
+          "${cssRoot}/chrome/chrome/hide_tabs_toolbar_v2.css".source =
             inputs.firefox-csshacks + "/chrome/hide_tabs_toolbar_v2.css";
-          "${cssRoot}/chrome/css_scrollbar_width_color.css".source =
+          "${cssRoot}/chrome/content/css_scrollbar_width_color.css".source =
             inputs.firefox-csshacks + "/content/css_scrollbar_width_color.css";
-          "${cssRoot}/chrome/newtab_background_color.css".source =
+          "${cssRoot}/chrome/content/newtab_background_color.css".source =
             inputs.firefox-csshacks + "/content/newtab_background_color.css";
-          "${cssRoot}/chrome/transparent_reader_toolbar.css".source =
+          "${cssRoot}/chrome/content/transparent_reader_toolbar.css".source =
             inputs.firefox-csshacks + "/content/transparent_reader_toolbar.css";
         };
         programs.firefox = {
@@ -93,11 +93,11 @@
               user_pref("extensions.autoDisableScopes", 0);
               user_pref("extensions.enabledScopes", 15);
             '';
-            userChrome = "@import url(hide_tabs_toolbar_v2.css);";
+            userChrome = "@import url(chrome/hide_tabs_toolbar_v2.css);";
             userContent = ''
-              @import url(css_scrollbar_width_color.css);
-              @import url(newtab_background_color.css);
-              @import url(transparent_reader_toolbar.css);
+              @import url(content/css_scrollbar_width_color.css);
+              @import url(content/newtab_background_color.css);
+              @import url(content/transparent_reader_toolbar.css);
             '';
             extensions.packages = addons;
             search = {
@@ -205,12 +205,21 @@
               "browser.startup.homepage_override.mstone" = "ignore";
               "browser.startup.page" = 3;
               "browser.uitour.enabled" = false;
+              "startup.homepage_override_url" = "";
               "trailhead.firstrun.didSeeAboutWelcome" = true;
               "browser.bookmarks.restore_default_bookmarks" = false;
               "browser.bookmarks.addedImportButton" = true;
               "browser.newtabpage.activity-stream.feeds.topsites" = false;
               "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
               "browser.newtabpage.activity-stream.improvesearch.topSiteSearchShortcuts" = false;
+              "browser.newtabpage.blocked" = lib.genAttrs [
+                "26UbzFJ7qT9/4DhodHKA1Q=="
+                "4gPpjkxgZzXPVtuEoAL9Ig=="
+                "eV8/WsSLxHadrTL1gAxhug=="
+                "gLv0ja2RYVgxKdp0I5qwvA=="
+                "K00ILysCaEq8+bEqV/3nuw=="
+                "T9nJot5PurhJSy8n038xGA=="
+              ] (_: 1);
               "browser.newtabpage.activity-stream.feeds.telemetry" = false;
               "browser.newtabpage.activity-stream.telemetry" = false;
               "app.shield.optoutstudies.enabled" = false;
@@ -219,6 +228,7 @@
               "datareporting.healthreport.service.enabled" = false;
               "datareporting.healthreport.uploadEnabled" = false;
               "datareporting.policy.dataSubmissionEnabled" = false;
+              "datareporting.sessions.current.clean" = true;
               "devtools.onboarding.telemetry.logged" = false;
               "toolkit.telemetry.archive.enabled" = false;
               "toolkit.telemetry.bhrPing.enabled" = false;

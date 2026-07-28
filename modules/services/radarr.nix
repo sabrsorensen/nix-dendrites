@@ -18,7 +18,6 @@
       };
 
       config = lib.mkIf config.my.host.services.radarr {
-        systemd.tmpfiles.rules = [ "d /var/lib/radarr4k 0750 radarr media -" ];
         my.caddy.apexRoutes = [
           ''
             redir /${cfg.pathSegment} /${cfg.pathSegment}/

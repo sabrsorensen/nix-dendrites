@@ -12,12 +12,15 @@
       };
       users.users.sam = {
         isNormalUser = true;
+        description = "Sam";
         uid = 1000;
         extraGroups = [
           "wheel"
           "networkmanager"
           "audio"
           "video"
+          "media"
+          "podman"
         ];
         hashedPasswordFile = config.sops.secrets.hashed_password.path;
         openssh.authorizedKeys.keyFiles = [

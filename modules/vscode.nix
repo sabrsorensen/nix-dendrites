@@ -143,6 +143,16 @@
         "stmicroelectronics.stm32cube-ide-registers"
         "stmicroelectronics.stm32cube-ide-rtos"
       ];
+      defaultKeybindings = [
+        {
+          key = "shift+[ArrowRight]";
+          command = "workbench.action.nextEditor";
+        }
+        {
+          key = "shift+[ArrowLeft]";
+          command = "workbench.action.previousEditor";
+        }
+      ];
       defaultSettings = {
         "[dockercompose]" = {
           "editor.autoIndent" = "advanced";
@@ -242,7 +252,7 @@
       }
       // themeSettings;
     in
-    lib.mkIf host.features.vscode {
+    lib.mkIf (host.features.vscode && host.home.enable) {
       nixpkgs.overlays = [ inputs.nix4vscode.overlays.forVscode ];
       home-manager.users.sam = {
         # The profiles use the local .NET SDK and STM32CubeMX; install both so
@@ -259,16 +269,7 @@
             enableUpdateCheck = true;
             extensions = defaultExtensions;
             enableMcpIntegration = true;
-            keybindings = [
-              {
-                key = "shift+[ArrowRight]";
-                command = "workbench.action.nextEditor";
-              }
-              {
-                key = "shift+[ArrowLeft]";
-                command = "workbench.action.previousEditor";
-              }
-            ];
+            keybindings = defaultKeybindings;
             userSettings = defaultSettings // {
               "vim.insertModeKeyBindings" = [
                 {
@@ -288,9 +289,11 @@
             };
           };
           profiles = {
+            Higi_LLP = { };
             Nix = {
               extensions = defaultExtensions ++ nixExtensions;
               enableMcpIntegration = true;
+              keybindings = defaultKeybindings;
               languageSnippets = {
                 nix = {
                   buildFirefoxXpiAddon = {
@@ -343,6 +346,7 @@
             Python = {
               extensions = defaultExtensions ++ pythonExtensions;
               enableMcpIntegration = true;
+              keybindings = defaultKeybindings;
               userSettings = defaultSettings // {
                 "[python]"."editor.formatOnType" = true;
                 "python.analysis.typeCheckingMode" = "strict";
@@ -351,7 +355,7 @@
             };
             STM32 = {
               extensions = defaultExtensions ++ stm32Extensions;
-              enableMcpIntegration = true;
+              keybindings = defaultKeybindings;
               userSettings = defaultSettings // {
                 "stm32cube-ide-core.configuration.productSTM32CubeMX.executablePath" =
                   "/etc/profiles/per-user/sam/bin/stm32cubemx";

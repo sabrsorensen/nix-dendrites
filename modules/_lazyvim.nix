@@ -10,7 +10,7 @@
     let
       username = if config.my.host.roles.wsl then "ssorensen" else "sam";
     in
-    lib.mkIf config.my.host.features.lazyvim {
+    lib.mkIf (config.my.host.features.lazyvim && config.my.host.home.enable) {
       home-manager.users.${username} = {
         imports = [ inputs.lazyvim.homeManagerModules.default ];
         programs.lazyvim = {

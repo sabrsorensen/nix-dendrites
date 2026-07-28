@@ -1372,6 +1372,7 @@ in
               http_port = 3030;
               root_url = "https://${cfg.grafanaHostName}.${domain}/";
             };
+            users.default_theme = "system";
           };
           provision = {
             enable = true;

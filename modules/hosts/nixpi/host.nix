@@ -38,6 +38,7 @@ let
     };
     users.users.sam = {
       isNormalUser = true;
+      description = "Sam";
       group = "sam";
       extraGroups = [
         "wheel"

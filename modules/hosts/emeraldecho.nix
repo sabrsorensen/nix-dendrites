@@ -5,6 +5,7 @@
   ...
 }:
 let
+  hostPkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
   steamdeckRoleModule = import ../roles/_steamdeck.nix { inherit inputs; };
   steamosLibraryModule =
     { lib, ... }:
@@ -12,7 +13,7 @@ let
       home = {
         username = "deck";
         homeDirectory = "/home/deck";
-        stateVersion = "24.11";
+        stateVersion = "26.05";
       };
       home.activation.setupSteamLibraryMount = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         export PATH="/usr/bin:/bin:$PATH"
@@ -114,12 +115,17 @@ let
     };
     my.deployment = {
       enableRemoteUser = true;
+      localFlakePath = "/home/sam/src/nix-dendrites";
       authorizedKeyFiles = [
         "${inputs.nix-secrets}/ssh-keys/atlasuponraiden/emeraldecho_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/kamino/emeraldecho_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/emeraldecho_nix.pub"
       ];
     };
+    environment.systemPackages = with hostPkgs; [
+      signal-desktop
+      vlc
+    ];
   };
   bootstrapModule = lib.recursiveUpdate hostModule {
     my.host.tags = [
@@ -233,6 +239,7 @@ let
     ];
     my.host.home.enable = false;
     my.deployment.enableRemoteUser = false;
+    home-manager.users = lib.mkForce { };
     users.users.jovian = {
       isNormalUser = true;
       description = "Steam Deck Installer User";
@@ -251,8 +258,10 @@ let
     };
     jovian.steam = {
       autoStart = lib.mkForce false;
+      user = lib.mkForce "jovian";
       desktopSession = lib.mkForce null;
     };
+    jovian.decky-loader.enable = lib.mkForce false;
     boot.loader.systemd-boot.enable = lib.mkForce false;
     documentation.enable = false;
   };

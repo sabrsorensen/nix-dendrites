@@ -24,11 +24,6 @@
           group = "media";
           uid = toInt identity.uid;
         };
-        systemd.tmpfiles.rules = [
-          "d ${config.my.media.configRoot}/deluge 0750 ${serviceName} media -"
-          "d ${config.my.media.configRoot}/gluetun 0750 root root -"
-          "d ${config.my.media.configRoot}/gluetun/tmp 0750 root root -"
-        ];
         my.caddy.apexRoutes = [
           ''
             import drop_scanners ${cfg.pathSegment}

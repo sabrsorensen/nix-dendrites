@@ -12,10 +12,12 @@
       };
       users.users.sam = {
         isNormalUser = true;
+        description = "Sam";
         group = "sam";
         extraGroups = [
           "wheel"
-          "video"
+          "media"
+          "podman"
         ];
         hashedPasswordFile = config.sops.secrets.hashed_password.path;
         openssh.authorizedKeys.keyFiles = [

@@ -19,7 +19,7 @@
         };
       };
     in
-    lib.mkIf config.my.host.roles.wsl {
+    lib.mkIf (config.my.host.roles.wsl && config.my.host.home.enable) {
       home-manager.users.ssorensen.programs = {
         gh = {
           enable = true;

@@ -277,6 +277,42 @@ host consumer remain required for each disposition.
 - **Attic — verified equivalent.** The configurable `hostName` drives Caddy
   and DNS publication, and the bootstrap helper now emits the concrete public
   cache endpoint derived from the secret domain.
+- **Atlas Caddy, Mealie, Naboo Blocky, and Naboo CoreDNS — evaluated
+  equivalent (2026-07-27).** Direct evaluation against main confirmed the
+  Mealie settings, Blocky settings, and rendered CoreDNS configuration. The
+  review restored Mealie's per-vhost console DEBUG log format. Atlas Caddy has
+  the same virtual-host and apex endpoint set; remaining route-order and
+  indentation differences do not change matching or proxy targets.
+- **Deployment helpers and builders — evaluated equivalent (2026-07-27).**
+  Zaphod's generated SSH host blocks and all evaluated remote-builder entries
+  match main.  The guarded Pi path now uses the configured `nix-<host>` target
+  alias and installs its lock cleanup before acquiring the target lock, so a
+  failed lock attempt cannot strand a retry-blocking lock.
+- **Runtime-host networking and boot policy — evaluated equivalent
+  (2026-07-27).** Atlas, Naboo, Nevarro, and Zaphod have matching effective
+  network, DNS, gateway, firewall, user, and service policy. Atlas again sets
+  systemd-boot's console mode to `max`; the generic Pi kernel, duplicate-safe
+  initrd module aliases, and serial-console arguments remain intentional Pi
+  migration choices. Pi hosts also force an empty `boot.kernel.sysctl`, as
+  main does, avoiding unsupported generic `vm.mmap_rnd_bits` writes during
+  `systemd-sysctl` activation; their `zstd` 100%-RAM zram configuration is
+  unchanged.
+- **Desktop boot and Airsonic identity — evaluated equivalent (2026-07-28).**
+  Kamino and Zaphod use the Cybernetic Plymouth theme, maximum boot-console
+  mode, and 1920×1080 framebuffer policy; Kamino receives this from the shared
+  GUI-gated module, so no host-specific duplication is needed. Atlas Airsonic
+  evaluates to the matching UID/PUID 2101, media GID/PGID 2096, and identical
+  media/config bind mounts.
+- **Atlas OCI container surface — evaluated equivalent (2026-07-28).** All
+  twelve enabled containers have matching image references, environment,
+  ports, mounts, dependencies, network options, and journald logging. Plex is
+  intentionally configured to pull `lscr.io/linuxserver/plex:latest` before
+  every start; the generated Minecraft plugin store path is the only expected
+  derivation-path difference.
+- **Firefox profile CSS — evaluated equivalent (2026-07-27).** The tab-toolbar
+  stylesheet is again installed beneath the profile's `chrome/chrome/` path,
+  matching the relative import from generated `userChrome.css`. This restores
+  the rule for every GUI-managed Firefox profile, including Emerald Echo.
 
 ### Verification findings: service implementations
 
@@ -394,10 +430,17 @@ This validates the Determinate Nix handoff, work-only SOPS activation, NuGet
 template, and Home Manager Code profile generation; it does not by itself
 validate each Windows-side extension or MCP server at runtime.
 
+WSL now uses the shared local-checkout `nhs`/`nhsu` implementation.  The
+former WSL-specific aliases overlapped with the shared function after Home
+Manager merged them, producing a recursive switch loop.  The shared
+implementation retains WSL's `-j`/`--max-jobs` argument handling while keeping
+`nhs`/`nhsu` as the one command surface for every host with a local flake
+checkout.
+
 After restoring the empty Python/STM32 profile metadata and Nix-profile
 snippets, the remaining managed-file differences are intentional format or
-source-interface replacements: Codex's predecessor `config.toml` is rendered
-as the current package's `config.yaml`. Firefox custom add-ons retain the
+source-interface replacements: Codex's versioned wrapper preserves the CLI's
+TOML configuration interface at `config.toml`. Firefox custom add-ons retain the
 predecessor's generated JSON-to-Nix model, now exposed as the repository
 package `update-firefox-addons` (`nix run .#update-firefox-addons`) rather than
 a Fish function. The package is installed on local-checkout hosts alongside

@@ -18,7 +18,6 @@
       };
 
       config = lib.mkIf config.my.host.services.bazarr {
-        systemd.tmpfiles.rules = [ "d /var/lib/bazarr4k 0750 bazarr media -" ];
         my.caddy.apexRoutes = [
           ''
             redir /${cfg.pathSegment} /${cfg.pathSegment}/

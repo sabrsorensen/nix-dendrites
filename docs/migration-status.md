@@ -36,7 +36,11 @@ Syncthing's folder and device topology now comes from the secret data input
 Kamino, ZaphodBeeblebrox, and Emerald Echo use the restored Home Manager
 clients with their predecessor folder filtering and tray policy.
 
-The base `system.stateVersion` is now `26.11`.
+The shared installed-host `system.stateVersion` remains `26.05`, preserving
+the compatibility defaults of the existing hosts. Installation media retains
+the version selected by its upstream module. In particular, Atlas continues to
+use its PostgreSQL 17 cluster until the documented PostgreSQL 18 migration is
+carried out.
 
 ## Inputs and their boundaries
 
@@ -157,7 +161,7 @@ shortcuts, and generation-cleanup helper. Deployment is now a broadcast module:
 host facts enable the restricted `nix-remote` account and its authorized keys,
 while desktop deployers receive `nh` checkout policy, `nix-*` SSH aliases,
 Atlas distributed-build routing, and the lock- and DNS-peer-gated
-`broadcast-deploy` command for Naboo and Nevarro. Deployers whose
+`remote-deploy` command for Naboo and Nevarro. Deployers whose
 `my.deployment.sleepy` fact is enabled also hold a blocking `systemd-inhibit`
 lease throughout guarded and explicit unsafe remote deployment commands.
 
@@ -229,8 +233,8 @@ choice:
   Context7, GitHub, NixOS, Postman, Pulumi, and Snyk) through Home Manager's
   profile integration. The accidental personal Arr MCP is removed.
 - The WSL CA bundle retains the predecessor `zscaler-ca-bundle.crt` output
-  name. Codex's current YAML configuration format intentionally replaces its
-  predecessor TOML file. The predecessor-only Fish add-on generator is now the
+  name. Codex's versioned wrapper retains the CLI's `config.toml` interface.
+  The predecessor-only Fish add-on generator is now the
   repository package `update-firefox-addons`, which targets the broadcast
   JSON/Nix source paths without embedding a checkout path.
 

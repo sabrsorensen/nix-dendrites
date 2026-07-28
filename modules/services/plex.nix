@@ -43,11 +43,6 @@ in
             uid = toInt tautulliIdentity.uid;
           };
         };
-        systemd.tmpfiles.rules = [
-          "d ${config.my.media.configRoot}/plex 0750 plex media -"
-          "d ${config.my.media.configRoot}/tautulli 0750 tautulli media -"
-          "d ${config.my.media.configRoot}/kitana 0750 kitana media -"
-        ];
         my.localDns.records = [ { hostname = cfg.hostName; } ];
         my.caddy.apexRoutes = [
           ''
@@ -81,6 +76,7 @@ in
         virtualisation.oci-containers.containers = {
           plex = {
             image = "lscr.io/linuxserver/plex:latest";
+            pull = "always";
             autoStart = true;
             environment = {
               ADVERTISE_IP = "https://${cfg.hostName}.${domain}/";
@@ -110,7 +106,6 @@ in
               "32469:32469/tcp"
             ];
             labels."com.centurylinklabs.watchtower.enable" = "false";
-            pull = "always";
             log-driver = "journald";
             extraOptions = [
               "--device=/dev/dri:/dev/dri:rwm"

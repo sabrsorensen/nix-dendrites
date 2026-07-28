@@ -2,7 +2,7 @@
 {
   flake.modules.nixos.wsl-ssh =
     { config, lib, ... }:
-    lib.mkIf config.my.host.roles.wsl {
+    lib.mkIf (config.my.host.roles.wsl && config.my.host.home.enable) {
       home-manager.users.ssorensen.programs.ssh = {
         enable = true;
         enableDefaultConfig = false;

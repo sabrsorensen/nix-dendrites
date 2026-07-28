@@ -74,10 +74,6 @@
         ];
         security.sudo.extraRules = lib.optionals enableRemoteUser [ remoteDeployRule ];
 
-        # Atlas is the deployment and remote-build endpoint. Keep SFTP
-        # available there without widening access on other SSH hosts.
-        services.openssh.allowSFTP = lib.mkIf isAtlas true;
-
         nix = {
           distributedBuilds = lib.mkDefault (!isWsl && !isAtlas);
           buildMachines = lib.mkDefault (lib.optionals (!isWsl && !isAtlas) [ atlasBuilder ]);

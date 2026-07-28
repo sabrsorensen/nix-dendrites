@@ -35,7 +35,9 @@ in
         ];
         my.localDns.records = [ { hostname = cfg.hostName; } ];
         my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
-          "reverse_proxy http://${config.services.immich.host}:${toString config.services.immich.port}"
+          ''
+            reverse_proxy http://${config.services.immich.host}:${toString config.services.immich.port}
+          ''
         ];
         services.immich = {
           enable = true;

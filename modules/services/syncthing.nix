@@ -29,6 +29,7 @@ let
     label = folderLabels.${name} or name;
     path = "/home/sam/${folderPaths.${name} or name}/";
     inherit devices;
+    ignorePatterns = [ ];
     type = "sendreceive";
     versioning = {
       type = "simple";
@@ -46,11 +47,13 @@ in
     }:
     let
       cfg = config.my.syncthing;
-      homeClient = builtins.elem config.my.host.name [
-        "Kamino"
-        "ZaphodBeeblebrox"
-        "EmeraldEcho"
-      ];
+      homeClient =
+        config.my.host.home.enable
+        && builtins.elem config.my.host.name [
+          "Kamino"
+          "ZaphodBeeblebrox"
+          "EmeraldEcho"
+        ];
       filteredFolders = lib.filterAttrs (
         _: folder: builtins.elem config.networking.hostName folder.devices
       ) cfg.folders;

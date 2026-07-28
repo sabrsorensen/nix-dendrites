@@ -178,7 +178,11 @@
           }
         ];
         my.localDns.records = [ { hostname = cfg.hostName; } ];
-        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [ "reverse_proxy /* 127.0.0.1:8080" ];
+        my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
+          ''
+            reverse_proxy /* 127.0.0.1:8080
+          ''
+        ];
         sops.secrets.atticd-env = {
           owner = "root";
           group = "root";

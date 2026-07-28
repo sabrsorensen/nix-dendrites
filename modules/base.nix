@@ -45,6 +45,10 @@ in
       nix.extraOptions = lib.optionalString (config ? sops && config.sops.secrets ? github_nixos_token) ''
         !include ${config.sops.secrets.github_nixos_token.path}
       '';
-      system.stateVersion = lib.mkDefault "26.11";
+      # Installed hosts retain their existing compatibility default.  The
+      # installation media module supplies its own state version.
+      system.stateVersion = lib.mkIf (!builtins.elem "installer" config.my.host.tags) (
+        lib.mkDefault "26.05"
+      );
     };
 }
