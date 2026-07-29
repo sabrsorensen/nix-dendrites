@@ -1,6 +1,8 @@
 # DO-NOT-EDIT. This file was auto-generated using github:vic/flake-file.
 # Use `nix run .#write-flake` to regenerate it.
 {
+  description = "sabrsorensen's Dendritic Nix configurations";
+
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 
   inputs = {
@@ -16,7 +18,11 @@
       url = "github:sabrsorensen/demlo/v3.8.1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
+    determinate = {
+      url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
+      inputs.nix.follows = "determinate-nix-src-ssh-fix";
+    };
+    determinate-nix-src-ssh-fix.url = "github:DarthPJB/nix-src/fix/ssh-master-localcommand-protocol-leak";
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";

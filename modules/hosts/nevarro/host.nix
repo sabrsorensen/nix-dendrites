@@ -14,10 +14,10 @@ let
     my.host = {
       name = "Nevarro";
       formFactor = "server";
+      platform = "rpi";
       home.enable = true;
       roles = {
         server = true;
-        rpi = true;
       };
       services = {
         blocky = true;

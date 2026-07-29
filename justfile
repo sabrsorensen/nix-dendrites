@@ -1,6 +1,17 @@
 default:
     @just --list --unsorted
 
+main_audit := env_var_or_default("MAIN_AUDIT", "../nix-dendrites-main-audit")
+
+# Show the state of the persistent, read-only predecessor reference checkout.
+audit-reference:
+    @git -C {{main_audit}} status --short
+    @git -C {{main_audit}} log -1 --oneline
+
+# Compare any repository-relative path with the predecessor without changing either checkout.
+audit-diff path:
+    @diff -ruN {{main_audit}}/{{path}} {{path}} || test $? -eq 1
+
 bootstrap-config host:
     @bash ./scripts/bootstrap-target.sh config {{host}}
 

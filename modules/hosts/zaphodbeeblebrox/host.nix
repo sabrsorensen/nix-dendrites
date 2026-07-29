@@ -21,6 +21,9 @@
             personalMcp = true;
             vscode = true;
             firmware = true;
+            # Trial the nix-src PR #569 fix for concurrent ssh-ng stores on
+            # the primary remote-deployment workstation.
+            determinateNix = true;
             nix-ld = true;
             bluetooth = true;
             docker = true;

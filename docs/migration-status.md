@@ -66,9 +66,9 @@ the delayed public/private pattern, then their configuration self-gates:
   pinned custom XPIs. It evaluates on the current graphical hosts.
 - LazyVim is registered behind `features.lazyvim`; it is deliberately disabled
   on every current host until a user opts in.
-- Jovian and Decky live in the private Steam Deck role bundle.  Emerald Echo
-  imports that bundle explicitly at its output boundary, so Jovian's Steam
-  overlay cannot affect ordinary x86 hosts.
+- Jovian and Decky live in the first-class Steam Deck platform module. Their
+  configuration is gated by `platform = "steamdeck"`, so Jovian's Steam overlay
+  cannot affect ordinary x86 hosts.
 - Disko, SOPS, and Home Manager use the same delayed-input pattern.
 
 `nixos-wsl` is the deliberate exception: its upstream module is imported only
@@ -102,7 +102,7 @@ Deployment and recovery variants:
   `emeraldecho-singleboot-installer`.
 
 The Steam Deck variants use tags for the genuine boot-mode edge; normal Jovian
-behavior still keys off `roles.steamdeck`.
+behavior keys off `platform = "steamdeck"`.
 
 ## Validation completed
 

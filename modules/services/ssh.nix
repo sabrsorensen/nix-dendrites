@@ -2,13 +2,17 @@
 {
   flake.modules.nixos.ssh =
     { config, lib, ... }:
-    lib.mkIf (config.my.host.services.ssh || config.my.host.is.server || config.my.host.is.rpi) {
+    lib.mkIf (
+      config.my.host.services.ssh
+      || config.my.host.is.server
+      || config.my.host.is.rpi
+      || config.my.deployment.canDeployRemotely
+      || config.my.deployment.enableRemoteUser
+    ) {
       services.openssh = {
         enable = true;
         openFirewall = true;
-        # Atlas is the deployment and remote-build endpoint.  The other SSH
-        # hosts expose only their normal shell service.
-        allowSFTP = lib.mkDefault (config.my.host.name == "AtlasUponRaiden");
+        allowSFTP = lib.mkDefault false;
         settings = {
           PasswordAuthentication = lib.mkDefault false;
           KbdInteractiveAuthentication = lib.mkDefault false;

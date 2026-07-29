@@ -20,9 +20,37 @@ A ported item is additionally marked **verified** only after its predecessor
 option content and host consumer were compared. Until then, it is a
 **ported candidate** rather than evidence of equivalent behavior.
 
-The family-level inventory is complete. Findings are refined as option-level
+The file inventory is complete. Findings are refined as option-level
 comparisons and implementations proceed; items classified **pending** are also
-maintained in `migration-status.md`.
+maintained in `migration-status.md`. A structural destination is not evidence
+that every option from main has been ported.
+
+## Active source audit — 2026-07-28
+
+The reference is the clean sibling worktree `../nix-dendrites-main-audit` at
+`6e59d5a` (`main`). Use `just audit-reference` to confirm that reference and
+`just audit-diff <path>` for a filesystem comparison. This pass distinguishes
+the intended broadcast architecture from missing user-visible behavior.
+
+| Family | Status | Source-comparison finding |
+| --- | --- | --- |
+| Dendritic bootstrap | verified after correction | `modules/dendritic/dendritic.nix` matches main's ownership of flake-file, flake-compat, flake-utils, flake-parts, Nixpkgs, Dendritic import, output construction, and flake description metadata. `nix-auto-follow` remains an intentional extra import in the rewrite. |
+| Host/output assembly | intentional structural change | Direct broadcast registration replaces main's descriptor, registration, and output-constructor graph. Host facts and output boundaries must preserve the resulting configuration. |
+| Platform model | intentional structural change | `my.host.platform` replaces the former RPi, WSL, and Steam Deck role flags. This makes Steam Deck integration a reusable platform module and keeps Jovian out of ordinary x86 systems. |
+| Determinate Nix | intentional temporary divergence | The module exists but is disabled on all hosts except the current Zaphod fork test, pending the upstream SSH-ng protocol-leak fix. It must not be described as enabled everywhere. |
+| VS Code/VSCodium | verified after correction | Native profiles now retain main's package-flavor/profile gates, extension inventories, settings, Higi profile, secret-wrapped launchers, and OpenSSH/desktop-item adjustments. The WSL synchronization module remains output-scoped; generated Windows manifests are intentionally not stored because they contain immutable Linux store paths. |
+| DHCP/CoreDNS | verified after correction | The Kea/CoreDNS unit graph and zone renderer match main. The rewrite now combines fixed bootstrap records with `my.localDns.publishedRecords`, restoring main's service/host DNS publication behavior. |
+| Blocky and local-DNS collector | verified | Blocky's port, forwarding, blocklists, metrics gate, firewall, and CoreDNS ordering match main. The rewrite's explicit publisher-output list is an intentional replacement for main's inventory traversal; the two DNS authorities publish no records themselves, so excluding them preserves the evaluated record set and prevents a cycle. |
+| Mealie | source-equivalent; runtime migration risk | The rewrite matches main's Mealie options, loopback listener, Caddy route, local PostgreSQL setting, and implicit service data location. `system.stateVersion` remains `26.05`; the earlier welcome-page regression therefore points to an upstream Mealie module/schema transition rather than a rewrite-only data-path override. Keep the separately documented data migration plan before changing that service's compatibility generation. |
+| Deployment and remote builders | verified | `nhs` derives its lower-case output name from the current host rather than hard-coding Zaphod. Naboo, Nevarro, and Zaphod evaluate to the same Atlas `ssh-ng` builder contract as main; Atlas has no self-builder. `secure-deploy` retains the two-host peer-health lock protocol, while `remote-deploy` is the general dispatcher and secure deployment remains the guarded Pi path. |
+| Raspberry Pi platform | intentional kernel change; evaluated | The base filesystem, DHCP, firmware, `cma=64M`, Pi device access, and service-host policy match main. The generic cached `linuxPackages` kernel and 100% ZRAM on Naboo/Nevarro are intentional changes to avoid multi-hour downstream kernel builds and provide build headroom. Nevarro evaluates with kernel `6.18.39`, ZRAM enabled, and no `vm.mmap_rnd_bits` setting; an already-busy `/dev/zram0` remains a live-transition cleanup issue rather than a declarative mismatch. |
+| Firefox/Home Manager | verified | The managed GUI profile preserves main's CSS, policies, search engines, preferences, NUR/custom add-ons, and MIME defaults. Emerald Echo evaluates with Sam's default profile, 19 declared add-ons, and all four CSS files, so its Steam Deck platform is no longer an exception to the managed browser policy. |
+| WSL boundary and work policy | verified | The output-scoped NixOS-WSL import retains main's default user, Docker Desktop, interop, start-menu, certificate/sandbox, token-include, Nix trust, and work-tool policies. The rewrite evaluates with `ssorensen`, Docker Desktop, and interop enabled; the duplicate inherited `wheel` entry is harmless but can be normalized later without changing access. |
+| Caddy/Fail2ban | verified | Caddy's Cloudflare DNS plugin, scanner/CORS snippets, virtual-host rendering, secret environment, Cloudflare-aware Fail2ban actions, and Atlas virtual-host set are present. The rewrite consolidates main's split Caddy files without changing their effective policy. |
+| Media base/network | verified after correction | Atlas's current media settings and Airsonic container match main, including the repaired PUID/PGID, existing config volume, and the unique container-UID assertion. Its narrower Podman-network gate is intentional and safe: direct source inspection shows Deluge and Watchtower are the only consumers of that named network. |
+| Native Home Manager policy | verified | Shell, Git, GPG, SSH, Atuin, MCP, Syncthing, Starship, tmux, Vim, GDrive, and the generated SSH blocks compare with main. The GPG agent includes the stale-keybox lock cleanup user unit. |
+| Feature policy | verified after correction | Audio, Bluetooth, firmware, nix-ld, NVIDIA, ZSA, AppImage, Bitwarden, Deskflow, Docker, Flatpak, Minecraft, Noson, Podman, Steam, 3D printing, Wine, music tagging, and Office are reviewed; Office includes `libreoffice-qt6` as in main. |
+| Remaining families | audited | The module inventory, source payloads, host gates, and representative consumer outputs have now been reviewed. Remaining items are intentional design choices or runtime validation work, not unreviewed source scope. |
 
 ## Ported behavior ledger
 
@@ -33,18 +61,18 @@ an omitted predecessor area is not evidence that it was intentionally retired.
 | Predecessor area | Broadcast destination | Activation / replacement |
 | --- | --- | --- |
 | Host inventory, descriptor registration, and outputs | `modules/hosts/**/host.nix`, `modules/hosts/*.nix` | Direct `flake.nixosConfigurations` outputs broadcast the registered NixOS modules and state intent in `my.host`. |
-| Host context and feature/service switches | `modules/host-context.nix` | Shared option schema plus derived `my.host.is` facts. |
+| Host context and feature/service switches | `modules/system/host-context.nix` | Shared option schema plus derived `my.host.is` facts. |
 | Disk and hardware edges | `modules/hosts/**/{hardware,disk,storage,users}.nix` | Host-name self-gating preserves physical facts without descriptor imports. |
-| Base platform policy | `modules/base.nix`, `modules/platforms/{x86,rpi*,}.nix`, `modules/locale.nix` | Architecture and RPi role facts gate platform policy. |
+| Base platform policy | `modules/system/{base,locale}.nix`, `modules/platforms/**` | Architecture and explicit platform facts gate platform policy. |
 | Desktop/local programs | `modules/features/*.nix` | Individual `my.host.features.*` facts: audio, Bluetooth, Docker, Podman, firmware, Flatpak, NVIDIA, Steam, Wine, AppImage, Office, Bitwarden, Deskflow, Minecraft, Noson, 3D printing, ZSA, and music tagging. |
-| External NixOS integrations | `modules/integrations/**`, delayed `/_` modules, and `modules/roles/_steamdeck.nix` | Disko, SOPS, Home Manager, and nix-flatpak expose options everywhere; NixOS-WSL and the Jovian/Decky Steam Deck bundle stay output-scoped because their upstream imports alter option/package surfaces. |
+| Nix integrations | `modules/system/nix/**`, `modules/tooling/nix/**` | System integrations expose NixOS options; tooling integrations provide repository and user-facing tooling. Inputs remain beside their consumer. |
 | Services | `modules/services/*.nix` | Individual `my.host.services.*` facts replace the predecessor media/service-stack aggregators. |
-| DNS and proxy publication | `modules/local-dns.nix`, `modules/services/{caddy,dhcp-coredns}.nix` | Services publish records through `my.localDns.records`; host outputs are collected without an evaluation cycle. |
-| Steam Deck/Decky | `modules/roles/_steamdeck.nix`, `modules/roles/_steamdeck/**`, `packages/decky/**` | The Emerald Echo output explicitly imports the private Steam Deck role bundle; role facts and boot-mode tags replace profile assembly without applying Jovian's Steam overlay globally. |
-| WSL work profile | `modules/hosts/nixos-wsl.nix`, `modules/wsl-*.nix` | The WSL output boundary supplies upstream options; role-gated modules supply portable user policy. |
+| DNS and proxy publication | `modules/system/local-dns.nix`, `modules/services/{caddy,dhcp-coredns}/**` | Services publish records through `my.localDns.records`; host outputs are collected without an evaluation cycle. |
+| Steam Deck/Decky | `modules/platforms/steamdeck/**`, `packages/decky/**` | The first-class Steam Deck platform module provides Jovian and Decky behavior; platform facts and boot-mode tags replace profile assembly without applying Jovian's Steam overlay globally. |
+| WSL work profile | `modules/platforms/wsl/**` | The WSL output boundary supplies upstream options; platform-gated modules supply portable user policy. |
 | Demlo and impermanence | `modules/features/{music-tagging,impermanence}.nix` | **Declaratively complete.** |
-| Armory | `modules/features/armory.nix` | **Intentional addition, not predecessor parity.** It is enabled only for ZaphodBeeblebrox and is intentionally not built on this machine. |
-| Flake formatter and follows optimization | `modules/{formatter,dendritic}.nix` | treefmt-nix provides `formatter`; flake-file's nix-auto-follow module prunes redundant follows. |
+| Armory | `modules/features/armory/armory.nix` | **Intentional addition, not predecessor parity.** It is enabled only for ZaphodBeeblebrox and is intentionally not built on this machine. |
+| Flake formatter and follows optimization | `modules/{dendritic,tooling}/**` | treefmt-nix provides `formatter`; Dendritic's nix-auto-follow module prunes redundant follows. |
 
 ## Intentionally not ported
 
@@ -60,7 +88,7 @@ than being functionality gaps:
   Direct host facts now drive the restricted `nix-remote` account, deployment
   keys, local `nh` checkout, Atlas builder route, and laptop deploy helpers;
 - `nix-auto-follow` as a standalone predecessor module: replaced by the same
-  flake-file integration in `modules/dendritic.nix`.
+  Dendritic integration in `modules/dendritic/dendritic.nix`.
 
 ## Inventory and structural classification
 
@@ -84,12 +112,12 @@ self-gating module, or a documented output-boundary exception.
 | `armory-runtime-nixpkgs`, `demlo`, `disko`, `impermanence`, `jovian-nixos`, `nix-flatpak`, secrets, hardware, RPi, WSL, SOPS, Home Manager | ported | Present in the rewrite with delayed consumption or the documented WSL exception. |
 | `treefmt-nix` | ported | Restored as the flake formatter and check. |
 | `lazyvim` | ported, disabled | Registered behind `my.host.features.lazyvim`; no host enables it. |
-| `nix-auto-follow` | ported | Restored through flake-file's module for follow-graph pruning during generation. |
-| `determinate` | ported, intentionally changed for WSL | The Determinate NixOS module is restored on every NixOS host, including WSL. It retains NixOS's generated settings as `/etc/nix/nix.custom.conf`, which Determinate's daemon includes. WSL's certificate and trusted-user policy remains layered onto that daemon; enabling it there is an explicit post-migration decision. The module sources are intent-added so a Git-backed flake includes them. |
-| `firefox-csshacks`, `nur` | ported | `modules/firefox.nix` restores the GUI-gated CSS, NUR Rycee add-ons, and pinned custom XPI profile. |
+| `nix-auto-follow` | ported | Restored through the Dendritic module for follow-graph pruning during generation. |
+| `determinate` | intentionally disabled pending upstream fix | The module and its test input are retained, but all ordinary hosts keep `features.determinateNix = false` because the upstream daemon currently breaks SSH-ng transport. Zaphod alone may opt into the fork while testing the upstream fix. |
+| `firefox-csshacks`, `nur` | ported | `modules/home/firefox/firefox.nix` restores the GUI-gated CSS, NUR Rycee add-ons, and pinned custom XPI profile. |
 | `gitignore` | ported | The common Sam Home Manager profile supplies the same executable helper. |
 | `nix-index-database` | ported | Restored through the common Sam Home Manager profile with its prebuilt database, shell integrations, command-not-found replacement, and `comma`. |
-| `nix4vscode` and three VS Code theme flakes | ported | `modules/vscode.nix` restores the input/overlay boundary, desktop VSCodium profile, Nix/Python/STM32 profiles, and a self-gating `my.host.vscodeTheme` selector for all three baked themes; `wsl-vscode.nix` owns the stable Windows Higi profile. |
+| `nix4vscode` and three VS Code theme flakes | ported | The inputs, native package selection, secret launcher wrapping, OpenSSH/desktop cleanup, conditional profile flags, Higi LLP profile, and Marketplace/Open VSX extension split are retained. |
 | `pkgs-by-name-for-flake-parts` and `packages` | intentionally retired | This was predecessor package-discovery/overlay glue. Current local packages are owned directly by `features/_armory.nix` and the Decky catalog modules, so no host consumes a global `pkgs.local` or package-index interface. |
 
 `lazyvim` was installed by a reusable predecessor module but its only shown
@@ -157,36 +185,36 @@ behavior.
 
 | Predecessor Home Manager family | Classification | Broadcast reconciliation |
 | --- | --- | --- |
-| Codex/MCP, Fish, Git/GPG, SSH, VS Code WSL sync | ported | `modules/wsl-{codex,fish,git-gpg,ssh,vscode}.nix` restores the WSL-specific profile. Atuin is deliberately not enabled: the predecessor's work profile did not import it. Native personal laptops opt into the personal Arr/Context7/GitHub/NixOS MCP client contract with `my.host.features.personalMcp`; WSL retains only its separately declared work MCP profile. |
-| Bash, Starship, tmux | ported | `modules/home.nix` restores the predecessor shell profile, full Starship module/prompt/battery/runtime configuration, and tmux activity, pane-switching, copy-mode/clipboard, split, and resize bindings. |
+| Codex/MCP, Fish, Git/GPG, SSH, VS Code WSL sync | ported | `modules/platforms/wsl/{codex,fish,git-gpg,ssh,vscode}.nix` restores the WSL-specific profile. Atuin is deliberately not enabled: the predecessor's work profile did not import it. Native personal laptops opt into the personal Arr/Context7/GitHub/NixOS MCP client contract with `my.host.features.personalMcp`; WSL retains only its separately declared work MCP profile. |
+| Bash, Fish, Git/GPG, SSH, Starship, tmux, Vim | ported | `modules/home/home.nix` restores the predecessor shell profile, full Starship module/prompt/battery/runtime configuration, Git identity/settings, GPG-agent policy and cleanup unit, generated SSH blocks, and tmux/vim bindings. |
 | Vim | ported | WSL and native personal hosts restore the pinned Night Owl plugin/colorscheme and guarded last-edit-position behavior. |
 | Syncthing | ported | `modules/services/syncthing.nix` restores the Atlas system service and secret-backed topology, including the original folder paths/labels and Emerald Echo SteamOS membership, plus Home Manager clients on Kamino, ZaphodBeeblebrox, and Emerald Echo with filtered folders, the GUI credential secret, and the predecessor tray policy. |
-| Firefox | ported | `modules/firefox.nix` restores the GUI-gated CSS files, policies, search aliases, preferences, MIME defaults, NUR add-ons, and pinned custom XPIs. `nix flake check --no-build` evaluates the graphical host path. |
+| Firefox | ported | `modules/home/firefox/firefox.nix` restores the GUI-gated CSS files, policies, search aliases, preferences, MIME defaults, NUR add-ons, and pinned custom XPIs. `nix flake check --no-build` evaluates the graphical host path. |
 | graphical-home, Konsole | ported | The shared profile restores the predecessor media/font and GUI desktop packages, its portable policy, the GUI-gated Night Owl Konsole scheme, and the desktop VSCodium default/Nix/Python/STM32 profiles. |
-| GDrive | ported | `modules/gdrive.nix` restores the per-host SOPS-backed rclone remote and `~/gdrive` mount for the predecessor's Sam profiles that enabled it, including Atlas and the two laptops. |
+| GDrive | ported | `modules/home/gdrive.nix` restores the per-host SOPS-backed rclone remote and `~/gdrive` mount for the predecessor's Sam profiles that enabled it, including Atlas and the two laptops. |
 | GitHub CLI | ported | The common Sam profile enables GitHub CLI and its Git credential helper; WSL inherits the same behavior. |
-| VS Code/VSCodium | ported | `modules/vscode.nix` supplies the GUI-laptop VSCodium package, Marketplace extension resolver, default extensions, Vim/editor settings, privacy policy, Nix/Python/STM32 profiles, and host-selected Party Owl/Synthwave Blues/SynthWave 84 themes. `wsl-vscode.nix` synchronizes the predecessor's managed common/Higi/Nix Windows Code policy, snippets, MCP configuration, and full extension-ID inventory for on-demand Windows installation while retaining an empty Linux extension tree. The predecessor's generated Windows-profile `extensions.json` files embedded immutable Linux store paths, so they are intentionally not copied into Windows; mutable database connections remain Windows application state and are intentionally not declared. |
-| LazyVim | ported, disabled | `modules/lazyvim.nix` registers the full integration behind an off-by-default host fact. |
-| Work and WSL work profiles | verified equivalent | `modules/wsl-work-home.nix` and related WSL modules restore the private CA/secret boundary, multi-SDK .NET toolchain, Azure DevOps CLI, NuGet credential provider/source, Pulumi/uv/Node packages, session policy, and Windows-owned Higi editor profile. |
+| VS Code/VSCodium | ported | `modules/home/vscode.nix` retains the theme/input boundary, package-flavor/profile options, extension inventories, default/Nix/Python/STM32/Higi profiles, secret-wrapped launchers, and OpenSSH/desktop package adjustments. `modules/platforms/wsl/wsl-vscode.nix` retains the Windows policy. Generated Windows extension manifests remain intentionally omitted because they contain immutable Linux store paths. |
+| LazyVim | ported, disabled | `modules/home/lazyvim/lazyvim.nix` registers the full integration behind an off-by-default host fact. |
+| Work and WSL work profiles | verified equivalent | `modules/platforms/wsl/work-home.nix` and related WSL modules restore the private CA/secret boundary, multi-SDK .NET toolchain, Azure DevOps CLI, NuGet credential provider/source, Pulumi/uv/Node packages, session policy, and Windows-owned Higi editor profile. |
 
 ### Nix tooling, system policy, users, and network
 
 | Predecessor family | Classification | Broadcast reconciliation |
 | --- | --- | --- |
-| Dendritic metadata/prune-lock and development shell | ported | Generated flake metadata is intentionally simplified; `modules/dendritic.nix` imports flake-file dendritic and nix-auto-follow modules, while `modules/devshell.nix` restores the default `just` and `pre-commit` development shell. |
+| Dendritic metadata/prune-lock and development shell | ported | Generated flake metadata is intentionally simplified; `modules/dendritic/dendritic.nix` imports flake-file's Dendritic and nix-auto-follow modules, while `modules/tooling/devshell.nix` restores the default `just` and `pre-commit` development shell. |
 | Flake constructors, inventory constructors, output helpers | structural glue | Replaced by direct `flake.nixosConfigurations` declarations in host modules and the broadcast registry. |
-| Disko, Home Manager, SOPS, impermanence | ported | Delayed integration modules under `modules/integrations` and `modules/features/impermanence.nix`. |
-| Formatter | ported | `modules/formatter.nix` restores treefmt/nixfmt. |
+| Disko, Home Manager, SOPS, impermanence | ported | Delayed system-Nix modules under `modules/system/nix/` and `modules/features/impermanence/impermanence.nix`. |
+| Formatter | ported | `modules/tooling/nix/formatter/formatter.nix` restores treefmt/nixfmt. |
 | nix-index | ported | RPi updater and the reusable Home Manager database/`comma` integration are present. |
 | Local package discovery/overlays | intentionally retired/replaced | Global package discovery is structural glue; Armory and Decky own their local packages directly, while NUR and the VS Code overlay are consumed by their own gated modules. |
 | Determinate Nix | ported, intentionally changed for WSL | Imported by the delayed Determinate module on every NixOS host. Enabling it on WSL is an explicit post-migration decision; WSL's certificate and trusted-user policy remains layered onto the resulting daemon. |
-| Cross compilation | ported | `modules/cross-compile.nix` restores `aarch64-linux` binfmt for every derived builder host. |
+| Cross compilation | ported | `modules/tooling/cross-compile.nix` restores `aarch64-linux` binfmt for every derived builder host. |
 | Bootstrap, deployment, systemd-boot policy | equivalent pending runtime validation | Declared variants and host boot edges remain direct; `bootstrap-enroll` is restored for explicit bootstrap tags and carries each variant's current final output name rather than deriving it from a display name. `modules/deployment.nix` replaces inventory metadata with self-gating host facts and restores the restricted remote account, Nix trust/sudo policy, local `nh` policy, Atlas builder routing, and guarded RPi deployment command. The predecessor Fish command surface—including direct remote switches, build-then-switch, secure deployment inspection, and Emerald Echo's standalone Home Manager activation—is retained as compatibility helpers backed by the broadcast output names. The deployer-side `sleepy` fact now wraps guarded and explicit unsafe remote deployments in a blocking `systemd-inhibit` lease. |
 | Audio, Bluetooth, firmware, locale, nix-ld, NVIDIA, ZSA | ported | Corresponding feature/platform modules exist. |
-| Plymouth and Wayland | ported | GUI-gated `modules/{plymouth,wayland}.nix` restore the Cybernetic boot theme, quiet high-resolution boot policy, and `NIXOS_OZONE_WL=1`. |
+| Plymouth and Wayland | ported | GUI-gated `modules/system/plymouth.nix` and `modules/home/wayland.nix` restore the Cybernetic boot theme, quiet high-resolution boot policy, and `NIXOS_OZONE_WL=1`. |
 | WSL base/certificates/work policy | verified equivalent | Output-scoped WSL modules restore interop, Docker Desktop, private CA handling, Nix trust/token settings, Fish, multi-SDK .NET, Azure/NuGet tooling, Git/GPG/SSH, Codex/MCP, and Windows editor synchronization including the stable Higi profile. |
 | Sam users, secrets, Syncthing user state | ported | The native `github_nixos_token` Nix include, generic personal Git/GPG/SSH/Atuin/MCP policy, and the filtered Syncthing Home Manager clients are restored. Native and Pi/bootstrapped Sam accounts explicitly declare `sam` as their primary group before SOPS installs secrets owned by that group. |
-| Static local DNS | ported | `modules/local-dns.nix` plus service publication replaces the predecessor static/collector split. |
+| Static local DNS | ported | `modules/system/local-dns.nix` plus service publication replaces the predecessor static/collector split. |
 | Shared deploy/site/secret-wrap helpers | replaced | Descriptor-only helpers are retired. Their resulting deployment behavior is expressed by `my.deployment` host facts and `modules/deployment.nix`; only live credential/connectivity validation remains. |
 
 ### Services and host-output reconciliation
@@ -212,13 +240,19 @@ The predecessor host families are reconciled as follows:
 - **Host descriptor/registration/export files:** structural glue, intentionally
   retired.
 - **Steam Deck profile helpers:** structural glue where they assemble profiles;
-  behavior is ported to the Steam Deck role, Jovian integration, Decky modules,
+  behavior is ported to the Steam Deck platform, Jovian integration, Decky modules,
   and direct variant tags. Runtime Decky validation remains pending.
 
 ## Planned implementation ledger
 
-The source-comparison implementation tracks are closed. The remaining tracks
-require a host build, boot, or activation:
+The source audit closed on 2026-07-28. The four confirmed declarative gaps
+found during that audit—flake description metadata, the Office package,
+media UID validation, and native VS Code/VSCodium parity—have been corrected.
+Remaining work is runtime validation on the affected machines, not unreviewed
+source scope.
+
+After those changes, the remaining tracks require a host build, boot, or
+activation:
 
 1. Perform the recorded runtime builds/boots and host activation checks.
 2. Perform runtime music-library validation on Atlas before relying on the
@@ -237,7 +271,7 @@ because it evaluates.
   derived `desktopSession` gate is an intentional narrowing of the old `gui`
   gate for X-server configuration.
 - treefmt/nixfmt and nix-auto-follow are verified as flake tooling: the
-  formatter/check evaluate and flake-file imports the follow-pruning module.
+  formatter/check evaluate and Dendritic imports the follow-pruning module.
 
 ### Verified partial or changed behavior
 
@@ -256,8 +290,8 @@ because it evaluates.
 The service, feature, platform, integration, publication, host-edge, and
 shared Home Manager inventories have received a predecessor-option and
 enabled-consumer comparison. Their individual results appear in the tables
-that follow. Items labelled **partial**, **changed**, or **untested** remain
-implementation work; they are not unreviewed candidates.
+that follow. Items labelled **changed** or **untested** are intentional
+divergences or runtime-validation work; they are not unreviewed candidates.
 
 ### Verification conclusion
 
@@ -273,7 +307,7 @@ host consumer remain required for each disposition.
 
 - **SSH — verified equivalent.** Server/RPi auto-activation is retained; the
   remotely managed Kamino and Zaphod hosts set the explicit SSH service fact,
-  and the former unintended Steam Deck role activation is removed.
+  and the former unintended Steam Deck activation is removed.
 - **Attic — verified equivalent.** The configurable `hostName` drives Caddy
   and DNS publication, and the bootstrap helper now emits the concrete public
   cache endpoint derived from the secret domain.
@@ -374,7 +408,8 @@ live key, connectivity, and remote-switch validation outstanding.
 | Broadcast area | Disposition |
 | --- | --- |
 | `audio`, `bluetooth`, `firmware`, `nix-ld`, `zsa`, `desktop` KDE policy, `appimage`, `deskflow`, `docker`, `flatpak`, `minecraft` tools, `threedprinter`, `steam` | **Equivalent.** Direct comparison found only self-gating/formatting changes or the deliberate central unfree-package collector. |
-| `bitwarden`, `noson`, `office` | **Verified equivalent.** The restored desktop Sam profile receives these through Home Manager, matching the predecessor user scope. |
+| `bitwarden`, `noson` | **Verified equivalent.** The restored desktop Sam profile receives these through Home Manager, matching the predecessor user scope. |
+| `office` | **Verified equivalent.** The Home Manager package scope includes `libreoffice-qt6`, matching main. |
 | `wine` | **Verified equivalent.** Packages, Nixpkgs policy, fonts, 32-bit graphics/audio, dconf, and the OpenLDAP test workaround match. |
 | `podman` | **Equivalent base runtime.** It enables Podman and selects it as the OCI backend. Watchtower uses Podman's native socket directly, so it remains compatible with Atlas retaining Docker. |
 | `nvidia` | **Verified equivalent.** The generic Intel microcode default is restored alongside the driver, graphics, PRIME, and unfree policy. |

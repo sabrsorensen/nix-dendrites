@@ -123,7 +123,6 @@
             "108.162.192.0/18"
             "190.93.240.0/20"
             "188.114.96.0/20"
-            "188.114.96.0/20"
             "197.234.240.0/22"
             "198.41.128.0/17"
             "162.158.0.0/15"
@@ -185,7 +184,7 @@
         environment.etc = lib.mkIf cfg.enableFail2ban {
           "fail2ban/filter.d/caddy-4xx.local".text = ''
             [Definition]
-            failregex = ^(?=.*"status"\s*:\s*(?:401|403|404|405|408|429))(?=.*"headers"\s*:\s*\{.*"(?:Cf-Connecting-Ip|X-Forwarded-For)"\s*:\s*\["<HOST>(?:,[^"]*)?"\]).*$
+            failregex = ^(?=.*"method"\s*:\s*"(?:GET|POST|HEAD|PUT|PATCH|DELETE|OPTIONS)")(?=.*"status"\s*:\s*(?:401|403|404|405|408|429))(?=.*"headers"\s*:\s*\{.*"(?:Cf-Connecting-Ip|X-Forwarded-For)"\s*:\s*\["<HOST>(?:,[^"]*)?"\]).*$
           '';
           "fail2ban/filter.d/caddy-scan.local".text = ''
             [Definition]
@@ -207,20 +206,24 @@
               #!${pkgs.bash}/bin/bash
               set -euo pipefail
               ip="$1"; jail="''${2:-unknown-jail}"
+              zone="''${CLOUDFLARE_ZONE_ID:-}"; account="''${CLOUDFLARE_ACCOUNT_ID:-}"; token="''${CLOUDFLARE_API_TOKEN:-}"
               case "$ip" in
                 *[!0-9A-Fa-f:.]*|"") echo "invalid Fail2ban IP: $ip" >&2; exit 2 ;;
               esac
               jail="$(printf '%s' "$jail" | ${pkgs.coreutils}/bin/tr -cd 'A-Za-z0-9._:-')"
               test -n "$jail" || jail="unknown-jail"
-              scope="''${CLOUDFLARE_ZONE_ID:-}"
-              if test -n "''${CLOUDFLARE_ACCOUNT_ID:-}"; then
-                scope="$CLOUDFLARE_ACCOUNT_ID"
-                base="https://api.cloudflare.com/client/v4/accounts/$scope/firewall/access_rules/rules"
+              zone="$(printf '%s' "$zone" | ${pkgs.coreutils}/bin/tr -d '\r\n')"; account="$(printf '%s' "$account" | ${pkgs.coreutils}/bin/tr -d '\r\n')"; token="$(printf '%s' "$token" | ${pkgs.coreutils}/bin/tr -d '\r\n')"
+              zone="''${zone#\"}"; zone="''${zone%\"}"; account="''${account#\"}"; account="''${account%\"}"; token="''${token#\"}"; token="''${token%\"}"
+              if test -n "$account"; then
+                scope="account:$account"
+                base="https://api.cloudflare.com/client/v4/accounts/$account/firewall/access_rules/rules"
+              elif test -n "$zone"; then
+                scope="zone:$zone"
+                base="https://api.cloudflare.com/client/v4/zones/$zone/firewall/access_rules/rules"
               else
-                base="https://api.cloudflare.com/client/v4/zones/$scope/firewall/access_rules/rules"
+                echo "missing Cloudflare scope: set CLOUDFLARE_ZONE_ID or CLOUDFLARE_ACCOUNT_ID" >&2; exit 1
               fi
-              test -n "$scope" || { echo "missing Cloudflare scope: set CLOUDFLARE_ZONE_ID or CLOUDFLARE_ACCOUNT_ID" >&2; exit 1; }
-              test -n "''${CLOUDFLARE_API_TOKEN:-}" || { echo "missing CLOUDFLARE_API_TOKEN" >&2; exit 1; }
+              test -n "$token" || { echo "missing CLOUDFLARE_API_TOKEN" >&2; exit 1; }
               cf_api() {
                 local op="$1" response http body errors
                 shift
@@ -234,9 +237,10 @@
                 fi
                 printf '%s' "$body"
               }
-              existing="$(cf_api "ban lookup failed ip=$ip" --get "$base" --data-urlencode "mode=block" --data-urlencode "configuration.target=ip" --data-urlencode "configuration.value=$ip" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | ${pkgs.jq}/bin/jq -r '.result[0].id // empty')"
-              test -n "$existing" && exit 0
-              cf_api "ban create failed ip=$ip" -X POST "$base" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" --data "{\"mode\":\"block\",\"configuration\":{\"target\":\"ip\",\"value\":\"$ip\"},\"notes\":\"fail2ban:$jail\"}" | ${pkgs.jq}/bin/jq -e '.success == true' >/dev/null
+              existing="$(cf_api "ban lookup failed ip=$ip scope=$scope" --get "$base" --data-urlencode "mode=block" --data-urlencode "configuration.target=ip" --data-urlencode "configuration.value=$ip" --data-urlencode "per_page=1" -H "Authorization: Bearer $token" -H "Content-Type: application/json" | ${pkgs.jq}/bin/jq -r '.result[0].id // empty')"
+              test -n "$existing" && { ${pkgs.systemd}/bin/systemd-cat -t fail2ban-caddy-cloudflare -p info <<<"ban skipped existing rule ip=$ip rule_id=$existing"; exit 0; }
+              cf_api "ban create failed ip=$ip scope=$scope" -X POST "$base" -H "Authorization: Bearer $token" -H "Content-Type: application/json" --data "{\"mode\":\"block\",\"configuration\":{\"target\":\"ip\",\"value\":\"$ip\"},\"notes\":\"fail2ban:$jail\"}" | ${pkgs.jq}/bin/jq -e '.success == true' >/dev/null
+              ${pkgs.systemd}/bin/systemd-cat -t fail2ban-caddy-cloudflare -p info <<<"ban created ip=$ip scope=$scope jail=$jail"
             '';
           };
           "fail2ban/caddy-cloudflare-unban.sh" = {
@@ -244,18 +248,20 @@
             text = ''
               #!${pkgs.bash}/bin/bash
               set -euo pipefail
-              ip="$1"; scope="''${CLOUDFLARE_ZONE_ID:-}"
+              ip="$1"; jail="''${2:-unknown-jail}"; zone="''${CLOUDFLARE_ZONE_ID:-}"; account="''${CLOUDFLARE_ACCOUNT_ID:-}"; token="''${CLOUDFLARE_API_TOKEN:-}"
               case "$ip" in
                 *[!0-9A-Fa-f:.]*|"") echo "invalid Fail2ban IP: $ip" >&2; exit 2 ;;
               esac
-              if test -n "''${CLOUDFLARE_ACCOUNT_ID:-}"; then
-                scope="$CLOUDFLARE_ACCOUNT_ID"
-                base="https://api.cloudflare.com/client/v4/accounts/$scope/firewall/access_rules/rules"
+              zone="$(printf '%s' "$zone" | ${pkgs.coreutils}/bin/tr -d '\r\n')"; account="$(printf '%s' "$account" | ${pkgs.coreutils}/bin/tr -d '\r\n')"; token="$(printf '%s' "$token" | ${pkgs.coreutils}/bin/tr -d '\r\n')"
+              zone="''${zone#\"}"; zone="''${zone%\"}"; account="''${account#\"}"; account="''${account%\"}"; token="''${token#\"}"; token="''${token%\"}"
+              if test -n "$account"; then
+                scope="account:$account"; base="https://api.cloudflare.com/client/v4/accounts/$account/firewall/access_rules/rules"
+              elif test -n "$zone"; then
+                scope="zone:$zone"; base="https://api.cloudflare.com/client/v4/zones/$zone/firewall/access_rules/rules"
               else
-                base="https://api.cloudflare.com/client/v4/zones/$scope/firewall/access_rules/rules"
+                echo "missing Cloudflare scope: set CLOUDFLARE_ZONE_ID or CLOUDFLARE_ACCOUNT_ID" >&2; exit 1
               fi
-              test -n "$scope" || { echo "missing Cloudflare scope: set CLOUDFLARE_ZONE_ID or CLOUDFLARE_ACCOUNT_ID" >&2; exit 1; }
-              test -n "''${CLOUDFLARE_API_TOKEN:-}" || { echo "missing CLOUDFLARE_API_TOKEN" >&2; exit 1; }
+              test -n "$token" || { echo "missing CLOUDFLARE_API_TOKEN" >&2; exit 1; }
               cf_api() {
                 local op="$1" response http body errors
                 shift
@@ -269,9 +275,12 @@
                 fi
                 printf '%s' "$body"
               }
-              cf_api "unban lookup failed ip=$ip" --get "$base" --data-urlencode "mode=block" --data-urlencode "configuration.target=ip" --data-urlencode "configuration.value=$ip" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | ${pkgs.jq}/bin/jq -r '.result[].id // empty' | while read -r rule; do
-                test -z "$rule" || cf_api "unban delete failed ip=$ip rule_id=$rule" -X DELETE "$base/$rule" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" >/dev/null
-              done
+              rules="$(cf_api "unban lookup failed ip=$ip scope=$scope" --get "$base" --data-urlencode "mode=block" --data-urlencode "configuration.target=ip" --data-urlencode "configuration.value=$ip" --data-urlencode "per_page=100" -H "Authorization: Bearer $token" -H "Content-Type: application/json" | ${pkgs.jq}/bin/jq -r '.result[].id // empty')"
+              deleted=0
+              while read -r rule; do
+                test -z "$rule" || { cf_api "unban delete failed ip=$ip scope=$scope rule_id=$rule" -X DELETE "$base/$rule" -H "Authorization: Bearer $token" -H "Content-Type: application/json" >/dev/null; deleted=$((deleted + 1)); }
+              done <<< "$rules"
+              ${pkgs.systemd}/bin/systemd-cat -t fail2ban-caddy-cloudflare -p info <<<"unban completed ip=$ip scope=$scope jail=$jail deleted_rules=$deleted"
             '';
           };
         };

@@ -13,8 +13,8 @@ in
         my.host = {
           name = "Ferrix";
           formFactor = "server";
+          platform = "rpi";
           home.enable = true;
-          roles.rpi = true;
         };
       }
     ];

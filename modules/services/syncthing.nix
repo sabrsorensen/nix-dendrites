@@ -176,7 +176,7 @@ in
                 package = pkgs.syncthingtray;
               };
             };
-            home.packages = lib.optionals config.my.host.roles.steamdeck [ pkgs.syncthingtray ];
+            home.packages = lib.optionals (config.my.host.platform == "steamdeck") [ pkgs.syncthingtray ];
           };
         })
       ];

@@ -11,7 +11,7 @@
       home-manager.users.sam.home.packages = [
         pkgs.hunspell
         pkgs.hunspellDicts.en_US
-        #pkgs.libreoffice-qt6
+        pkgs.libreoffice-qt6
         pkgs.gimp3-with-plugins
       ];
     };

@@ -7,8 +7,8 @@ let
     my.host = {
       name = "NixPi";
       formFactor = "server";
+      platform = "rpi";
       home.enable = true;
-      roles.rpi = true;
     };
   };
   imageModule =
@@ -31,10 +31,10 @@ let
     my.host = {
       name = "NixPi";
       formFactor = "server";
+      platform = "rpi";
       home.enable = false;
       tags = [ "bootstrap" ];
       bootstrap.finalConfigName = "nixpi";
-      roles.rpi = true;
     };
     users.users.sam = {
       isNormalUser = true;

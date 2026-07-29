@@ -49,6 +49,7 @@ Every host declares its intent directly in `my.host`:
 my.host = {
   name = "Kamino";
   formFactor = "laptop";
+  platform = "generic";
   roles = { workstation = true; builder = true; };
   features = { gui = true; docker = true; nvidia = true; };
   services = { minecraft = true; };
@@ -57,8 +58,8 @@ my.host = {
 
 Use the buckets consistently:
 
-- `roles`: broad environment or identity—`workstation`, `server`, `rpi`,
-  `steamdeck`, `wsl`, and similar classifications.
+- `roles`: operational responsibilities—`workstation`, `server`, and `builder`.
+- `platform`: OS/hardware integration—`generic`, `rpi`, `steamdeck`, or `wsl`.
 - `formFactor`: physical/operational shape—`laptop`, `desktop`, `handheld`,
   `server`, or `vm`.
 - `features`: a local capability or policy toggle—GUI, Docker, Podman,
@@ -72,6 +73,40 @@ Use the buckets consistently:
 Module authors normally read `my.host.is.*` for broad classifications and
 `my.host.features.*` or `my.host.services.*` for concrete activation. Avoid
 host-name checks except for genuine hardware-edge facts.
+
+## Module directory responsibilities
+
+- `system/`: baseline NixOS policy, host-fact schema, locale, boot presentation,
+  local DNS, and NixOS-wide Nix integrations in `system/nix/`.
+- `platforms/`: reusable OS or hardware integration layers such as RPi, WSL,
+  Steam Deck, and x86 defaults. They gate on `my.host.platform`.
+- `features/`: optional user-facing or local-host capabilities. A grouped
+  feature owns its implementation and non-Nix assets together.
+- `services/`: hosted service implementations. Service-specific scripts and
+  templates live beside the service module, as with `dhcp-coredns/`.
+- `home/`: reusable Home Manager policy and its user-facing assets.
+- `tooling/`: repository, deployment, and command-line workflow support;
+  tooling-only Nix integrations live in `tooling/nix/`.
+- `hosts/`: host outputs and genuine host-local facts only.
+
+`flake.nix` is the repository entrypoint. `modules/dendritic/dendritic.nix`
+owns its Dendritic/flake-file bootstrap and repository-wide flake inputs; it
+is not a separate integration category.
+
+## Parity-audit workspace
+
+Use the persistent sibling `../nix-dendrites-main-audit` checkout as the
+predecessor reference. It is intentionally separate from the rewrite worktree
+and must not receive implementation edits. The audit helpers are:
+
+```bash
+just audit-reference
+just audit-diff modules/home-manager/vscode
+```
+
+Set `MAIN_AUDIT` when the reference checkout lives elsewhere. Classify a
+difference before changing it: structural glue, intentional design change, or
+an implementation gap. The living evidence ledger is `docs/parity-audit.md`.
 
 ## Docker and Podman are separate choices
 
@@ -112,15 +147,14 @@ and exceptional hardware quirks here. Keep broad policy out of these files.
 CPU architecture and platform integration are different concerns:
 
 - Steam Deck is `x86_64-linux`; it receives the normal x86 layer.
-- Steam Deck also has `roles.steamdeck = true`. Its private Steam Deck role
-  bundle imports Jovian and Decky only at Emerald Echo's output boundary; those
-  modules must not enter the universal module set because Jovian overlays the
-  ordinary Steam package with the Steam Deck runtime.
-- Raspberry Pi is an aarch64 host with `roles.rpi = true`; shared Pi defaults
+- Steam Deck has `platform = "steamdeck"`. Its first-class platform module
+  provides Jovian and Decky behavior, gated by that platform and narrower
+  Steam Deck features where appropriate.
+- Raspberry Pi is an aarch64 host with `platform = "rpi"`; shared Pi defaults
   belong in an RPi-gated module, while each board's boot and network facts stay
   in its host directory.
-- WSL is identified by `roles.wsl = true`. Its current output also declares
-  `formFactor = "vm"`, so module policy must use the role rather than treating
+- WSL is identified by `platform = "wsl"`. Its current output also declares
+  `formFactor = "vm"`, so module policy must use the platform rather than treating
   that form factor as a WSL discriminator.
 - Personal MCP clients use the explicit `features.personalMcp` opt-in rather
   than a form-factor heuristic. WSL therefore retains only its separately
@@ -161,7 +195,8 @@ decentralized.
 ## Inputs and bootstrap safety
 
 Use `flake-file`, `flake-parts`, and the Dendritic bootstrap in
-`modules/dendritic.nix`. Declare a new input there, then regenerate:
+`modules/dendritic/dendritic.nix`. Declare a bootstrap input there, or declare an
+integration input beside the module that consumes it, then regenerate:
 
 ```bash
 nix run .#write-flake
@@ -172,7 +207,7 @@ and bootstrap-delayed input consumers from automatic discovery; it is not a
 substitute for `all.nix` or a general module-grouping mechanism.
 
 The Firefox custom-add-on source list is
-`modules/_firefox-addons.json`; refresh its committed generated package set
+`modules/home/firefox/_firefox-addons.json`; refresh its committed generated package set
 with `nix run .#update-firefox-addons`. This update tool is installed on hosts
 with `my.deployment.localFlakePath`, along with `nix-auto-follow`, the
 formatter, and flake-writing tools. It performs AMO lookups only when
@@ -193,8 +228,8 @@ evaluation, or special-argument requirements. Record that exception and why.
 ### The WSL exception
 
 `nixos-wsl` is deliberately host-scoped. Its option-provider module is added
-only to the `nixos-wsl` output in `modules/hosts/nixos-wsl.nix`; the ordinary
-broadcast module contains only portable user policy gated by `roles.wsl`.
+only to the `nixos-wsl` output in `modules/platforms/wsl/nixos-wsl/nixos-wsl.nix`; the ordinary
+broadcast module contains only portable user policy gated by `platform = "wsl"`.
 
 This is not a stylistic exception. `lib.mkIf` gates configuration values, not
 the evaluation of option names. Putting `wsl.enable` in a broadcast module

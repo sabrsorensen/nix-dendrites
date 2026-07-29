@@ -13,8 +13,8 @@ in
         my.host = {
           name = "Coruscant";
           formFactor = "server";
+          platform = "rpi";
           home.enable = true;
-          roles.rpi = true;
         };
         my.localDns.records = [ { hostname = "homeassistant"; } ];
       }

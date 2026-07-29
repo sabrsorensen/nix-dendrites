@@ -1,4 +1,7 @@
-{ ... }:
+{ inputs, lib, ... }:
+let
+  rootLuksUuid = lib.removeSuffix "\n" (builtins.readFile "${inputs.nix-secrets}/luks/zaphod/root.txt");
+in
 {
   flake.modules.nixos.hardware-zaphodbeeblebrox =
     {
@@ -68,6 +71,10 @@
           ];
           systemd.enable = true;
           verbose = false;
+          luks.devices.crypted = {
+            device = lib.mkForce "/dev/disk/by-uuid/${rootLuksUuid}";
+            allowDiscards = true;
+          };
         };
         kernelModules = [ "kvm-intel" ];
         loader = {
