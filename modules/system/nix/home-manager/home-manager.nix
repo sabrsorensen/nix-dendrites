@@ -5,5 +5,5 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  imports = lib.optional (inputs ? home-manager) ./_home-manager.nix;
+  imports = lib.optional (inputs ? home-manager) ./_content.nix;
 }

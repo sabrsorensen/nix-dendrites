@@ -3,10 +3,13 @@
   isWsl,
   lib,
   pkgs,
+  secretRoot ? inputs.nix-secrets,
 }:
 let
-  gpgKeysDir = "${inputs.nix-secrets}/gpg-keys";
-  ascFiles = builtins.filter (name: lib.hasSuffix ".asc" name) (builtins.attrNames (builtins.readDir gpgKeysDir));
+  gpgKeysDir = "${secretRoot}/gpg-keys";
+  ascFiles = builtins.filter (name: lib.hasSuffix ".asc" name) (
+    builtins.attrNames (builtins.readDir gpgKeysDir)
+  );
 in
 {
   systemd.user.services.gpg-cleanup-stale-locks = {

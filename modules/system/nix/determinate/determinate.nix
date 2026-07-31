@@ -11,5 +11,5 @@
     determinate-nix-src-ssh-fix.url = "github:DarthPJB/nix-src/fix/ssh-master-localcommand-protocol-leak";
   };
 
-  imports = lib.optional (inputs ? determinate) ./_determinate.nix;
+  imports = lib.optional (inputs ? determinate) ./_content.nix;
 }

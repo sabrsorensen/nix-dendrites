@@ -5,5 +5,5 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  imports = lib.optional (inputs ? nix-index-database) ./_nix-index.nix;
+  imports = lib.optional (inputs ? nix-index-database) ./_content.nix;
 }

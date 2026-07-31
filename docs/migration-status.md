@@ -19,7 +19,7 @@ Completed shared layers include:
   and the generic-kernel policy;
 - desktop and local-capability features including audio, Bluetooth, Docker,
   Podman, firmware, Flatpak, NVIDIA, Steam, Wine, AppImage execution, printing,
-  music-tagging tools, and desktop tools;
+  Beets/Demlo music tooling, and desktop tools;
 - bootstrap-delayed external integrations for Disko, SOPS, nix-flatpak,
   Jovian, and Home Manager;
 - local DNS publication collection, DNS/DHCP, Caddy publication, and the
@@ -52,8 +52,8 @@ the delayed public/private pattern, then their configuration self-gates:
   state.
 - Demlo is consumed through a delayed feature module; media-service hosts
   receive its command system-wide. Atlas additionally enables the separated
-  Beets and Demlo Home Manager configuration modules through
-  `features.musicTagging`; this is an explicit post-parity enhancement.
+  Beets and Demlo Home Manager configuration modules through `features.beets`
+  and `features.demlo`; this is an explicit post-parity enhancement.
 - Impermanence is broadcast as an option provider, while its persistent-state
   policy activates only for `features.impermanence` hosts.
 - Armory is an intentional, optional addition using a pinned legacy runtime.
@@ -66,9 +66,10 @@ the delayed public/private pattern, then their configuration self-gates:
   pinned custom XPIs. It evaluates on the current graphical hosts.
 - LazyVim is registered behind `features.lazyvim`; it is deliberately disabled
   on every current host until a user opts in.
-- Jovian and Decky live in the first-class Steam Deck platform module. Their
-  configuration is gated by `platform = "steamdeck"`, so Jovian's Steam overlay
-  cannot affect ordinary x86 hosts.
+- Steam Deck hardware, boot, Jovian, and Decky policy live in the first-class
+  Steam Deck platform module. Their configuration is gated by
+  `platform = "steamdeck"`, so Jovian's Steam overlay cannot affect ordinary
+  x86 hosts.
 - Disko, SOPS, and Home Manager use the same delayed-input pattern.
 
 `nixos-wsl` is the deliberate exception: its upstream module is imported only
@@ -92,7 +93,6 @@ Runtime hosts:
 
 Deployment and recovery variants:
 
-- `atlasuponraiden-bootstrap`;
 - `naboo-image`, `nevarro-image`, `nixpi-image`, `nixpi-bootstrap`, and
   `nixpi-bootstrap-image`;
 - `emeraldecho-dualboot`, `emeraldecho-bootstrap`,
@@ -107,13 +107,22 @@ behavior keys off `platform = "steamdeck"`.
 ## Validation completed
 
 Focused evaluation has succeeded for the NixOS-WSL system, the Raspberry Pi
-image variants, the NixPi bootstrap image, Atlas bootstrap, Emerald Echo
+image variants, the NixPi bootstrap image, Emerald Echo
 runtime/bootstrap variants, and the Emerald Echo installer derivations. A
-subsequent full evaluation also composed all 24 declared NixOS outputs and the
+subsequent full evaluation also composed all declared NixOS outputs and the
 `emeraldecho-steamos` Home Manager output without building or activating them.
-Broad `nix flake check --no-build` runs have also been used repeatedly during the
-migration as host edges were completed. The WSL top-level derivation also
-evaluates with Determinate preserving NixOS's generated settings as
+After the final WSL host-fact split and private-payload content rename passes,
+including host Disko layouts and generated Firefox/monitoring data,
+`nix flake check --no-build` passed on x86_64-linux as well. Broad no-build
+flake checks have also been used repeatedly during the migration as host edges
+were completed. On 2026-07-30, the sibling `nix-dendrites-main-content`
+checkout was strictly normalized to the same private content-file convention
+and passed parse, formatting, whitespace, and `nix flake check --no-build`
+validation. A normalized parity pass then matched representative host disk,
+RPi boot, WSL policy, Atlas Caddy/DNS, native Home Manager, Firefox, and
+VSCodium option slices between `nix-dendrites-main-content` and this rewrite.
+The WSL top-level derivation also evaluates with Determinate
+preserving NixOS's generated settings as
 `/etc/nix/nix.custom.conf`. On 2026-07-22, the repaired broadcast WSL
 configuration was successfully activated after direct closure comparison;
 this exercised its Determinate daemon handoff, WSL work SOPS token, Home
@@ -161,7 +170,7 @@ shortcuts, and generation-cleanup helper. Deployment is now a broadcast module:
 host facts enable the restricted `nix-remote` account and its authorized keys,
 while desktop deployers receive `nh` checkout policy, `nix-*` SSH aliases,
 Atlas distributed-build routing, and the lock- and DNS-peer-gated
-`remote-deploy` command for Naboo and Nevarro. Deployers whose
+`secure-deploy` path through `nhsr`/`nhsur` for Naboo and Nevarro. Deployers whose
 `my.deployment.sleepy` fact is enabled also hold a blocking `systemd-inhibit`
 lease throughout guarded and explicit unsafe remote deployment commands.
 
@@ -210,49 +219,32 @@ did not import Determinate for WSL.
 
 ## Remaining work
 
-The source-level content-preservation review remains in progress. The WSL
-activation changelog exposed additional missing predecessor policy: its
-`workstation` role and `nix-ld` feature, local-checkout `nh`/Fish/formatter
-policy, and parts of the Windows Code extension/profile inventory had not been
-carried forward. It also exposed two broadcast-only WSL additions (Atuin and a
-global Git ignore file), which were removed. The corrected WSL system and Home
-Manager package closures have now been compared directly with the predecessor;
-the remaining source review is broader than WSL. The work
-also retains host/runtime validation and operations that
-require an explicit operational
-choice:
+The source-level content-preservation review and private `_content.nix` split
+are complete for the tracked predecessor payloads. The WSL activation gaps,
+global secret-gating issue, RPi Sam Home Manager SOPS edge, Atuin/laptop gates,
+NuGet template namespace check, WSL Code MCP set, CA-bundle naming, and Fish
+add-on generator replacement have all been corrected in source.
 
-- WSL activation exposed one additional broadcast-gating defect: the global
-  `ghcr_token` declaration attempted to decrypt the personal `secrets.yaml`
-  even though no WSL service consumed it. It is now gated to the Arr Sync and
-  Plex service facts; WSL installs only its work `secrets/wsl.yaml` token.
-- The WSL NuGet template now tests its Home Manager SOPS namespace (where the
-  work secret is declared), restoring the predecessor `nuget-higi-config`
-  output that the system-SOPS namespace check had accidentally suppressed.
-- WSL Code now receives the predecessor work MCP set (Azure, Azure DevOps,
-  Context7, GitHub, NixOS, Postman, Pulumi, and Snyk) through Home Manager's
-  profile integration. The accidental personal Arr MCP is removed.
-- The WSL CA bundle retains the predecessor `zscaler-ca-bundle.crt` output
-  name. Codex's versioned wrapper retains the CLI's `config.toml` interface.
-  The predecessor-only Fish add-on generator is now the
-  repository package `update-firefox-addons`, which targets the broadcast
-  JSON/Nix source paths without embedding a checkout path.
+Remaining work is host/runtime validation and operations that require an
+explicit operational choice:
 
 - validate the upstream `nixos-hardware.raspberry-pi-4` module on hardware.
   It is now imported at the Pi output boundary and retains its firmware,
-  device-tree, boot-loader, and Pi PCIe/USB/video defaults while intentionally
-  preferring the generic cached kernel. The predecessor's `nixos-raspberrypi`
+  device-tree, and boot-loader defaults while intentionally preferring the
+  generic cached kernel; evaluated RPi kernel params and initrd module names
+  match the predecessor. The predecessor's `nixos-raspberrypi`
   input supplied a `pkgs.rpi` overlay that no predecessor module used; its
   Cachix cache is also removed because all active Pi kernel and firmware
   derivations come from Nixpkgs;
 - activate `homeConfigurations.emeraldecho-steamos` on SteamOS and verify it
-  reconciles the shared `/srv/steam-library` mount alongside the declarative
+  reconciles the shared `/srv/steam-library` mount from its colocated
+  Home Manager payload alongside the declarative
   NixOS mount; Decky and Steam still need runtime validation;
 - perform the documented Atlas runtime music-library validation. Demlo and
   Armory's declarative ports are complete; Armory must remain unbuilt and
   unrun on this machine;
 
-- build or activate the Atlas music-tagging profile to verify ownership and
+- build or activate the Atlas Beets/Demlo profile to verify ownership and
   access to `/AnomalyRealm/media/music` on the deployed host;
 - build the Emerald Echo system closure and exercise Decky at runtime (plugin
   staging, settings seed, XR driver setup, and Steam integration);
@@ -271,5 +263,6 @@ choice:
 2. Boot or deploy one representative image/installer variant to verify its
    runtime edge, and record the result in `docs/parity-audit.md`.
 
-No old configuration is imported as a compatibility bridge. Continue porting
-one behavior at a time into independently broadcast, self-gating modules.
+No old configuration is imported as a compatibility bridge. Future behavior
+should be added as independently broadcast, self-gating modules with
+operational payloads kept in private `_content.nix` files.

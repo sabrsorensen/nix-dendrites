@@ -15,7 +15,10 @@ in
   programs.vim = {
     enable = true;
     defaultEditor = true;
-    plugins = with pkgs.vimPlugins; [ vim-fish vim-night-owl ];
+    plugins = with pkgs.vimPlugins; [
+      vim-fish
+      vim-night-owl
+    ];
     settings = { };
     extraConfig = ''
       set expandtab

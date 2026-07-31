@@ -11,5 +11,5 @@
     };
   };
 
-  imports = lib.optional (inputs ? sops-nix) ./_secrets.nix;
+  imports = lib.optional (inputs ? sops-nix) ./_content.nix;
 }

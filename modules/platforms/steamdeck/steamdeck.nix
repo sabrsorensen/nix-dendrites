@@ -6,6 +6,6 @@
   };
 
   flake.modules.nixos.platform-steamdeck = {
-    imports = [ (import ./_steamdeck.nix { inherit inputs; }) ];
+    imports = [ (import ./_content.nix { inherit inputs; }) ];
   };
 }

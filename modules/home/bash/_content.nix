@@ -5,11 +5,15 @@
 {
   enable = true;
   enableCompletion = true;
-  profileExtra = if isSteamDeck then ''
-    if [ -e "${nixProfile}" ]; then
-      . "${nixProfile}"
-    fi
-  '' else "";
+  profileExtra =
+    if isSteamDeck then
+      ''
+        if [ -e "${nixProfile}" ]; then
+          . "${nixProfile}"
+        fi
+      ''
+    else
+      "";
   bashrcExtra = ''
     # If not running interactively, don't do anything
     [[ $- != *i* ]] && return

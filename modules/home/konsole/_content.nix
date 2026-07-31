@@ -8,6 +8,5 @@ let
   };
 in
 {
-  home.file.".local/share/konsole/NightOwl.colorscheme".source =
-    "${nightOwl}/NightOwl.colorscheme";
+  home.file.".local/share/konsole/NightOwl.colorscheme".source = "${nightOwl}/NightOwl.colorscheme";
 }

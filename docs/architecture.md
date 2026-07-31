@@ -74,6 +74,18 @@ Module authors normally read `my.host.is.*` for broad classifications and
 `my.host.features.*` or `my.host.services.*` for concrete activation. Avoid
 host-name checks except for genuine hardware-edge facts.
 
+Some feature facts are aggregate conveniences. They should set component
+feature defaults with `lib.mkDefault`; reusable modules should still gate on
+the component feature they implement. For example, `features.gui` defaults on
+components such as `audio`, `appimage`, `desktop`, `firefox`, `konsole`,
+`plymouth`, and `wayland`, while `features.decky` defaults on `deckyLoader`,
+`deckyCatalog`, and `deckyPlugins`. The same pattern applies to aggregate
+personal profile and persistence flags such as `personalMcp` and
+`impermanence`. Keep unrelated clients separate: the Atuin client is selected
+by `features.atuin`, while the Atuin sync server is selected by
+`services.atuinServer`. A host can keep the aggregate enabled and disable or
+force-enable a component when needed.
+
 ## Module directory responsibilities
 
 - `system/`: baseline NixOS policy, host-fact schema, locale, boot presentation,
@@ -148,14 +160,20 @@ CPU architecture and platform integration are different concerns:
 
 - Steam Deck is `x86_64-linux`; it receives the normal x86 layer.
 - Steam Deck has `platform = "steamdeck"`. Its first-class platform module
-  provides Jovian and Decky behavior, gated by that platform and narrower
-  Steam Deck features where appropriate.
+  provides reusable hardware, boot, Jovian, and Decky behavior, gated by that
+  platform and narrower Steam Deck features where appropriate.
 - Raspberry Pi is an aarch64 host with `platform = "rpi"`; shared Pi defaults
   belong in an RPi-gated module, while each board's boot and network facts stay
   in its host directory.
 - WSL is identified by `platform = "wsl"`. Its current output also declares
   `formFactor = "vm"`, so module policy must use the platform rather than treating
   that form factor as a WSL discriminator.
+
+Home Manager modules should consume `my.host.home.username` and
+`my.host.home.homeDirectory` rather than translating platform names into account
+names themselves. The shared default is `sam` everywhere except WSL, where it is
+`ssorensen`; host facts may override those values if a future host needs a
+different primary Home Manager account.
 - Personal MCP clients use the explicit `features.personalMcp` opt-in rather
   than a form-factor heuristic. WSL therefore retains only its separately
   declared work MCP configuration.
@@ -206,13 +224,13 @@ nix run .#write-flake
 and bootstrap-delayed input consumers from automatic discovery; it is not a
 substitute for `all.nix` or a general module-grouping mechanism.
 
-The Firefox custom-add-on source list is
-`modules/home/firefox/_firefox-addons.json`; refresh its committed generated package set
-with `nix run .#update-firefox-addons`. This update tool is installed on hosts
-with `my.deployment.localFlakePath`, along with `nix-auto-follow`, the
-formatter, and flake-writing tools. It performs AMO lookups only when
-explicitly invoked; normal evaluation and deployment use the pinned generated
-Nix file.
+The Firefox custom-add-on source list and pinned generated package set live in
+`modules/home/firefox/firefox-addons/` as an internal Firefox component; refresh
+them with `nix run .#update-firefox-addons`. This update tool is exported by the
+Firefox add-ons updater module and installed on hosts with
+`my.deployment.localFlakePath`, along with `nix-auto-follow`, the formatter, and
+flake-writing tools. It performs AMO lookups only when explicitly invoked;
+normal evaluation and deployment use the pinned generated Nix file.
 
 When an input provides a NixOS module that is safe to import everywhere, use a
 public bootstrap module plus a private `/_` delayed module: the public file
