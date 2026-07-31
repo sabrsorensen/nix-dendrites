@@ -17,6 +17,8 @@ in
     pkgs.tmux
     pkgs.home-manager
     pkgs.cowsay
+    pkgs.asciiquarium
+    pkgs.comma
     pkgs.p7zip
     pkgs.rclone
     pkgs.dig.dnsutils
@@ -40,6 +42,8 @@ in
     inputs.self.packages.${system}.write-lock
     inputs.self.packages.${system}.update-firefox-addons
     inputs.nix-auto-follow.packages.${system}.default
+    pkgs.nurl
+    pkgs.nix-init
   ]
   ++ lib.optionals hasLocalGuiFlake [ leasesEditor ]
   ++ lib.optionals (pkgs.stdenv.hostPlatform.system == "x86_64-linux") [ pkgs.intel-gpu-tools ];

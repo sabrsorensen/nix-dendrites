@@ -41,6 +41,9 @@ That recreates the hidden selection graph this structure removes. Inputs whose
 option surfaces are unsafe to broadcast remain explicit output-boundary
 exceptions.
 
+Copyable examples of the public broadcast/private-content split live in
+[`templates/broadcast-content/`](templates/broadcast-content/README.md).
+
 ## Host facts are the interface
 
 Every host declares its intent directly in `my.host`:
@@ -86,6 +89,11 @@ by `features.atuin`, while the Atuin sync server is selected by
 `services.atuinServer`. A host can keep the aggregate enabled and disable or
 force-enable a component when needed.
 
+The current persistence provider is impermanence, but no host enables it yet.
+The recorded assessment of Preservation as a future replacement is in
+[`preservation-investigation.md`](preservation-investigation.md); do not begin
+a provider migration until selecting the first ephemeral-root host.
+
 ## Module directory responsibilities
 
 - `system/`: baseline NixOS policy, host-fact schema, locale, boot presentation,
@@ -105,11 +113,18 @@ force-enable a component when needed.
 owns its Dendritic/flake-file bootstrap and repository-wide flake inputs; it
 is not a separate integration category.
 
-## Parity-audit workspace
+## Historical predecessor audit
 
-Use the persistent sibling `../nix-dendrites-main-audit` checkout as the
-predecessor reference. It is intentionally separate from the rewrite worktree
-and must not receive implementation edits. The audit helpers are:
+The completed predecessor conversion evidence is archived in
+[`archive/broadcast-rewrite/`](archive/broadcast-rewrite/README.md). It is
+useful when investigating a suspected regression, but is not a living module
+inventory or task list. Current implementation decisions belong in this guide
+and current runtime follow-up belongs beside the affected module or in a
+focused operational document.
+
+The persistent sibling `../nix-dendrites-main-audit` checkout remains available
+for targeted historical comparison. It is intentionally separate from the
+rewrite worktree and must not receive implementation edits. The helpers are:
 
 ```bash
 just audit-reference
@@ -118,7 +133,9 @@ just audit-diff modules/home-manager/vscode
 
 Set `MAIN_AUDIT` when the reference checkout lives elsewhere. Classify a
 difference before changing it: structural glue, intentional design change, or
-an implementation gap. The living evidence ledger is `docs/parity-audit.md`.
+an implementation gap. Record an active finding in the affected module, this
+guide, or a focused operational document, rather than reviving the archive as
+a task tracker.
 
 ## Docker and Podman are separate choices
 
@@ -373,10 +390,9 @@ aggregator.
 Do not rely on chat history, memory, or a future maintainer rediscovering the
 same failure mode. If it was expensive or surprising to learn, document it.
 
-## Migration progress is a maintained interface
+## Use focused operational records
 
-Keep `docs/migration-status.md` accurate in every porting change. Add each
-discovered missing behavior to its remaining-work list before or alongside the
-implementation, then move it to completed work in the same change once its
-focused evaluation passes. Do not leave completed tasks in the remaining list,
-and do not claim parity while a predecessor behavior is untracked.
+When a change leaves long-lived operational work, create or update a short,
+focused document beside the relevant concern, as with the PostgreSQL and
+Preservation investigations. Do not recreate a global migration tracker after
+the migration has closed.

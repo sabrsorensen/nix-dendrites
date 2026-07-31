@@ -42,6 +42,10 @@
       url = "github:hyrfilm/gitignore";
       flake = false;
     };
+    herdr = {
+      url = "github:herdrdev/herdr/v0.7.5";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -126,6 +130,10 @@
         flake-utils.follows = "flake-utils";
         nixpkgs.follows = "nixpkgs";
       };
+    };
+    terminal-rain-lightning = {
+      url = "github:delta-psi/terminal-rain-lightning-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     treefmt-nix = {
       url = "https://flakehub.com/f/numtide/treefmt-nix/*";
