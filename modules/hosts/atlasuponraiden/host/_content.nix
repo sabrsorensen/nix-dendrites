@@ -63,11 +63,6 @@
       ];
     };
     my.localDns.records = [ { hostname = "atlas"; } ];
-    # Atlas is the remote build machine.  Its kernel rejects the seccomp BPF
-    # filter that Nix's nested store tests install, which prevents it from
-    # building Nix itself.  Keep Nix sandboxing; only disable that additional
-    # syscall filter on this controlled builder.
-    nix.settings.filter-syscalls = false;
     my.deployment = {
       canDeployRemotely = true;
       enableRemoteUser = true;
