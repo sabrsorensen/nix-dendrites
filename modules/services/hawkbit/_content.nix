@@ -43,9 +43,6 @@ in
   my.localDns.records = [ { hostname = cfg.hostName; } ];
   my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
     ''
-      basic_auth /* {
-          sorenssa {$HAWKBIT_PASSWORD}
-      }
       filter {
         content_type text/html.*
         search_pattern </head>
@@ -109,7 +106,12 @@ in
         "postgres"
         "rabbitmq"
       ];
-      environment = databaseEnvironment;
+      environment = databaseEnvironment // {
+        HAWKBIT_SECURITY_USER_ADMIN_TENANT = "DEFAULT";
+        HAWKBIT_SECURITY_USER_ADMIN_PASSWORD = "{noop}admin";
+        HAWKBIT_SECURITY_USER_ADMIN_ROLES = "TENANT_ADMIN";
+        HAWKBIT_SERVER_REPOSITORY_IMPLICIT_TENANT_CREATE_ALLOWED = "true";
+      };
       networks = [ mediaNetwork ];
       volumes = [ "${hawkbitDataRoot}/artifactrepo:/app/artifactrepo:rw" ];
       ports = [ "${lanAddress}:8082:8080/tcp" ];
