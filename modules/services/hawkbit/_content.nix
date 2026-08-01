@@ -3,9 +3,23 @@
   cfg,
   domain,
   hawkbitIdentity,
+  lib,
   toInt,
   ...
 }:
+let
+  mediaNetwork = config.my.media.podmanNetwork;
+  hawkbitDataRoot = "${config.my.media.configRoot}/hawkbit";
+  databaseEnvironment = {
+    PROFILES = "postgresql";
+    SPRING_DATASOURCE_URL = "jdbc:postgresql://postgres:5432/hawkbit";
+    SPRING_DATASOURCE_USERNAME = "postgres";
+    SPRING_DATASOURCE_PASSWORD = "admin";
+    SPRING_RABBITMQ_HOST = "rabbitmq";
+    SPRING_RABBITMQ_USERNAME = "guest";
+    SPRING_RABBITMQ_PASSWORD = "guest";
+  };
+in
 {
   users.users = {
     hawkbit = {
@@ -34,8 +48,7 @@
       environment = {
         HAWKBIT_URL = "http://hawkbit-mgmt:8080";
       };
-      volumes = [
-      ];
+      networks = [ mediaNetwork ];
       ports = [
         "127.0.0.1:8084:80"
       ];
@@ -46,44 +59,102 @@
         "--network-alias=hawkbit-ui"
       ];
     };
+    hawkbit-ddi = {
+      image = "hawkbit/hawkbit-ddi-server:latest";
+      autoStart = true;
+      dependsOn = [
+        "postgres"
+        "rabbitmq"
+      ];
+      environment = databaseEnvironment;
+      networks = [ mediaNetwork ];
+      ports = [ "127.0.0.1:8081:8081/tcp" ];
+      volumes = [ "${hawkbitDataRoot}/artifactrepo:/app/artifactrepo:rw" ];
+      labels."com.centurylinklabs.watchtower.enable" = "true";
+      log-driver = "journald";
+      extraOptions = [ "--network-alias=hawkbit-ddi" ];
+    };
+    hawkbit-dmf = {
+      image = "hawkbit/hawkbit-dmf-server:latest";
+      autoStart = true;
+      dependsOn = [
+        "postgres"
+        "rabbitmq"
+      ];
+      environment = databaseEnvironment;
+      networks = [ mediaNetwork ];
+      labels."com.centurylinklabs.watchtower.enable" = "true";
+      log-driver = "journald";
+      extraOptions = [ "--network-alias=hawkbit-dmf" ];
+    };
     hawkbit-mgmt-server = {
       image = "hawkbit/hawkbit-mgmt-server:latest";
       autoStart = true;
-      environment = {
-        PROFILES = "postgresql";
-        SPRING_DATASOURCE_URL = "jdbc:postgresql://postgres:5432/hawkbit";
-        SPRING_DATASOURCE_USERNAME = "postgres";
-        SPRING_DATASOURCE_PASSWORD = "admin";
-        SPRING_RABBITMQ_HOST = "rabbitmq";
-        SPRING_RABBITMQ_USERNAME = "guest";
-        SPRING_RABBITMQ_PASSWORD = "guest";
-      };
-      volumes = [
-        "artifactrepo:/app/artifactrepo"
+      dependsOn = [
+        "postgres"
+        "rabbitmq"
       ];
+      environment = databaseEnvironment;
+      networks = [ mediaNetwork ];
+      volumes = [ "${hawkbitDataRoot}/artifactrepo:/app/artifactrepo:rw" ];
       ports = [ "127.0.0.1:8082:8080/tcp" ];
       labels."com.centurylinklabs.watchtower.enable" = "true";
       log-driver = "journald";
       extraOptions = [ "--network-alias=hawkbit-mgmt" ];
     };
-    kitana = {
-      image = "pannal/kitana";
+    postgres = {
+      image = "postgres:16.5";
       autoStart = true;
-      volumes = [
-        "/etc/localtime:/etc/localtime:ro"
-        "${config.my.media.configRoot}/kitana:/app/data:rw"
+      environment = {
+        POSTGRES_DB = "hawkbit";
+        POSTGRES_USER = "postgres";
+        POSTGRES_PASSWORD = "admin";
+      };
+      networks = [ mediaNetwork ];
+      volumes = [ "${hawkbitDataRoot}/postgres:/var/lib/postgresql/data:rw" ];
+      labels."com.centurylinklabs.watchtower.enable" = "true";
+      log-driver = "journald";
+      extraOptions = [
+        "--hostname=postgres"
+        "--network-alias=postgres"
+        "--health-cmd=pg_isready -d hawkbit -U postgres"
+        "--health-interval=20s"
+        "--health-retries=10"
       ];
-      ports = [ "127.0.0.1:31337:31337/tcp" ];
-      cmd = [
-        "-B"
-        "0.0.0.0:31337"
-        "-p"
-        "/kitana"
-        "-P"
+    };
+    rabbitmq = {
+      image = "rabbitmq:4-management-alpine";
+      autoStart = true;
+      environment = {
+        RABBITMQ_DEFAULT_VHOST = "/";
+        RABBITMQ_DEFAULT_USER = "guest";
+        RABBITMQ_DEFAULT_PASS = "guest";
+      };
+      networks = [ mediaNetwork ];
+      ports = [
+        "127.0.0.1:15672:15672/tcp"
+        "127.0.0.1:5672:5672/tcp"
       ];
       labels."com.centurylinklabs.watchtower.enable" = "true";
       log-driver = "journald";
-      extraOptions = [ "--network-alias=kitana" ];
+      extraOptions = [
+        "--hostname=rabbitmq"
+        "--network-alias=rabbitmq"
+      ];
     };
   };
+  systemd.services =
+    lib.genAttrs
+      [
+        "podman-hawkbit-ui"
+        "podman-hawkbit-ddi"
+        "podman-hawkbit-dmf"
+        "podman-hawkbit-mgmt-server"
+        "podman-postgres"
+        "podman-rabbitmq"
+      ]
+      (_: {
+        after = [ "podman-network-media.service" ];
+        requires = [ "podman-network-media.service" ];
+      });
 }

@@ -166,6 +166,7 @@
           netbirdServer = lib.mkEnableOption "NetBird server topology";
           gonic = lib.mkEnableOption "Gonic music service";
           gotify = lib.mkEnableOption "Gotify notification service";
+          hawkbit = lib.mkEnableOption "hawkBit device-management service";
           plex = lib.mkEnableOption "Plex media-service bundle";
           profilarr = lib.mkEnableOption "Profilarr media service";
           prowlarr = lib.mkEnableOption "Prowlarr media service";

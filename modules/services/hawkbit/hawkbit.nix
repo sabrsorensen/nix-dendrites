@@ -8,10 +8,10 @@ in
   flake.modules.nixos.hawkbit =
     args@{ config, lib, ... }:
     let
-      cfg = config.my.plex;
+      cfg = config.my.hawkbit;
       toInt = value: if builtins.isInt value then value else builtins.fromJSON value;
       hawkbitIdentity = lib.attrByPath [ "hawkbit" ] {
-        uid = 2200;
+        uid = 2201;
         gid = 2096;
       } config.my.media.containerIdentities;
     in

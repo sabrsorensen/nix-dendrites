@@ -37,6 +37,7 @@
         flaresolverr = true;
         gonic = true;
         gotify = true;
+        hawkbit = true;
         immich = true;
         jellyfin = true;
         mealie = true;
@@ -108,7 +109,7 @@
           gid = 2096;
         };
         hawkbit = {
-          uid = 2200;
+          uid = 2201;
           gid = 2096;
         };
       };
