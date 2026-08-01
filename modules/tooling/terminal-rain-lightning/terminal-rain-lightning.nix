@@ -6,6 +6,5 @@
   };
 
   flake.modules.nixos.terminal-rain-lightning =
-    args@{ pkgs, ... }:
-    import ./_content.nix (args // { inherit inputs; });
+    args@{ pkgs, ... }: import ./_content.nix (args // { inherit inputs; });
 }

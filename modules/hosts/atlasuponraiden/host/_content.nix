@@ -107,6 +107,10 @@
           uid = 2106;
           gid = 2096;
         };
+        hawkbit = {
+          uid = 2200;
+          gid = 2096;
+        };
       };
     };
     my.monitoring = {
