@@ -28,6 +28,11 @@ in
       message = "hawkBit requires my.host.address so its LAN endpoints have a specific bind address.";
     }
   ];
+  systemd.tmpfiles.rules = [
+    "d ${hawkbitDataRoot} 0750 root root -"
+    "d ${hawkbitDataRoot}/artifactrepo 0750 root root -"
+    "d ${hawkbitDataRoot}/postgres 0750 root root -"
+  ];
   users.users = {
     hawkbit = {
       isSystemUser = true;
