@@ -8,6 +8,7 @@
   ...
 }:
 let
+  lanAddress = config.my.host.address;
   mediaNetwork = config.my.media.podmanNetwork;
   hawkbitDataRoot = "${config.my.media.configRoot}/hawkbit";
   databaseEnvironment = {
@@ -21,6 +22,12 @@ let
   };
 in
 {
+  assertions = [
+    {
+      assertion = lanAddress != null;
+      message = "hawkBit requires my.host.address so its LAN endpoints have a specific bind address.";
+    }
+  ];
   users.users = {
     hawkbit = {
       isSystemUser = true;
@@ -31,6 +38,9 @@ in
   my.localDns.records = [ { hostname = cfg.hostName; } ];
   my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
     ''
+      basic_auth /* {
+          sorenssa {$HAWKBIT_PASSWORD}
+      }
       filter {
         content_type text/html.*
         search_pattern </head>
@@ -68,7 +78,7 @@ in
       ];
       environment = databaseEnvironment;
       networks = [ mediaNetwork ];
-      ports = [ "127.0.0.1:8081:8081/tcp" ];
+      ports = [ "${lanAddress}:8081:8081/tcp" ];
       volumes = [ "${hawkbitDataRoot}/artifactrepo:/app/artifactrepo:rw" ];
       labels."com.centurylinklabs.watchtower.enable" = "true";
       log-driver = "journald";
@@ -97,7 +107,7 @@ in
       environment = databaseEnvironment;
       networks = [ mediaNetwork ];
       volumes = [ "${hawkbitDataRoot}/artifactrepo:/app/artifactrepo:rw" ];
-      ports = [ "127.0.0.1:8082:8080/tcp" ];
+      ports = [ "${lanAddress}:8082:8080/tcp" ];
       labels."com.centurylinklabs.watchtower.enable" = "true";
       log-driver = "journald";
       extraOptions = [ "--network-alias=hawkbit-mgmt" ];
@@ -111,6 +121,7 @@ in
         POSTGRES_PASSWORD = "admin";
       };
       networks = [ mediaNetwork ];
+      ports = [ "${lanAddress}:5432:5432/tcp" ];
       volumes = [ "${hawkbitDataRoot}/postgres:/var/lib/postgresql/data:rw" ];
       labels."com.centurylinklabs.watchtower.enable" = "true";
       log-driver = "journald";
@@ -132,8 +143,8 @@ in
       };
       networks = [ mediaNetwork ];
       ports = [
-        "127.0.0.1:15672:15672/tcp"
-        "127.0.0.1:5672:5672/tcp"
+        "${lanAddress}:15672:15672/tcp"
+        "${lanAddress}:5672:5672/tcp"
       ];
       labels."com.centurylinklabs.watchtower.enable" = "true";
       log-driver = "journald";
@@ -143,6 +154,13 @@ in
       ];
     };
   };
+  networking.firewall.allowedTCPPorts = [
+    5432
+    5672
+    8081
+    8082
+    15672
+  ];
   systemd.services =
     lib.genAttrs
       [
