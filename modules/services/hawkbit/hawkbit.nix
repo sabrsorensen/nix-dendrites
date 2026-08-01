@@ -3,6 +3,9 @@ let
   domain = builtins.replaceStrings [ "\n" ] [ "" ] (
     builtins.readFile "${inputs.nix-secrets}/domain.txt"
   );
+  hawkbitPassword = builtins.replaceStrings [ "\n" ] [ "" ] (
+    builtins.readFile "${inputs.nix-secrets}/hawkbit-password.txt"
+  );
 in
 {
   flake.modules.nixos.hawkbit =
@@ -35,6 +38,7 @@ in
               cfg
               domain
               hawkbitIdentity
+              hawkbitPassword
               toInt
               ;
           }

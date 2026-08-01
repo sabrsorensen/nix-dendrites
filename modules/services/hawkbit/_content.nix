@@ -3,6 +3,7 @@
   cfg,
   domain,
   hawkbitIdentity,
+  hawkbitPassword,
   lib,
   pkgs,
   toInt,
@@ -24,8 +25,11 @@ let
   };
   mgmtEnvironment = databaseEnvironment // {
     HAWKBIT_SECURITY_USER_ADMIN_TENANT = "DEFAULT";
-    HAWKBIT_SECURITY_USER_ADMIN_PASSWORD = "{noop}admin";
+    HAWKBIT_SECURITY_USER_ADMIN_PASSWORD = hawkbitPassword;
     HAWKBIT_SECURITY_USER_ADMIN_ROLES = "TENANT_ADMIN";
+    HAWKBIT_SECURITY_USER_CUSHYCHICKEN_TENANT = "DEFAULT";
+    HAWKBIT_SECURITY_USER_CUSHYCHICKEN_PASSWORD = hawkbitPassword;
+    HAWKBIT_SECURITY_USER_CUSHYCHICKEN_ROLES = "TENANT_ADMIN";
     HAWKBIT_SERVER_REPOSITORY_IMPLICIT_TENANT_CREATE_ALLOWED = "true";
   };
   escapeArgs = args: lib.escapeShellArgs args;
