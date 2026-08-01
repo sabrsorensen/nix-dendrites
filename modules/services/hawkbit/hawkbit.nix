@@ -6,7 +6,12 @@ let
 in
 {
   flake.modules.nixos.hawkbit =
-    args@{ config, lib, ... }:
+    args@{
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     let
       cfg = config.my.hawkbit;
       toInt = value: if builtins.isInt value then value else builtins.fromJSON value;

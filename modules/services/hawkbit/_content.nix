@@ -4,12 +4,14 @@
   domain,
   hawkbitIdentity,
   lib,
+  pkgs,
   toInt,
   ...
 }:
 let
   lanAddress = config.my.host.address;
-  mediaNetwork = config.my.media.podmanNetwork;
+  docker = "${pkgs.docker}/bin/docker";
+  dockerNetwork = "hawkbit";
   hawkbitDataRoot = "${config.my.media.configRoot}/hawkbit";
   databaseEnvironment = {
     PROFILES = "postgresql";
@@ -20,6 +22,112 @@ let
     SPRING_RABBITMQ_USERNAME = "guest";
     SPRING_RABBITMQ_PASSWORD = "guest";
   };
+  mgmtEnvironment = databaseEnvironment // {
+    HAWKBIT_SECURITY_USER_ADMIN_TENANT = "DEFAULT";
+    HAWKBIT_SECURITY_USER_ADMIN_PASSWORD = "{noop}admin";
+    HAWKBIT_SECURITY_USER_ADMIN_ROLES = "TENANT_ADMIN";
+    HAWKBIT_SERVER_REPOSITORY_IMPLICIT_TENANT_CREATE_ALLOWED = "true";
+  };
+  escapeArgs = args: lib.escapeShellArgs args;
+  environmentArgs =
+    environment:
+    lib.concatLists (
+      lib.mapAttrsToList (name: value: [
+        "--env"
+        "${name}=${value}"
+      ]) environment
+    );
+  volumeArgs =
+    volumes:
+    lib.concatLists (
+      map (volume: [
+        "--volume"
+        volume
+      ]) volumes
+    );
+  portArgs =
+    ports:
+    lib.concatLists (
+      map (port: [
+        "--publish"
+        port
+      ]) ports
+    );
+  networkArgs =
+    aliases:
+    lib.concatLists (
+      map (alias: [
+        "--network-alias"
+        alias
+      ]) aliases
+    );
+  dockerRun =
+    {
+      name,
+      image,
+      environment ? { },
+      volumes ? [ ],
+      ports ? [ ],
+      aliases ? [ ],
+      hostname ? null,
+      extraArgs ? [ ],
+    }:
+    escapeArgs (
+      [
+        docker
+        "run"
+        "--name"
+        name
+        "--network"
+        dockerNetwork
+      ]
+      ++ lib.optional (hostname != null) "--hostname=${hostname}"
+      ++ networkArgs aliases
+      ++ environmentArgs environment
+      ++ volumeArgs volumes
+      ++ portArgs ports
+      ++ extraArgs
+      ++ [ image ]
+    );
+  dockerImage = image: {
+    ExecStartPre = "-${docker} pull ${image}";
+  };
+  mkDockerService =
+    {
+      name,
+      image,
+      environment ? { },
+      volumes ? [ ],
+      ports ? [ ],
+      aliases ? [ ],
+      hostname ? null,
+      extraArgs ? [ ],
+      after ? [ ],
+      requires ? [ ],
+    }:
+    {
+      inherit after requires;
+      wantedBy = [ "multi-user.target" ];
+      path = [ pkgs.docker ];
+      serviceConfig = (dockerImage image) // {
+        ExecStart = dockerRun {
+          inherit
+            name
+            image
+            environment
+            volumes
+            ports
+            aliases
+            hostname
+            extraArgs
+            ;
+        };
+        ExecStop = "-${docker} stop --time 10 ${name}";
+        ExecStopPost = "-${docker} rm -f ${name}";
+        Restart = "always";
+        RestartSec = 5;
+      };
+    };
 in
 {
   assertions = [
@@ -53,114 +161,6 @@ in
       }
     ''
   ];
-  virtualisation.oci-containers.containers = {
-    hawkbit-ui = {
-      image = "ghcr.io/dogukanarat/hawkbit-ui";
-      autoStart = true;
-      environment = {
-        HAWKBIT_URL = "http://hawkbit-mgmt:8080";
-      };
-      networks = [ mediaNetwork ];
-      ports = [
-        "127.0.0.1:8084:80"
-      ];
-      labels."com.centurylinklabs.watchtower.enable" = "true";
-      log-driver = "journald";
-      extraOptions = [
-        "--hostname=hawkbit-ui"
-        "--network-alias=hawkbit-ui"
-      ];
-    };
-    hawkbit-ddi = {
-      image = "hawkbit/hawkbit-ddi-server:latest";
-      autoStart = true;
-      dependsOn = [
-        "postgres"
-        "rabbitmq"
-      ];
-      environment = databaseEnvironment;
-      networks = [ mediaNetwork ];
-      ports = [ "${lanAddress}:8081:8081/tcp" ];
-      volumes = [ "${hawkbitDataRoot}/artifactrepo:/app/artifactrepo:rw" ];
-      labels."com.centurylinklabs.watchtower.enable" = "true";
-      log-driver = "journald";
-      extraOptions = [ "--network-alias=hawkbit-ddi" ];
-    };
-    hawkbit-dmf = {
-      image = "hawkbit/hawkbit-dmf-server:latest";
-      autoStart = true;
-      dependsOn = [
-        "postgres"
-        "rabbitmq"
-      ];
-      environment = databaseEnvironment;
-      networks = [ mediaNetwork ];
-      labels."com.centurylinklabs.watchtower.enable" = "true";
-      log-driver = "journald";
-      extraOptions = [ "--network-alias=hawkbit-dmf" ];
-    };
-    hawkbit-mgmt-server = {
-      image = "hawkbit/hawkbit-mgmt-server:latest";
-      autoStart = true;
-      dependsOn = [
-        "postgres"
-        "rabbitmq"
-      ];
-      environment = databaseEnvironment // {
-        HAWKBIT_SECURITY_USER_ADMIN_TENANT = "DEFAULT";
-        HAWKBIT_SECURITY_USER_ADMIN_PASSWORD = "{noop}admin";
-        HAWKBIT_SECURITY_USER_ADMIN_ROLES = "TENANT_ADMIN";
-        HAWKBIT_SERVER_REPOSITORY_IMPLICIT_TENANT_CREATE_ALLOWED = "true";
-      };
-      networks = [ mediaNetwork ];
-      volumes = [ "${hawkbitDataRoot}/artifactrepo:/app/artifactrepo:rw" ];
-      ports = [ "${lanAddress}:8082:8080/tcp" ];
-      labels."com.centurylinklabs.watchtower.enable" = "true";
-      log-driver = "journald";
-      extraOptions = [ "--network-alias=hawkbit-mgmt" ];
-    };
-    postgres = {
-      image = "postgres:16.5";
-      autoStart = true;
-      environment = {
-        POSTGRES_DB = "hawkbit";
-        POSTGRES_USER = "postgres";
-        POSTGRES_PASSWORD = "admin";
-      };
-      networks = [ mediaNetwork ];
-      ports = [ "${lanAddress}:5432:5432/tcp" ];
-      volumes = [ "${hawkbitDataRoot}/postgres:/var/lib/postgresql/data:rw" ];
-      labels."com.centurylinklabs.watchtower.enable" = "true";
-      log-driver = "journald";
-      extraOptions = [
-        "--hostname=postgres"
-        "--network-alias=postgres"
-        "--health-cmd=pg_isready -d hawkbit -U postgres"
-        "--health-interval=20s"
-        "--health-retries=10"
-      ];
-    };
-    rabbitmq = {
-      image = "rabbitmq:4-management-alpine";
-      autoStart = true;
-      environment = {
-        RABBITMQ_DEFAULT_VHOST = "/";
-        RABBITMQ_DEFAULT_USER = "guest";
-        RABBITMQ_DEFAULT_PASS = "guest";
-      };
-      networks = [ mediaNetwork ];
-      ports = [
-        "${lanAddress}:15672:15672/tcp"
-        "${lanAddress}:5672:5672/tcp"
-      ];
-      labels."com.centurylinklabs.watchtower.enable" = "true";
-      log-driver = "journald";
-      extraOptions = [
-        "--hostname=rabbitmq"
-        "--network-alias=rabbitmq"
-      ];
-    };
-  };
   networking.firewall.allowedTCPPorts = [
     5432
     5672
@@ -168,18 +168,128 @@ in
     8082
     15672
   ];
-  systemd.services =
-    lib.genAttrs
-      [
-        "podman-hawkbit-ui"
-        "podman-hawkbit-ddi"
-        "podman-hawkbit-dmf"
-        "podman-hawkbit-mgmt-server"
-        "podman-postgres"
-        "podman-rabbitmq"
-      ]
-      (_: {
-        after = [ "podman-network-media.service" ];
-        requires = [ "podman-network-media.service" ];
-      });
+  systemd.services = {
+    docker-hawkbit-network = {
+      after = [ "docker.service" ];
+      requires = [ "docker.service" ];
+      wantedBy = [ "multi-user.target" ];
+      path = [ pkgs.docker ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStop = "-${docker} network rm ${dockerNetwork}";
+      };
+      script = ''
+        ${docker} network inspect ${dockerNetwork} >/dev/null 2>&1 || ${docker} network create ${dockerNetwork}
+      '';
+    };
+    docker-hawkbit-postgres = mkDockerService {
+      name = "hawkbit-postgres";
+      image = "postgres:16.5";
+      hostname = "postgres";
+      aliases = [ "postgres" ];
+      environment = {
+        POSTGRES_DB = "hawkbit";
+        POSTGRES_USER = "postgres";
+        POSTGRES_PASSWORD = "admin";
+      };
+      ports = [ "${lanAddress}:5432:5432/tcp" ];
+      volumes = [ "${hawkbitDataRoot}/postgres:/var/lib/postgresql/data:rw" ];
+      extraArgs = [
+        "--health-cmd"
+        "pg_isready -d hawkbit -U postgres"
+        "--health-interval"
+        "20s"
+        "--health-retries"
+        "10"
+      ];
+      after = [ "docker-hawkbit-network.service" ];
+      requires = [ "docker-hawkbit-network.service" ];
+    };
+    docker-hawkbit-rabbitmq = mkDockerService {
+      name = "hawkbit-rabbitmq";
+      image = "rabbitmq:4-management-alpine";
+      hostname = "rabbitmq";
+      aliases = [ "rabbitmq" ];
+      environment = {
+        RABBITMQ_DEFAULT_VHOST = "/";
+        RABBITMQ_DEFAULT_USER = "guest";
+        RABBITMQ_DEFAULT_PASS = "guest";
+      };
+      ports = [
+        "${lanAddress}:15672:15672/tcp"
+        "${lanAddress}:5672:5672/tcp"
+      ];
+      after = [ "docker-hawkbit-network.service" ];
+      requires = [ "docker-hawkbit-network.service" ];
+    };
+    docker-hawkbit-ddi = mkDockerService {
+      name = "hawkbit-ddi";
+      image = "hawkbit/hawkbit-ddi-server:latest";
+      aliases = [ "hawkbit-ddi" ];
+      environment = databaseEnvironment;
+      ports = [ "${lanAddress}:8081:8081/tcp" ];
+      volumes = [ "${hawkbitDataRoot}/artifactrepo:/app/artifactrepo:rw" ];
+      after = [
+        "docker-hawkbit-network.service"
+        "docker-hawkbit-postgres.service"
+        "docker-hawkbit-rabbitmq.service"
+      ];
+      requires = [
+        "docker-hawkbit-network.service"
+        "docker-hawkbit-postgres.service"
+        "docker-hawkbit-rabbitmq.service"
+      ];
+    };
+    docker-hawkbit-dmf = mkDockerService {
+      name = "hawkbit-dmf";
+      image = "hawkbit/hawkbit-dmf-server:latest";
+      aliases = [ "hawkbit-dmf" ];
+      environment = databaseEnvironment;
+      after = [
+        "docker-hawkbit-network.service"
+        "docker-hawkbit-postgres.service"
+        "docker-hawkbit-rabbitmq.service"
+      ];
+      requires = [
+        "docker-hawkbit-network.service"
+        "docker-hawkbit-postgres.service"
+        "docker-hawkbit-rabbitmq.service"
+      ];
+    };
+    docker-hawkbit-mgmt = mkDockerService {
+      name = "hawkbit-mgmt";
+      image = "hawkbit/hawkbit-mgmt-server:latest";
+      aliases = [ "hawkbit-mgmt" ];
+      environment = mgmtEnvironment;
+      ports = [ "${lanAddress}:8082:8080/tcp" ];
+      volumes = [ "${hawkbitDataRoot}/artifactrepo:/app/artifactrepo:rw" ];
+      after = [
+        "docker-hawkbit-network.service"
+        "docker-hawkbit-postgres.service"
+        "docker-hawkbit-rabbitmq.service"
+      ];
+      requires = [
+        "docker-hawkbit-network.service"
+        "docker-hawkbit-postgres.service"
+        "docker-hawkbit-rabbitmq.service"
+      ];
+    };
+    docker-hawkbit-ui = mkDockerService {
+      name = "hawkbit-ui";
+      image = "ghcr.io/dogukanarat/hawkbit-ui";
+      environment = {
+        HAWKBIT_URL = "http://hawkbit-mgmt:8080";
+      };
+      ports = [ "127.0.0.1:8084:80/tcp" ];
+      after = [
+        "docker-hawkbit-network.service"
+        "docker-hawkbit-mgmt.service"
+      ];
+      requires = [
+        "docker-hawkbit-network.service"
+        "docker-hawkbit-mgmt.service"
+      ];
+    };
+  };
 }
