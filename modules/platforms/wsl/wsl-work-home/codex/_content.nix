@@ -90,7 +90,8 @@
               "/mnt/c/Users/${username}/src/higi".trust_level = "trusted";
             };
             mcp_servers = {
-              Atlassian.url = "https://mcp.atlassian.com/v1/mcp/authv2";
+              AtlassianJira.url = "https://mcp.atlassian.com/v1/mcp/authv2";
+              AtlassianConfluence.url = "https://mcp.atlassian.com/v1/mcp/authv2";
               GitHub = {
                 url = "https://api.githubcopilot.com/mcp";
                 bearer_token_env_var = "GITHUB_NIXOS_MCP_TOKEN";
