@@ -90,20 +90,6 @@
               "/mnt/c/Users/${username}/src/higi".trust_level = "trusted";
             };
             mcp_servers = {
-              AtlassianJira.url = "https://mcp.atlassian.com/v1/mcp/authv2";
-              AtlassianConfluence.url = "https://mcp.atlassian.com/v1/mcp/authv2";
-              GitHub = {
-                url = "https://api.githubcopilot.com/mcp";
-                bearer_token_env_var = "GITHUB_NIXOS_MCP_TOKEN";
-              };
-              HigishGitHub = {
-                url = "https://api.githubcopilot.com/mcp";
-                bearer_token_env_var = "HIGISH_GITHUB_NIXOS_MCP_TOKEN";
-              };
-              Context7 = {
-                url = "https://mcp.context7.com/mcp";
-                env_http_headers.CONTEXT7_API_KEY = "CONTEXT7_API_KEY";
-              };
               AZDOLocal = {
                 command = "npx";
                 args = [
@@ -116,6 +102,20 @@
                 env_vars = [ "PERSONAL_ACCESS_TOKEN" ];
                 startup_timeout_sec = 300;
               };
+              Context7 = {
+                url = "https://mcp.context7.com/mcp";
+                env_http_headers.CONTEXT7_API_KEY = "CONTEXT7_API_KEY";
+              };
+              GitHub = {
+                url = "https://api.githubcopilot.com/mcp";
+                bearer_token_env_var = "GITHUB_NIXOS_MCP_TOKEN";
+              };
+              HigishGitHub = {
+                url = "https://api.githubcopilot.com/mcp";
+                bearer_token_env_var = "HIGISH_GITHUB_NIXOS_MCP_TOKEN";
+              };
+              HigiConfluence.url = "https://mcp.atlassian.com/v1/mcp/authv2";
+              HigiJira.url = "https://mcp.atlassian.com/v1/mcp/authv2";
               Pulumi = {
                 url = "https://mcp.ai.pulumi.com/mcp";
                 bearer_token_env_var = "PULUMI_NIXOS_MCP_TOKEN";
