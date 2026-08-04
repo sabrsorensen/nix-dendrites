@@ -9,7 +9,7 @@ lib.mkMerge [
     home.packages = with pkgs; [
       hunspell
       hunspellDicts.en_US
-      #libreoffice-qt6
+      libreoffice-qt6
       gimp3-with-plugins
     ];
   })

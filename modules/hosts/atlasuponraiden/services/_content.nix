@@ -4,6 +4,8 @@
     group = "media";
   };
 
+  services.openssh.allowSFTP = true;
+
   services.postgresql.settings.dynamic_shared_memory_type = "sysv";
 
   services.samba.settings = {
