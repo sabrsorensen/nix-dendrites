@@ -42,6 +42,22 @@ lib.mkMerge [
     };
   })
 
+  # Common MCP clients are part of the interactive workstation profile. Keep
+  # this host-derived default so WSL and personal computers receive the same
+  # shared server configuration without each host having to opt in manually.
+  (lib.mkIf
+    (
+      config.my.host.platform == "wsl"
+      || builtins.elem config.my.host.formFactor [
+        "desktop"
+        "laptop"
+      ]
+    )
+    {
+      my.host.features.mcpCommon = lib.mkDefault true;
+    }
+  )
+
   {
     my.host.is = {
       workstation = config.my.host.roles.workstation || config.my.host.features.gui;

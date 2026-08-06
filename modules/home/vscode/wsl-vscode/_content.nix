@@ -17,7 +17,6 @@ let
   managedPaths = [
     "settings.json"
     "keybindings.json"
-    "mcp.json"
     "snippets"
     "profiles"
   ];
@@ -128,10 +127,24 @@ let
         done < ${managedPathsFile}
       }
 
+      # MCP is optional. Do not remove a Windows-managed file when the
+      # declarative profile intentionally has no MCP servers.
+      sync_existing_path() {
+        src_root="$1"
+        dst_root="$2"
+        rel_path="$3"
+
+        if [ -e "$src_root/$rel_path" ]; then
+          sync_managed_path "$src_root" "$dst_root" "$rel_path"
+        fi
+      }
+
       mkdir -p "$export_root"
       cp ${extensionIdsFile} "$HOME/.local/state/vscode-sync/extensions.txt"
       sync_tree "$source_root" "$export_root"
+      sync_existing_path "$source_root" "$export_root" "mcp.json"
       sync_tree "$export_root" "$target_root"
+      sync_existing_path "$export_root" "$target_root" "mcp.json"
 
       if [ "$install_extensions" -eq 1 ]; then
         if ! command -v where.exe >/dev/null 2>&1 || ! where.exe code >/dev/null 2>&1; then
