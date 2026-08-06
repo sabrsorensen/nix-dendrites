@@ -13,6 +13,7 @@
     displayManager.sddm.enable = true;
     geoclue2.enable = true;
   };
+  security.pam.services.sddm.kwallet.enable = true;
   xdg.portal = {
     enable = true;
     extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];

@@ -1,5 +1,23 @@
 { ... }:
+let
+  homeModule = import ./_home-content.nix;
+  featureModule =
+    args@{
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    {
+      options.my.features.noson = lib.mkEnableOption "Noson";
+      config = lib.mkIf config.my.features.noson (homeModule args);
+    };
+  nixosModule = import ./_content.nix;
+in
 {
+  dendritic.homeManagerModules = [ featureModule ];
+  flake.modules.homeManager.noson = featureModule;
+
   flake.modules.nixos.noson =
     args@{
       config,
@@ -7,15 +25,5 @@
       pkgs,
       ...
     }:
-    let
-      username = config.my.host.home.username;
-    in
-    lib.mkIf (config.my.host.features.noson && config.my.host.home.enable) (
-      lib.mkMerge [
-        (import ./_content.nix args)
-        {
-          home-manager.users.${username} = import ./_home-content.nix args;
-        }
-      ]
-    );
+    lib.mkIf (config.my.host.features.noson && config.my.host.home.enable) (nixosModule args);
 }

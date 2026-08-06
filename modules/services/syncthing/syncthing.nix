@@ -38,6 +38,8 @@ let
   };
 in
 {
+  dendritic.homeManagerModules = [ (import ./_home-content.nix { inherit inputs; }) ];
+
   flake.modules.nixos.syncthing =
     args@{
       config,
@@ -47,7 +49,6 @@ in
     }:
     let
       cfg = config.my.syncthing;
-      homeUsername = config.my.host.home.username;
       homeClient =
         config.my.host.home.enable
         && builtins.elem config.my.host.name [
@@ -106,7 +107,6 @@ in
         args
         // {
           inherit cfg filteredFolders homeClient;
-          inherit homeUsername;
           secretsFile = "${inputs.nix-secrets}/secrets.yaml";
         }
       );

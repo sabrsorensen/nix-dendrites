@@ -1,17 +1,19 @@
 { ... }:
-{
-  flake.modules.nixos.home-starship =
-    {
+let
+  homeModule = import ./_content.nix;
+  featureModule =
+    args@{
       config,
       lib,
+      pkgs,
       ...
     }:
-    let
-      host = config.my.host;
-      username = host.home.username;
-    in
-    lib.mkIf host.home.enable {
-      home-manager.users.${username}.programs.starship =
-        (import ./_content.nix { inherit lib; }).programs.starship;
+    {
+      options.my.features.starship = lib.mkEnableOption "starship";
+      config = lib.mkIf config.my.features.starship (homeModule args);
     };
+in
+{
+  dendritic.homeManagerModules = [ featureModule ];
+  flake.modules.homeManager.starship = featureModule;
 }

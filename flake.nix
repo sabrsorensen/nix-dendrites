@@ -42,8 +42,8 @@
       url = "github:hyrfilm/gitignore";
       flake = false;
     };
-    herdr = {
-      url = "github:herdrdev/herdr/v0.7.5";
+    herdr-nix = {
+      url = "github:herdrdev/herdr-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {

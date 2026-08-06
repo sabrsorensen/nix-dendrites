@@ -45,10 +45,6 @@ in
     ];
     openssh.authorizedKeys.keyFiles = [ "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/kamino.pub" ];
   };
-  services.displayManager.autoLogin = {
-    enable = true;
-    user = "sam";
-  };
   environment.systemPackages = [
     pkgs.czkawka
     reolinkCli

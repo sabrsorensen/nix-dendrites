@@ -1,4 +1,31 @@
 { inputs, ... }:
+let
+  homeModule = import ./_home-module.nix { inherit inputs; };
+  featureModule =
+    args@{
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    {
+      options.my.features.vscode = lib.mkEnableOption "VS Code";
+      imports = [ homeModule ];
+    };
+  wslVscodeModule =
+    args@{
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
+    {
+      options.my.features.wslVscode = lib.mkEnableOption "WSL VS Code synchronization";
+      config = lib.mkIf config.my.features.wslVscode (
+        import ./wsl-vscode/_content.nix (args // { inherit inputs pkgs; })
+      );
+    };
+in
 {
   flake-file.inputs = {
     nix4vscode = {
@@ -22,70 +49,11 @@
     };
   };
 
-  # Keep editor packages and Marketplace extension resolution as a normal,
-  # self-gating broadcast capability.  The WSL profile continues to manage the
-  # Windows-side editor separately.
-  flake.modules.nixos.vscode =
-    args@{
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-    let
-      host = config.my.host;
-      cfg = config.my.editor;
-      username = host.home.username;
-      package = import ./package/_content.nix {
-        inherit
-          config
-          cfg
-          host
-          inputs
-          lib
-          pkgs
-          username
-          ;
-      };
-      editorProgram = import ./_profiles-content.nix {
-        inherit
-          cfg
-          lib
-          pkgs
-          ;
-        inherit (host) vscodeTheme;
-        inherit (package)
-          baseThemePackage
-          themePackage
-          ;
-      };
-    in
-    {
-      options.my.editor = import ./_options-content.nix { inherit lib; };
+  dendritic.homeManagerModules = [
+    featureModule
+    wslVscodeModule
+  ];
+  flake.modules.homeManager.vscode = featureModule;
 
-      config = lib.mkIf (host.features.vscode && host.home.enable) (
-        import ./_content.nix (
-          args
-          // {
-            inherit
-              cfg
-              editorProgram
-              inputs
-              username
-              ;
-          }
-        )
-      );
-    };
-
-  flake.modules.nixos.wsl-vscode =
-    args@{
-      config,
-      lib,
-      pkgs,
-      ...
-    }:
-    lib.mkIf (config.my.host.platform == "wsl" && config.my.host.home.enable) (
-      import ./wsl-vscode/_content.nix (args // { inherit inputs; })
-    );
+  flake.modules.homeManager.wsl-vscode = wslVscodeModule;
 }

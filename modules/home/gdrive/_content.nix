@@ -1,8 +1,10 @@
 {
+  config,
+  lib,
   secretFile,
   tokenName,
+  ...
 }:
-{ config, lib, ... }:
 {
   # The personal hosts keep the age identity in Sam's SSH directory; without
   # this Home Manager key source sops-nix cannot start the rclone mount.

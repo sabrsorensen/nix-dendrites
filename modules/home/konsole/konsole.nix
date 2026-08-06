@@ -1,16 +1,19 @@
 { ... }:
-{
-  flake.modules.nixos.konsole =
-    {
+let
+  homeModule = import ./_content.nix;
+  featureModule =
+    args@{
       config,
       lib,
       pkgs,
       ...
     }:
-    let
-      username = config.my.host.home.username;
-    in
-    lib.mkIf (config.my.host.features.konsole && config.my.host.home.enable) {
-      home-manager.users.${username} = import ./_content.nix { inherit pkgs; };
+    {
+      options.my.features.konsole = lib.mkEnableOption "Konsole";
+      config = lib.mkIf config.my.features.konsole (homeModule args);
     };
+in
+{
+  dendritic.homeManagerModules = [ featureModule ];
+  flake.modules.homeManager.konsole = featureModule;
 }

@@ -1,16 +1,19 @@
 { ... }:
-{
-  flake.modules.nixos.office =
-    {
+let
+  homeModule = import ./_content.nix;
+  featureModule =
+    args@{
       config,
       lib,
       pkgs,
       ...
     }:
-    let
-      username = config.my.host.home.username;
-    in
-    lib.mkIf (config.my.host.features.office && config.my.host.home.enable) {
-      home-manager.users.${username} = import ./_content.nix { inherit lib pkgs; };
+    {
+      options.my.features.office = lib.mkEnableOption "Office applications";
+      config = lib.mkIf config.my.features.office (homeModule args);
     };
+in
+{
+  dendritic.homeManagerModules = [ featureModule ];
+  flake.modules.homeManager.office = featureModule;
 }

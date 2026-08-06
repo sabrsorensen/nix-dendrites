@@ -1,24 +1,21 @@
 {
-  enableCoreWhitespace ? true,
   inputs,
-  gitIdentityPath ? null,
   lib,
-  username,
   ...
 }:
 let
   gitValue =
-    path: builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${gitIdentityPath}/${path}");
+    path: builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile "${inputs.nix-secrets}/${path}");
 in
 {
-  home-manager.users.${username}.programs.git = {
+  programs.git = {
     enable = true;
     settings = {
-      user = lib.mkIf (gitIdentityPath != null) {
+      user = {
         name = gitValue "git/name.txt";
         email = gitValue "git/email.txt";
         signingKey = gitValue (
-          if builtins.pathExists "${gitIdentityPath}/gpg-keys/signing-key-hash-wsl.txt" then
+          if builtins.pathExists "${inputs.nix-secrets}/gpg-keys/signing-key-hash-wsl.txt" then
             "gpg-keys/signing-key-hash-wsl.txt"
           else
             "gpg-keys/signing-key-hash.txt"
@@ -55,8 +52,6 @@ in
         excludesFile = "$HOME/.gitignore_global";
         fsmonitor = true;
         untrackedCache = true;
-      }
-      // lib.optionalAttrs enableCoreWhitespace {
         whitespace = "trailing-space,space-before-tab";
       };
       diff = {

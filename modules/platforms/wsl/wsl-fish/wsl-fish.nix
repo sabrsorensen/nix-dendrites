@@ -1,15 +1,15 @@
 { ... }:
-{
-  flake.modules.nixos.wsl-fish =
+let
+  homeModule =
+    { config, lib, ... }:
     {
-      config,
-      lib,
-      ...
-    }:
-    let
-      username = config.my.host.home.username;
-    in
-    lib.mkIf (config.my.host.platform == "wsl" && config.my.host.home.enable) {
-      home-manager.users.${username}.programs.fish = import ./_content.nix { };
+      options.my.features.wslFish = lib.mkEnableOption "WSL Fish integration";
+      config = lib.mkIf config.my.features.wslFish {
+        programs.fish = import ./_content.nix { };
+      };
     };
+in
+{
+  dendritic.homeManagerModules = [ homeModule ];
+  flake.modules.homeManager.wsl-fish = homeModule;
 }

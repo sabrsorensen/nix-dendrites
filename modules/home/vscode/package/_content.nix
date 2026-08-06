@@ -1,15 +1,14 @@
 {
   config,
   cfg,
-  host,
   inputs,
   lib,
   pkgs,
-  username,
+  vscodeTheme,
   ...
 }:
 let
-  theme = host.vscodeTheme;
+  theme = vscodeTheme;
   baseThemePackage =
     {
       partyowl84 = {
@@ -75,16 +74,18 @@ let
           export ${secret.name}="$(cat ${lib.escapeShellArg secret.path})"
         fi
       '')
-      [
-        {
-          name = "GITHUB_NIXOS_MCP_TOKEN";
-          path = config.home-manager.users.${username}.sops.secrets.github_nixos_mcp_token.path;
-        }
-        {
-          name = "CONTEXT7_API_KEY";
-          path = config.home-manager.users.${username}.sops.secrets.context7_api_key.path;
-        }
-      ];
+      (
+        builtins.filter (secret: secret.path != null) [
+          {
+            name = "GITHUB_NIXOS_MCP_TOKEN";
+            path = lib.attrByPath [ "sops" "secrets" "github_nixos_mcp_token" "path" ] null config;
+          }
+          {
+            name = "CONTEXT7_API_KEY";
+            path = lib.attrByPath [ "sops" "secrets" "context7_api_key" "path" ] null config;
+          }
+        ]
+      );
   themePackage = pkgs.symlinkJoin {
     name = "${baseThemePackage.pname or baseThemePackage.name}-wrapped";
     paths = [ editorPackage ];

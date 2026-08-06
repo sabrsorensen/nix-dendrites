@@ -1,18 +1,49 @@
 { inputs, ... }:
-{
-  # Google Drive is a user service and therefore belongs in Home Manager, but
-  # the host fact remains the single broadcast activation boundary.
-  flake.modules.nixos.gdrive =
-    { config, lib, ... }:
+let
+  homeModule =
+    {
+      config,
+      lib,
+      ...
+    }:
     let
-      host = config.my.host;
-      username = host.home.username;
-      tokenName = "rclone/gdrive/${lib.strings.toLower host.name}_token";
-      secretFile = "${inputs.nix-secrets}/rclone/gdrive.yaml";
+      cfg = config.my.gdrive;
     in
-    lib.mkIf (host.features.gdrive && host.home.enable) {
-      home-manager.users.${username} = import ./_content.nix {
-        inherit secretFile tokenName;
+    {
+      options = {
+        my.features.gdrive = lib.mkEnableOption "Google Drive integration";
+        my.gdrive = {
+          secretFile = lib.mkOption {
+            type = lib.types.nullOr lib.types.path;
+            default = null;
+            description = "SOPS file containing the Google Drive token.";
+          };
+          tokenName = lib.mkOption {
+            type = lib.types.str;
+            default = "";
+            description = "SOPS key containing the Google Drive token.";
+          };
+        };
       };
+      config = lib.mkIf config.my.features.gdrive (
+        lib.mkMerge [
+          (import ./_content.nix {
+            inherit config lib;
+            inherit (cfg) secretFile tokenName;
+          })
+          {
+            assertions = [
+              {
+                assertion = cfg.secretFile != null && cfg.tokenName != "";
+                message = "Google Drive requires my.gdrive.secretFile and tokenName.";
+              }
+            ];
+          }
+        ]
+      );
     };
+in
+{
+  dendritic.homeManagerModules = [ homeModule ];
+  flake.modules.homeManager.gdrive = homeModule;
 }

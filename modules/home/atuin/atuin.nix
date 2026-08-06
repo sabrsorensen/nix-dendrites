@@ -1,20 +1,32 @@
 { inputs, ... }:
-{
-  flake.modules.nixos.home-atuin =
+let
+  homeModule =
     {
       config,
       lib,
       ...
     }:
-    let
-      host = config.my.host;
-      domain = builtins.replaceStrings [ "\n" ] [ "" ] (
-        builtins.readFile "${inputs.nix-secrets}/domain.txt"
-      );
-      username = host.home.username;
-    in
-    lib.mkIf (host.home.enable && host.features.atuin && host.platform != "wsl") {
-      home-manager.users.${username}.programs.atuin =
-        (import ./_content.nix { inherit domain; }).programs.atuin;
+    {
+      options = {
+        my.features.atuin = lib.mkEnableOption "Atuin shell history synchronization";
+        my.atuin.domain = lib.mkOption {
+          type = lib.types.str;
+          default = "";
+          description = "Atuin synchronization domain.";
+        };
+      };
+      config = lib.mkIf config.my.features.atuin {
+        assertions = [
+          {
+            assertion = config.my.atuin.domain != "";
+            message = "Atuin requires my.atuin.domain.";
+          }
+        ];
+        programs.atuin = (import ./_content.nix { domain = config.my.atuin.domain; }).programs.atuin;
+      };
     };
+in
+{
+  dendritic.homeManagerModules = [ homeModule ];
+  flake.modules.homeManager.atuin = homeModule;
 }

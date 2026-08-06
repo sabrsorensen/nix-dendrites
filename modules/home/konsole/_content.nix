@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, ... }:
 let
   nightOwl = pkgs.fetchFromGitHub {
     owner = "yijiem";

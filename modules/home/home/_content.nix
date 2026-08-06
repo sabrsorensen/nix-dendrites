@@ -1,4 +1,5 @@
 {
+  homeModules,
   inputs,
   ...
 }:
@@ -19,20 +20,114 @@
     }:
     let
       host = config.my.host;
+      deployment = config.my.deployment;
       username = host.home.username;
       homeDirectory = host.home.homeDirectory;
+      hasLocalFlake = deployment.localFlakePath != null;
+      canDeployRemotely = deployment.canDeployRemotely && hasLocalFlake;
+      domain = builtins.replaceStrings [ "\n" ] [ "" ] (
+        builtins.readFile "${inputs.nix-secrets}/domain.txt"
+      );
     in
     lib.mkIf host.home.enable {
       home-manager.sharedModules = [ inputs.sops-nix.homeManagerModules.sops ];
 
       home-manager.users.${username} = {
-        imports = [
-          inputs.nix-index-database.homeModules.nix-index
-        ]
-        ++ lib.optionals (host.platform == "wsl") [
-          "${inputs.nix-work-secrets}/modules/sam-secrets-private.nix"
-        ];
+        imports =
+          homeModules
+          ++ lib.optionals (host.platform == "wsl") [
+            "${inputs.nix-work-secrets}/modules/sam-secrets-private.nix"
+          ];
 
+        my.features = {
+          bash = true;
+          atuin = host.features.atuin;
+          beets = host.features.beets;
+          bitwarden = host.features.bitwarden;
+          demlo = host.features.demlo;
+          direnv = true;
+          firefox = host.features.firefox;
+          "github-cli" = true;
+          fish = true;
+          git = true;
+          gpg = true;
+          gdrive = host.features.gdrive;
+          herdr = host.platform == "wsl";
+          lazyvim = host.features.lazyvim;
+          mcpCommon = host.features.mcpCommon;
+          "nix-index" = true;
+          noson = host.features.noson;
+          office = host.features.office;
+          personalMcp = host.features.personalMcp;
+          persistence = host.features.persistenceHome;
+          sops = host.platform != "wsl";
+          starship = true;
+          steamdeck = host.platform == "steamdeck";
+          syncthing = builtins.elem host.name [
+            "Kamino"
+            "ZaphodBeeblebrox"
+            "EmeraldEcho"
+          ];
+          ssh = true;
+          tmux = true;
+          vim = true;
+          wslFish = host.platform == "wsl";
+          wslCodex = host.platform == "wsl";
+          wslWorkHome = host.platform == "wsl";
+          wslVscode = host.platform == "wsl";
+          vscode = host.features.vscode;
+        };
+        my.bash.isSteamDeck = host.platform == "steamdeck";
+        my.fish = {
+          isWsl = host.platform == "wsl";
+          deploy = {
+            enable = canDeployRemotely;
+            path = deployment.localFlakePath;
+            inherit domain;
+            inhibitSleep = deployment.sleepy;
+          };
+          localFlake = {
+            enable = hasLocalFlake;
+            path = deployment.localFlakePath;
+            configurationName = lib.toLower host.name;
+            inhibitSleep = deployment.sleepy;
+          };
+          local.enable = true;
+          podman.enable = host.features.podman;
+          rpi.enable = host.is.rpi;
+          steamdeck.enable = host.platform == "steamdeck";
+        };
+        my.atuin.domain = builtins.replaceStrings [ "\n" ] [ "" ] (
+          builtins.readFile "${inputs.nix-secrets}/domain.txt"
+        );
+        my.features.konsole = host.features.konsole;
+        my.gpg = {
+          isGui = host.features.gui;
+          isWsl = host.platform == "wsl";
+          secretRoot = inputs.nix-secrets;
+        };
+        my.gdrive = {
+          secretFile = "${inputs.nix-secrets}/rclone/gdrive.yaml";
+          tokenName = "rclone/gdrive/${lib.strings.toLower host.name}_token";
+        };
+        my.ssh = {
+          domain = builtins.replaceStrings [ "\n" ] [ "" ] (
+            builtins.readFile "${inputs.nix-secrets}/domain.txt"
+          );
+          hostName = host.name;
+          canDeployRemotely = config.my.deployment.canDeployRemotely;
+        };
+        my.sops = {
+          homeDirectory = homeDirectory;
+          isManagedPersonal = host.platform != "wsl";
+        };
+        my.syncthingClient = {
+          hostName = host.name;
+          devices = config.my.syncthing.devices;
+          folders = config.my.syncthing.folders;
+          tray.enable = host.name != "EmeraldEcho";
+          isSteamDeck = host.platform == "steamdeck";
+        };
         home = {
           username = lib.mkForce username;
           homeDirectory = lib.mkForce homeDirectory;
@@ -46,7 +141,6 @@
               lolcat
               mediainfo
               nerd-fonts.caskaydia-cove
-              comma
               (runCommandLocal "gitignore" { } ''
                 install -Dm755 ${inputs.gitignore}/gitignore "$out/bin/gitignore"
               '')
@@ -65,12 +159,6 @@
 
         programs = {
           home-manager.enable = true;
-          nix-index = {
-            enable = true;
-            enableBashIntegration = true;
-            enableFishIntegration = true;
-            enableZshIntegration = true;
-          };
           # Avoid generating per-user man-cache/manpath state on WSL.
           man.generateCaches = false;
           command-not-found.enable = false;

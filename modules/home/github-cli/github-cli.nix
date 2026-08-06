@@ -1,16 +1,19 @@
 { ... }:
-{
-  flake.modules.nixos.home-github-cli =
-    {
+let
+  homeModule = import ./_content.nix;
+  featureModule =
+    args@{
       config,
       lib,
+      pkgs,
       ...
     }:
-    let
-      host = config.my.host;
-      username = host.home.username;
-    in
-    lib.mkIf host.home.enable {
-      home-manager.users.${username}.programs.gh = import ./_content.nix;
+    {
+      options.my.features."github-cli" = lib.mkEnableOption "GitHub CLI";
+      config = lib.mkIf config.my.features."github-cli" homeModule;
     };
+in
+{
+  dendritic.homeManagerModules = [ featureModule ];
+  flake.modules.homeManager.github-cli = featureModule;
 }

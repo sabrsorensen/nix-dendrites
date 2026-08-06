@@ -1,7 +1,5 @@
 {
-  canDeployRemotely,
-  deployment,
-  host,
+  isWsl,
   lib,
   pkgs,
   ...
@@ -29,12 +27,7 @@
       };
     }
   ];
-  interactiveShellInit = lib.mkIf (host.platform != "wsl") ''
-    ${lib.optionalString canDeployRemotely ''
-      # Make the checkout path available to deployment helpers and
-      # interactive scripts.
-      set -gx DENDRITIC_FLAKE_PATH ${lib.escapeShellArg deployment.localFlakePath}
-    ''}
+  interactiveShellInit = lib.mkIf (!isWsl) ''
     if command -sq gpg
       set -gx GPG_TTY (tty)
     end

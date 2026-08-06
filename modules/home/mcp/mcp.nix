@@ -1,23 +1,33 @@
 { ... }:
-{
-  flake.modules.nixos.home-mcp =
+let
+  commonModule = import ./_content.nix;
+  personalModule = import ./_personal-content.nix;
+  workModule = import ./_work-content.nix;
+  homeModule =
     {
       config,
       lib,
       pkgs,
       ...
     }:
-    let
-      host = config.my.host;
-      username = host.home.username;
-    in
-    lib.mkIf host.home.enable {
-      home-manager.users.${username} = lib.mkMerge [
-        (lib.mkIf (host.features.mcpCommon || host.platform == "wsl") (
-          import ./_content.nix { inherit lib; }
-        ))
-        (lib.mkIf host.features.personalMcpServers (import ./_personal-content.nix { inherit pkgs; }))
-        (lib.mkIf (host.platform == "wsl") (import ./_work-content.nix { }))
+    {
+      options.my.features = {
+        mcpCommon = lib.mkEnableOption "common MCP clients";
+        personalMcp = lib.mkEnableOption "personal MCP clients";
+        workMcp = lib.mkEnableOption "work MCP clients";
+      };
+      config = lib.mkMerge [
+        (lib.mkIf config.my.features.mcpCommon (commonModule {
+          inherit lib;
+        }))
+        (lib.mkIf config.my.features.personalMcp (personalModule {
+          inherit pkgs;
+        }))
+        (lib.mkIf config.my.features.workMcp (workModule { }))
       ];
     };
+in
+{
+  dendritic.homeManagerModules = [ homeModule ];
+  flake.modules.homeManager.mcp = homeModule;
 }

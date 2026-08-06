@@ -1,14 +1,12 @@
 {
   canDeployRemotely,
-  config,
   domain,
+  host,
   includeHostBlocks ? true,
   lib,
-  username,
   ...
 }:
 let
-  host = config.my.host;
   sshHosts = {
     atlasuponraiden = {
       alias = "AtlasUponRaiden";
@@ -84,7 +82,7 @@ let
       );
 in
 {
-  home-manager.users.${username}.programs.ssh = {
+  programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
     settings = {

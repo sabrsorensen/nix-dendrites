@@ -1,15 +1,21 @@
 { ... }:
-{
-  flake.modules.nixos.home-direnv =
-    {
+let
+  homeModule = { ... }: {
+    programs.direnv = import ./_content.nix;
+  };
+  featureModule =
+    args@{
       config,
       lib,
+      pkgs,
       ...
     }:
-    let
-      host = config.my.host;
-    in
-    lib.mkIf (host.home.enable && config.my.deployment.localFlakePath != null) {
-      home-manager.users.${host.home.username}.programs.direnv = import ./_content.nix;
+    {
+      options.my.features.direnv = lib.mkEnableOption "Direnv";
+      config = lib.mkIf config.my.features.direnv (homeModule args);
     };
+in
+{
+  dendritic.homeManagerModules = [ featureModule ];
+  flake.modules.homeManager.direnv = featureModule;
 }

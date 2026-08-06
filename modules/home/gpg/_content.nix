@@ -1,9 +1,11 @@
 {
   inputs,
+  isGui,
   isWsl,
   lib,
   pkgs,
   secretRoot ? inputs.nix-secrets,
+  ...
 }:
 let
   gpgKeysDir = "${secretRoot}/gpg-keys";
@@ -12,6 +14,8 @@ let
   );
 in
 {
+  home.packages = lib.optional isGui pkgs.kdePackages.kleopatra;
+
   systemd.user.services.gpg-cleanup-stale-locks = {
     Unit = {
       Description = "Remove stale GPG keybox lock files";

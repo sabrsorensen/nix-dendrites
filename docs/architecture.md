@@ -41,6 +41,53 @@ That recreates the hidden selection graph this structure removes. Inputs whose
 option surfaces are unsafe to broadcast remain explicit output-boundary
 exceptions.
 
+## Home Manager features follow the same model
+
+Home Manager programs are broadcast through `flake.modules.homeManager` and
+must be composed once at the managed-user boundary. Do not create a
+`flake.modules.nixos.home-<program>` module whose only job is importing an
+equivalent Home Manager module for a user; that is a second, mislabeled module
+registry.
+
+Each public Home Manager feature appends its self-gating module to
+`dendritic.homeManagerModules`. `sam-home` receives that completed list from
+flake composition and imports it once. This is deliberately a list of module
+values, not an attrset read from `inputs.self` or `config.flake`: reading the
+flake output from the nested NixOS/Home Manager evaluation would create a
+fixpoint cycle.
+
+Instead, a Home Manager module owns its options and self-gates on a flat Home
+Manager feature boolean, while the NixOS Home Manager boundary sets the desired
+feature values from visible host facts. A standalone Home Manager configuration
+sets the same values directly. Conceptually:
+
+```nix
+# Home Manager module
+options.my.features.vim = lib.mkEnableOption "Vim";
+config = lib.mkIf config.my.features.vim {
+  programs.vim.enable = true;
+};
+
+# NixOS-managed user's Home Manager configuration
+my.features.vim = config.my.host.features.vim;
+```
+
+The NixOS layer therefore establishes a user, imports the Home Manager
+broadcast set once, and declares feature state; it does not enumerate or import
+individual programs. Every broadcast Home Manager module must be safe when its
+feature is false. Home Manager-only programs such as Firefox, VS Code, shells,
+editors, and CLI tools publish only a `homeManager` module. A module publishes
+both NixOS and Home Manager variants only when it has distinct system and user
+configuration (for example, a system service plus user integration, or NixOS
+cache policy plus a user package).
+
+One public feature may activate several related broadcast modules. Fish is the
+example: `my.features.fish` selects the shell as a whole, while the separately
+maintained Fish capability modules gate on narrow values such as
+`my.fish.deploy.enable` and `my.fish.podman.enable`. Use this shape when the
+pieces are useful implementation units but are not independent user-facing
+features.
+
 Copyable examples of the public broadcast/private-content split live in
 [`templates/broadcast-content/`](templates/broadcast-content/README.md).
 

@@ -1,20 +1,36 @@
 { inputs, ... }:
-{
-  # Herdr's Nix flake exposes its release build as the default package.
-  # Keep the input next to the Home Manager module that consumes it.
-  flake-file.inputs.herdr = {
-    url = "github:herdrdev/herdr/v0.7.5";
-    inputs.nixpkgs.follows = "nixpkgs";
-  };
-
-  flake.modules.nixos.home-herdr =
+let
+  homeModule = { pkgs, ... }@args: import ./_home-content.nix (args // { inherit inputs; });
+  featureModule =
     args@{
       config,
       lib,
       pkgs,
       ...
     }:
-    lib.mkIf (config.my.host.platform == "wsl" && config.my.host.home.enable) (
-      import ./_content.nix (args // { inherit inputs; })
-    );
+    {
+      options.my.features.herdr = lib.mkEnableOption "Herdr";
+      config = lib.mkIf config.my.features.herdr (homeModule args);
+    };
+  nixosModule = import ./_nixos-content.nix;
+in
+{
+  flake-file.inputs.herdr-nix = {
+    url = "github:herdrdev/herdr-nix";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  dendritic.homeManagerModules = [ featureModule ];
+  flake.modules.homeManager.herdr = featureModule;
+
+  flake.modules.nixos.home-herdr =
+    args@{
+      config,
+      lib,
+      ...
+    }:
+    let
+      host = config.my.host;
+    in
+    lib.mkIf (host.platform == "wsl" && host.home.enable) (nixosModule args);
 }

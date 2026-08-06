@@ -1,21 +1,31 @@
 { ... }:
-{
-  flake.modules.nixos.bitwarden =
+let
+  homeModule = import ./_home-content.nix;
+  featureModule =
     args@{
       config,
       lib,
       pkgs,
       ...
     }:
+    {
+      options.my.features.bitwarden = lib.mkEnableOption "Bitwarden";
+      config = lib.mkIf config.my.features.bitwarden (homeModule args);
+    };
+  nixosModule = import ./_nixos-content.nix;
+in
+{
+  dendritic.homeManagerModules = [ featureModule ];
+  flake.modules.homeManager.bitwarden = featureModule;
+
+  flake.modules.nixos.bitwarden =
+    args@{
+      config,
+      lib,
+      ...
+    }:
     let
-      username = config.my.host.home.username;
+      host = config.my.host;
     in
-    lib.mkIf config.my.host.features.bitwarden (
-      lib.mkMerge [
-        (import ./_nixos-content.nix args)
-        (lib.mkIf config.my.host.home.enable {
-          home-manager.users.${username} = import ./_home-content.nix args;
-        })
-      ]
-    );
+    lib.mkIf host.features.bitwarden (nixosModule args);
 }

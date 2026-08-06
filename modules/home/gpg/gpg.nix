@@ -1,21 +1,34 @@
 { inputs, ... }:
-{
-  flake.modules.nixos.home-gpg =
+let
+  homeModule =
     {
       config,
       lib,
       pkgs,
       ...
     }:
-    let
-      host = config.my.host;
-      username = host.home.username;
-    in
-    lib.mkIf host.home.enable {
-      home-manager.users.${username} = import ./_content.nix {
-        inherit inputs lib pkgs;
-        isWsl = host.platform == "wsl";
-        secretRoot = if host.platform == "wsl" then inputs.nix-work-secrets else inputs.nix-secrets;
+    {
+      options = {
+        my.features.gpg = lib.mkEnableOption "GPG configuration";
+        my.gpg = {
+          isGui = lib.mkEnableOption "KDE GPG tools";
+          isWsl = lib.mkEnableOption "WSL-specific GPG behavior";
+          secretRoot = lib.mkOption {
+            type = lib.types.path;
+            default = inputs.nix-secrets;
+            description = "Directory containing managed GPG key material.";
+          };
+        };
       };
+      config = lib.mkIf config.my.features.gpg (
+        import ./_content.nix {
+          inherit inputs lib pkgs;
+          inherit (config.my.gpg) isGui isWsl secretRoot;
+        }
+      );
     };
+in
+{
+  dendritic.homeManagerModules = [ homeModule ];
+  flake.modules.homeManager.gpg = homeModule;
 }

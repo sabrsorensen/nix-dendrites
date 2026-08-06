@@ -10,7 +10,13 @@ in
 {
   flake.homeConfigurations.emeraldecho-steamos = inputs.home-manager.lib.homeManagerConfiguration {
     pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
-    modules = [ payload.steamosLibraryModule ];
+    extraSpecialArgs = { inherit inputs; };
+    modules = [
+      { nixpkgs.config.allowUnfree = true; }
+      { my.features.firefox = true; }
+      payload.steamosLibraryModule
+      inputs.self.modules.homeManager.firefox
+    ];
   };
   flake.nixosConfigurations.emeraldecho = inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";

@@ -28,8 +28,9 @@
 
       warnings = lib.optional config.my.host.features.determinateNix ''
         Determinate Nix currently follows the temporary nix-src SSH fix in
-        https://github.com/DeterminateSystems/nix-src/pull/569. Check that PR's
-        merge status before returning determinate.inputs.nix to upstream main.
+        https://github.com/DeterminateSystems/nix-src/pull/569. The fix merged,
+        but Determinate's Nix pin still predates it; remove this override after
+        a Determinate update includes that merge.
       '';
     };
 }

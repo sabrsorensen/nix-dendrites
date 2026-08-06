@@ -2,14 +2,13 @@
   config,
   lib,
   pkgs,
-  username,
   ...
 }:
 let
-  homePackages = config.home-manager.users.${username}.home.packages or [ ];
+  homePackages = config.home.packages;
 in
 {
-  home-manager.users.${username}.home.persistence."/persistent" = {
+  home.persistence."/persistent" = {
     directories = [
       ".config/fish"
       ".config/mozilla/firefox"

@@ -1,6 +1,6 @@
 { inputs }:
-{
-  flake.modules.nixos.wsl-codex =
+let
+  homeModule =
     {
       config,
       lib,
@@ -9,8 +9,8 @@
     }:
     let
       codexPackage = inputs.codex-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
-      username = config.my.host.home.username;
-      homeDirectory = config.my.host.home.homeDirectory;
+      username = config.home.username;
+      homeDirectory = config.home.homeDirectory;
       secretExports =
         lib.concatMapStringsSep "\n"
           (spec: ''
@@ -21,37 +21,34 @@
           [
             {
               env = "GITHUB_NIXOS_MCP_TOKEN";
-              path = config.home-manager.users.${username}.sops.secrets.github_nixos_mcp_token.path;
+              path = config.sops.secrets.github_nixos_mcp_token.path;
             }
             {
               env = "HIGISH_GITHUB_NIXOS_MCP_TOKEN";
-              path = config.home-manager.users.${username}.sops.secrets.higish_github_nixos_mcp_token.path;
+              path = config.sops.secrets.higish_github_nixos_mcp_token.path;
             }
             {
               env = "PULUMI_NIXOS_MCP_TOKEN";
-              path = config.home-manager.users.${username}.sops.secrets.pulumi_nixos_mcp_token.path;
+              path = config.sops.secrets.pulumi_nixos_mcp_token.path;
             }
             {
               env = "CONTEXT7_API_KEY";
-              path = config.home-manager.users.${username}.sops.secrets.context7_api_key.path;
+              path = config.sops.secrets.context7_api_key.path;
             }
             {
               env = "POSTMAN_API_KEY";
-              path = config.home-manager.users.${username}.sops.secrets.postman_nixos_mcp_token.path;
+              path = config.sops.secrets.postman_nixos_mcp_token.path;
             }
             {
               env = "PERSONAL_ACCESS_TOKEN";
-              path = config.home-manager.users.${username}.sops.secrets.azdo_nixos_mcp_token.path;
+              path = config.sops.secrets.azdo_nixos_mcp_token.path;
             }
             {
               env = "SNYK_TOKEN";
-              path = config.home-manager.users.${username}.sops.secrets.snyk_nixos_mcp_token.path;
+              path = config.sops.secrets.snyk_nixos_mcp_token.path;
             }
           ];
       wrappedCodex = pkgs.symlinkJoin {
-        # Home Manager selects config.toml for Codex >= 0.2.0 by inspecting
-        # the package version.  Preserve the wrapped CLI's version metadata
-        # instead of making it look like an unversioned legacy package.
         name = "codex-wrapped-${lib.getVersion codexPackage}";
         paths = [ codexPackage ];
         nativeBuildInputs = [ pkgs.makeWrapper ];
@@ -60,8 +57,9 @@
         '';
       };
     in
-    lib.mkIf (config.my.host.platform == "wsl" && config.my.host.home.enable) {
-      home-manager.users.${username} = {
+    {
+      options.my.features.wslCodex = lib.mkEnableOption "WSL work Codex profile";
+      config = lib.mkIf config.my.features.wslCodex {
         home.packages = [
           pkgs.bubblewrap
           (pkgs.python3.withPackages (ps: [ ps.pyyaml ]))
@@ -147,4 +145,8 @@
         };
       };
     };
+in
+{
+  dendritic.homeManagerModules = [ homeModule ];
+  flake.modules.homeManager.wsl-codex = homeModule;
 }

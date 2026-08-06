@@ -1,17 +1,19 @@
 { inputs, ... }:
-{
-  flake.modules.nixos.home-steamdeck =
+let
+  homeModule = { pkgs, ... }@args: import ./_content.nix (args // { inherit inputs pkgs; });
+  featureModule =
     args@{
       config,
       lib,
       pkgs,
       ...
     }:
-    let
-      host = config.my.host;
-      username = host.home.username;
-    in
-    lib.mkIf (host.home.enable && host.platform == "steamdeck") (
-      import ./_content.nix (args // { inherit inputs username; })
-    );
+    {
+      options.my.features.steamdeck = lib.mkEnableOption "steamdeck";
+      config = lib.mkIf config.my.features.steamdeck (homeModule args);
+    };
+in
+{
+  dendritic.homeManagerModules = [ featureModule ];
+  flake.modules.homeManager.steamdeck = featureModule;
 }

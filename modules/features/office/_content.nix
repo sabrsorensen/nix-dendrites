@@ -1,4 +1,4 @@
-{ lib, pkgs }:
+{ lib, pkgs, ... }:
 lib.mkMerge [
   {
     # settings for all systems

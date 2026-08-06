@@ -1,16 +1,19 @@
 { ... }:
-{
-  flake.modules.nixos.home-tmux =
-    {
+let
+  homeModule = import ./_content.nix;
+  featureModule =
+    args@{
       config,
       lib,
+      pkgs,
       ...
     }:
-    let
-      host = config.my.host;
-      username = host.home.username;
-    in
-    lib.mkIf host.home.enable {
-      home-manager.users.${username}.programs.tmux = (import ./_content.nix).programs.tmux;
+    {
+      options.my.features.tmux = lib.mkEnableOption "Tmux";
+      config = lib.mkIf config.my.features.tmux homeModule;
     };
+in
+{
+  dendritic.homeManagerModules = [ featureModule ];
+  flake.modules.homeManager.tmux = featureModule;
 }

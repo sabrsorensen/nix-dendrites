@@ -2,7 +2,6 @@
   inputs,
   lib,
   pkgs,
-  username,
   ...
 }:
 let
@@ -70,52 +69,50 @@ let
   '';
 in
 {
-  home-manager.users.${username} = {
-    xdg = {
-      enable = true;
-      desktopEntries.return-to-gaming = returnToGamingEntry;
-    };
+  xdg = {
+    enable = true;
+    desktopEntries.return-to-gaming = returnToGamingEntry;
+  };
 
-    home.file = {
-      ".config/reshade/Shaders/.keep".text = "";
-      ".config/reshade/Textures/.keep".text = "";
-      ".local/share/gamescope/reshade/Shaders/.keep".text = "";
-      ".local/share/gamescope/reshade/Textures/.keep".text = "";
-      ".local/share/breezy_vulkan/.keep".text = "";
-      "Desktop/return-to-gaming.desktop".text = ''
-        [Desktop Entry]
-        Name=${returnToGamingEntry.name}
-        Exec=${returnToGamingEntry.exec}
-        Icon=${returnToGamingEntry.icon}
-        Terminal=${if returnToGamingEntry.terminal then "true" else "false"}
-        Type=Application
-        Categories=${builtins.concatStringsSep ";" returnToGamingEntry.categories};
-        Comment=${returnToGamingEntry.comment}
-      '';
-    };
+  home.file = {
+    ".config/reshade/Shaders/.keep".text = "";
+    ".config/reshade/Textures/.keep".text = "";
+    ".local/share/gamescope/reshade/Shaders/.keep".text = "";
+    ".local/share/gamescope/reshade/Textures/.keep".text = "";
+    ".local/share/breezy_vulkan/.keep".text = "";
+    "Desktop/return-to-gaming.desktop".text = ''
+      [Desktop Entry]
+      Name=${returnToGamingEntry.name}
+      Exec=${returnToGamingEntry.exec}
+      Icon=${returnToGamingEntry.icon}
+      Terminal=${if returnToGamingEntry.terminal then "true" else "false"}
+      Type=Application
+      Categories=${builtins.concatStringsSep ";" returnToGamingEntry.categories};
+      Comment=${returnToGamingEntry.comment}
+    '';
+  };
 
-    systemd.user.services.xr-driver = {
-      Unit = {
-        Description = "XR user-space driver";
-        After = [ "default.target" ];
-        ConditionPathExists = "%h/.local/bin/xrDriver";
-      };
-      Service = {
-        Type = "simple";
-        Environment = [ "LD_LIBRARY_PATH=%h/.local/share/xr_driver/lib:${xrDriverRuntimeLibs}" ];
-        ExecStart = "%h/.local/bin/xrDriver";
-        Restart = "always";
-      };
-      Install.WantedBy = [ "default.target" ];
+  systemd.user.services.xr-driver = {
+    Unit = {
+      Description = "XR user-space driver";
+      After = [ "default.target" ];
+      ConditionPathExists = "%h/.local/bin/xrDriver";
     };
+    Service = {
+      Type = "simple";
+      Environment = [ "LD_LIBRARY_PATH=%h/.local/share/xr_driver/lib:${xrDriverRuntimeLibs}" ];
+      ExecStart = "%h/.local/bin/xrDriver";
+      Restart = "always";
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
 
-    home.activation = {
-      xrDriverCleanup = inputs.home-manager.lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
-        rm -f "$HOME/.config/systemd/user/default.target.wants/xr-driver.service"
-      '';
-      seedSteamConfig = inputs.home-manager.lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        $DRY_RUN_CMD ${steamConfigPython}/bin/python3 ${steamConfigSeedScript}
-      '';
-    };
+  home.activation = {
+    xrDriverCleanup = inputs.home-manager.lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+      rm -f "$HOME/.config/systemd/user/default.target.wants/xr-driver.service"
+    '';
+    seedSteamConfig = inputs.home-manager.lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      $DRY_RUN_CMD ${steamConfigPython}/bin/python3 ${steamConfigSeedScript}
+    '';
   };
 }

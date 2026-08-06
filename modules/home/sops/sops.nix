@@ -1,29 +1,43 @@
 { inputs, ... }:
-{
-  flake.modules.nixos.home-sops =
+let
+  homeModule =
     args@{
       config,
       lib,
       pkgs,
       ...
     }:
-    let
-      host = config.my.host;
-      username = host.home.username;
-      homeDirectory = host.home.homeDirectory;
-      isManagedPersonal = host.home.enable && host.platform != "wsl";
-    in
-    lib.mkIf (host.home.enable && host.platform != "wsl") (
-      import ./_content.nix (
-        args
-        // {
-          inherit
-            homeDirectory
-            inputs
-            isManagedPersonal
-            username
-            ;
-        }
-      )
-    );
+    {
+      options = {
+        my.features.sops = lib.mkEnableOption "SOPS-managed Home Manager secrets";
+        my.sops = {
+          homeDirectory = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Home directory used to locate managed personal SOPS configuration.";
+          };
+          isManagedPersonal = lib.mkEnableOption "managed personal SOPS configuration";
+        };
+      };
+      config = lib.mkIf config.my.features.sops (
+        lib.mkMerge [
+          (import ./_content.nix {
+            inherit inputs lib pkgs;
+            inherit (config.my.sops) homeDirectory isManagedPersonal;
+          })
+          {
+            assertions = [
+              {
+                assertion = config.my.sops.homeDirectory != null;
+                message = "Home Manager SOPS requires my.sops.homeDirectory.";
+              }
+            ];
+          }
+        ]
+      );
+    };
+in
+{
+  dendritic.homeManagerModules = [ homeModule ];
+  flake.modules.homeManager.sops = homeModule;
 }

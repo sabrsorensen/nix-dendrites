@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, ... }:
 {
   # The personal Arr MCP is launched through npx.
   home.packages = [ pkgs.nodejs ];
