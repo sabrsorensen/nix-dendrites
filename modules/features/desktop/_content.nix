@@ -14,10 +14,10 @@
     geoclue2.enable = true;
     xserver.xkb = {
       # Keep US QWERTY as the login default, with Dvorak available before
-      # authentication through Ctrl+Shift in SDDM and the Plasma session.
+      # authentication through Super+Space in SDDM and the Plasma session.
       layout = "us,us";
       variant = ",dvorak";
-      options = "grp:ctrl_shift_toggle";
+      options = "grp:win_space_toggle";
     };
   };
   security.pam.services.sddm.kwallet.enable = true;
