@@ -13,10 +13,14 @@ let
         my.fish.isWsl = lib.mkEnableOption "WSL Fish behavior";
       };
       config = lib.mkIf config.my.features.fish {
-        programs.fish = import ./_base-content.nix {
-          inherit lib pkgs;
-          inherit (config.my.fish) isWsl;
-        };
+        programs.fish =
+          (import ./_base-content.nix {
+            inherit lib pkgs;
+            inherit (config.my.fish) isWsl;
+          })
+          // {
+            functions = import ./_functions/_base-content.nix { };
+          };
       };
     };
 in

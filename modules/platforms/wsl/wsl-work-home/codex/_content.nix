@@ -77,6 +77,12 @@ let
               "gpt-5.4" = "gpt-5.5";
             };
             personality = "pragmatic";
+            skills.config = [
+              {
+                path = "${homeDirectory}/.codex/skills/herdr/SKILL.md";
+                enabled = true;
+              }
+            ];
             projects = {
               "${homeDirectory}/src/".trust_level = "trusted";
               "${homeDirectory}/src/nix-dendrites".trust_level = "trusted";
