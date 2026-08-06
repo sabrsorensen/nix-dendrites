@@ -26,11 +26,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785294467,
-        "narHash": "sha256-mylUWHK2wIw8S07K5hbkrLELnflJkDwsSWz2YFbJzLI=",
+        "lastModified": 1785947843,
+        "narHash": "sha256-1XqKozqcRt2r20n0Ce81+qvo3mGsL1RPCPWuWSyj7tI=",
         "owner": "sadjow",
         "repo": "codex-cli-nix",
-        "rev": "e4e3b0672bbb8fba7f32fe53cd9c604990970374",
+        "rev": "6d7078f8e0c410007311b1ce09f0355c93ff8fb5",
         "type": "github"
       },
       "original": {
@@ -567,11 +567,11 @@
     "nix-work-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1781204666,
-        "narHash": "sha256-NQxle6KGRiiglXhWC1hlQJxMPLNwA8O7HP8L2sCQK9w=",
+        "lastModified": 1786048184,
+        "narHash": "sha256-S6Y43YY36e02vSo2cWhRW51pNVm50uFRPCxSvfCNREw=",
         "ref": "refs/heads/main",
-        "rev": "66b9fa8854af85cedc16552619c59d671185d49f",
-        "revCount": 32,
+        "rev": "de700c77de48d73607ae3d513dc8492563d1ef6a",
+        "revCount": 33,
         "type": "git",
         "url": "https://github.com/sabrsorensen/nix-work-secrets.git"
       },

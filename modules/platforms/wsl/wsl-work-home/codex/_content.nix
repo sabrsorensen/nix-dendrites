@@ -88,10 +88,6 @@ let
               "${homeDirectory}/src/nix-dendrites".trust_level = "trusted";
               "${homeDirectory}/src/nix-dendrites-rewrite".trust_level = "trusted";
               "${homeDirectory}/src/nix-dendrites-broadcast".trust_level = "trusted";
-              "${homeDirectory}/higi/".trust_level = "trusted";
-              "${homeDirectory}/higi/airflow_docker".trust_level = "trusted";
-              "${homeDirectory}/higi/care-everyday-llp".trust_level = "trusted";
-              "/mnt/c/Users/${username}/src/higi".trust_level = "trusted";
             };
             mcp_servers = {
               AZDOLocal = {
@@ -145,6 +141,11 @@ let
                 ];
                 env_vars = [ "SNYK_TOKEN" ];
                 startup_timeout_sec = 300;
+              };
+            };
+            hooks.state = {
+              "${homeDirectory}/.codex/hooks.json:session_start:0:0" = {
+                trusted_hash = "sha256:219a76f1453ea3d5eaa859c97679f86f7faf3d8669db007cb16e071381f1d573";
               };
             };
           };

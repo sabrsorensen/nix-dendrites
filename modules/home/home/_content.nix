@@ -37,6 +37,7 @@
           homeModules
           ++ lib.optionals (host.platform == "wsl") [
             "${inputs.nix-work-secrets}/modules/sam-secrets-private.nix"
+            "${inputs.nix-work-secrets}/modules/codex-projects-private.nix"
           ];
 
         my.features = {

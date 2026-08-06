@@ -49,12 +49,14 @@
         radarr = true;
         sonarr = true;
         ntfy = true;
+        nextcloud = true;
         organizr = true;
         samba = true;
         scrutiny = true;
         syncthing = true;
       };
     };
+    my.nextcloud.dataDir = "/AnomalyRealm/nextcloud";
     users.users.sam = {
       extraGroups = [ "dialout" ];
       openssh.authorizedKeys.keyFiles = [

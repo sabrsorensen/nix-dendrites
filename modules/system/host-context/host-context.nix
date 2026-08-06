@@ -173,6 +173,7 @@
           radarr = lib.mkEnableOption "Radarr media service";
           sonarr = lib.mkEnableOption "Sonarr media service";
           ntfy = lib.mkEnableOption "ntfy notification service";
+          nextcloud = lib.mkEnableOption "Nextcloud with Collabora Online";
           ombi = lib.mkEnableOption "Ombi media-request service";
           organizr = lib.mkEnableOption "Organizr media dashboard";
           samba = lib.mkEnableOption "Samba shares";
