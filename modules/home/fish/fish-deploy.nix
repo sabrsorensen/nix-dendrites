@@ -9,9 +9,6 @@ let
     }:
     let
       cfg = config.my.fish.deploy;
-      deployment = {
-        localFlakePath = cfg.path;
-      };
     in
     {
       options = {
@@ -38,11 +35,22 @@ let
             message = "Fish deployment helpers require my.fish.deploy.path and domain.";
           }
         ];
-        programs.fish.functions = import ./_functions/_deployment.nix {
-          inherit deployment;
-          domain = cfg.domain;
-          inhibitSleep = cfg.inhibitSleep;
-          systemdInhibit = lib.getExe' pkgs.systemd "systemd-inhibit";
+        home.packages = [
+          (pkgs.writeShellApplication {
+            name = "nix-deploy";
+            runtimeInputs = [ pkgs.python3 ];
+            text = ''
+              exec ${pkgs.python3}/bin/python3 ${./scripts/nix-deploy.py} \
+                --flake ${lib.escapeShellArg (toString cfg.path)} \
+                --domain ${lib.escapeShellArg cfg.domain} \
+                ${lib.optionalString cfg.inhibitSleep "--inhibit-sleep"} "$@"
+            '';
+          })
+        ];
+        programs.fish.functions = {
+          nhsr = "nix-deploy switch $argv";
+          nhsur = "nix-deploy upgrade $argv";
+          nhsur_unsafe = "nix-deploy unsafe $argv";
         };
       };
     };
