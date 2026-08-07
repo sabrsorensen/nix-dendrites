@@ -5,7 +5,7 @@
   ...
 }:
 {
-  nhs = ''
+  nhSwitch = ''
     if test (count $argv) -ge 1; and contains -- $argv[1] -j --max-jobs
       if ${if inhibitSleep then "true" else "false"}
         inhibitSleep nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going -- $argv
@@ -18,9 +18,9 @@
       nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going $argv
     end
   '';
-  nhSwitch = "nhs $argv";
+  nhs = "nhSwitch $argv";
   updateFirefoxCustomAddons = "update-firefox-addons ${deployment.localFlakePath}";
-  nhsu = ''
+  nhSwitchUpgrade = ''
     pushd ${deployment.localFlakePath}
     or return $status
     if ${if inhibitSleep then "true" else "false"}
@@ -58,5 +58,5 @@
     or return $update_status
     nhs $argv
   '';
-  nhSwitchUpgrade = "nhsu $argv";
+  nhsu = "nhSwitchUpgrade $argv";
 }

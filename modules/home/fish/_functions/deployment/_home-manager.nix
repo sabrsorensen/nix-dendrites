@@ -4,8 +4,21 @@
   ...
 }:
 {
-  homeManagerSwitchRemote = ''
-    set target_spec $argv[1]
+  remoteHomeOutput = ''
+    switch (string lower $argv[1])
+      case emeraldecho
+        echo emeraldecho-steamos
+    end
+  '';
+  remoteHomeUser = ''
+    switch (string lower $argv[1])
+      case atlasuponraiden emeraldecho kamino naboo nevarro zaphodbeeblebrox
+        echo sam
+    end
+  '';
+  __deployHomeManager = ''
+    set mode $argv[1]
+    set target_spec $argv[2]
     set target_host $target_spec
     if test -z "$target_spec"
       echo "Usage: <command> <target_host|user@target_host> [build_args...]"
@@ -35,25 +48,20 @@
       set remote_target "$remote_user@$target_host"
     end
     set remote_store_url "ssh://$remote_target?remote-program=/home/$remote_user/.nix-profile/bin/nix-store"
-    set remote_method (remoteDeployMethod $target_host)
-    set ping_host (__deploymentPingHost $target_host)
+    set -l update_args
+    if test "$mode" = upgrade
+      set update_args --update
+    end
     echo "🔨 Building $home_output locally..."
-    inhibitSleep nix build ${deployment.localFlakePath}#$home_output $argv[2..-1]
+    inhibitSleep nh home build ${deployment.localFlakePath}#$home_output $update_args $argv[3..-1]
     or return $status
     set store_path (nix path-info ${deployment.localFlakePath}#$home_output)
     or return $status
-    if test "$remote_method" = "build-then-switch"
-      if command -sq notify-send
-        notify-send "Home Manager build complete" "Turn on $target_host. Activation will continue after it responds to ping."
-      end
-      echo "Build completed for $target_host."
-      echo "Turn on $target_host, then press Enter to start waiting for network reachability."
-      read
-      echo "Waiting for $target_host at $ping_host to respond to ping..."
-      while not ping -c 1 -W 1 $ping_host >/dev/null 2>&1
-        sleep 5
-      end
+    if command -sq notify-send
+      notify-send "Home Manager build complete" "Turn on $target_host. Activation will continue after it responds to ping."
     end
+    echo "Build completed for $target_host."
+    __deployWaitForTarget $target_host
     echo "📦 Copying $home_output to $remote_target..."
     inhibitSleep nix copy --to "$remote_store_url" ${deployment.localFlakePath}#$home_output
     or return $status
