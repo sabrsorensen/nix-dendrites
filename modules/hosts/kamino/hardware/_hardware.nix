@@ -10,6 +10,7 @@
 }:
 {
   boot = {
+    kernelParams = [ "video=1920x1080@60" ];
     extraModulePackages = [ ];
     loader = {
       efi.canTouchEfiVariables = true;

@@ -48,6 +48,7 @@ in
   networking.networkmanager.enable = true;
 
   boot = {
+    kernelParams = [ "video=1920x1080@60" ];
     initrd = {
       availableKernelModules = [
         "xhci_pci"

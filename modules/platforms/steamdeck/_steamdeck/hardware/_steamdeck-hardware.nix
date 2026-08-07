@@ -5,6 +5,7 @@
 }:
 {
   boot = {
+    kernelParams = [ "video=1280x800@60" ];
     initrd.availableKernelModules = [
       "nvme"
       "sd_mod"
