@@ -11,7 +11,7 @@ in
   flake.modules.nixos.hardware-kamino =
     args@{ config, lib, ... }:
     lib.mkIf (config.my.host.name == "Kamino") (
-      import ./_content.nix (
+      import ./_hardware.nix (
         args
         // {
           inherit

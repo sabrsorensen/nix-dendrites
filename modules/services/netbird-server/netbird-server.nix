@@ -18,7 +18,7 @@ in
       netbirdDomain = "netbird.${domain}";
     in
     lib.mkIf config.my.host.services.netbirdServer (
-      import ./_content.nix (
+      import ./_netbird-server.nix (
         args
         // {
           inherit

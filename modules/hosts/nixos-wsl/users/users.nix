@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    lib.mkIf (config.my.host.name == "NixOS-WSL") (import ./_content.nix args);
+    lib.mkIf (config.my.host.name == "NixOS-WSL") (import ./_users.nix args);
 }

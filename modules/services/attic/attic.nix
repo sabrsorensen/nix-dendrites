@@ -55,7 +55,7 @@
       };
 
       config = lib.mkIf config.my.host.services.attic (
-        import ./_content.nix (
+        import ./_attic.nix (
           args
           // {
             inherit

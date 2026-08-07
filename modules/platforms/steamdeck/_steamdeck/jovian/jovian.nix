@@ -9,7 +9,7 @@ let
     }:
     {
       imports = [ inputs.jovian-nixos.nixosModules.default ];
-      config = lib.mkIf (config.my.host.platform == "steamdeck") (import ./_content.nix args);
+      config = lib.mkIf (config.my.host.platform == "steamdeck") (import ./_steamdeck-jovian.nix args);
     };
 in
 module

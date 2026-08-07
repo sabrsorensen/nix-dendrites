@@ -13,7 +13,7 @@
       };
 
       config = lib.mkIf config.my.host.services.prowlarr (
-        import ./_content.nix (args // { inherit cfg; })
+        import ./_prowlarr.nix (args // { inherit cfg; })
       );
     };
 }

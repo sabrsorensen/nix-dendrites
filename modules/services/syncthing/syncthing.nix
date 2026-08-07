@@ -38,7 +38,7 @@ let
   };
 in
 {
-  dendritic.homeManagerModules = [ (import ./_home-content.nix { inherit inputs; }) ];
+  dendritic.homeManagerModules = [ (import ./_syncthing-home.nix { inherit inputs; }) ];
 
   flake.modules.nixos.syncthing =
     args@{
@@ -103,7 +103,7 @@ in
           default = defaultFolders;
         };
       };
-      config = import ./_content.nix (
+      config = import ./_syncthing-nixos.nix (
         args
         // {
           inherit cfg filteredFolders homeClient;

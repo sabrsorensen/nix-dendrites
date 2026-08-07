@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.features.zsa (import ./_content.nix { inherit pkgs; });
+    lib.mkIf config.my.host.features.zsa (import ./_zsa.nix { inherit pkgs; });
 }

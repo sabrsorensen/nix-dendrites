@@ -21,7 +21,7 @@ let
         };
       };
       config = lib.mkIf config.my.features.gpg (
-        import ./_content.nix {
+        import ./_gpg.nix {
           inherit inputs lib pkgs;
           inherit (config.my.gpg) isGui isWsl secretRoot;
         }

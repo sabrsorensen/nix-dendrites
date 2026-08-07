@@ -12,5 +12,5 @@
       pkgs,
       ...
     }:
-    import ./_content.nix (args // { inherit inputs; });
+    import ./_cli-tools.nix (args // { inherit inputs; });
 }

@@ -5,5 +5,5 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  imports = lib.optional (inputs ? disko) ./_content.nix;
+  imports = lib.optional (inputs ? disko) ./_disko.nix;
 }

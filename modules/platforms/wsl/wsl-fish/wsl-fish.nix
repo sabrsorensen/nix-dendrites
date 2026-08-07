@@ -5,7 +5,7 @@ let
     {
       options.my.features.wslFish = lib.mkEnableOption "WSL Fish integration";
       config = lib.mkIf config.my.features.wslFish {
-        programs.fish = import ./_content.nix { };
+        programs.fish = import ./_wsl-fish-module.nix { };
       };
     };
 in

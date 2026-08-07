@@ -11,6 +11,6 @@ in
       ...
     }:
     lib.mkIf (config.my.host.name == "AtlasUponRaiden") (
-      import ./_content.nix (args // { inherit domain; })
+      import ./_hardware.nix (args // { inherit domain; })
     );
 }

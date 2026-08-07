@@ -26,7 +26,7 @@
       };
 
       config = lib.mkIf config.my.host.services.airsonic (
-        import ./_content.nix (
+        import ./_airsonic.nix (
           args
           // {
             inherit

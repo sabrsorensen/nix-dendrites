@@ -7,5 +7,5 @@ in
 {
   flake-file.inputs.nixos-hardware.url = "github:NixOS/nixos-hardware";
   flake.modules.nixos.base =
-    args@{ config, lib, ... }: import ./_content.nix (args // { inherit domain; });
+    args@{ config, lib, ... }: import ./_base.nix (args // { inherit domain; });
 }

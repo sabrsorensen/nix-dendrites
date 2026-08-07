@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.features.plymouth (import ./_content.nix args);
+    lib.mkIf config.my.host.features.plymouth (import ./_plymouth.nix args);
 }

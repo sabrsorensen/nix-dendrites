@@ -1,6 +1,6 @@
 { ... }:
 let
-  homeModule = import ./_home-content.nix;
+  homeModule = import ./_noson-home.nix;
   featureModule =
     args@{
       config,
@@ -12,7 +12,7 @@ let
       options.my.features.noson = lib.mkEnableOption "Noson";
       config = lib.mkIf config.my.features.noson (homeModule args);
     };
-  nixosModule = import ./_content.nix;
+  nixosModule = import ./_noson-nixos.nix;
 in
 {
   dendritic.homeManagerModules = [ featureModule ];

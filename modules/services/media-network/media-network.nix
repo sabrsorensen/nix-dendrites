@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    import ./_content.nix args;
+    import ./_media-network.nix args;
 }

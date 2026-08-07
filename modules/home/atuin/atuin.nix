@@ -22,7 +22,7 @@ let
             message = "Atuin requires my.atuin.domain.";
           }
         ];
-        programs.atuin = (import ./_content.nix { domain = config.my.atuin.domain; }).programs.atuin;
+        programs.atuin = (import ./_atuin.nix { domain = config.my.atuin.domain; }).programs.atuin;
       };
     };
 in

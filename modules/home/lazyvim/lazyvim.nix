@@ -6,5 +6,5 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  imports = lib.optional (inputs ? lazyvim) ./_content.nix;
+  imports = lib.optional (inputs ? lazyvim) ./_lazyvim.nix;
 }

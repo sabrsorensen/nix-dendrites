@@ -27,7 +27,7 @@ in
       };
 
       config = lib.mkIf config.my.host.services.plex (
-        import ./_content.nix (
+        import ./_plex.nix (
           args
           // {
             inherit

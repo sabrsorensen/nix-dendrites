@@ -10,7 +10,7 @@
       enabled = config.my.host.home.enable && config.my.host.platform != "wsl";
     in
     lib.mkIf enabled (
-      import ./_content.nix (
+      import ./_sam.nix (
         args
         // {
           inherit inputs;

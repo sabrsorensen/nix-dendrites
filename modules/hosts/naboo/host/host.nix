@@ -2,7 +2,7 @@
 let
   network = builtins.fromJSON (builtins.readFile "${inputs.nix-secrets}/network.json");
   rpiHardware = inputs.nixos-hardware.nixosModules.raspberry-pi-4;
-  payload = import ./_content.nix { inherit inputs network; };
+  payload = import ./_host.nix { inherit inputs network; };
 in
 {
   flake.nixosConfigurations.naboo = inputs.nixpkgs.lib.nixosSystem {

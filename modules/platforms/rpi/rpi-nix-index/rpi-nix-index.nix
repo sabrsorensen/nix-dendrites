@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.is.rpi (import ./_content.nix args);
+    lib.mkIf config.my.host.is.rpi (import ./_rpi-nix-index.nix args);
 }

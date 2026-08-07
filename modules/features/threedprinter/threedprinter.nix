@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.features.threedprinter (import ./_content.nix { inherit pkgs; });
+    lib.mkIf config.my.host.features.threedprinter (import ./_threedprinter.nix { inherit pkgs; });
 }

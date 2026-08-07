@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.services.minecraft (import ./_content.nix args);
+    lib.mkIf config.my.host.services.minecraft (import ./_minecraft.nix args);
 }

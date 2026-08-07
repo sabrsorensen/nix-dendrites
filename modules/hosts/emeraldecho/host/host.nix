@@ -5,7 +5,7 @@
   ...
 }:
 let
-  payload = import ./_content.nix { inherit inputs lib; };
+  payload = import ./_host.nix { inherit inputs lib; };
 in
 {
   flake.homeConfigurations.emeraldecho-steamos = inputs.home-manager.lib.homeManagerConfiguration {

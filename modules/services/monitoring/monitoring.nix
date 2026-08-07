@@ -14,7 +14,7 @@ in
     }:
     let
       cfg = config.my.monitoring;
-      dashboards = import ./_dashboards-content.nix { inherit pkgs; };
+      dashboards = import ./_monitoring-dashboards.nix { inherit pkgs; };
     in
     {
       options.my.monitoring = {
@@ -53,7 +53,7 @@ in
         };
       };
       config = lib.mkIf config.my.host.services.monitoring (
-        import ./_content.nix (
+        import ./_monitoring.nix (
           args
           // {
             inherit

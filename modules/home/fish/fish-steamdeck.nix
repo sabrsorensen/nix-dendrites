@@ -10,7 +10,7 @@ let
     {
       options.my.fish.steamdeck.enable = lib.mkEnableOption "Fish Steam Deck helpers";
       config = lib.mkIf (config.my.features.fish && config.my.fish.steamdeck.enable) {
-        programs.fish.functions = import ./_functions/_steamdeck-content.nix { };
+        programs.fish.functions = import ./_functions/_steamdeck.nix { };
       };
     };
 in

@@ -101,6 +101,6 @@
         ''
       );
     }
-    // import ./_cloudflare-actions-content.nix { inherit pkgs; }
+    // import ./_caddy-cloudflare-actions.nix { inherit pkgs; }
   );
 }

@@ -14,12 +14,12 @@ let
       };
       config = lib.mkIf config.my.features.fish {
         programs.fish =
-          (import ./_base-content.nix {
+          (import ./_fish-base.nix {
             inherit lib pkgs;
             inherit (config.my.fish) isWsl;
           })
           // {
-            functions = import ./_functions/_base-content.nix { };
+            functions = import ./_functions/_base.nix { };
           };
       };
     };

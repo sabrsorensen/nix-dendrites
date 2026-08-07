@@ -30,7 +30,7 @@ let
         install -m644 "$src" "$dst/${addonId}.xpi"
       '';
     };
-  customAddons = pkgs.callPackage ./firefox-addons/_content.nix {
+  customAddons = pkgs.callPackage ./firefox-addons/_firefox-addons.nix {
     inherit buildMozillaXpiAddon;
   };
   nurPkgs = pkgs.extend inputs.nur.overlays.default;
@@ -60,7 +60,7 @@ let
       whatcampaign
     ]);
 in
-(import ./_content.nix { inherit inputs; }) {
+(import ./_firefox.nix { inherit inputs; }) {
   inherit addons lib profileName;
   cssRoot = "${config.xdg.configHome}/mozilla/firefox/${profileName}";
   nixIcon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";

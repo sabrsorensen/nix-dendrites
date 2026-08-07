@@ -17,6 +17,6 @@
         description = "Path below the apex domain used for Bazarr.";
       };
 
-      config = lib.mkIf config.my.host.services.bazarr (import ./_content.nix (args // { inherit cfg; }));
+      config = lib.mkIf config.my.host.services.bazarr (import ./_bazarr.nix (args // { inherit cfg; }));
     };
 }

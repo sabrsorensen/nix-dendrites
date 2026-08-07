@@ -21,7 +21,7 @@
       };
 
       config = lib.mkIf config.my.host.services.organizr (
-        import ./_content.nix (
+        import ./_organizr.nix (
           args
           // {
             inherit

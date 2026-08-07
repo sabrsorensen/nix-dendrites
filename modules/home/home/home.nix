@@ -1,7 +1,7 @@
 { config, inputs, ... }:
 {
   imports = [
-    (import ./_content.nix {
+    (import ./_home.nix {
       inherit inputs;
       homeModules = config.dendritic.homeManagerModules;
     })

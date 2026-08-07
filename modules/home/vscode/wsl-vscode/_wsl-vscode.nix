@@ -8,12 +8,12 @@ let
   vscodePkgs = pkgs.extend inputs.nix4vscode.overlays.forVscode;
   vscodePackage =
     inputs.partyowl84-vscode-theme.packages.${pkgs.stdenv.hostPlatform.system}.vscode-partyowl84;
-  extensions = import ../_extensions-content.nix {
+  extensions = import ../_vscode-extensions.nix {
     baseThemePackage = vscodePackage;
     cfg.packageFlavor = "vscode";
     pkgs = vscodePkgs;
   };
-  settings = import ../_settings-content.nix { vscodeTheme = "partyowl84"; };
+  settings = import ../_vscode-settings.nix { vscodeTheme = "partyowl84"; };
   managedPaths = [
     "settings.json"
     "keybindings.json"

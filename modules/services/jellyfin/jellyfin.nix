@@ -15,7 +15,7 @@
       };
 
       config = lib.mkIf config.my.host.services.jellyfin (
-        import ./_content.nix (args // { inherit cfg groupName localAddr; })
+        import ./_jellyfin.nix (args // { inherit cfg groupName localAddr; })
       );
     };
 }

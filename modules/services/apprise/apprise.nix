@@ -26,7 +26,7 @@
       };
 
       config = lib.mkIf config.my.host.services.apprise (
-        import ./_content.nix (
+        import ./_apprise.nix (
           args
           // {
             inherit

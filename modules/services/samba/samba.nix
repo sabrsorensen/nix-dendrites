@@ -11,6 +11,6 @@
         default = { };
         description = "Additional Samba settings merged on top of the shared defaults.";
       };
-      config = lib.mkIf config.my.host.services.samba (import ./_content.nix (args // { inherit cfg; }));
+      config = lib.mkIf config.my.host.services.samba (import ./_samba.nix (args // { inherit cfg; }));
     };
 }

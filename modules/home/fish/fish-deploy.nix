@@ -39,8 +39,8 @@ let
           }
         ];
         programs.fish.functions =
-          (import ./_functions/_local-content.nix { })
-          // (import ./_functions/_remote-deployment-content.nix {
+          (import ./_functions/_local.nix { })
+          // (import ./_functions/_remote-deployment.nix {
             inherit deployment;
             domain = cfg.domain;
             inhibitSleep = cfg.inhibitSleep;

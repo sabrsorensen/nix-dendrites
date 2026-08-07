@@ -33,7 +33,7 @@ in
       };
 
       config = lib.mkIf config.my.host.services.profilarr (
-        import ./_content.nix (
+        import ./_profilarr.nix (
           args
           // {
             inherit

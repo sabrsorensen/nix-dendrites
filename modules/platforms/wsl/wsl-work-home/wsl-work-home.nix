@@ -9,7 +9,7 @@ let
     }:
     {
       options.my.features.wslWorkHome = lib.mkEnableOption "WSL work Home Manager profile";
-      config = lib.mkIf config.my.features.wslWorkHome (import ./_home-content.nix args);
+      config = lib.mkIf config.my.features.wslWorkHome (import ./_wsl-work-home.nix args);
     };
 in
 {

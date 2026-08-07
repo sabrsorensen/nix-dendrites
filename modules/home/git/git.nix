@@ -12,7 +12,7 @@ let
       };
 
       config = lib.mkIf config.my.features.git (
-        import ./_content.nix {
+        import ./_git.nix {
           inherit inputs lib;
         }
       );

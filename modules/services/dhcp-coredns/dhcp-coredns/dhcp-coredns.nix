@@ -115,7 +115,7 @@ in
       };
 
       config = lib.mkIf enabled (
-        import ./_content.nix (
+        import ./_dhcp-coredns.nix (
           args
           // {
             inherit

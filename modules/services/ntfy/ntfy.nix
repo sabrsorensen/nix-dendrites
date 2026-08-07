@@ -25,7 +25,7 @@ in
       };
 
       config = lib.mkIf config.my.host.services.ntfy (
-        import ./_content.nix (args // { inherit cfg domain; })
+        import ./_ntfy.nix (args // { inherit cfg domain; })
       );
     };
 }

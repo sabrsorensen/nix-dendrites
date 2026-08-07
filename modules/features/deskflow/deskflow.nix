@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.features.deskflow (import ./_content.nix { inherit lib pkgs; });
+    lib.mkIf config.my.host.features.deskflow (import ./_deskflow.nix { inherit lib pkgs; });
 }

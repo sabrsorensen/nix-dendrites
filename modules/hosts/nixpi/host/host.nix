@@ -1,7 +1,7 @@
 { config, inputs, ... }:
 let
   rpiHardware = inputs.nixos-hardware.nixosModules.raspberry-pi-4;
-  payload = import ./_content.nix { inherit inputs; };
+  payload = import ./_host.nix { inherit inputs; };
 in
 {
   flake.nixosConfigurations.nixpi = inputs.nixpkgs.lib.nixosSystem {

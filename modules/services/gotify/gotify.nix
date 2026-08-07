@@ -21,7 +21,7 @@
       };
 
       config = lib.mkIf config.my.host.services.gotify (
-        import ./_content.nix (args // { inherit cfg pathSegment; })
+        import ./_gotify.nix (args // { inherit cfg pathSegment; })
       );
     };
 }

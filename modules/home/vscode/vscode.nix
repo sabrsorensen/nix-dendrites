@@ -22,7 +22,7 @@ let
     {
       options.my.features.wslVscode = lib.mkEnableOption "WSL VS Code synchronization";
       config = lib.mkIf config.my.features.wslVscode (
-        import ./wsl-vscode/_content.nix (args // { inherit inputs pkgs; })
+        import ./wsl-vscode/_wsl-vscode.nix (args // { inherit inputs pkgs; })
       );
     };
 in

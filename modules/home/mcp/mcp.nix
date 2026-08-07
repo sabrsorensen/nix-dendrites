@@ -1,8 +1,8 @@
 { ... }:
 let
-  commonModule = import ./_content.nix;
-  personalModule = import ./_personal-content.nix;
-  workModule = import ./_work-content.nix;
+  commonModule = import ./_mcp.nix;
+  personalModule = import ./_mcp-personal.nix;
+  workModule = import ./_mcp-work.nix;
   homeModule =
     {
       config,

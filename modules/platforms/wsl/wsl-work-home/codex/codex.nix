@@ -6,5 +6,5 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  imports = [ (import ./_content.nix { inherit inputs; }) ];
+  imports = [ (import ./_codex.nix { inherit inputs; }) ];
 }

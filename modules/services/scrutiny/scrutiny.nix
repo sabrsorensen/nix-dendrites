@@ -16,7 +16,7 @@
         default = "scrutiny";
       };
       config = lib.mkIf config.my.host.services.scrutiny (
-        import ./_content.nix (args // { inherit cfg; })
+        import ./_scrutiny.nix (args // { inherit cfg; })
       );
     };
 }

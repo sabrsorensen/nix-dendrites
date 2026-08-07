@@ -21,7 +21,7 @@ let
       };
       config = lib.mkIf config.my.features.sops (
         lib.mkMerge [
-          (import ./_content.nix {
+          (import ./_sops.nix {
             inherit inputs lib pkgs;
             inherit (config.my.sops) homeDirectory isManagedPersonal;
           })

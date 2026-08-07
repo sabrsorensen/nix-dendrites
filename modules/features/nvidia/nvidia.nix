@@ -1,5 +1,5 @@
 { ... }:
 {
   flake.modules.nixos.nvidia =
-    args@{ config, lib, ... }: lib.mkIf config.my.host.features.nvidia (import ./_content.nix args);
+    args@{ config, lib, ... }: lib.mkIf config.my.host.features.nvidia (import ./_nvidia.nix args);
 }

@@ -1,4 +1,4 @@
 { ... }:
 {
-  imports = [ ./_content.nix ];
+  imports = [ ./_beets-module.nix ];
 }

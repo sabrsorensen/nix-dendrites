@@ -1,6 +1,6 @@
 { ... }:
 let
-  homeModule = import ./_content.nix;
+  homeModule = import ./_starship.nix;
   featureModule =
     args@{
       config,

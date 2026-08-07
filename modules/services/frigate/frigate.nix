@@ -27,7 +27,7 @@ in
       };
 
       config = lib.mkIf config.my.host.services.frigate (
-        import ./_content.nix (args // { inherit cfg nginxPort publicHost; })
+        import ./_frigate.nix (args // { inherit cfg nginxPort publicHost; })
       );
     };
 }

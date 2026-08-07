@@ -1,7 +1,7 @@
 { ... }:
 let
   homeModule = { ... }: {
-    programs.direnv = import ./_content.nix;
+    programs.direnv = import ./_direnv.nix;
   };
   featureModule =
     args@{

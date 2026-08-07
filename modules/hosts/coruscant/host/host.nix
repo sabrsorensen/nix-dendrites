@@ -8,7 +8,7 @@ in
     system = "aarch64-linux";
     modules = builtins.attrValues config.flake.modules.nixos ++ [
       rpiHardware
-      (import ./_content.nix { inherit network; })
+      (import ./_host.nix { inherit network; })
     ];
   };
 }

@@ -1,6 +1,6 @@
 { inputs, ... }:
 let
-  homeModule = { pkgs, ... }@args: import ./_home-content.nix (args // { inherit inputs; });
+  homeModule = { pkgs, ... }@args: import ./_herdr-home.nix (args // { inherit inputs; });
   featureModule =
     args@{
       config,
@@ -12,7 +12,7 @@ let
       options.my.features.herdr = lib.mkEnableOption "Herdr";
       config = lib.mkIf config.my.features.herdr (homeModule args);
     };
-  nixosModule = import ./_nixos-content.nix;
+  nixosModule = import ./_herdr-nixos.nix;
 in
 {
   flake-file.inputs.herdr-nix = {

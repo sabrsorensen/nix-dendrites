@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.features.desktop (import ./_content.nix args);
+    lib.mkIf config.my.host.features.desktop (import ./_desktop.nix args);
 }

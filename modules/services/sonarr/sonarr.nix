@@ -17,6 +17,6 @@
         description = "Path below the apex domain used for Sonarr.";
       };
 
-      config = lib.mkIf config.my.host.services.sonarr (import ./_content.nix (args // { inherit cfg; }));
+      config = lib.mkIf config.my.host.services.sonarr (import ./_sonarr.nix (args // { inherit cfg; }));
     };
 }

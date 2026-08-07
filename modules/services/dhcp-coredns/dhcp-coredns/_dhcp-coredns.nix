@@ -45,10 +45,10 @@ let
   };
 in
 lib.mkMerge [
-  (import ./_state-content.nix contentArgs)
-  (import ./_prepare-content.nix contentArgs)
-  (import ./_kea-content.nix contentArgs)
-  (import ./_coredns-content.nix contentArgs)
-  (import ./_sync-content.nix contentArgs)
-  (import ./_firewall-content.nix contentArgs)
+  (import ./_dhcp-coredns-state.nix contentArgs)
+  (import ./_dhcp-coredns-prepare.nix contentArgs)
+  (import ./_dhcp-coredns-kea.nix contentArgs)
+  (import ./_dhcp-coredns-coredns.nix contentArgs)
+  (import ./_dhcp-coredns-sync.nix contentArgs)
+  (import ./_dhcp-coredns-firewall.nix contentArgs)
 ]

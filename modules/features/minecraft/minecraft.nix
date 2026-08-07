@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.features.minecraft (import ./_content.nix { inherit pkgs; });
+    lib.mkIf config.my.host.features.minecraft (import ./_minecraft.nix { inherit pkgs; });
 }

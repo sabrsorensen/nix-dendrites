@@ -1,14 +1,14 @@
 { inputs, lib, ... }:
 let
   hostPkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
-  steamosLibraryModule = import ./_steamos-library-content.nix;
-  hostModule = import ./_host-content.nix {
+  steamosLibraryModule = import ./_host-steamos-library.nix;
+  hostModule = import ./_host-facts.nix {
     inherit hostPkgs inputs;
   };
   dualBootModule = lib.recursiveUpdate hostModule {
     my.host.tags = [ "steamdeck-dualboot" ];
   };
-  dualBootBootstrapModule = import ./_bootstrap-content.nix {
+  dualBootBootstrapModule = import ./_host-bootstrap.nix {
     inherit lib;
     baseModule = dualBootModule;
     finalConfigName = "emeraldecho-dualboot";
@@ -20,7 +20,7 @@ let
   singleBootModule = lib.recursiveUpdate hostModule {
     my.host.tags = [ "steamdeck-singleboot" ];
   };
-  singleBootBootstrapModule = import ./_bootstrap-content.nix {
+  singleBootBootstrapModule = import ./_host-bootstrap.nix {
     inherit lib;
     baseModule = singleBootModule;
     finalConfigName = "emeraldecho-singleboot";
@@ -29,7 +29,7 @@ let
       "bootstrap"
     ];
   };
-  installer = import ./_installer-content.nix {
+  installer = import ./_host-installer.nix {
     inherit inputs lib;
   };
   dualBootInstallerModule = installer.mkInstallerModule {

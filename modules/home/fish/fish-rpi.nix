@@ -10,7 +10,7 @@ let
     {
       options.my.fish.rpi.enable = lib.mkEnableOption "Fish Raspberry Pi helpers";
       config = lib.mkIf (config.my.features.fish && config.my.fish.rpi.enable) {
-        programs.fish.functions = import ./_functions/_rpi-content.nix { };
+        programs.fish.functions = import ./_functions/_rpi.nix { };
       };
     };
 in

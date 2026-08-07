@@ -17,6 +17,6 @@
         description = "Path below the apex domain used for Radarr.";
       };
 
-      config = lib.mkIf config.my.host.services.radarr (import ./_content.nix (args // { inherit cfg; }));
+      config = lib.mkIf config.my.host.services.radarr (import ./_radarr.nix (args // { inherit cfg; }));
     };
 }

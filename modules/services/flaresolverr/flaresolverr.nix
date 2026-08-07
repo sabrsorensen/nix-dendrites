@@ -30,7 +30,7 @@
       };
 
       config = lib.mkIf config.my.host.services.flaresolverr (
-        import ./_content.nix (args // { inherit cfg; })
+        import ./_flaresolverr.nix (args // { inherit cfg; })
       );
     };
 }

@@ -39,7 +39,7 @@ in
       };
 
       config = lib.mkIf (config.my.host.services.dhcpCoredns && cfg.enable) (
-        import ./_content.nix (args // { inherit cfg domain; })
+        import ./_dhcp-failover.nix (args // { inherit cfg domain; })
       );
     };
 }

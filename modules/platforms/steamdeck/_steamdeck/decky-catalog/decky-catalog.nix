@@ -9,7 +9,7 @@ let
     }:
     {
       config = lib.mkIf (config.my.host.platform == "steamdeck" && config.my.host.features.deckyCatalog) (
-        import ./_content.nix args
+        import ./_steamdeck-decky-catalog.nix args
       );
     };
 in

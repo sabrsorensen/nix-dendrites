@@ -1,6 +1,6 @@
 { inputs, ... }:
 let
-  homeModule = import ./_home-content.nix;
+  homeModule = import ./_demlo.nix;
   featureModule =
     args@{
       config,

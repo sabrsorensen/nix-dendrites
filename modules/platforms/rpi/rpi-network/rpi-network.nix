@@ -6,6 +6,6 @@ in
   flake.modules.nixos.rpi-network =
     args@{ config, lib, ... }:
     lib.mkIf (config.my.host.is.rpi && config.my.host.address != null) (
-      import ./_content.nix (args // { inherit network; })
+      import ./_rpi-network.nix (args // { inherit network; })
     );
 }

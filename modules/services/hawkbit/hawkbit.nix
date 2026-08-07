@@ -31,7 +31,7 @@ in
       };
 
       config = lib.mkIf config.my.host.services.hawkbit (
-        import ./_content.nix (
+        import ./_hawkbit.nix (
           args
           // {
             inherit

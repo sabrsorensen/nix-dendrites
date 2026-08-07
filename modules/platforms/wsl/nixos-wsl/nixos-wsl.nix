@@ -12,6 +12,6 @@
     { config, lib, ... }:
     {
       imports = [ inputs.nixos-wsl.nixosModules.default ];
-      config = lib.mkIf (config.my.host.platform == "wsl") (import ./_content.nix);
+      config = lib.mkIf (config.my.host.platform == "wsl") (import ./_nixos-wsl.nix);
     };
 }

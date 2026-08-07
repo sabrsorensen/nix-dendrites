@@ -13,6 +13,6 @@ in
       ...
     }:
     lib.mkIf (config.my.host.name == "ZaphodBeeblebrox") (
-      import ./_content.nix (args // { inherit rootLuksUuid; })
+      import ./_hardware.nix (args // { inherit rootLuksUuid; })
     );
 }

@@ -40,7 +40,7 @@ let
           }
         ];
         programs.ssh =
-          (import ./_content.nix {
+          (import ./_ssh.nix {
             inherit lib;
             canDeployRemotely = cfg.canDeployRemotely;
             domain = cfg.domain;

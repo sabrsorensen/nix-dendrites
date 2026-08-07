@@ -25,7 +25,7 @@
       };
 
       config = lib.mkIf config.my.host.services.atuinServer (
-        import ./_content.nix (args // { inherit cfg; })
+        import ./_atuin.nix (args // { inherit cfg; })
       );
     };
 }

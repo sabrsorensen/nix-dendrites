@@ -6,6 +6,6 @@ let
       lib,
       ...
     }:
-    lib.mkIf (config.my.host.platform == "steamdeck") (import ./_content.nix args);
+    lib.mkIf (config.my.host.platform == "steamdeck") (import ./_steamdeck-hardware.nix args);
 in
 module

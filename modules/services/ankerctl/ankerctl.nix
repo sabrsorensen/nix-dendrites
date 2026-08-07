@@ -11,7 +11,7 @@
       localAddr = "127.0.0.1:${lib.toString port}";
     in
     lib.mkIf config.my.host.services.ankerctl (
-      import ./_content.nix (
+      import ./_ankerctl.nix (
         args
         // {
           inherit

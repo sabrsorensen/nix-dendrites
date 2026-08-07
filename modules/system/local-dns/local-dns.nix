@@ -12,5 +12,5 @@ let
   ];
 in
 {
-  flake.lib = import ./_content.nix { inherit inputs network publisherOutputs; };
+  flake.lib = import ./_local-dns.nix { inherit inputs network publisherOutputs; };
 }

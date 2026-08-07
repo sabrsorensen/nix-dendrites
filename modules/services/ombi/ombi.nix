@@ -16,7 +16,7 @@
       };
 
       config = lib.mkIf config.my.host.services.ombi (
-        import ./_content.nix (args // { inherit cfg localAddr port; })
+        import ./_ombi.nix (args // { inherit cfg localAddr port; })
       );
     };
 }

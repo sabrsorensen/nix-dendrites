@@ -1,6 +1,6 @@
 { ... }:
 let
-  homeModule = import ./_content.nix;
+  homeModule = import ./_tmux.nix;
   featureModule =
     args@{
       config,

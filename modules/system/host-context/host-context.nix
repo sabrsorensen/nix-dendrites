@@ -299,6 +299,6 @@
         };
       };
 
-      config = import ./_content.nix args;
+      config = import ./_host-context.nix args;
     };
 }

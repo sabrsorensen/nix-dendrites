@@ -21,7 +21,7 @@
       };
 
       config = lib.mkIf config.my.host.services.deluge (
-        import ./_content.nix (
+        import ./_deluge.nix (
           args
           // {
             inherit

@@ -8,5 +8,5 @@
       || config.my.host.is.rpi
       || config.my.deployment.canDeployRemotely
       || config.my.deployment.enableRemoteUser
-    ) (import ./_content.nix args);
+    ) (import ./_ssh.nix args);
 }

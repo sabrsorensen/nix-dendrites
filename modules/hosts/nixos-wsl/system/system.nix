@@ -18,7 +18,7 @@
       secretsFile = "${inputs.nix-work-secrets}/secrets/wsl.yaml";
     in
     lib.mkIf (config.my.host.name == "NixOS-WSL") (
-      import ./_content.nix (
+      import ./_system.nix (
         args
         // {
           inherit

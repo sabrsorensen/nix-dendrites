@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.features.wine (import ./_content.nix args);
+    lib.mkIf config.my.host.features.wine (import ./_wine.nix args);
 }

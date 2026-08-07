@@ -35,7 +35,7 @@ let
             message = "Local Fish flake helpers require my.fish.localFlake.path and configurationName.";
           }
         ];
-        programs.fish.functions = import ./_functions/_local-checkout-content.nix {
+        programs.fish.functions = import ./_functions/_local-checkout.nix {
           configurationName = cfg.configurationName;
           deployment.localFlakePath = cfg.path;
           inhibitSleep = cfg.inhibitSleep;

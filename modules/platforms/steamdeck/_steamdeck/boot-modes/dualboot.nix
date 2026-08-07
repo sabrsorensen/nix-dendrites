@@ -8,6 +8,6 @@ let
     }:
     lib.mkIf (
       config.my.host.platform == "steamdeck" && builtins.elem "steamdeck-dualboot" config.my.host.tags
-    ) (import ./_dualboot-content.nix args);
+    ) (import ./_steamdeck-boot-modes-dualboot.nix args);
 in
 module

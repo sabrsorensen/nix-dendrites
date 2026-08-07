@@ -1,6 +1,6 @@
 { inputs, ... }:
 let
-  homeModule = { pkgs, ... }@args: import ./_content.nix (args // { inherit inputs pkgs; });
+  homeModule = { pkgs, ... }@args: import ./_steamdeck.nix (args // { inherit inputs pkgs; });
   featureModule =
     args@{
       config,

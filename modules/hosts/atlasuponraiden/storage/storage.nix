@@ -7,5 +7,5 @@
       pkgs,
       ...
     }:
-    lib.mkIf (config.my.host.name == "AtlasUponRaiden") (import ./_content.nix args);
+    lib.mkIf (config.my.host.name == "AtlasUponRaiden") (import ./_storage.nix args);
 }

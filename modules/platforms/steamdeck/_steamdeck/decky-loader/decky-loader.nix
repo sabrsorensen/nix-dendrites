@@ -10,7 +10,7 @@ let
       ...
     }:
     lib.mkIf (config.my.host.platform == "steamdeck" && config.my.host.features.deckyLoader) (
-      import ./_content.nix args
+      import ./_steamdeck-decky-loader.nix args
     );
 in
 module

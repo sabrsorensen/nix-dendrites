@@ -14,7 +14,7 @@
       };
 
       config = lib.mkIf config.my.host.services.gonic (
-        import ./_content.nix (args // { inherit cfg mediaCfg; })
+        import ./_gonic.nix (args // { inherit cfg mediaCfg; })
       );
     };
 }

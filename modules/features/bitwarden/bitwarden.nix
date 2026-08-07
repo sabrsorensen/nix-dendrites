@@ -1,6 +1,6 @@
 { ... }:
 let
-  homeModule = import ./_home-content.nix;
+  homeModule = import ./_bitwarden-home.nix;
   featureModule =
     args@{
       config,
@@ -12,7 +12,7 @@ let
       options.my.features.bitwarden = lib.mkEnableOption "Bitwarden";
       config = lib.mkIf config.my.features.bitwarden (homeModule args);
     };
-  nixosModule = import ./_nixos-content.nix;
+  nixosModule = import ./_bitwarden-nixos.nix;
 in
 {
   dendritic.homeManagerModules = [ featureModule ];

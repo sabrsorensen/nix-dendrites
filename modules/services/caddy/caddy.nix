@@ -49,7 +49,7 @@
       };
 
       config = lib.mkIf enabled (
-        import ./_content.nix (
+        import ./_caddy.nix (
           args
           // {
             inherit cfg renderRoutes virtualHosts;

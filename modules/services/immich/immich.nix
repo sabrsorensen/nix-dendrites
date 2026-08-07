@@ -27,7 +27,7 @@ in
         };
       };
       config = lib.mkIf config.my.host.services.immich (
-        import ./_content.nix (args // { inherit cfg domain; })
+        import ./_immich.nix (args // { inherit cfg domain; })
       );
     };
 }

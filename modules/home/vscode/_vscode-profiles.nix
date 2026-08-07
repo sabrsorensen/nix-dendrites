@@ -8,14 +8,14 @@
   ...
 }:
 let
-  extensions = import ./_extensions-content.nix {
+  extensions = import ./_vscode-extensions.nix {
     inherit
       baseThemePackage
       cfg
       pkgs
       ;
   };
-  settings = import ./_settings-content.nix { inherit vscodeTheme; };
+  settings = import ./_vscode-settings.nix { inherit vscodeTheme; };
 in
 {
   enable = true;

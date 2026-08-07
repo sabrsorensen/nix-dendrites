@@ -35,7 +35,7 @@ in
       };
 
       config = lib.mkIf config.my.host.services.nextcloud (
-        import ./_content.nix (
+        import ./_nextcloud.nix (
           args
           // {
             inherit

@@ -5,7 +5,7 @@
 }:
 let
   network = builtins.fromJSON (builtins.readFile "${inputs.nix-secrets}/network.json");
-  payload = import ./_content.nix { inherit inputs network; };
+  payload = import ./_host.nix { inherit inputs network; };
 in
 {
   flake.nixosConfigurations.atlasuponraiden = inputs.nixpkgs.lib.nixosSystem {

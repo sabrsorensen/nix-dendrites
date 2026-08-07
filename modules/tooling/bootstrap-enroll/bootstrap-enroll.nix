@@ -10,5 +10,5 @@
     let
       enabled = builtins.elem "bootstrap" config.my.host.tags;
     in
-    lib.mkIf enabled (import ./_content.nix args);
+    lib.mkIf enabled (import ./_bootstrap-enroll.nix args);
 }

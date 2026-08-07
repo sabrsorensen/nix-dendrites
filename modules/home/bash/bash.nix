@@ -7,7 +7,7 @@ let
       ...
     }:
     {
-      programs.bash = import ./_content.nix { inherit isSteamDeck nixProfile; };
+      programs.bash = import ./_bash.nix { inherit isSteamDeck nixProfile; };
     };
   featureModule =
     args@{

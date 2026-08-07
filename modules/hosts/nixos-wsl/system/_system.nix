@@ -38,8 +38,8 @@ let
   };
 in
 lib.mkMerge [
-  (import ./_wsl-content.nix contentArgs)
-  (import ./_certificates-content.nix contentArgs)
-  (import ./_nix-content.nix contentArgs)
-  (import ./_sops-content.nix contentArgs)
+  (import ./_system-wsl.nix contentArgs)
+  (import ./_system-certificates.nix contentArgs)
+  (import ./_system-nix.nix contentArgs)
+  (import ./_system-sops.nix contentArgs)
 ]

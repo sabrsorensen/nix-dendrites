@@ -1,4 +1,4 @@
 { ... }:
 {
-  perSystem = import ./_content.nix;
+  perSystem = import ./_devshell-flake.nix;
 }

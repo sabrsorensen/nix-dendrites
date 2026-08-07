@@ -1,4 +1,4 @@
 { ... }:
 {
-  flake.modules.nixos.locale = import ./_content.nix;
+  flake.modules.nixos.locale = import ./_locale.nix;
 }

@@ -27,7 +27,7 @@ let
       };
       config = lib.mkIf config.my.features.gdrive (
         lib.mkMerge [
-          (import ./_content.nix {
+          (import ./_gdrive.nix {
             inherit config lib;
             inherit (cfg) secretFile tokenName;
           })

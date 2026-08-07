@@ -53,7 +53,7 @@
       };
     in
     {
-      config = import ./_content.nix (
+      config = import ./_deployment.nix (
         args
         // {
           inherit

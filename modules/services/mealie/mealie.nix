@@ -26,7 +26,7 @@ in
         };
       };
       config = lib.mkIf config.my.host.services.mealie (
-        import ./_content.nix (args // { inherit cfg domain; })
+        import ./_mealie.nix (args // { inherit cfg domain; })
       );
     };
 }

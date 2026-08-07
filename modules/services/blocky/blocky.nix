@@ -40,7 +40,7 @@ in
       };
 
       config = lib.mkIf config.my.host.services.blocky (
-        import ./_content.nix (args // { inherit cfg networkConfig localDomain; })
+        import ./_blocky.nix (args // { inherit cfg networkConfig localDomain; })
       );
     };
 }

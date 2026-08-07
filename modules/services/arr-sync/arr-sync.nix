@@ -14,7 +14,7 @@
       };
 
       config = lib.mkIf config.my.host.services.arrSync (
-        import ./_content.nix (args // { inherit cfg inputs serviceName; })
+        import ./_arr-sync.nix (args // { inherit cfg inputs serviceName; })
       );
     };
 }
