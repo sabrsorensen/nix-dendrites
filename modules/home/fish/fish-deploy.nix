@@ -38,14 +38,12 @@ let
             message = "Fish deployment helpers require my.fish.deploy.path and domain.";
           }
         ];
-        programs.fish.functions =
-          (import ./_functions/_local.nix { })
-          // (import ./_functions/_remote-deployment.nix {
+        programs.fish.functions = import ./_functions/_remote-deployment.nix {
             inherit deployment;
             domain = cfg.domain;
             inhibitSleep = cfg.inhibitSleep;
             systemdInhibit = lib.getExe' pkgs.systemd "systemd-inhibit";
-          });
+          };
       };
     };
 in
