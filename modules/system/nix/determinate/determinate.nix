@@ -8,7 +8,7 @@
       url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
       inputs.nix.follows = "determinate-nix-src-ssh-fix";
     };
-    determinate-nix-src-ssh-fix.url = "github:DarthPJB/nix-src/fix/ssh-master-localcommand-protocol-leak";
+    determinate-nix-src-ssh-fix.url = "github:DeterminateSystems/nix-src/main";
   };
 
   imports = lib.optional (inputs ? determinate) ./_determinate.nix;

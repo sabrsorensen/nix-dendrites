@@ -93,16 +93,16 @@
         "nixpkgs-regression": "nixpkgs-regression"
       },
       "locked": {
-        "lastModified": 1785943348,
-        "narHash": "sha256-QXRKNiAA5CHLsZKufrhF2Um19p9Yb2H6wNNrxJNeOTc=",
-        "owner": "DarthPJB",
+        "lastModified": 1785946426,
+        "narHash": "sha256-ZRIbK4y6Wm69a71DCHoLLJgF6KbAfn5LbW2cVB1+7+U=",
+        "owner": "DeterminateSystems",
         "repo": "nix-src",
-        "rev": "0d2935e32715db81d881378388bc38bf8939a5d5",
+        "rev": "3fb5d217cf29422d2cbb3f59566bd1867707334f",
         "type": "github"
       },
       "original": {
-        "owner": "DarthPJB",
-        "ref": "fix/ssh-master-localcommand-protocol-leak",
+        "owner": "DeterminateSystems",
+        "ref": "main",
         "repo": "nix-src",
         "type": "github"
       }
