@@ -9,7 +9,9 @@ import shlex
 import shutil
 import subprocess
 import sys
+import termios
 import time
+import tty
 from dataclasses import dataclass
 from typing import Sequence
 
@@ -81,10 +83,27 @@ def run_inhibited(config: Config, command: Sequence[str]) -> subprocess.Complete
     return run(inhibited)
 
 
+def wait_for_key() -> None:
+    if not sys.stdin.isatty():
+        input()
+        return
+    settings = termios.tcgetattr(sys.stdin)
+    try:
+        tty.setcbreak(sys.stdin.fileno())
+        sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
+    print()
+
+
 def wait_for_target(target: str, domain: str) -> None:
     ping_host = f"{target}.{domain}"
-    print(f"Turn on {target}, then press Enter to start waiting for network reachability.")
-    input()
+    if run(["ping", "-c", "1", "-W", "1", ping_host], quiet=True).returncode == 0:
+        print(f"{target} is already reachable. Starting remote deployment...")
+        return
+    print(f"{target} is not responding at {ping_host}.")
+    print("Turn on the target, then press any key to begin waiting for reachability.")
+    wait_for_key()
     print(f"Waiting for {target} at {ping_host} to respond to ping...")
     while run(["ping", "-c", "1", "-W", "1", ping_host], quiet=True).returncode != 0:
         time.sleep(5)
