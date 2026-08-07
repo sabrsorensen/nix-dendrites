@@ -20,11 +20,7 @@
     end
     set target_host_lower (string lower $target_host)
     set switch_target_host "nix-$target_host_lower"
-    set ping_host "$target_host.${domain}"
-    set ssh_ping_host (ssh -G $target_host 2>/dev/null | string match -r "^[Hh]ostname " | string replace -r "^[Hh]ostname " "")
-    if test -n "$ssh_ping_host"
-      set ping_host $ssh_ping_host
-    end
+    set ping_host (__deploymentPingHost $target_host)
     echo "🔨 Building $target_host locally before waiting for it to come online..."
     inhibitSleep nh os build ${deployment.localFlakePath} -H $target_host_lower --keep-going $argv[2..-1]
     or return $status
@@ -49,11 +45,7 @@
     end
     set target_host_lower (string lower $target_host)
     set switch_target_host "nix-$target_host_lower"
-    set ping_host "$target_host.${domain}"
-    set ssh_ping_host (ssh -G $target_host 2>/dev/null | string match -r "^[Hh]ostname " | string replace -r "^[Hh]ostname " "")
-    if test -n "$ssh_ping_host"
-      set ping_host $ssh_ping_host
-    end
+    set ping_host (__deploymentPingHost $target_host)
     echo "🔨 Building $target_host locally before waiting for it to come online..."
     inhibitSleep nh os build ${deployment.localFlakePath} -H $target_host_lower --update --keep-going $argv[2..-1]
     or return $status

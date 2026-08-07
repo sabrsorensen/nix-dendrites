@@ -2,19 +2,18 @@
   configurationName,
   deployment,
   inhibitSleep,
-  systemdInhibit,
   ...
 }:
 {
   nhs = ''
     if test (count $argv) -ge 1; and contains -- $argv[1] -j --max-jobs
       if ${if inhibitSleep then "true" else "false"}
-        ${systemdInhibit} --what=shutdown:sleep:idle --who=nhs --why="NixOS local switch" --mode=block nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going -- $argv
+        inhibitSleep nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going -- $argv
       else
         nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going -- $argv
       end
     else if ${if inhibitSleep then "true" else "false"}
-      ${systemdInhibit} --what=shutdown:sleep:idle --who=nhs --why="NixOS local switch" --mode=block nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going $argv
+      inhibitSleep nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going $argv
     else
       nh os switch ${deployment.localFlakePath} -H ${configurationName} --keep-going $argv
     end
@@ -25,7 +24,7 @@
     pushd ${deployment.localFlakePath}
     or return $status
     if ${if inhibitSleep then "true" else "false"}
-      ${systemdInhibit} --what=shutdown:sleep:idle --who=nhsu --why="Nix flake update" --mode=block nix flake update
+      inhibitSleep nix flake update
     else
       nix flake update
     end
@@ -36,7 +35,7 @@
       for pass in (seq $max_passes)
         set -l before_state (sha256sum flake.nix flake.lock 2>/dev/null | string collect)
         if ${if inhibitSleep then "true" else "false"}
-          ${systemdInhibit} --what=shutdown:sleep:idle --who=nhsu --why="Regenerate flake metadata" --mode=block nix run .#write-flake
+          inhibitSleep nix run .#write-flake
         else
           nix run .#write-flake
         end

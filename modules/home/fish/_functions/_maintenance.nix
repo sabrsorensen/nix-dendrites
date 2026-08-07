@@ -1,10 +1,5 @@
 { ... }:
 {
-  inhibitSleep = ''
-    echo "🔒 Inhibiting sleep for: $argv"
-    echo -ne "\033]0;$argv\007"
-    systemd-inhibit --what=shutdown:sleep:idle:handle-power-key:handle-suspend-key:handle-hibernate-key:handle-lid-switch --who="$USER" --why=nixos-rebuild --mode=block $argv
-  '';
   cleanGenerations = ''
     nix-collect-garbage -d
     or return $status

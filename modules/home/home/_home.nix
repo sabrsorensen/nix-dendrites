@@ -94,7 +94,6 @@
             inhibitSleep = deployment.sleepy;
           };
           local.enable = true;
-          podman.enable = host.features.podman;
           rpi.enable = host.is.rpi;
           steamdeck.enable = host.platform == "steamdeck";
         };

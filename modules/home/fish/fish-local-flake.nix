@@ -35,12 +35,15 @@ let
             message = "Local Fish flake helpers require my.fish.localFlake.path and configurationName.";
           }
         ];
-        programs.fish.functions = import ./_functions/_local-checkout.nix {
-          configurationName = cfg.configurationName;
-          deployment.localFlakePath = cfg.path;
-          inhibitSleep = cfg.inhibitSleep;
-          systemdInhibit = lib.getExe' pkgs.systemd "systemd-inhibit";
-        };
+        programs.fish.functions =
+          (import ./_functions/_local-flake.nix {
+            configurationName = cfg.configurationName;
+            deployment.localFlakePath = cfg.path;
+            inhibitSleep = cfg.inhibitSleep;
+          })
+          // (import ./_functions/_deployment-common.nix {
+            systemdInhibit = lib.getExe' pkgs.systemd "systemd-inhibit";
+          });
       };
     };
 in

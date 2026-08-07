@@ -36,11 +36,7 @@
     end
     set remote_store_url "ssh://$remote_target?remote-program=/home/$remote_user/.nix-profile/bin/nix-store"
     set remote_method (remoteDeployMethod $target_host)
-    set ping_host "$target_host.${domain}"
-    set ssh_ping_host (ssh -G $target_host 2>/dev/null | string match -r "^[Hh]ostname " | string replace -r "^[Hh]ostname " "")
-    if test -n "$ssh_ping_host"
-      set ping_host $ssh_ping_host
-    end
+    set ping_host (__deploymentPingHost $target_host)
     echo "🔨 Building $home_output locally..."
     inhibitSleep nix build ${deployment.localFlakePath}#$home_output $argv[2..-1]
     or return $status
