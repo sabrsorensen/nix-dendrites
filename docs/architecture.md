@@ -84,7 +84,7 @@ cache policy plus a user package).
 One public feature may activate several related broadcast modules. Fish is the
 example: `my.features.fish` selects the shell as a whole, while the separately
 maintained Fish capability modules gate on narrow values such as
-`my.fish.deploy.enable` and `my.fish.podman.enable`. Use this shape when the
+`my.fish.deploy.enable`. Use this shape when the
 pieces are useful implementation units but are not independent user-facing
 features.
 
@@ -238,6 +238,7 @@ Home Manager modules should consume `my.host.home.username` and
 names themselves. The shared default is `sam` everywhere except WSL, where it is
 `ssorensen`; host facts may override those values if a future host needs a
 different primary Home Manager account.
+
 - Personal MCP clients use the explicit `features.personalMcp` opt-in rather
   than a form-factor heuristic. WSL therefore retains only its separately
   declared work MCP configuration.
