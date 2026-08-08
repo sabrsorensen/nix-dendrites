@@ -72,8 +72,8 @@ in
     pname = "decky-tabmaster";
     owner = "Tormak9970";
     repo = "TabMaster";
-    rev = "v2.16.2";
-    srcHash = "sha256-I2czx1mh6KD/Uve7uhFOck4kHqhCoNMNl4SZC5VrQzY=";
+    rev = "v2.15.1";
+    srcHash = "sha256-2BdTeVXeioxMRjjM9W/Vm/IYGVCWFsH2MOwDWIack4E=";
     pnpmHash = "sha256-pA9OCFj4xdtAST7qwmYUI/ZdNhWN0PvYCvYi3H8/mcQ=";
     verifyMainPy = false;
   };
