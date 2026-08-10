@@ -13,7 +13,7 @@ let
   lanAddress = config.my.host.address;
   docker = "${pkgs.docker}/bin/docker";
   dockerNetwork = "hawkbit";
-  hawkbitVersion = "1.0.3";
+  hawkbitVersion = "1.0.4";
   hawkbitDataRoot = "${config.my.media.configRoot}/hawkbit";
   databaseEnvironment = {
     PROFILES = "postgresql";
