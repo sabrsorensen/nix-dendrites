@@ -13,6 +13,7 @@ let
   lanAddress = config.my.host.address;
   docker = "${pkgs.docker}/bin/docker";
   dockerNetwork = "hawkbit";
+  hawkbitVersion = "1.0.3";
   hawkbitDataRoot = "${config.my.media.configRoot}/hawkbit";
   databaseEnvironment = {
     PROFILES = "postgresql";
@@ -229,7 +230,7 @@ in
     };
     docker-hawkbit-ddi = mkDockerService {
       name = "hawkbit-ddi";
-      image = "hawkbit/hawkbit-ddi-server:latest";
+      image = "hawkbit/hawkbit-ddi-server:${hawkbitVersion}";
       aliases = [ "hawkbit-ddi" ];
       environment = databaseEnvironment;
       ports = [ "${lanAddress}:8081:8081/tcp" ];
@@ -247,7 +248,7 @@ in
     };
     docker-hawkbit-dmf = mkDockerService {
       name = "hawkbit-dmf";
-      image = "hawkbit/hawkbit-dmf-server:latest";
+      image = "hawkbit/hawkbit-dmf-server:${hawkbitVersion}";
       aliases = [ "hawkbit-dmf" ];
       environment = databaseEnvironment;
       after = [
@@ -263,7 +264,7 @@ in
     };
     docker-hawkbit-mgmt = mkDockerService {
       name = "hawkbit-mgmt";
-      image = "hawkbit/hawkbit-mgmt-server:latest";
+      image = "hawkbit/hawkbit-mgmt-server:${hawkbitVersion}";
       aliases = [ "hawkbit-mgmt" ];
       environment = mgmtEnvironment;
       ports = [ "${lanAddress}:8082:8080/tcp" ];
