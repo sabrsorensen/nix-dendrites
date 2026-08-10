@@ -96,16 +96,18 @@ def wait_for_key() -> None:
     print()
 
 
+def target_reachable(target: str, domain: str) -> bool:
+    ping_host = f"{target}.{domain}"
+    return run(["ping", "-c", "1", "-W", "1", ping_host], quiet=True).returncode == 0
+
+
 def wait_for_target(target: str, domain: str) -> None:
     ping_host = f"{target}.{domain}"
-    if run(["ping", "-c", "1", "-W", "1", ping_host], quiet=True).returncode == 0:
-        print(f"{target} is already reachable. Starting remote deployment...")
-        return
     print(f"{target} is not responding at {ping_host}.")
     print("Turn on the target, then press any key to begin waiting for reachability.")
     wait_for_key()
     print(f"Waiting for {target} at {ping_host} to respond to ping...")
-    while run(["ping", "-c", "1", "-W", "1", ping_host], quiet=True).returncode != 0:
+    while not target_reachable(target, domain):
         time.sleep(5)
     print(f"{target} is reachable. Starting remote deployment...")
 
@@ -195,20 +197,24 @@ def deploy_nixos(config: Config, mode: str, target: str, extra: list[str], unsaf
     target_ssh = f"nix-{target_lower}{'-tail' if tail else ''}"
     lock_host = f"nix-{target_lower}"
     secure = None if unsafe else secure_config(target, config.domain)
+    reachable = target_reachable(target, config.domain)
     locked = False
-    if secure is not None:
-        target_ssh, locked = secure_preflight(target, secure, tail)
-        if not locked:
-            return 1
     try:
-        build = ["nh", "os", "build", config.flake, "-H", target_lower, *update, "--keep-going", "--", *extra]
-        print(f"🔨 Building {target} locally before waiting for it to come online...")
-        result = run_inhibited(config, build)
-        if result.returncode != 0:
-            return result.returncode
-        notify("NixOS build complete", f"Turn on {target}. Deployment will continue after it responds to ping.")
-        print(f"Build completed for {target}.")
-        wait_for_target(target, config.domain)
+        if reachable:
+            print(f"{target} is reachable. Starting remote deployment...")
+        else:
+            build = ["nh", "os", "build", config.flake, "-H", target_lower, *update, "--keep-going", "--", *extra]
+            print(f"{target} is offline. Building locally before waiting for it to come online...")
+            result = run_inhibited(config, build)
+            if result.returncode != 0:
+                return result.returncode
+            notify("NixOS build complete", f"Turn on {target}. Deployment will continue after it responds to ping.")
+            print(f"Build completed for {target}.")
+            wait_for_target(target, config.domain)
+        if secure is not None:
+            target_ssh, locked = secure_preflight(target, secure, tail)
+            if not locked:
+                return 1
         switch = [
             "nh", "os", "switch", config.flake, "-H", target_lower,
             "--target-host", target_ssh, *update, "--keep-going", "--", *extra,
