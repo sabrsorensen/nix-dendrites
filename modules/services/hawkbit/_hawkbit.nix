@@ -213,7 +213,7 @@ in
     };
     docker-hawkbit-rabbitmq = mkDockerService {
       name = "hawkbit-rabbitmq";
-      image = "rabbitmq:4-management-alpine";
+      image = "rabbitmq:3.13.7-management-alpine";
       hostname = "rabbitmq";
       aliases = [ "rabbitmq" ];
       environment = {
