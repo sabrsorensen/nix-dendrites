@@ -144,7 +144,7 @@ in
   systemd.tmpfiles.rules = [
     "d ${hawkbitDataRoot} 0750 root root -"
     "d ${hawkbitDataRoot}/artifactrepo 0750 root root -"
-    "d ${hawkbitDataRoot}/postgres 0750 root root -"
+    "d ${hawkbitDataRoot}/postgres 0750 999 999 -"
   ];
   users.users = {
     hawkbit = {
