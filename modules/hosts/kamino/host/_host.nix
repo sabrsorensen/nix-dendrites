@@ -20,6 +20,7 @@ in
       atuin = true;
       personalMcp = true;
       vscode = true;
+      claudeCode = true;
       firmware = true;
       nix-ld = true;
       docker = true;

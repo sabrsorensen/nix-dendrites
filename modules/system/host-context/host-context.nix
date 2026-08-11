@@ -130,6 +130,7 @@
           personalMcp = lib.mkEnableOption "Sam's personal MCP client profile";
           personalMcpServers = lib.mkEnableOption "Sam's personal MCP servers";
           vscode = lib.mkEnableOption "the declarative VSCodium editor profile";
+          claudeCode = lib.mkEnableOption "Claude Code";
         };
 
         vscodeTheme = lib.mkOption {

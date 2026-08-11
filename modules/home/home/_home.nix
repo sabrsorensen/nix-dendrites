@@ -77,6 +77,7 @@
           wslWorkHome = host.platform == "wsl";
           wslVscode = host.platform == "wsl";
           vscode = host.features.vscode;
+          claudeCode = host.features.claudeCode;
         };
         my.bash.isSteamDeck = host.platform == "steamdeck";
         my.fish = {

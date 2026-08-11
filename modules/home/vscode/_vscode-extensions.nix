@@ -71,6 +71,7 @@ let
       ];
   defaultExtensionIds = [
     "docker.docker"
+    "anthropic.claude-code"
     "esbenp.prettier-vscode"
     "evondev.indent-rainbow-palettes"
     "github.vscode-github-actions"

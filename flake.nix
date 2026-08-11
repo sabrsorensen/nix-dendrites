@@ -7,6 +7,10 @@
 
   inputs = {
     armory-runtime-nixpkgs.url = "github:NixOS/nixpkgs/752b6a95db93f03d6901304f760bd452b4b7db41";
+    claude-code = {
+      url = "github:sadjow/claude-code-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     codex-nix = {
       url = "github:sadjow/codex-cli-nix";
       inputs = {
