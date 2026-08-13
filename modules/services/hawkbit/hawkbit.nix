@@ -3,9 +3,6 @@ let
   domain = builtins.replaceStrings [ "\n" ] [ "" ] (
     builtins.readFile "${inputs.nix-secrets}/domain.txt"
   );
-  hawkbitPassword = builtins.replaceStrings [ "\n" ] [ "" ] (
-    builtins.readFile "${inputs.nix-secrets}/hawkbit-password.txt"
-  );
 in
 {
   flake.modules.nixos.hawkbit =
@@ -24,6 +21,7 @@ in
       } config.my.media.containerIdentities;
     in
     {
+      options.my.host.services.hawkbit = lib.mkEnableOption "hawkBit device-management service";
       options.my.hawkbit.hostName = lib.mkOption {
         type = lib.types.str;
         default = "hawkbit";
@@ -38,7 +36,7 @@ in
               cfg
               domain
               hawkbitIdentity
-              hawkbitPassword
+              inputs
               toInt
               ;
           }

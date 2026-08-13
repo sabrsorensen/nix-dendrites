@@ -4,5 +4,8 @@
   # self-gates on the host feature rather than being imported per workstation.
   flake.modules.nixos.appimage =
     { config, lib, ... }:
-    lib.mkIf config.my.host.features.appimage (import ./_appimage.nix { });
+    {
+      options.my.host.features.appimage = lib.mkEnableOption "AppImage integration";
+      config = lib.mkIf config.my.host.features.appimage (import ./_appimage.nix { });
+    };
 }

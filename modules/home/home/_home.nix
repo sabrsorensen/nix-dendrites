@@ -53,7 +53,7 @@
           git = true;
           gpg = true;
           gdrive = host.features.gdrive;
-          herdr = host.platform == "wsl";
+          herdr = host.features.codex || host.features.claudeCode;
           lazyvim = host.features.lazyvim;
           mcpCommon = host.features.mcpCommon;
           "nix-index" = true;
@@ -73,11 +73,12 @@
           tmux = true;
           vim = true;
           wslFish = host.platform == "wsl";
-          wslCodex = host.platform == "wsl";
+          wslCodex = host.platform == "wsl" && host.features.codex;
           wslWorkHome = host.platform == "wsl";
           wslVscode = host.platform == "wsl";
           vscode = host.features.vscode;
           claudeCode = host.features.claudeCode;
+          codex = host.features.codex;
         };
         my.bash.isSteamDeck = host.platform == "steamdeck";
         my.fish = {

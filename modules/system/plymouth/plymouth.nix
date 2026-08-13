@@ -7,5 +7,8 @@
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.features.plymouth (import ./_plymouth.nix args);
+    {
+      options.my.host.features.plymouth = lib.mkEnableOption "Plymouth boot splash";
+      config = lib.mkIf config.my.host.features.plymouth (import ./_plymouth.nix args);
+    };
 }

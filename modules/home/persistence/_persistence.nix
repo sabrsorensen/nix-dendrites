@@ -11,7 +11,6 @@ in
   home.persistence."/persistent" = {
     directories = [
       ".config/fish"
-      ".config/mozilla/firefox"
     ]
     ++ lib.optionals (lib.elem pkgs.google-chrome homePackages) [
       ".config/Google-Chrome"

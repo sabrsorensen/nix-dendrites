@@ -26,6 +26,7 @@ in
           description = "Immich media storage path for this host.";
         };
       };
+      options.my.host.services.immich = lib.mkEnableOption "Immich service";
       config = lib.mkIf config.my.host.services.immich (
         import ./_immich.nix (args // { inherit cfg domain; })
       );

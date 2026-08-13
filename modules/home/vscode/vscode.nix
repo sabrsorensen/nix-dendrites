@@ -56,4 +56,10 @@ in
   flake.modules.homeManager.vscode = featureModule;
 
   flake.modules.homeManager.wsl-vscode = wslVscodeModule;
+
+  flake.modules.nixos.vscode =
+    { lib, ... }:
+    {
+      options.my.host.features.vscode = lib.mkEnableOption "the declarative VSCodium editor profile";
+    };
 }

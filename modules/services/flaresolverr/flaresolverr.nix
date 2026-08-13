@@ -29,6 +29,7 @@
         };
       };
 
+      options.my.host.services.flaresolverr = lib.mkEnableOption "FlareSolverr media dependency";
       config = lib.mkIf config.my.host.services.flaresolverr (
         import ./_flaresolverr.nix (args // { inherit cfg; })
       );

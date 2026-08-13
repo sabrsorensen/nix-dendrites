@@ -17,6 +17,7 @@
         description = "Path below the apex domain used for Radarr.";
       };
 
+      options.my.host.services.radarr = lib.mkEnableOption "Radarr media service";
       config = lib.mkIf config.my.host.services.radarr (import ./_radarr.nix (args // { inherit cfg; }));
     };
 }

@@ -25,6 +25,7 @@ in
           default = null;
         };
       };
+      options.my.host.services.mealie = lib.mkEnableOption "Mealie service";
       config = lib.mkIf config.my.host.services.mealie (
         import ./_mealie.nix (args // { inherit cfg domain; })
       );

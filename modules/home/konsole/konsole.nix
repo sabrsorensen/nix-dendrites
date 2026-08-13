@@ -16,4 +16,10 @@ in
 {
   dendritic.homeManagerModules = [ featureModule ];
   flake.modules.homeManager.konsole = featureModule;
+
+  flake.modules.nixos.konsole =
+    { lib, ... }:
+    {
+      options.my.host.features.konsole = lib.mkEnableOption "Konsole terminal profile";
+    };
 }

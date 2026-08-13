@@ -26,6 +26,7 @@ in
         description = "Local hostname published for Plex.";
       };
 
+      options.my.host.services.plex = lib.mkEnableOption "Plex media-service bundle";
       config = lib.mkIf config.my.host.services.plex (
         import ./_plex.nix (
           args

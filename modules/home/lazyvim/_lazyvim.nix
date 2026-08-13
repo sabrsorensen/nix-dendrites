@@ -102,4 +102,10 @@ in
 {
   dendritic.homeManagerModules = [ featureModule ];
   flake.modules.homeManager.lazyvim = featureModule;
+
+  flake.modules.nixos.lazyvim =
+    { lib, ... }:
+    {
+      options.my.host.features.lazyvim = lib.mkEnableOption "LazyVim editor configuration";
+    };
 }

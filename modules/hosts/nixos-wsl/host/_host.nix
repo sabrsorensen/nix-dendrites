@@ -10,7 +10,10 @@
     roles = {
       workstation = true;
     };
-    features.nix-ld = true;
+    features = {
+      nix-ld = true;
+      codex = true;
+    };
   };
   my.deployment = {
     # Declare the checkout explicitly so `nh` and local helpers use the

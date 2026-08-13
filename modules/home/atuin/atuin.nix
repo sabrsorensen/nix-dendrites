@@ -29,4 +29,10 @@ in
 {
   dendritic.homeManagerModules = [ homeModule ];
   flake.modules.homeManager.atuin = homeModule;
+
+  flake.modules.nixos.atuin-client =
+    { lib, ... }:
+    {
+      options.my.host.features.atuin = lib.mkEnableOption "Atuin Home Manager client";
+    };
 }

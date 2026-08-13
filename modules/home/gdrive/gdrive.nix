@@ -46,4 +46,10 @@ in
 {
   dendritic.homeManagerModules = [ homeModule ];
   flake.modules.homeManager.gdrive = homeModule;
+
+  flake.modules.nixos.gdrive =
+    { lib, ... }:
+    {
+      options.my.host.features.gdrive = lib.mkEnableOption "Sam's rclone Google Drive mount";
+    };
 }

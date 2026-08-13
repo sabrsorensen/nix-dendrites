@@ -54,6 +54,7 @@
         };
       };
 
+      options.my.host.services.attic = lib.mkEnableOption "Attic cache service";
       config = lib.mkIf config.my.host.services.attic (
         import ./_attic.nix (
           args

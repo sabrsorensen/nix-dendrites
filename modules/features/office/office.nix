@@ -16,4 +16,10 @@ in
 {
   dendritic.homeManagerModules = [ featureModule ];
   flake.modules.homeManager.office = featureModule;
+
+  flake.modules.nixos.office =
+    { lib, ... }:
+    {
+      options.my.host.features.office = lib.mkEnableOption "office tools";
+    };
 }

@@ -17,20 +17,23 @@ in
       relayPort = 33080;
       netbirdDomain = "netbird.${domain}";
     in
-    lib.mkIf config.my.host.services.netbirdServer (
-      import ./_netbird-server.nix (
-        args
-        // {
-          inherit
-            inputs
-            clientId
-            domain
-            managementAddress
-            managementPort
-            relayPort
-            netbirdDomain
-            ;
-        }
-      )
-    );
+    {
+      options.my.host.services.netbirdServer = lib.mkEnableOption "NetBird server topology";
+      config = lib.mkIf config.my.host.services.netbirdServer (
+        import ./_netbird-server.nix (
+          args
+          // {
+            inherit
+              inputs
+              clientId
+              domain
+              managementAddress
+              managementPort
+              relayPort
+              netbirdDomain
+              ;
+          }
+        )
+      );
+    };
 }

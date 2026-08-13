@@ -50,6 +50,18 @@ in
     enable = true;
     user = "sam";
   };
+  # Numlock on by default: the SDDM greeter, and the console (in case a boot
+  # ever lands on a virtual terminal instead of the graphical session).
+  services.displayManager.sddm.settings.General.Numlock = "on";
+  systemd.services.numlockOnTty = {
+    description = "Enable NumLock on console TTYs";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.kbd}/bin/setleds -D +num < /dev/tty1";
+    };
+  };
   environment.systemPackages = [
     pkgs.czkawka
     reolinkCli

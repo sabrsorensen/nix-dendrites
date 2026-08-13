@@ -5,6 +5,8 @@
     {
       imports = [ inputs.impermanence.nixosModules.impermanence ];
 
+      options.my.host.features.persistenceSystem = lib.mkEnableOption "system persistent state";
+
       config = lib.mkIf config.my.host.features.persistenceSystem {
         environment.persistence."/persistent" = {
           hideMounts = true;

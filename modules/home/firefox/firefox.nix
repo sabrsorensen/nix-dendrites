@@ -1,6 +1,6 @@
 { inputs, ... }:
 let
-  homeModule = import ./_home-module.nix { inherit inputs; };
+  homeModule = import ./_firefox.nix { inherit inputs; };
   featureModule =
     args@{
       config,
@@ -30,4 +30,10 @@ in
 
   dendritic.homeManagerModules = [ featureModule ];
   flake.modules.homeManager.firefox = featureModule;
+
+  flake.modules.nixos.firefox =
+    { lib, ... }:
+    {
+      options.my.host.features.firefox = lib.mkEnableOption "Firefox browser profile";
+    };
 }

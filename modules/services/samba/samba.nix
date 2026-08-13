@@ -11,6 +11,7 @@
         default = { };
         description = "Additional Samba settings merged on top of the shared defaults.";
       };
+      options.my.host.services.samba = lib.mkEnableOption "Samba shares";
       config = lib.mkIf config.my.host.services.samba (import ./_samba.nix (args // { inherit cfg; }));
     };
 }

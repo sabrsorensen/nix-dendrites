@@ -20,6 +20,7 @@
         description = "Route otherwise-unmatched apex requests to Organizr.";
       };
 
+      options.my.host.services.organizr = lib.mkEnableOption "Organizr media dashboard";
       config = lib.mkIf config.my.host.services.organizr (
         import ./_organizr.nix (
           args

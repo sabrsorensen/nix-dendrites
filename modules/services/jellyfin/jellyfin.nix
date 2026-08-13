@@ -14,6 +14,7 @@
         description = "Path below the apex domain used for Jellyfin.";
       };
 
+      options.my.host.services.jellyfin = lib.mkEnableOption "Jellyfin media service";
       config = lib.mkIf config.my.host.services.jellyfin (
         import ./_jellyfin.nix (args // { inherit cfg groupName localAddr; })
       );

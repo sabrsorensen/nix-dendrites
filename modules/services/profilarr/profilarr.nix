@@ -32,6 +32,7 @@ in
         };
       };
 
+      options.my.host.services.profilarr = lib.mkEnableOption "Profilarr media service";
       config = lib.mkIf config.my.host.services.profilarr (
         import ./_profilarr.nix (
           args

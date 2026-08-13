@@ -18,6 +18,8 @@
       enabled = config.my.host.services.caddy || cfg.apexRoutes != [ ] || virtualHosts != { };
     in
     {
+      options.my.host.services.caddy = lib.mkEnableOption "Caddy reverse proxy";
+
       options.my.caddy = {
         enableFail2ban = lib.mkOption {
           type = lib.types.bool;

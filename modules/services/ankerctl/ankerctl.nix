@@ -10,19 +10,22 @@
       logsDir = "/opt/ankerctl/logs";
       localAddr = "127.0.0.1:${lib.toString port}";
     in
-    lib.mkIf config.my.host.services.ankerctl (
-      import ./_ankerctl.nix (
-        args
-        // {
-          inherit
-            capturesDir
-            dataDir
-            localAddr
-            logsDir
-            port
-            serviceName
-            ;
-        }
-      )
-    );
+    {
+      options.my.host.services.ankerctl = lib.mkEnableOption "AnkerCtl printer-control service";
+      config = lib.mkIf config.my.host.services.ankerctl (
+        import ./_ankerctl.nix (
+          args
+          // {
+            inherit
+              capturesDir
+              dataDir
+              localAddr
+              logsDir
+              port
+              serviceName
+              ;
+          }
+        )
+      );
+    };
 }

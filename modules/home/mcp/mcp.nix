@@ -30,4 +30,13 @@ in
 {
   dendritic.homeManagerModules = [ homeModule ];
   flake.modules.homeManager.mcp = homeModule;
+
+  flake.modules.nixos.mcp =
+    { lib, ... }:
+    {
+      options.my.host.features = {
+        mcpCommon = lib.mkEnableOption "common MCP client profile";
+        personalMcp = lib.mkEnableOption "Sam's personal MCP client profile";
+      };
+    };
 }

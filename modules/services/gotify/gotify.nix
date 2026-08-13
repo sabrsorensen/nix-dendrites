@@ -20,6 +20,7 @@
         };
       };
 
+      options.my.host.services.gotify = lib.mkEnableOption "Gotify notification service";
       config = lib.mkIf config.my.host.services.gotify (
         import ./_gotify.nix (args // { inherit cfg pathSegment; })
       );

@@ -12,6 +12,7 @@
         description = "Path below the apex domain used for Prowlarr.";
       };
 
+      options.my.host.services.prowlarr = lib.mkEnableOption "Prowlarr media service";
       config = lib.mkIf config.my.host.services.prowlarr (
         import ./_prowlarr.nix (args // { inherit cfg; })
       );

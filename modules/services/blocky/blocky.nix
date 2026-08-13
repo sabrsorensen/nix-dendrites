@@ -39,6 +39,7 @@ in
         };
       };
 
+      options.my.host.services.blocky = lib.mkEnableOption "Blocky DNS service";
       config = lib.mkIf config.my.host.services.blocky (
         import ./_blocky.nix (args // { inherit cfg networkConfig localDomain; })
       );

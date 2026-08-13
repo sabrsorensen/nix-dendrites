@@ -27,5 +27,8 @@ in
     let
       host = config.my.host;
     in
-    lib.mkIf host.features.bitwarden (nixosModule args);
+    {
+      options.my.host.features.bitwarden = lib.mkEnableOption "Bitwarden";
+      config = lib.mkIf host.features.bitwarden (nixosModule args);
+    };
 }

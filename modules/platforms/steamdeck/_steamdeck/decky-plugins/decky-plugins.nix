@@ -28,6 +28,7 @@ let
         valueType;
     in
     {
+      options.my.host.features.deckyPlugins = lib.mkEnableOption "declarative Decky plugin staging";
       options.jovian.decky-loader.plugins = lib.mkOption {
         type = lib.types.attrsOf lib.types.package;
         default = { };

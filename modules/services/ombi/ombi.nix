@@ -15,6 +15,7 @@
         description = "Path below the apex domain used for Ombi.";
       };
 
+      options.my.host.services.ombi = lib.mkEnableOption "Ombi media-request service";
       config = lib.mkIf config.my.host.services.ombi (
         import ./_ombi.nix (args // { inherit cfg localAddr port; })
       );

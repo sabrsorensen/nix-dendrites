@@ -17,6 +17,7 @@
         description = "Path below the apex domain used for Bazarr.";
       };
 
+      options.my.host.services.bazarr = lib.mkEnableOption "Bazarr media service";
       config = lib.mkIf config.my.host.services.bazarr (import ./_bazarr.nix (args // { inherit cfg; }));
     };
 }

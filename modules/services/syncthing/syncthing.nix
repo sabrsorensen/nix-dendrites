@@ -73,6 +73,7 @@ in
       };
     in
     {
+      options.my.host.services.syncthing = lib.mkEnableOption "system Syncthing";
       options.my.syncthing = {
         serverUser = lib.mkOption {
           type = lib.types.str;

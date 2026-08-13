@@ -12,7 +12,8 @@ let
   leasesEditor = inputs.self.packages.${system}.leases-editor;
 in
 {
-  environment.systemPackages = [
+  options.my.host.features.localGuiTools = lib.mkEnableOption "local graphical maintenance tools";
+  config.environment.systemPackages = [
     pkgs.git
     pkgs.tmux
     pkgs.home-manager

@@ -28,8 +28,6 @@ lib.mkMerge [
 
   (lib.mkIf config.my.host.features.impermanence {
     my.host.features = {
-      persistenceBluetooth = lib.mkDefault true;
-      persistenceFirefox = lib.mkDefault true;
       persistenceHome = lib.mkDefault true;
       persistenceSystem = lib.mkDefault true;
     };

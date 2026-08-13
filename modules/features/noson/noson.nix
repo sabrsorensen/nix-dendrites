@@ -25,5 +25,8 @@ in
       pkgs,
       ...
     }:
-    lib.mkIf (config.my.host.features.noson && config.my.host.home.enable) (nixosModule args);
+    {
+      options.my.host.features.noson = lib.mkEnableOption "Noson";
+      config = lib.mkIf (config.my.host.features.noson && config.my.host.home.enable) (nixosModule args);
+    };
 }

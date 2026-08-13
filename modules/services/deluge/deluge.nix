@@ -20,6 +20,7 @@
         description = "Path below the apex domain used for Deluge.";
       };
 
+      options.my.host.services.deluge = lib.mkEnableOption "Deluge download service with Gluetun VPN";
       config = lib.mkIf config.my.host.services.deluge (
         import ./_deluge.nix (
           args

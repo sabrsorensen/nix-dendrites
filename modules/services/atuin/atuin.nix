@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.modules.nixos.atuin =
+  flake.modules.nixos.atuin-server =
     args@{ config, lib, ... }:
     let
       cfg = config.my.atuin;
@@ -24,6 +24,7 @@
         };
       };
 
+      options.my.host.services.atuinServer = lib.mkEnableOption "Atuin history-sync server";
       config = lib.mkIf config.my.host.services.atuinServer (
         import ./_atuin.nix (args // { inherit cfg; })
       );

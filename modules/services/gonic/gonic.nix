@@ -13,6 +13,7 @@
         description = "Path below the apex domain used for Gonic.";
       };
 
+      options.my.host.services.gonic = lib.mkEnableOption "Gonic music service";
       config = lib.mkIf config.my.host.services.gonic (
         import ./_gonic.nix (args // { inherit cfg mediaCfg; })
       );

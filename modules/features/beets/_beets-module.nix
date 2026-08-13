@@ -16,4 +16,10 @@ in
 {
   dendritic.homeManagerModules = [ featureModule ];
   flake.modules.homeManager.beets = featureModule;
+
+  flake.modules.nixos.beets =
+    { lib, ... }:
+    {
+      options.my.host.features.beets = lib.mkEnableOption "Beets music-library management";
+    };
 }

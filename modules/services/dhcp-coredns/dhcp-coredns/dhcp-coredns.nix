@@ -58,6 +58,8 @@ in
       leasesFile = "${inputs.nix-secrets}/leases.json";
     in
     {
+      options.my.host.services.dhcpCoredns = lib.mkEnableOption "Kea DHCP with CoreDNS updates";
+
       options.my.dhcpCoredns = {
         enable = lib.mkEnableOption "DHCP + CoreDNS local DNS stack";
 

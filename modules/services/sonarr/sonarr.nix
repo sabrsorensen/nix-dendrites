@@ -17,6 +17,7 @@
         description = "Path below the apex domain used for Sonarr.";
       };
 
+      options.my.host.services.sonarr = lib.mkEnableOption "Sonarr media service";
       config = lib.mkIf config.my.host.services.sonarr (import ./_sonarr.nix (args // { inherit cfg; }));
     };
 }

@@ -9,8 +9,11 @@ let
       pkgs,
       ...
     }:
-    lib.mkIf (config.my.host.platform == "steamdeck" && config.my.host.features.deckyLoader) (
-      import ./_steamdeck-decky-loader.nix args
-    );
+    {
+      options.my.host.features.deckyLoader = lib.mkEnableOption "Decky Loader";
+      config = lib.mkIf (config.my.host.platform == "steamdeck" && config.my.host.features.deckyLoader) (
+        import ./_steamdeck-decky-loader.nix args
+      );
+    };
 in
 module

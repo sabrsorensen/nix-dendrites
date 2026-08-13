@@ -141,17 +141,20 @@ in
       lib,
       ...
     }:
-    lib.mkIf config.my.host.features.armory {
-      assertions = [
-        {
-          assertion = pkgs.stdenv.hostPlatform.system == supportedSystem;
-          message = "The Armory module is only supported on x86_64-linux because upstream only ships an amd64 Debian release and Armory depends on legacy PyQt4.";
-        }
-      ];
+    {
+      options.my.host.features.armory = lib.mkEnableOption "Bitcoin Armory wallet tooling";
+      config = lib.mkIf config.my.host.features.armory {
+        assertions = [
+          {
+            assertion = pkgs.stdenv.hostPlatform.system == supportedSystem;
+            message = "The Armory module is only supported on x86_64-linux because upstream only ships an amd64 Debian release and Armory depends on legacy PyQt4.";
+          }
+        ];
 
-      environment.systemPackages = lib.optionals (pkgs.stdenv.hostPlatform.system == supportedSystem) [
-        inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.armory
-        inputs.armory-runtime-nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.bitcoind
-      ];
+        environment.systemPackages = lib.optionals (pkgs.stdenv.hostPlatform.system == supportedSystem) [
+          inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.armory
+          inputs.armory-runtime-nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.bitcoind
+        ];
+      };
     };
 }

@@ -24,9 +24,12 @@ in
       pkgs,
       ...
     }:
-    lib.mkIf config.my.host.features.demlo {
-      environment.systemPackages = [
-        inputs.demlo.packages.${pkgs.stdenv.hostPlatform.system}.default
-      ];
+    {
+      options.my.host.features.demlo = lib.mkEnableOption "Demlo audio-file processing";
+      config = lib.mkIf config.my.host.features.demlo {
+        environment.systemPackages = [
+          inputs.demlo.packages.${pkgs.stdenv.hostPlatform.system}.default
+        ];
+      };
     };
 }

@@ -51,4 +51,10 @@ in
 
   dendritic.homeManagerModules = [ homeModule ];
   flake.modules.homeManager.claude-code = homeModule;
+
+  flake.modules.nixos.claude-code =
+    { lib, ... }:
+    {
+      options.my.host.features.claudeCode = lib.mkEnableOption "Claude Code";
+    };
 }

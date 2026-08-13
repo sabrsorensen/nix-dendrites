@@ -78,59 +78,22 @@
           builder = lib.mkEnableOption "builder role";
         };
 
+        # Individual feature/service options are declared beside their owning
+        # module (see e.g. modules/features/docker/docker.nix,
+        # modules/services/plex/plex.nix). What remains here are aggregate
+        # flags that cascade defaults onto several sub-features in
+        # _host-context.nix, plus a couple of options with no single owning
+        # module (see docs/architecture.md for the reasoning). Two flags
+        # (wifi, personalMcpServers) are currently declared but consumed
+        # nowhere in the repo -- left as-is pending a decision on whether
+        # they're vestigial.
         features = {
-          armory = lib.mkEnableOption "Bitcoin Armory wallet tooling";
           gui = lib.mkEnableOption "local graphical environment";
-          appimage = lib.mkEnableOption "AppImage integration";
-          atuin = lib.mkEnableOption "Atuin Home Manager client";
-          audio = lib.mkEnableOption "local audio stack";
-          bluetooth = lib.mkEnableOption "Bluetooth";
-          desktop = lib.mkEnableOption "generic desktop session";
           wifi = lib.mkEnableOption "Wi-Fi";
-          firmware = lib.mkEnableOption "redistributable firmware";
-          firefox = lib.mkEnableOption "Firefox browser profile";
-          nix-ld = lib.mkEnableOption "nix-ld compatibility";
-          nvidia = lib.mkEnableOption "NVIDIA support";
-          flatpak = lib.mkEnableOption "Flatpak";
-          docker = lib.mkEnableOption "Docker container runtime";
-          podman = lib.mkEnableOption "Podman container runtime";
-          determinateNix = lib.mkOption {
-            type = lib.types.bool;
-            default = true;
-            description = "Whether to use Determinate Nix instead of the upstream Nix daemon.";
-          };
-          decky = lib.mkEnableOption "Decky Loader and declarative Decky plugins";
-          deckyCatalog = lib.mkEnableOption "declarative Decky plugin catalogue";
-          deckyLoader = lib.mkEnableOption "Decky Loader";
-          deckyPlugins = lib.mkEnableOption "declarative Decky plugin staging";
           homeGuiPackages = lib.mkEnableOption "default graphical Home Manager packages";
-          konsole = lib.mkEnableOption "Konsole terminal profile";
-          localGuiTools = lib.mkEnableOption "local graphical maintenance tools";
-          plymouth = lib.mkEnableOption "Plymouth boot splash";
-          steam = lib.mkEnableOption "Steam";
-          wayland = lib.mkEnableOption "Wayland session environment";
-          wine = lib.mkEnableOption "Wine";
-          deskflow = lib.mkEnableOption "Deskflow";
-          minecraft = lib.mkEnableOption "Minecraft tooling";
-          threedprinter = lib.mkEnableOption "3D-printer tooling";
-          zsa = lib.mkEnableOption "ZSA tooling";
-          beets = lib.mkEnableOption "Beets music-library management";
-          bitwarden = lib.mkEnableOption "Bitwarden";
-          demlo = lib.mkEnableOption "Demlo audio-file processing";
-          noson = lib.mkEnableOption "Noson";
+          decky = lib.mkEnableOption "Decky Loader and declarative Decky plugins";
           impermanence = lib.mkEnableOption "persistent state on an ephemeral root filesystem";
-          mcpCommon = lib.mkEnableOption "common MCP client profile";
-          persistenceBluetooth = lib.mkEnableOption "Bluetooth persistent state";
-          persistenceFirefox = lib.mkEnableOption "Firefox persistent state";
-          persistenceHome = lib.mkEnableOption "Home Manager persistent state";
-          persistenceSystem = lib.mkEnableOption "system persistent state";
-          lazyvim = lib.mkEnableOption "LazyVim editor configuration";
-          office = lib.mkEnableOption "office tools";
-          gdrive = lib.mkEnableOption "Sam's rclone Google Drive mount";
-          personalMcp = lib.mkEnableOption "Sam's personal MCP client profile";
           personalMcpServers = lib.mkEnableOption "Sam's personal MCP servers";
-          vscode = lib.mkEnableOption "the declarative VSCodium editor profile";
-          claudeCode = lib.mkEnableOption "Claude Code";
         };
 
         vscodeTheme = lib.mkOption {
@@ -143,46 +106,10 @@
           description = "Baked VSCodium theme selected when the vscode feature is enabled.";
         };
 
-        services = {
-          ankerctl = lib.mkEnableOption "AnkerCtl printer-control service";
-          airsonic = lib.mkEnableOption "Airsonic music service";
-          apprise = lib.mkEnableOption "Apprise notification service";
-          arrSync = lib.mkEnableOption "Arr Sync webhook service";
-          attic = lib.mkEnableOption "Attic cache service";
-          atuinServer = lib.mkEnableOption "Atuin history-sync server";
-          bazarr = lib.mkEnableOption "Bazarr media service";
-          blocky = lib.mkEnableOption "Blocky DNS service";
-          caddy = lib.mkEnableOption "Caddy reverse proxy";
-          dhcpCoredns = lib.mkEnableOption "Kea DHCP with CoreDNS updates";
-          deluge = lib.mkEnableOption "Deluge download service with Gluetun VPN";
-          flaresolverr = lib.mkEnableOption "FlareSolverr media dependency";
-          frigate = lib.mkEnableOption "Frigate NVR service";
-          immich = lib.mkEnableOption "Immich service";
-          jellyfin = lib.mkEnableOption "Jellyfin media service";
-          mealie = lib.mkEnableOption "Mealie service";
-          minecraft = lib.mkEnableOption "Minecraft server";
-          monitoring = lib.mkEnableOption "monitoring services";
-          monitoringExporters = lib.mkEnableOption "Prometheus node and SMART exporter services";
-          netbirdClient = lib.mkEnableOption "NetBird overlay-network client";
-          netbirdServer = lib.mkEnableOption "NetBird server topology";
-          gonic = lib.mkEnableOption "Gonic music service";
-          gotify = lib.mkEnableOption "Gotify notification service";
-          hawkbit = lib.mkEnableOption "hawkBit device-management service";
-          plex = lib.mkEnableOption "Plex media-service bundle";
-          profilarr = lib.mkEnableOption "Profilarr media service";
-          prowlarr = lib.mkEnableOption "Prowlarr media service";
-          radarr = lib.mkEnableOption "Radarr media service";
-          sonarr = lib.mkEnableOption "Sonarr media service";
-          ntfy = lib.mkEnableOption "ntfy notification service";
-          nextcloud = lib.mkEnableOption "Nextcloud with Collabora Online";
-          ombi = lib.mkEnableOption "Ombi media-request service";
-          organizr = lib.mkEnableOption "Organizr media dashboard";
-          samba = lib.mkEnableOption "Samba shares";
-          scrutiny = lib.mkEnableOption "Scrutiny disk monitoring";
-          ssh = lib.mkEnableOption "OpenSSH server defaults";
-          syncthing = lib.mkEnableOption "system Syncthing";
-          watchtower = lib.mkEnableOption "Watchtower container-update service";
-        };
+        # Every services.* option is now declared beside its owning module
+        # (see e.g. modules/services/plex/plex.nix); this namespace has no
+        # entries left to declare centrally.
+        services = { };
 
         is = {
           workstation = lib.mkOption {

@@ -52,6 +52,7 @@ in
           default = [ ];
         };
       };
+      options.my.host.services.monitoring = lib.mkEnableOption "monitoring services";
       config = lib.mkIf config.my.host.services.monitoring (
         import ./_monitoring.nix (
           args

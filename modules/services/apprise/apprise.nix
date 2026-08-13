@@ -25,6 +25,7 @@
         };
       };
 
+      options.my.host.services.apprise = lib.mkEnableOption "Apprise notification service";
       config = lib.mkIf config.my.host.services.apprise (
         import ./_apprise.nix (
           args

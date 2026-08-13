@@ -3,7 +3,7 @@
   cfg,
   domain,
   hawkbitIdentity,
-  hawkbitPassword,
+  inputs,
   lib,
   pkgs,
   toInt,
@@ -24,12 +24,14 @@ let
     SPRING_RABBITMQ_USERNAME = "guest";
     SPRING_RABBITMQ_PASSWORD = "guest";
   };
+  # Admin/cushychicken passwords are supplied at runtime via envFile (see
+  # sops.secrets.hawkbit_env below), not baked into this derivation: a plain
+  # Nix value here would end up readable in the store and in `docker inspect`
+  # output for every host that evaluates this module.
   mgmtEnvironment = databaseEnvironment // {
     HAWKBIT_SECURITY_USER_ADMIN_TENANT = "DEFAULT";
-    HAWKBIT_SECURITY_USER_ADMIN_PASSWORD = hawkbitPassword;
     HAWKBIT_SECURITY_USER_ADMIN_ROLES = "TENANT_ADMIN";
     HAWKBIT_SECURITY_USER_CUSHYCHICKEN_TENANT = "DEFAULT";
-    HAWKBIT_SECURITY_USER_CUSHYCHICKEN_PASSWORD = hawkbitPassword;
     HAWKBIT_SECURITY_USER_CUSHYCHICKEN_ROLES = "TENANT_ADMIN";
     HAWKBIT_SERVER_REPOSITORY_IMPLICIT_TENANT_CREATE_ALLOWED = "true";
   };
@@ -71,6 +73,7 @@ let
       name,
       image,
       environment ? { },
+      envFile ? null,
       volumes ? [ ],
       ports ? [ ],
       aliases ? [ ],
@@ -89,6 +92,10 @@ let
       ++ lib.optional (hostname != null) "--hostname=${hostname}"
       ++ networkArgs aliases
       ++ environmentArgs environment
+      ++ lib.optionals (envFile != null) [
+        "--env-file"
+        envFile
+      ]
       ++ volumeArgs volumes
       ++ portArgs ports
       ++ extraArgs
@@ -102,6 +109,7 @@ let
       name,
       image,
       environment ? { },
+      envFile ? null,
       volumes ? [ ],
       ports ? [ ],
       aliases ? [ ],
@@ -120,6 +128,7 @@ let
             name
             image
             environment
+            envFile
             volumes
             ports
             aliases
@@ -141,9 +150,17 @@ in
       message = "hawkBit requires my.host.address so its LAN endpoints have a specific bind address.";
     }
   ];
+  sops.secrets.hawkbit_env = {
+    owner = "root";
+    group = "root";
+    mode = "0400";
+    format = "dotenv";
+    sopsFile = "${inputs.nix-secrets}/env_files/hawkbit.env";
+    key = "";
+  };
   systemd.tmpfiles.rules = [
     "d ${hawkbitDataRoot} 0750 root root -"
-    "d ${hawkbitDataRoot}/artifactrepo 0750 root root -"
+    "d ${hawkbitDataRoot}/artifactrepo 0750 1000 101 -"
     "d ${hawkbitDataRoot}/postgres 0750 999 999 -"
   ];
   users.users = {
@@ -153,17 +170,23 @@ in
       uid = toInt hawkbitIdentity.uid;
     };
   };
-  my.localDns.records = [ { hostname = cfg.hostName; } ];
+  my.localDns.records = [
+    { hostname = cfg.hostName; }
+    { hostname = "hbdemodevice"; }
+  ];
   my.caddy.virtualHosts."${cfg.hostName}.{$DOMAIN}".routes = [
     ''
-      filter {
-        content_type text/html.*
-        search_pattern </head>
-        replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/plex/aquamarine.css'></head>"
-      }
       reverse_proxy /* 127.0.0.1:8084 {
         header_up -Accept-Encoding
       }
+    ''
+  ];
+  # RPi4 A/B OTA proof-of-concept target: BusyBox httpd on the device
+  # serves a page identifying which deployed image is currently booted,
+  # a visible signal that a hawkBit-driven update actually took effect.
+  my.caddy.virtualHosts."hbdemodevice.{$DOMAIN}".routes = [
+    ''
+      reverse_proxy /* 192.168.1.5:80
     ''
   ];
   networking.firewall.allowedTCPPorts = [
@@ -232,7 +255,14 @@ in
       name = "hawkbit-ddi";
       image = "hawkbit/hawkbit-ddi-server:${hawkbitVersion}";
       aliases = [ "hawkbit-ddi" ];
-      environment = databaseEnvironment;
+      environment = databaseEnvironment // {
+        # System-wide default device poll interval, for a faster demo/test
+        # feedback loop than the 5-minute default. minPollingTime must also
+        # drop below pollingTime or the requested interval gets clamped
+        # back up to its (also 00:00:30) default floor.
+        HAWKBIT_CONTROLLER_POLLINGTIME = "00:00:20";
+        HAWKBIT_CONTROLLER_MINPOLLINGTIME = "00:00:10";
+      };
       ports = [ "${lanAddress}:8081:8081/tcp" ];
       volumes = [ "${hawkbitDataRoot}/artifactrepo:/app/artifactrepo:rw" ];
       after = [
@@ -267,6 +297,7 @@ in
       image = "hawkbit/hawkbit-mgmt-server:${hawkbitVersion}";
       aliases = [ "hawkbit-mgmt" ];
       environment = mgmtEnvironment;
+      envFile = config.sops.secrets.hawkbit_env.path;
       ports = [ "${lanAddress}:8082:8080/tcp" ];
       volumes = [ "${hawkbitDataRoot}/artifactrepo:/app/artifactrepo:rw" ];
       after = [

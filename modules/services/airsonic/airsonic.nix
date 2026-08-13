@@ -25,6 +25,7 @@
         description = "Path below the apex domain used for Airsonic.";
       };
 
+      options.my.host.services.airsonic = lib.mkEnableOption "Airsonic music service";
       config = lib.mkIf config.my.host.services.airsonic (
         import ./_airsonic.nix (
           args

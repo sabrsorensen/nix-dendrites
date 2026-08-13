@@ -24,6 +24,7 @@ in
         };
       };
 
+      options.my.host.services.ntfy = lib.mkEnableOption "ntfy notification service";
       config = lib.mkIf config.my.host.services.ntfy (
         import ./_ntfy.nix (args // { inherit cfg domain; })
       );

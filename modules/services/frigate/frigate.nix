@@ -26,6 +26,7 @@ in
         };
       };
 
+      options.my.host.services.frigate = lib.mkEnableOption "Frigate NVR service";
       config = lib.mkIf config.my.host.services.frigate (
         import ./_frigate.nix (args // { inherit cfg nginxPort publicHost; })
       );

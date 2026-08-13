@@ -16,4 +16,10 @@ in
 {
   dendritic.homeManagerModules = [ featureModule ];
   flake.modules.homeManager.persistence = featureModule;
+
+  flake.modules.nixos.persistence =
+    { lib, ... }:
+    {
+      options.my.host.features.persistenceHome = lib.mkEnableOption "Home Manager persistent state";
+    };
 }

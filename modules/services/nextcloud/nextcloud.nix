@@ -34,6 +34,7 @@ in
         };
       };
 
+      options.my.host.services.nextcloud = lib.mkEnableOption "Nextcloud with Collabora Online";
       config = lib.mkIf config.my.host.services.nextcloud (
         import ./_nextcloud.nix (
           args
