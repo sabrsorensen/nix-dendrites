@@ -23,6 +23,7 @@ in
     pkgs.p7zip
     pkgs.rclone
     pkgs.dig.dnsutils
+    pkgs.eza
     pkgs.htop
     pkgs.openssl
     pkgs.pciutils.out
