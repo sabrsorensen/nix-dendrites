@@ -40,7 +40,7 @@ in
 
   services.nextcloud = {
     enable = true;
-    package = pkgs.nextcloud33;
+    package = pkgs.nextcloud34;
     hostName = nextcloudHost;
     https = false;
     datadir = cfg.dataDir;
@@ -51,7 +51,7 @@ in
       dbtype = "pgsql";
     };
     extraApps = {
-      inherit (pkgs.nextcloud33Packages.apps) richdocuments;
+      inherit (pkgs.nextcloud34Packages.apps) richdocuments;
     };
     # Retain the App Store for non-core apps while pinning the office
     # integration to the Nextcloud version selected above.

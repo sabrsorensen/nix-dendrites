@@ -90,7 +90,7 @@
 
       directory = {
         fish_style_pwd_dir_length = 1;
-        format = "[$path/]($style)[$read_only]($read_only_style)";
+        format = "[$path]($style)[$read_only]($read_only_style)";
         style = "bold green";
       };
 
