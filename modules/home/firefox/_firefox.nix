@@ -258,7 +258,13 @@ in
   };
 }
 // lib.optionalAttrs (options.home ? persistence) {
-  home.persistence."/persistent".directories = lib.mkIf (config.my.features.persistence or false) [
-    ".config/mozilla/firefox"
-  ];
+  # enable (not just directories) must be gated: allPersistentStoragePaths in
+  # the impermanence module collects every home.persistence.<path> submodule
+  # with enable = true regardless of whether its directories/files end up
+  # empty, so an ungated `directories = mkIf ... [...]` still registers this
+  # host as having a persistent path and trips its "not persisted" warnings.
+  home.persistence."/persistent" = {
+    enable = config.my.features.persistence or false;
+    directories = [ ".config/mozilla/firefox" ];
+  };
 }

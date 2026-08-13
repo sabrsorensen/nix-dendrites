@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(nix flake *)"
+      "Bash(nix flake *)",
+      "Bash(nix eval *)"
     ]
   }
 }
