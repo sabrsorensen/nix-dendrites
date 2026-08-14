@@ -64,15 +64,28 @@ let
     ]);
 in
 {
-  home.file = {
-    "${cssRoot}/chrome/chrome/hide_tabs_toolbar_v2.css".source =
-      inputs.firefox-csshacks + "/chrome/hide_tabs_toolbar_v2.css";
-    "${cssRoot}/chrome/content/css_scrollbar_width_color.css".source =
-      inputs.firefox-csshacks + "/content/css_scrollbar_width_color.css";
-    "${cssRoot}/chrome/content/newtab_background_color.css".source =
-      inputs.firefox-csshacks + "/content/newtab_background_color.css";
-    "${cssRoot}/chrome/content/transparent_reader_toolbar.css".source =
-      inputs.firefox-csshacks + "/content/transparent_reader_toolbar.css";
+  home = {
+    file = {
+      "${cssRoot}/chrome/chrome/hide_tabs_toolbar_v2.css".source =
+        inputs.firefox-csshacks + "/chrome/hide_tabs_toolbar_v2.css";
+      "${cssRoot}/chrome/content/css_scrollbar_width_color.css".source =
+        inputs.firefox-csshacks + "/content/css_scrollbar_width_color.css";
+      "${cssRoot}/chrome/content/newtab_background_color.css".source =
+        inputs.firefox-csshacks + "/content/newtab_background_color.css";
+      "${cssRoot}/chrome/content/transparent_reader_toolbar.css".source =
+        inputs.firefox-csshacks + "/content/transparent_reader_toolbar.css";
+    };
+  }
+  // lib.optionalAttrs (options.home ? persistence) {
+    # enable (not just directories) must be gated: allPersistentStoragePaths in
+    # the impermanence module collects every home.persistence.<path> submodule
+    # with enable = true regardless of whether its directories/files end up
+    # empty, so an ungated `directories = mkIf ... [...]` still registers this
+    # host as having a persistent path and trips its "not persisted" warnings.
+    persistence."/persistent" = {
+      enable = config.my.features.persistence or false;
+      directories = [ ".config/mozilla/firefox" ];
+    };
   };
   programs.firefox = {
     enable = true;
@@ -255,16 +268,5 @@ in
     "text/xml" = [ "firefox.desktop" ];
     "x-scheme-handler/http" = [ "firefox.desktop" ];
     "x-scheme-handler/https" = [ "firefox.desktop" ];
-  };
-}
-// lib.optionalAttrs (options.home ? persistence) {
-  # enable (not just directories) must be gated: allPersistentStoragePaths in
-  # the impermanence module collects every home.persistence.<path> submodule
-  # with enable = true regardless of whether its directories/files end up
-  # empty, so an ungated `directories = mkIf ... [...]` still registers this
-  # host as having a persistent path and trips its "not persisted" warnings.
-  home.persistence."/persistent" = {
-    enable = config.my.features.persistence or false;
-    directories = [ ".config/mozilla/firefox" ];
   };
 }
