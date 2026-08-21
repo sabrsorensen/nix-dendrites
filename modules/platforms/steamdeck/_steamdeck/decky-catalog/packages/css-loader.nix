@@ -47,6 +47,11 @@ mkDeckyPlugin {
     hash = "sha256-dEhK1LcOMerSQsOiUahMm/RX78ABNsKReQfRfspyw68=";
   };
   hash = "sha256-cdKYY2+1wJR7ME7Tj0FZnhP00nrsUetcxbjFZGbGZfg=";
+  # Upstream's pnpm-lock.yaml is lockfileVersion 6.0, too old for pnpm_11 to
+  # force-convert under --frozen-lockfile; read it with the pnpm major it was
+  # generated for instead of forcing a fresh (potentially drifted) one.
+  pnpm = import ./_pnpm9.nix { inherit pkgs; };
+  fetcherVersion = 3;
   postPatch = ''
     cp ${./assets/vendor/css-loader-main.py} main.py
   '';

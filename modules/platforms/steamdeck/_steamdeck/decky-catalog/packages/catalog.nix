@@ -1,6 +1,13 @@
 { pkgs }:
 let
   mkDeckyPlugin = pkgs.callPackage ./mk-plugin.nix { };
+  # Some upstream plugins still ship a pre-v9 pnpm-lock.yaml that pnpm_11
+  # refuses to force-convert under --frozen-lockfile. Rather than force a
+  # fresh lockfile (which re-resolves every unpinned transitive dependency
+  # against whatever is newest today, drifting from what upstream actually
+  # tested), read their real, committed lockfile with the pnpm major it was
+  # generated for.
+  pnpm9 = import ./_pnpm9.nix { inherit pkgs; };
   mk =
     {
       pname,
@@ -11,16 +18,23 @@ let
       pnpmHash,
       verifyMainPy ? true,
       executablePaths ? [ ],
+      legacyLockfile ? false,
     }:
-    mkDeckyPlugin {
-      inherit pname verifyMainPy executablePaths;
-      version = if rev == "main" || rev == "master" then "unstable" else rev;
-      src = pkgs.fetchFromGitHub {
-        inherit owner repo rev;
-        hash = srcHash;
-      };
-      hash = pnpmHash;
-    };
+    mkDeckyPlugin (
+      {
+        inherit pname verifyMainPy executablePaths;
+        version = if rev == "main" || rev == "master" then "unstable" else rev;
+        src = pkgs.fetchFromGitHub {
+          inherit owner repo rev;
+          hash = srcHash;
+        };
+        hash = pnpmHash;
+      }
+      // pkgs.lib.optionalAttrs legacyLockfile {
+        pnpm = pnpm9;
+        fetcherVersion = 3;
+      }
+    );
 in
 {
   "decky-audio-loader" = mk {
@@ -29,7 +43,7 @@ in
     repo = "SDH-AudioLoader";
     rev = "main";
     srcHash = "sha256-9UQOMyeaofrbw7KSNn1kgdgeeDSjqLJFtYYO+EYKwGo=";
-    pnpmHash = "sha256-eKMmkRemqx7jOnnGH5hdMt11c9bPiYlInu4ru9FLyfk=";
+    pnpmHash = "sha256-iZsmVp1vr+LVQRYlADMZDZFNgYenD58UGe2p+n3xzbM=";
     executablePaths = [ "*/bin/*" ];
   };
   "decky-steamgriddb" = mk {
@@ -39,6 +53,7 @@ in
     rev = "HEAD";
     srcHash = "sha256-3+7k24L3nYW7zoKzTPC3khOubs00plbGoIuFmxT6jB8=";
     pnpmHash = "sha256-FRIkp2GuP/kVaxpq7Sn6DYsUbE2O/g8vxin+pl+3ZNw=";
+    legacyLockfile = true;
   };
   "decky-lookup" = mk {
     pname = "decky-lookup";
@@ -46,7 +61,7 @@ in
     repo = "Decky-Lookup";
     rev = "main";
     srcHash = "sha256-Z2dvdxuo98q4FwatEJ/fs5Wwdq9zSrUt/g5vPgW/k44=";
-    pnpmHash = "sha256-8fqu4t5oy2Y23cU1vhz9vnw8H2m7TCH+yLsz5GzXh/E=";
+    pnpmHash = "sha256-ztV/7yhou+aAiU8BnWbvGTpDOdwmqqJCF+KTmPth/Xw=";
     verifyMainPy = false;
     executablePaths = [ "*/bin/*" ];
   };
@@ -58,6 +73,7 @@ in
     srcHash = "sha256-QpY3tEuTde/NVLRX0OWLLqIHnGxUDTJTfNIot1dKLLk=";
     pnpmHash = "sha256-lmhw7aYSmkblSStHu0Z/ykU+YPsi+2e/3jSeUU4VNgI=";
     executablePaths = [ "*/bin/*" ];
+    legacyLockfile = true;
   };
   "decky-protondb" = mk {
     pname = "decky-protondb";
@@ -65,7 +81,7 @@ in
     repo = "protondb-decky";
     rev = "main";
     srcHash = "sha256-gXJH16PQNSiOPzWldeqShq0UxT9KUeaygINsNPHWifs=";
-    pnpmHash = "sha256-WJlCk355suOqpHyEse23uglk0XTB33D53CHmOyTS6v0=";
+    pnpmHash = "sha256-I5RNOInDZE0hFZ48kf9iLtGe8cTKWrFRMGVufF5P3xI=";
     executablePaths = [ "*/bin/*" ];
   };
   "decky-tabmaster" = mk {
@@ -74,7 +90,7 @@ in
     repo = "TabMaster";
     rev = "v2.15.1";
     srcHash = "sha256-2BdTeVXeioxMRjjM9W/Vm/IYGVCWFsH2MOwDWIack4E=";
-    pnpmHash = "sha256-pA9OCFj4xdtAST7qwmYUI/ZdNhWN0PvYCvYi3H8/mcQ=";
+    pnpmHash = "sha256-3ZBIhYfEAfMVRJd6AL2viL/UrBUbzMKH4/++P7Jk6Z8=";
     verifyMainPy = false;
   };
   "decky-autoflatpaks" = mk {
@@ -83,15 +99,15 @@ in
     repo = "decky-autoflatpaks";
     rev = "main";
     srcHash = "sha256-CjVjHAjTGMP5ATo+7lDwOZ0OI0SvjkqVYUd0xHjfLbA=";
-    pnpmHash = "sha256-xZChs8C6+CVAcU6vaPnOpQa3m91YiDp8doxTKAuZc98=";
+    pnpmHash = "sha256-NQUkUs+C4IeshpByseirr0ZIW00Dux8Jj/24amiZOd8=";
   };
   "decky-bluetooth" = mk {
     pname = "decky-bluetooth";
     owner = "Outpox";
     repo = "Bluetooth";
     rev = "main";
-    srcHash = "sha256-iRffRd13ABENTW4b1tFjaK40s2rvVbumeBPDsRIohjU=";
-    pnpmHash = "sha256-02S4/SRPo9hSioDwyPgPNBdfEurX9yaXbq8MbqwK8pY=";
+    srcHash = "sha256-E09yECuizhPKSnbn4FGvU4+1jNn4dq5oxJCuloqX30Q=";
+    pnpmHash = "sha256-Hf2tFLlScnHh97EthKNXxkEbykU6xjC3s1iA7AqJ1r4=";
   };
   "decky-kdeconnect" = mk {
     pname = "decky-kdeconnect";
@@ -101,6 +117,7 @@ in
     srcHash = "sha256-hX2VOy1Q90umizQ3WXuSLRfR49ZOnIQ+/xCIaAZcWuI=";
     pnpmHash = "sha256-fqNiU22sjdOArkYQkWnQGR819HU+xpXFt5fPS9qrwic=";
     executablePaths = [ "*/bin/*" ];
+    legacyLockfile = true;
   };
   "decky-web-browser" = mk {
     pname = "decky-web-browser";
@@ -108,7 +125,7 @@ in
     repo = "DeckWebBrowser";
     rev = "master";
     srcHash = "sha256-qilaHvk/HiOaqBl1IgBLtfVoPaYph0yuoS+p7yG9aCE=";
-    pnpmHash = "sha256-c61m7jlyx4vTbalB7EVd0fc+TH/uFXeYRBxEIDEj2FE=";
+    pnpmHash = "sha256-53TRL8rka+0I6LnVlpEw5AHhbcS2G2YJycVY1hpx7ms=";
     executablePaths = [ "*/bin/*" ];
   };
   "decky-museck" = mk {
@@ -116,8 +133,8 @@ in
     owner = "Nezreka";
     repo = "Museck";
     rev = "main";
-    srcHash = "sha256-l1DXMRfTd9CfOBPe9DVjnLGcaQVQXBgfJ0hIzfBUjGU=";
-    pnpmHash = "sha256-o7PQ7XMtaA3kypofskunp5/NaNcJFn+4CT1NIGm3MSI=";
+    srcHash = "sha256-jCZoGmLcwS1CuY99lsYJ98l9+EvpGh8Kj2hDW5157yM=";
+    pnpmHash = "sha256-1TKYD24kVNwgOWQzVKebHnGh4QHSXRTnKxZpRjGFIEo=";
     verifyMainPy = false;
   };
 }

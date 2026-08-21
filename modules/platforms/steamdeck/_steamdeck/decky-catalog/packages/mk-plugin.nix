@@ -2,7 +2,7 @@
   lib,
   fetchPnpmDeps,
   nodejs,
-  pnpm_9,
+  pnpm_11,
   pnpmConfigHook,
   python3,
   stdenv,
@@ -14,7 +14,8 @@
   sourceRoot ? null,
   hash,
   meta ? { },
-  fetcherVersion ? 3,
+  pnpm ? pnpm_11,
+  fetcherVersion ? 4,
   buildMessage ? "Building ${pname} frontend...",
   buildCommand ? "pnpm build",
   buildInputs ? [ ],
@@ -69,12 +70,12 @@ stdenv.mkDerivation {
       src
       fetcherVersion
       hash
+      pnpm
       ;
-    pnpm = pnpm_9;
   };
   nativeBuildInputs = [
     nodejs
-    pnpm_9
+    pnpm
     pnpmConfigHook
     python3
   ]

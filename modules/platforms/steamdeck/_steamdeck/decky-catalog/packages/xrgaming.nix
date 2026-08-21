@@ -162,7 +162,7 @@ mkDeckyPlugin {
     sha256 = "sha256-YEsCMfWR4ohXBhhyqVYrwhs5j49OuBFxahTaYarRv/o=";
     fetchSubmodules = true;
   };
-  hash = "sha256-aTAYCuALMBYDaMrYGSFmYs4YonKX5c23MrEDFnonusQ=";
+  hash = "sha256-USsFNT8+c2ekBcShzdkjaq5980ctDwK8LYKp8wOoFIw=";
   extraNativeBuildInputs = with pkgs; [
     git
     curl

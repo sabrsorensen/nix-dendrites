@@ -2,24 +2,7 @@
   lib,
   fetchFromGitHub,
   mkDeckyPlugin,
-  pkgs,
 }:
-let
-  writeSourceReplacementScript = import ./_write-source-replacement-script.nix { inherit pkgs; };
-  sourceReplacementScript = writeSourceReplacementScript {
-    scriptName = "decky-free-loader-import-path";
-    defaultFile = "main.py";
-    replacements = [
-      {
-        kind = "literal";
-        reason = "Resolve the plugin-local import path without assuming Decky's mutable plugins directory layout.";
-        old = ''sys.path.append(os.path.abspath("../plugins/free-loader"))'';
-        new = "sys.path.append(os.path.dirname(os.path.abspath(__file__)))";
-        expectedCount = 1;
-      }
-    ];
-  };
-in
 mkDeckyPlugin {
   pname = "decky-free-loader";
   version = "unstable";
@@ -27,10 +10,9 @@ mkDeckyPlugin {
     owner = "jwhitlow45";
     repo = "free-loader";
     rev = "main";
-    hash = "sha256-MCpk5v3GelpOIKqkqyESS6qhM4rWOndhf0X1ybr5g+k=";
+    hash = "sha256-niK2O+5Te0wVR9BJqN0/yE4i0cEtveLO9+mkj5JolnM=";
   };
-  hash = "sha256-JiZYfSiDUEXSZ0Vwv/B/+twXm/fHOr6uQMeFc/FCKPI=";
-  inherit sourceReplacementScript;
+  hash = "sha256-Vvr6HTSR6YXfSuzPLIqSFH4kl3RAHNjVEiWwcKy8eu8=";
   executablePaths = [ "*/bin/*" ];
   meta = with lib; {
     description = "Notifications for free games on Steam, GOG, and Epic Games";

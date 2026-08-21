@@ -2,6 +2,7 @@
   lib,
   fetchFromGitHub,
   mkDeckyPlugin,
+  pkgs,
   animationConfig ? null,
 }:
 mkDeckyPlugin {
@@ -14,6 +15,11 @@ mkDeckyPlugin {
     hash = "sha256-F9OKBmuX0Pux3KTPX6UYJ1RL05ZMso2h0uw/VlvQ8CU=";
   };
   hash = "sha256-2yKZ+HQPJM2Lh8IZ3SKxUJFE2fCQszbyMJGq+76G6vk=";
+  # Upstream's pnpm-lock.yaml is lockfileVersion 6.0, too old for pnpm_11 to
+  # force-convert under --frozen-lockfile; read it with the pnpm major it was
+  # generated for instead of forcing a fresh (potentially drifted) one.
+  pnpm = import ./_pnpm9.nix { inherit pkgs; };
+  fetcherVersion = 3;
   postPatch = ''
     cp ${./assets/vendor/animation-changer-main.py} main.py
   '';

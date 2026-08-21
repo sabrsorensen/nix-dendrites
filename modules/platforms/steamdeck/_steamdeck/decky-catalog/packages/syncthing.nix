@@ -3,7 +3,7 @@ mkDeckyPlugin {
   pname = "decky-syncthing";
   version = "0.3.0-jovian";
   src = ./assets/vendor/syncthing;
-  hash = "sha256-nFFB1JLAjeKIgRSObZoI4Sl149ZwjpQR5jSlUhUVyUQ=";
+  hash = "sha256-4R6z0nEXV9DWYR1Zj2vRNfR3U+coYuOoZ8rBxWem9DE=";
   buildMessage = "Building Jovian Syncthing frontend...";
   meta = with lib; {
     description = "Jovian/NixOS-friendly Syncthing integration for Decky Loader";
