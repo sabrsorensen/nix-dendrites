@@ -32,6 +32,27 @@ let
       echo "Temperature: N/A"
     fi
 
+    if [ -x ${pkgs.libraspberrypi}/bin/vcgencmd ]; then
+      throttled_raw="$(${pkgs.sudo}/bin/sudo ${pkgs.libraspberrypi}/bin/vcgencmd get_throttled 2>/dev/null | ${pkgs.coreutils}/bin/cut -d= -f2)"
+      if [ -n "$throttled_raw" ]; then
+        throttled_val=$((throttled_raw))
+        flags=""
+        [ $((throttled_val & 0x1)) -ne 0 ] && flags="$flags undervoltage-now"
+        [ $((throttled_val & 0x2)) -ne 0 ] && flags="$flags freq-capped-now"
+        [ $((throttled_val & 0x4)) -ne 0 ] && flags="$flags throttled-now"
+        [ $((throttled_val & 0x8)) -ne 0 ] && flags="$flags soft-temp-limit-now"
+        [ $((throttled_val & 0x10000)) -ne 0 ] && flags="$flags undervoltage-occurred"
+        [ $((throttled_val & 0x20000)) -ne 0 ] && flags="$flags freq-capped-occurred"
+        [ $((throttled_val & 0x40000)) -ne 0 ] && flags="$flags throttled-occurred"
+        [ $((throttled_val & 0x80000)) -ne 0 ] && flags="$flags soft-temp-limit-occurred"
+        if [ -z "$flags" ]; then
+          echo "Power: OK"
+        else
+          echo "Power: WARNING -$flags"
+        fi
+      fi
+    fi
+
     echo
     if ${config.systemd.package}/bin/systemctl list-unit-files blocky.service >/dev/null 2>&1; then
       ${config.systemd.package}/bin/systemctl is-active --quiet blocky && echo "Blocky: Running" || echo "Blocky: Not running"

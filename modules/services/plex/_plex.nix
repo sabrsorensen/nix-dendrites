@@ -56,7 +56,8 @@
   ];
   virtualisation.oci-containers.containers = {
     plex = {
-      image = "lscr.io/linuxserver/plex:1.43.3.10828-00f62d37d-ls315";
+      image = "lscr.io/linuxserver/plex:latest";
+      pull = "newer";
       autoStart = true;
       environment = {
         ADVERTISE_IP = "https://${cfg.hostName}.${domain}/";
