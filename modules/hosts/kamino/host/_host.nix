@@ -59,7 +59,7 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.kbd}/bin/setleds -D +num < /dev/tty1";
+      ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.kbd}/bin/setleds -D +num < /dev/tty1'";
     };
   };
   environment.systemPackages = [
