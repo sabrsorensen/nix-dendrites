@@ -56,6 +56,8 @@ let
           wrapProgram "$out/bin/codex" --run ${lib.escapeShellArg secretExports}
         '';
       };
+      herdrPackage = inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.herdr;
+      codexConfig = "${homeDirectory}/.codex/config.toml";
     in
     {
       options.my.features.wslCodex = lib.mkEnableOption "WSL work Codex profile";
@@ -65,11 +67,33 @@ let
           (pkgs.python3.withPackages (ps: [ ps.pyyaml ]))
         ]
         ++ lib.optional (pkgs ? spec-kit) pkgs.spec-kit;
+        home.file.".codex/skills/herdr/SKILL.md" = {
+          source = ./herdr-skill.md;
+          force = true;
+        };
+        # Home Manager normally links this file from the Nix store.  Herdr's
+        # Codex integration must update it to enable hooks, so the activation
+        # bridge below turns the generated link into a mutable user file after
+        # each generation has been linked.
+        home.activation.herdrCodexPrepareConfig = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+          if [ -f ${lib.escapeShellArg codexConfig} ] && [ ! -L ${lib.escapeShellArg codexConfig} ]; then
+            run mv -f ${lib.escapeShellArg codexConfig} ${lib.escapeShellArg "${codexConfig}.herdr-previous"}
+          fi
+        '';
+        home.activation.herdrCodexIntegration = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+          codex_home=${lib.escapeShellArg homeDirectory}/.codex
+          run mkdir -p "$codex_home"
+          if [ -L ${lib.escapeShellArg codexConfig} ]; then
+            run cp --remove-destination "$(readlink -f ${lib.escapeShellArg codexConfig})" ${lib.escapeShellArg codexConfig}
+          fi
+          run ${lib.getExe herdrPackage} integration install codex
+        '';
         programs.codex = {
           enable = true;
           package = wrappedCodex;
           enableMcpIntegration = true;
           settings = {
+            features.hooks = true;
             model = "gpt-5.6-terra";
             model_reasoning_effort = "medium";
             notice.model_migrations = {
