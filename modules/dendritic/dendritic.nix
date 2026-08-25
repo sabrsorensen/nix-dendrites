@@ -32,6 +32,22 @@
 
     flake-file.description = "sabrsorensen's Dendritic Nix configurations";
 
+    # Determinate's nested nix-src deliberately uses its own nixpkgs
+    # compatibility pin. Following that subtree to the root weekly nixpkgs
+    # can make nix itself fail to build when a Boost backport no longer
+    # applies cleanly. Keep Determinate intact while deduplicating the rest
+    # of the lock graph.
+    flake-file.prune-lock.program = lib.mkForce (
+      prunePkgs:
+      prunePkgs.writeShellApplication {
+        name = "nix-auto-follow";
+        runtimeInputs = [ inputs.nix-auto-follow.packages.${prunePkgs.stdenv.hostPlatform.system}.default ];
+        text = ''
+          auto-follow --ignore determinate "$1" > "$2"
+        '';
+      }
+    );
+
     systems = [
       "aarch64-linux"
       "x86_64-linux"
