@@ -163,6 +163,9 @@ let
     "decky-free-loader" = pkgs.callPackage ./packages/free-loader.nix {
       inherit mkDeckyPlugin;
     };
+    "decky-nexus" = pkgs.callPackage ./packages/decky-nexus.nix {
+      inherit mkDeckyPlugin;
+    };
     "decky-syncthing" = pkgs.callPackage ./packages/syncthing.nix {
       inherit mkDeckyPlugin;
     };
@@ -182,6 +185,7 @@ in
         "XR Gaming"
         "Web Browser"
         "TabMaster"
+        "Nexus Mods"
         "Syncthing"
         "SteamGridDB"
         "ProtonDB Badges"
