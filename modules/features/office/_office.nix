@@ -4,7 +4,7 @@ lib.mkMerge [
     # settings for all systems
     home.packages = with pkgs; [ ];
   }
-  (lib.mkIf (pkgs.stdenv.isLinux) {
+  (lib.mkIf (pkgs.stdenv.hostPlatform.isLinux) {
     # NixOS settings
     home.packages = with pkgs; [
       hunspell

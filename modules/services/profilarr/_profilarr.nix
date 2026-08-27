@@ -41,6 +41,13 @@ in
     ports = [ "${localAddr}:6868/tcp" ];
     labels."com.centurylinklabs.watchtower.enable" = "true";
     log-driver = "journald";
-    extraOptions = [ "--network-alias=${serviceName}" ];
+    extraOptions = [
+      "--network-alias=${serviceName}"
+      "--health-cmd=curl --fail http://localhost:6868 || exit 1"
+      "--health-interval=10s"
+      "--health-retries=5"
+      "--health-start-period=15s"
+      "--health-timeout=10s"
+    ];
   };
 }

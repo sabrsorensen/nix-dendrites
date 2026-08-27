@@ -56,8 +56,7 @@
   ];
   virtualisation.oci-containers.containers = {
     plex = {
-      image = "lscr.io/linuxserver/plex:latest";
-      pull = "newer";
+      image = "lscr.io/linuxserver/plex:version-1.43.3.10896-cb3ebc72d";
       autoStart = true;
       environment = {
         ADVERTISE_IP = "https://${cfg.hostName}.${domain}/";
@@ -92,6 +91,11 @@
         "--device=/dev/dri:/dev/dri:rwm"
         "--hostname=plex"
         "--network-alias=plex"
+        "--health-cmd=curl --fail http://localhost:32400/identity || exit 1"
+        "--health-interval=10s"
+        "--health-retries=5"
+        "--health-start-period=60s"
+        "--health-timeout=10s"
       ];
     };
     tautulli = {
@@ -115,7 +119,14 @@
       ports = [ "127.0.0.1:8181:8181/tcp" ];
       labels."com.centurylinklabs.watchtower.enable" = "true";
       log-driver = "journald";
-      extraOptions = [ "--network-alias=tautulli" ];
+      extraOptions = [
+        "--network-alias=tautulli"
+        "--health-cmd=curl --fail http://localhost:8181 || exit 1"
+        "--health-interval=10s"
+        "--health-retries=5"
+        "--health-start-period=30s"
+        "--health-timeout=10s"
+      ];
     };
     kitana = {
       image = "pannal/kitana";
@@ -134,7 +145,14 @@
       ];
       labels."com.centurylinklabs.watchtower.enable" = "true";
       log-driver = "journald";
-      extraOptions = [ "--network-alias=kitana" ];
+      extraOptions = [
+        "--network-alias=kitana"
+        "--health-cmd=curl --fail http://localhost:31337/kitana/ || exit 1"
+        "--health-interval=10s"
+        "--health-retries=5"
+        "--health-start-period=15s"
+        "--health-timeout=10s"
+      ];
     };
   };
 }

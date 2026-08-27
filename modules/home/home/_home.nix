@@ -103,6 +103,7 @@
           builtins.readFile "${inputs.nix-secrets}/domain.txt"
         );
         my.features.konsole = host.features.konsole;
+        my.features.plasma = host.features.plasma;
         my.gpg = {
           isGui = host.features.gui;
           isWsl = host.platform == "wsl";

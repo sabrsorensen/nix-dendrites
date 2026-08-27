@@ -34,6 +34,11 @@
     log-driver = "journald";
     extraOptions = [
       "--network=host"
+      ''--health-cmd=node -e "require('http').get('http://localhost:3000/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"''
+      "--health-interval=10s"
+      "--health-retries=5"
+      "--health-start-period=15s"
+      "--health-timeout=10s"
     ];
   };
 }

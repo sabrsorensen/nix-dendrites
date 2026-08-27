@@ -30,6 +30,7 @@
         apprise = true;
         arrSync = true;
         attic = true;
+        autobrr = true;
         atuinServer = true;
         bazarr = true;
         caddy = true;
