@@ -16,14 +16,7 @@
     ''
       redir /${cfg.pathSegment} /${cfg.pathSegment}/
       route /${cfg.pathSegment}/* {
-        filter {
-          content_type text/html.*
-          search_pattern </head>
-          replacement "<link rel='stylesheet' type='text/css' href='https://theme-park.dev/css/base/${serviceName}/aquamarine.css'></head>"
-        }
-        reverse_proxy /${cfg.pathSegment}/* ${localAddr} {
-          header_up -Accept-Encoding
-        }
+        reverse_proxy /${cfg.pathSegment}/* ${localAddr}
       }
     ''
   ];
