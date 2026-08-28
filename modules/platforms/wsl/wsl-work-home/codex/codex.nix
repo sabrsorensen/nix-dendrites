@@ -1,10 +1,6 @@
 { inputs, ... }:
 {
-  flake-file.inputs.codex-nix = {
-    url = "github:sadjow/codex-cli-nix";
-    inputs.flake-utils.follows = "flake-utils";
-    inputs.nixpkgs.follows = "nixpkgs";
-  };
-
+  # The codex-nix input is declared beside the base Codex feature in
+  # modules/home/codex/codex.nix; this profile only consumes it.
   imports = [ (import ./_codex.nix { inherit inputs; }) ];
 }

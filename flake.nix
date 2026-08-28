@@ -124,6 +124,10 @@
       url = "https://flakehub.com/f/Mic92/sops-nix/*";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    superpowers = {
+      url = "github:obra/superpowers";
+      flake = false;
+    };
     synthwave-84-vscode-theme = {
       url = "github:sabrsorensen/nix-synthwave-vscode";
       inputs = {

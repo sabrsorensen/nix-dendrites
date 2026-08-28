@@ -853,6 +853,7 @@
         "partyowl84-vscode-theme": "partyowl84-vscode-theme",
         "plasma-manager": "plasma-manager",
         "sops-nix": "sops-nix",
+        "superpowers": "superpowers",
         "synthwave-84-vscode-theme": "synthwave-84-vscode-theme",
         "synthwave-blues-vscode-theme": "synthwave-blues-vscode-theme",
         "terminal-rain-lightning": "terminal-rain-lightning",
@@ -876,6 +877,22 @@
       "original": {
         "type": "tarball",
         "url": "https://flakehub.com/f/Mic92/sops-nix/%2A"
+      }
+    },
+    "superpowers": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786553601,
+        "narHash": "sha256-EsGNO0dULWf5Bx6bGrCv2kI2Z8aKH0kRvGiuN23wChQ=",
+        "owner": "obra",
+        "repo": "superpowers",
+        "rev": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+        "type": "github"
+      },
+      "original": {
+        "owner": "obra",
+        "repo": "superpowers",
+        "type": "github"
       }
     },
     "synthwave-84-vscode-theme": {
