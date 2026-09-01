@@ -17,6 +17,7 @@
       gui = true;
       deskflow = true;
       firmware = true;
+      minecraft = true;
       noson = true;
     };
   };

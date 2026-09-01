@@ -91,6 +91,7 @@ let
       "editor.tabSize" = 2;
     };
     "chat.disableAIFeatures" = true;
+    "claudeCode.preferredLocation" = "panel";
     "accessibility.signals.terminalBell"."sound" = "on";
     "debug.toolBarLocation" = "commandCenter";
     "diffEditor.ignoreTrimWhitespace" = false;
