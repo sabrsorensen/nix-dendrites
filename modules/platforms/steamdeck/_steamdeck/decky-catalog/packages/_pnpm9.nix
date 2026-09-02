@@ -8,4 +8,7 @@
 pkgs.callPackage "${pkgs.path}/pkgs/development/tools/pnpm/generic.nix" {
   version = "9.15.9";
   hash = "sha256-z4anrXZEBjldQoam0J1zBxFyCsxtk+nc6ax6xNxKKKc=";
+  # nixpkgs' own pnpm/default.nix passes this; without it callPackage supplies
+  # pkgs.nodejs and generic.nix warns "Override nodejs-slim instead of nodejs".
+  nodejs = null;
 }
