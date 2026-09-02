@@ -58,6 +58,27 @@ let
       };
       herdrPackage = inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.herdr;
       codexConfig = "${homeDirectory}/.codex/config.toml";
+      azdoMcpLibraryPath = lib.makeLibraryPath (
+        with pkgs;
+        [
+          libsecret
+          glib
+          libgcrypt
+          pcre2
+          util-linux
+          libselinux
+          libffi
+          libgpg-error
+        ]
+      );
+      azdoMcp = pkgs.writeShellApplication {
+        name = "azdo-mcp";
+        runtimeInputs = [ pkgs.nodejs ];
+        text = ''
+          export LD_LIBRARY_PATH=${lib.escapeShellArg azdoMcpLibraryPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+          exec ${pkgs.nodejs}/bin/npx "$@"
+        '';
+      };
     in
     {
       options.my.features.wslCodex = lib.mkEnableOption "WSL work Codex profile";
@@ -65,6 +86,7 @@ let
         home.packages = [
           pkgs.bubblewrap
           (pkgs.python3.withPackages (ps: [ ps.pyyaml ]))
+          azdoMcp
         ]
         ++ lib.optional (pkgs ? spec-kit) pkgs.spec-kit;
         home.file.".codex/skills/herdr/SKILL.md" = {
@@ -114,8 +136,17 @@ let
               "${homeDirectory}/src/nix-dendrites-broadcast".trust_level = "trusted";
             };
             mcp_servers = {
-              AZDOLocal = {
+              Azure = {
                 command = "npx";
+                args = [
+                  "-y"
+                  "@azure/mcp@latest"
+                  "server"
+                  "start"
+                ];
+              };
+              AZDOLocal = {
+                command = "${azdoMcp}/bin/azdo-mcp";
                 args = [
                   "-y"
                   "@azure-devops/mcp@next"

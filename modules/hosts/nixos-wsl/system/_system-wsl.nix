@@ -14,6 +14,7 @@
   services.openssh.openFirewall = lib.mkForce false;
   programs.nix-ld.libraries = with pkgs; [
     icu
+    libsecret
     openssl
     zlib
     stdenv.cc.cc.lib
