@@ -32,6 +32,7 @@ in
       nvidia = true;
       noson = true;
       office = true;
+      plasma = true;
       steam = true;
       threedprinter = true;
       wine = true;

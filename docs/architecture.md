@@ -218,6 +218,65 @@ humans, while self-gating preserves the broadcast model for Nix.
 Put device UUIDs, bootloader configuration, physical interfaces, disk layouts,
 and exceptional hardware quirks here. Keep broad policy out of these files.
 
+## Host-specific overrides
+
+A host-specific concern is a public file `modules/hosts/<host>/<concern>/<concern>.nix`
+that registers `flake.modules.nixos.<concern>-<host>`, `lib.mkIf`-gated on
+`config.my.host.name == "<Host>"`, importing a private `_<concern>.nix` payload
+in the same directory. It is still broadcast to every host like any other
+module; only the gate is host-specific. `hardware-zaphodbeeblebrox`,
+`disk-zaphodbeeblebrox`, and `services-atlasuponraiden` are the reference
+shape. Never conditionally *import* one of these from a host output — the gate
+lives inside the module.
+
+The same shape carries a per-host override of a **broadcast feature that owns a
+large mostly-shared settings body** (captured desktop state, input-device ids,
+per-machine tuning — `programs.plasma` is the worked example):
+
+```text
+modules/home/plasma/_plasma.nix           # shared base, gated on my.features.plasma
+modules/hosts/kamino/plasma/plasma.nix    # registers flake.modules.nixos.plasma-kamino
+modules/hosts/kamino/plasma/_plasma.nix   # Kamino's delta — a bare programs.plasma attrset
+```
+
+```nix
+# modules/hosts/kamino/plasma/plasma.nix
+flake.modules.nixos = lib.optionalAttrs (inputs ? plasma-manager) {
+  plasma-kamino =
+    { config, lib, ... }:
+    lib.mkIf
+      (
+        config.my.host.name == "Kamino"
+        && config.my.host.features.plasma
+        && config.my.host.home.enable
+      )
+      {
+        home-manager.users.${config.my.host.home.username}.programs.plasma = import ./_plasma.nix;
+      };
+};
+```
+
+Rules:
+
+- The base module keeps only keys whose value is identical on every host that
+  has the feature. Anything that differs, or is host-only, moves entirely into
+  the per-host payload, so base and delta merge with no conflict and no
+  `lib.mkForce`.
+- The per-host module self-gates on `my.host.name` plus the feature and
+  `home.enable` booleans. It is broadcast, not conditionally imported.
+- It reaches Home Manager by setting `home-manager.users.<user>.programs.<x>`
+  from the NixOS side. It does not append to `dendritic.homeManagerModules` —
+  that list is fixed at flake composition and cannot be host-aware.
+- Wrap the registration in `lib.optionalAttrs (inputs ? <input>)` when the
+  feature's own module is guarded on an optional flake input.
+- Capture host deltas verbatim (rc2nix output, UUIDs, device ids). Do not tidy
+  churn keys — that is the porting discipline.
+
+To resplit after editing host state: evaluate
+`config.home-manager.users.<user>.programs.<x>` for each host, diff the rendered
+attrsets, move the identical intersection to the base and everything else to the
+per-host payloads.
+
 ## Architecture versus integration roles
 
 CPU architecture and platform integration are different concerns:

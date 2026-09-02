@@ -120,6 +120,19 @@ silently pick a runtime for the host.
   (`host.nix`, `hardware.nix`, etc.) — organization, not an import
   aggregator. A private `_` helper may live alongside.
 
+Host-specific config is a `hosts/<host>/<concern>/<concern>.nix` +
+`_<concern>.nix` pair: the public file registers
+`flake.modules.nixos.<concern>-<host>` gated on
+`config.my.host.name == "<Host>"` and imports the private payload — broadcast
+like everything else, only the gate is host-specific (`hardware-zaphodbeeblebrox`,
+`services-atlasuponraiden`). The same shape carries a per-host override of a
+broadcast feature that owns a big mostly-shared settings body (e.g.
+`programs.plasma`): base keeps only values identical on every host, each host's
+delta lives in `hosts/<host>/<concern>/_<concern>.nix` and is applied via
+`home-manager.users.<user>.programs.<x>` from the gated NixOS module — never a
+second `dendritic.homeManagerModules` entry. See "Host-specific overrides" in
+[docs/architecture.md](docs/architecture.md).
+
 CPU architecture and platform integration are different concerns (e.g. Steam
 Deck is `x86_64-linux` *and* `platform = "steamdeck"`) — don't invent a new
 architecture layer just because a host has a special integration stack.

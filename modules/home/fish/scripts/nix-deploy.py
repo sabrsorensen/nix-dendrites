@@ -242,13 +242,17 @@ def deploy_home(config: Config, mode: str, target_spec: str, extra: list[str]) -
     configured_user = HOME_USERS.get(target.lower(), remote_user)
     remote_target = target if remote_user == configured_user else f"{remote_user}@{target}"
     remote_store = f"ssh://{remote_target}?remote-program=/home/{remote_user}/.nix-profile/bin/nix-store"
+    # `home_output` names a `homeConfigurations` attribute, not a package, so
+    # it must go through `-c`/`homeConfigurations.<name>.activationPackage`
+    # rather than a bare `<flake>#<name>` installable.
+    home_attr = f"{config.flake}#homeConfigurations.{home_output}.activationPackage"
     update = ["--update"] if mode == "upgrade" else []
-    build = ["nh", "home", "build", f"{config.flake}#{home_output}", *update, "--", *extra]
+    build = ["nh", "home", "build", config.flake, "-c", home_output, *update, "--", *extra]
     print(f"🔨 Building {home_output} locally before waiting for it to come online...")
     result = run_inhibited(config, build)
     if result.returncode != 0:
         return result.returncode
-    path = run(["nix", "path-info", f"{config.flake}#{home_output}"], capture=True)
+    path = run(["nix", "path-info", home_attr], capture=True)
     if path.returncode != 0:
         return path.returncode
     store_path = path.stdout.strip().splitlines()[-1]
@@ -256,7 +260,7 @@ def deploy_home(config: Config, mode: str, target_spec: str, extra: list[str]) -
     print(f"Build completed for {target}.")
     wait_for_target(target, config.domain)
     print(f"📦 Copying {home_output} to {remote_target}...")
-    result = run_inhibited(config, ["nix", "copy", "--to", remote_store, f"{config.flake}#{home_output}"])
+    result = run_inhibited(config, ["nix", "copy", "--to", remote_store, home_attr])
     if result.returncode != 0:
         return result.returncode
     activation = f"{store_path}/activate"
