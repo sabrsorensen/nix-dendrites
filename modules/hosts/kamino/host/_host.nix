@@ -21,6 +21,7 @@ in
       personalMcp = true;
       vscode = true;
       claudeCode = true;
+      claudeDesktop = true;
       firmware = true;
       nix-ld = true;
       docker = true;
@@ -28,6 +29,7 @@ in
       bitwarden = true;
       deskflow = false;
       flatpak = true;
+      lutris = true;
       minecraft = true;
       nvidia = true;
       noson = true;
@@ -35,6 +37,7 @@ in
       plasma = true;
       steam = true;
       threedprinter = true;
+      w3dHubLauncher = true;
       wine = true;
       zsa = true;
     };

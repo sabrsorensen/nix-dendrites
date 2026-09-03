@@ -17,8 +17,10 @@
       gui = true;
       deskflow = true;
       firmware = true;
+      lutris = true;
       minecraft = true;
       noson = true;
+      w3dHubLauncher = true;
     };
   };
   users.groups.sam.gid = 1000;
