@@ -6,6 +6,4 @@ if [[ $# -ne 1 ]]; then
   exit 1
 fi
 
-target=$1
-
-ssh "$target" 'sudo bootstrap-enroll'
+ssh "$1" 'sudo bootstrap-enroll'

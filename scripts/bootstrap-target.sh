@@ -7,42 +7,24 @@ if [[ $# -ne 2 ]]; then
 fi
 
 mode=$1
-host=$2
+host=$(tr '[:upper:]' '[:lower:]' <<<"$2")
+
+if [[ ! $host =~ ^[a-z0-9-]+$ ]]; then
+  echo "Host names may contain only lowercase letters, digits, and hyphens." >&2
+  exit 1
+fi
 
 case "$mode" in
-  config)
-    predicate='builtins.match ".*-bootstrap$" output.name != null && (output.buildProduct or null) == null'
-    attr='output.configuration'
+  config | output)
+    configuration="${host}-bootstrap"
     ;;
-  output)
-    predicate='builtins.match ".*-bootstrap$" output.name != null && (output.buildProduct or null) == null'
-    attr='output.name'
-    ;;
-  image-config)
-    predicate='builtins.match ".*-bootstrap-image$" output.name != null && (output.buildProduct or null) == "sdImage"'
-    attr='output.configuration'
-    ;;
-  image-output)
-    predicate='builtins.match ".*-bootstrap-image$" output.name != null && (output.buildProduct or null) == "sdImage"'
-    attr='output.name'
+  image-config | image-output)
+    configuration="${host}-bootstrap-image"
     ;;
   final-config)
-    nix eval --raw --impure --expr "
-      let
-        flake = builtins.getFlake (toString ./.);
-        inventory = builtins.getAttr \"${host}\" flake.outputs.lib.hostInventory;
-        bootstrapOutputs = builtins.filter (
-          output: builtins.match \".*-bootstrap$\" output.name != null && (output.buildProduct or null) == null
-        ) inventory.outputs;
-      in
-      if bootstrapOutputs == [] then
-        \"${host}\"
-      else
-        let
-          cfg = flake.outputs.nixosConfigurations.\${(builtins.head bootstrapOutputs).configuration}.config;
-        in
-        cfg.my.host.bootstrap.finalConfigName
-    "
+    configuration="${host}-bootstrap"
+    nix eval --raw ".#nixosConfigurations.\"${configuration}\".config.my.host.bootstrap.finalConfigName"
+    printf '\n'
     exit 0
     ;;
   *)
@@ -51,17 +33,7 @@ case "$mode" in
     ;;
 esac
 
-nix eval --raw --impure --expr "
-  let
-    flake = builtins.getFlake (toString ./.);
-    inventory = builtins.getAttr \"${host}\" flake.outputs.lib.hostInventory;
-    outputs = builtins.filter (output: ${predicate}) inventory.outputs;
-  in
-  if outputs == [] then
-    builtins.throw \"No matching bootstrap target found for ${host}\"
-  else
-    let
-      output = builtins.head outputs;
-    in
-    ${attr}
-"
+# Bootstrap configurations are explicit flake outputs.  Evaluating the host
+# name first gives a clear error if the requested variant is not declared.
+nix eval --raw ".#nixosConfigurations.\"${configuration}\".config.networking.hostName" >/dev/null
+printf '%s\n' "$configuration"

@@ -7,6 +7,15 @@
 
   inputs = {
     armory-runtime-nixpkgs.url = "github:NixOS/nixpkgs/752b6a95db93f03d6901304f760bd452b4b7db41";
+    claude-code = {
+      url = "github:sadjow/claude-code-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    claude-desktop = {
+      url = "github:k3d3/claude-desktop-linux-flake";
+      inputs.nixpkgs.follows = "claude-desktop-nixpkgs";
+    };
+    claude-desktop-nixpkgs.url = "github:NixOS/nixpkgs/6ad174a6dc07c7742fc64005265addf87ad08615";
     codex-nix = {
       url = "github:sadjow/codex-cli-nix";
       inputs = {
@@ -16,10 +25,7 @@
     };
     demlo = {
       url = "github:sabrsorensen/demlo/v3.8.1";
-      inputs = {
-        flake-utils.follows = "flake-utils";
-        nixpkgs.follows = "nixpkgs";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
     disko = {
@@ -41,8 +47,12 @@
       url = "github:hyrfilm/gitignore";
       flake = false;
     };
+    herdr-nix = {
+      url = "github:herdrdev/herdr-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
-      url = "github:nix-community/home-manager/master";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     impermanence = {
@@ -86,13 +96,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware";
-    nixos-raspberrypi = {
-      url = "github:nvmd/nixos-raspberrypi/main";
-      inputs = {
-        flake-compat.follows = "flake-compat";
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL";
       inputs = {
@@ -108,10 +111,6 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
-    packages = {
-      url = "path:./packages";
-      flake = false;
-    };
     partyowl84-vscode-theme = {
       url = "github:sabrsorensen/partyowl84-vscode-theme";
       inputs = {
@@ -119,10 +118,20 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
-    pkgs-by-name-for-flake-parts.url = "github:drupol/pkgs-by-name-for-flake-parts";
+    plasma-manager = {
+      url = "github:nix-community/plasma-manager";
+      inputs = {
+        home-manager.follows = "home-manager";
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
     sops-nix = {
       url = "https://flakehub.com/f/Mic92/sops-nix/*";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    superpowers = {
+      url = "github:obra/superpowers";
+      flake = false;
     };
     synthwave-84-vscode-theme = {
       url = "github:sabrsorensen/nix-synthwave-vscode";
@@ -137,6 +146,10 @@
         flake-utils.follows = "flake-utils";
         nixpkgs.follows = "nixpkgs";
       };
+    };
+    terminal-rain-lightning = {
+      url = "github:delta-psi/terminal-rain-lightning-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     treefmt-nix = {
       url = "https://flakehub.com/f/numtide/treefmt-nix/*";

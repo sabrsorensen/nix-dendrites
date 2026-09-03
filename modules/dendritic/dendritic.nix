@@ -1,33 +1,56 @@
 { inputs, lib, ... }:
 {
-  # setup of tools for dendritic pattern
+  imports = [
+    inputs.flake-file.flakeModules.dendritic
+    inputs.flake-file.flakeModules.nix-auto-follow
+  ];
 
-  flake-file.inputs = {
-    flake-file.url = "github:vic/flake-file";
-    flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/*";
-    flake-utils.url = "https://flakehub.com/f/numtide/flake-utils/*";
-    flake-parts = {
-      url = "https://flakehub.com/f/hercules-ci/flake-parts/*";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
-    # Use Determinate's cooled-down Nixpkgs feed as the repo-wide default.
-    nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
+  options.dendritic.homeManagerModules = lib.mkOption {
+    type = lib.types.listOf lib.types.raw;
+    default = [ ];
+    internal = true;
+    description = "Home Manager feature modules broadcast to managed users.";
   };
 
-  imports = [
-    # Also provides flake-file.flakeModules.{default,import-tree}
-    inputs.flake-file.flakeModules.dendritic
-  ];
+  config = {
+    flake-file.inputs = {
+      # Bootstrap inputs stay together in the Dendritic module. Feature
+      # integrations declare their own dependencies alongside their consumers.
+      flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/*";
+      flake-file.url = "github:vic/flake-file";
+      flake-parts = {
+        url = "https://flakehub.com/f/hercules-ci/flake-parts/*";
+        inputs.nixpkgs-lib.follows = "nixpkgs";
+      };
+      flake-utils.url = "https://flakehub.com/f/numtide/flake-utils/*";
+      nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
+    };
 
-  # import all modules recursively with import-tree
-  # same as default set by flake-file.flakeModules.dendritic
-  flake-file.outputs = ''
-    inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules)
-  '';
+    flake-file.outputs = ''
+      inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules)
+    '';
 
-  # set flake.systems
-  systems = [
-    "aarch64-linux"
-    "x86_64-linux"
-  ];
+    flake-file.description = "sabrsorensen's Dendritic Nix configurations";
+
+    # Determinate's nested nix-src deliberately uses its own nixpkgs
+    # compatibility pin. Following that subtree to the root weekly nixpkgs
+    # can make nix itself fail to build when a Boost backport no longer
+    # applies cleanly. Keep Determinate intact while deduplicating the rest
+    # of the lock graph.
+    flake-file.prune-lock.program = lib.mkForce (
+      prunePkgs:
+      prunePkgs.writeShellApplication {
+        name = "nix-auto-follow";
+        runtimeInputs = [ inputs.nix-auto-follow.packages.${prunePkgs.stdenv.hostPlatform.system}.default ];
+        text = ''
+          auto-follow --ignore determinate "$1" > "$2"
+        '';
+      }
+    );
+
+    systems = [
+      "aarch64-linux"
+      "x86_64-linux"
+    ];
+  };
 }

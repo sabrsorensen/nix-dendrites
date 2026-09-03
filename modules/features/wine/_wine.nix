@@ -1,0 +1,85 @@
+{ pkgs, ... }:
+{
+  # Enable Wine with WoW64 support for running 32-bit and 64-bit Windows apps
+  environment.systemPackages = with pkgs; [
+    # Wine with 64-bit and 32-bit support
+    wineWow64Packages.stable
+
+    # Bottles for easy Wine prefix management
+    bottles
+
+    # Winetricks for easy Windows component installation
+    winetricks
+
+    # Wine utilities
+    wine-staging # Alternative wine with additional patches
+
+    # Windows fonts for better compatibility
+    corefonts
+    vista-fonts
+  ];
+
+  # Enable 32-bit support in nixpkgs for Wine
+  nixpkgs.config = {
+    allowUnfree = true;
+    # Enable 32-bit support for Wine
+    allowUnsupportedSystem = true;
+  };
+
+  # OpenLDAP's test017-syncreplication-refresh is currently flaky in this setup.
+  # Bottles depends on OpenLDAP transitively, so disable tests to unblock builds.
+  nixpkgs.overlays = [
+    (
+      final: prev:
+      let
+        patool = prev.python314Packages.patool.overrideAttrs (_: {
+          # Patool 4.0.5's archive-discovery tests assume older file and
+          # compressor behavior. Bottles needs Patool at runtime, but not
+          # this incompatible test suite.
+          doInstallCheck = false;
+        });
+      in
+      {
+        openldap = prev.openldap.overrideAttrs (_: {
+          doCheck = false;
+        });
+        bottles-unwrapped = prev.bottles-unwrapped.overrideAttrs (old: {
+          propagatedBuildInputs = map (
+            dependency: if ((dependency.pname or null) == "patool") then patool else dependency
+          ) old.propagatedBuildInputs;
+        });
+        bottles = prev.bottles.override {
+          bottles-unwrapped = final.bottles-unwrapped;
+        };
+      }
+    )
+  ];
+
+  # Wine-specific system configuration
+  programs.dconf.enable = true; # Required for Bottles GUI
+
+  # Fonts needed for Windows applications
+  fonts.packages = with pkgs; [
+    corefonts
+    vista-fonts
+    liberation_ttf
+    dejavu_fonts
+  ];
+
+  # Audio support for Wine applications
+  services.pulseaudio.support32Bit = true;
+
+  # Graphics drivers 32-bit support (you already have NVIDIA configured)
+  hardware.graphics = {
+    enable32Bit = true;
+    extraPackages32 = with pkgs.pkgsi686Linux; [
+      # Add 32-bit graphics packages if needed
+    ];
+  };
+
+  # Allow unfree packages needed for Wine and Windows apps
+  my.unfreePackageNames = [
+    "corefonts"
+    "vista-fonts"
+  ];
+}

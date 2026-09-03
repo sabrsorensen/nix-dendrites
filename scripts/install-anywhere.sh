@@ -10,10 +10,9 @@ host=$1
 target=$2
 shift 2
 
-bootstrap_config=$(dirname "$0")/bootstrap-target.sh
-bootstrap_cfg=$("$bootstrap_config" config "$host")
+bootstrap_configuration=$("$(dirname "$0")/bootstrap-target.sh" config "$host")
 
 exec nix run github:nix-community/nixos-anywhere -- \
-  --flake ".#${bootstrap_cfg}" \
+  --flake ".#${bootstrap_configuration}" \
   "$target" \
   "$@"
