@@ -53,7 +53,7 @@
           git = true;
           gpg = true;
           gdrive = host.features.gdrive;
-          herdr = host.features.codex || host.features.claudeCode;
+          herdr = host.features.codex || host.features.claude;
           lazyvim = host.features.lazyvim;
           mcpCommon = host.features.mcpCommon;
           "nix-index" = true;
@@ -77,7 +77,7 @@
           wslWorkHome = host.platform == "wsl";
           wslVscode = host.platform == "wsl";
           vscode = host.features.vscode;
-          claudeCode = host.features.claudeCode;
+          claude = host.features.claude;
           codex = host.features.codex;
         };
         my.bash.isSteamDeck = host.platform == "steamdeck";

@@ -32,8 +32,8 @@ let
   };
 in
 {
-  options.my.features.claudeCode = lib.mkEnableOption "Claude Code";
-  config = lib.mkIf config.my.features.claudeCode {
+  options.my.features.claude = lib.mkEnableOption "Claude Code";
+  config = lib.mkIf config.my.features.claude {
     programs.claude-code = {
       enable = true;
       package = wrappedClaude;
@@ -43,5 +43,8 @@ in
       # hooks/hooks.json, which Claude Code discovers automatically.
       plugins.superpowers = inputs.superpowers;
     };
+
+    # Real-time usage monitor for Claude Code's local session logs.
+    home.packages = [ pkgs.claude-monitor ];
   };
 }
