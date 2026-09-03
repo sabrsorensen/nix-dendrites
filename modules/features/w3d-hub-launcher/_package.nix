@@ -140,6 +140,29 @@ stdenvNoCC.mkDerivation (finalAttrs: {
         ln -sfn "@out@/share/w3d-hub-launcher/media" "$w3dhub_runtime/media"
         ln -sfn "@out@/share/w3d-hub-launcher/locales" "$w3dhub_runtime/locales"
         cd "$w3dhub_runtime"
+
+        # The launcher's own dependency-install step is an upstream no-op, so
+        # the Wine prefix it runs games in (its wine_prefix setting, empty by
+        # default -> Wine's own default $WINEPREFIX/$HOME/.wine) never gets
+        # the components W3D-engine games need. Bootstrap it once here,
+        # mirroring what every install guide for these games requires:
+        # corefonts/vcrun/xact/d3dx9/msxml3 (crash-on-launch without them) and
+        # d3dcompiler_47 (Wine's built-in vkd3d-shader-based reimplementation
+        # fails to compile some W3D shaders -- confirmed by reproducing an
+        # APB crash down to that exact code path). Native win7 override is
+        # needed for dotnet452. Guarded by a sentinel so it only runs once;
+        # only marked done on success so a transient (e.g. network) failure
+        # is retried on the next launch instead of silently skipped forever.
+        # Caveat: since this targets Wine's own default prefix, it also
+        # affects any other Wine app sharing that same default $HOME/.wine.
+        w3dhub_wineprefix="''${WINEPREFIX:-$HOME/.wine}"
+        w3dhub_bootstrap_sentinel="$w3dhub_runtime/.wine-bootstrap-complete"
+        if [ ! -e "$w3dhub_bootstrap_sentinel" ]; then
+          WINEPREFIX="$w3dhub_wineprefix" winetricks -q \
+            corefonts vcrun2008 vcrun2010 xact xact_x64 d3dx9 d3dx9_43 \
+            msxml3 dotnet452 win7 d3dcompiler_47 \
+            && touch "$w3dhub_bootstrap_sentinel"
+        fi
       ''}
 
     substituteInPlace "$out/bin/w3d-hub-launcher" --replace-fail "@out@" "$out"
