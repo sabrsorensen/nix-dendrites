@@ -23,6 +23,10 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
+    context-mode = {
+      url = "github:mksglu/context-mode";
+      flake = false;
+    };
     demlo = {
       url = "github:sabrsorensen/demlo/v3.8.1";
       inputs.nixpkgs.follows = "nixpkgs";

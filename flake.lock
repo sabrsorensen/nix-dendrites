@@ -97,6 +97,22 @@
         "type": "github"
       }
     },
+    "context-mode": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788523601,
+        "narHash": "sha256-uJRx0M51AmOOClYVvyH9z1e5x1ZFb51W2tUMhUqfsr0=",
+        "owner": "mksglu",
+        "repo": "context-mode",
+        "rev": "5e14177a89ba6917ed109f1d31592c3c2fa22258",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mksglu",
+        "repo": "context-mode",
+        "type": "github"
+      }
+    },
     "demlo": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -881,6 +897,7 @@
         "claude-desktop": "claude-desktop",
         "claude-desktop-nixpkgs": "claude-desktop-nixpkgs",
         "codex-nix": "codex-nix",
+        "context-mode": "context-mode",
         "demlo": "demlo",
         "determinate": "determinate",
         "disko": "disko",

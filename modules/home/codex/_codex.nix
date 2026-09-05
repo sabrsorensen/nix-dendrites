@@ -20,11 +20,16 @@ in
         package = codexPackage;
       })
       {
+        plugins.context-mode = inputs.context-mode;
         # Superpowers agentic-skills framework (github:obra/superpowers).
         # The repo ships a .codex-plugin/plugin.json manifest, so Codex
         # loads its skills straight from the plugin source.
-        plugins = [ inputs.superpowers ];
+        plugins.superpowers = inputs.superpowers;
       }
+    ];
+
+    home.packages = with pkgs; [
+      rtk
     ];
   };
 }

@@ -37,14 +37,24 @@ in
     programs.claude-code = {
       enable = true;
       package = wrappedClaude;
-      # Superpowers agentic-skills framework (github:obra/superpowers),
-      # installed as a personal plugin. The repo ships a
-      # .claude-plugin/plugin.json manifest plus skills/ and
-      # hooks/hooks.json, which Claude Code discovers automatically.
+      plugins.context-mode = inputs.context-mode;
+        # Superpowers agentic-skills framework (github:obra/superpowers),
+        # installed as a personal plugin. The repo ships a
+        # .claude-plugin/plugin.json manifest plus skills/ and
+        # hooks/hooks.json, which Claude Code discovers automatically.
       plugins.superpowers = inputs.superpowers;
+      settings = {
+        statusLine = {
+          type = "command";
+          command = "context-mode statusline";
+        };
+      };
     };
 
     # Real-time usage monitor for Claude Code's local session logs.
-    home.packages = [ pkgs.claude-monitor ];
+    home.packages = with pkgs; [
+      claude-monitor
+      rtk
+    ];
   };
 }

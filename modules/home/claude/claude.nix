@@ -8,6 +8,10 @@ in
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    context-mode = {
+      url = "github:mksglu/context-mode";
+      flake = false;
+    };
     superpowers = {
       url = "github:obra/superpowers";
       flake = false;
