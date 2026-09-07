@@ -54,7 +54,6 @@ in
     # Real-time usage monitor for Claude Code's local session logs.
     home.packages = with pkgs; [
       claude-monitor
-      rtk
     ];
   };
 }

@@ -8,24 +8,14 @@ in
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    context-mode = {
-      url = "github:mksglu/context-mode";
-      flake = false;
-    };
-    superpowers = {
-      url = "github:obra/superpowers";
-      flake = false;
-    };
 
     # Not `inputs.nixpkgs.follows = "nixpkgs"`: upstream's package recipe still
     # uses `nodePackages.asar`, which our newer nixpkgs has removed. Upstream's
     # own flake.nix tracks `nixpkgs-unstable` (a moving ref that also no longer
     # has it), so pin a dedicated nixpkgs at the exact rev upstream last locked
     # and tested against (same tactic as armory-runtime-nixpkgs).
-    claude-desktop-nixpkgs.url = "github:NixOS/nixpkgs/6ad174a6dc07c7742fc64005265addf87ad08615";
     claude-desktop = {
-      url = "github:k3d3/claude-desktop-linux-flake";
-      inputs.nixpkgs.follows = "claude-desktop-nixpkgs";
+      url = "github:heytcass/claude-desktop-linux-flake";
     };
   };
 
@@ -41,7 +31,7 @@ in
     { lib, ... }:
     {
       options.my.host.features.claude =
-        lib.mkEnableOption "Claude tooling (Code, Desktop app, usage monitor)";
+        lib.mkEnableOption "Claude tooling (Code, Desktop app)";
     };
 
   # flake-file makes the claude-desktop input available after bootstrap; delay

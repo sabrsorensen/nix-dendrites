@@ -11,11 +11,7 @@
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    claude-desktop = {
-      url = "github:k3d3/claude-desktop-linux-flake";
-      inputs.nixpkgs.follows = "claude-desktop-nixpkgs";
-    };
-    claude-desktop-nixpkgs.url = "github:NixOS/nixpkgs/6ad174a6dc07c7742fc64005265addf87ad08615";
+    claude-desktop.url = "github:heytcass/claude-desktop-linux-flake";
     codex-nix = {
       url = "github:sadjow/codex-cli-nix";
       inputs = {

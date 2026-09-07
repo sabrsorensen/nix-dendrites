@@ -9,14 +9,6 @@ in
       inputs.flake-utils.follows = "flake-utils";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    context-mode = {
-      url = "github:mksglu/context-mode";
-      flake = false;
-    };
-    superpowers = {
-      url = "github:obra/superpowers";
-      flake = false;
-    };
   };
 
   dendritic.homeManagerModules = [ homeModule ];

@@ -29,7 +29,6 @@ in
     ];
 
     home.packages = with pkgs; [
-      rtk
     ];
   };
 }
