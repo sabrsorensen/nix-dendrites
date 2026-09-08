@@ -186,6 +186,10 @@ A persistent, read-only reference checkout of the predecessor repo lives at
 - [docs/preservation-investigation.md](docs/preservation-investigation.md) —
   impermanence is the current persistence provider; don't start a migration
   to Preservation until the first ephemeral-root host is chosen.
+- [docs/lutris-renegade-x-launcher.md](docs/lutris-renegade-x-launcher.md) —
+  manual Lutris installer script for Renegade X, and the Wine/GE-Proton
+  `powershell.exe` stub fix (packaged as `wine-powershell-stub-install`)
+  needed for the Totem Arts Launcher to run at all.
 - [docs/archive/broadcast-rewrite/](docs/archive/broadcast-rewrite/README.md)
   — historical conversion/validation evidence, useful for regression
   investigation, not a living task list.
