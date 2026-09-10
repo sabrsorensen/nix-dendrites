@@ -13,22 +13,10 @@ let
       openssl
     ]
   );
-  # Jovian pins Decky Loader to 3.2.6; override to the upstream 3.2.8 release.
-  # Override shape mirrors Jovian's own pkgs/decky-loader/prerelease.nix. The
-  # frontend pnpm lockfile and pyproject deps are byte-identical to 3.2.6, so
-  # the pnpm deps hash is unchanged.
-  deckyLoaderPackage = pkgs.decky-loader.overridePythonAttrs (old: rec {
-    version = "3.2.8";
-    src = old.src.override {
-      rev = "v${version}";
-      hash = "sha256-Y2dMTKLXtZAyXuWhnS/jbqjCYyWvSChslt/YxIBbWXw=";
-    };
-    pnpmDeps = old.pnpmDeps.override {
-      inherit version src;
-      hash = "sha256-OHimg85kcjk+Tq1Yv8TA9CfPDVzxdgPpzTi2mxyPs4s=";
-    };
-    # 3.2.8 already sets PATH alongside LD_LIBRARY_PATH in localplatformlinux's
-    # `run` default env, so that patch (present for 3.2.6) is dropped here.
+  # Jovian ships Decky Loader 3.2.8, which sets PATH alongside LD_LIBRARY_PATH in
+  # localplatformlinux's `run` default env; only the systemd/python3 absolute-path
+  # patches remain necessary.
+  deckyLoaderPackage = pkgs.decky-loader.overridePythonAttrs (old: {
     postPatch = (old.postPatch or "") + ''
       substituteInPlace backend/decky_loader/localplatform/localplatformlinux.py \
         --replace-fail '["systemctl", "is-active", service_name]' '["${pkgs.systemd}/bin/systemctl", "is-active", service_name]' \

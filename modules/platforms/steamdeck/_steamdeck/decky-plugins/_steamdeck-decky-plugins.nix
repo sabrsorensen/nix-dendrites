@@ -56,8 +56,35 @@ lib.mkMerge [
         };
         script = ''
           primary_group="$(id -gn ${cfg.user})"
-          mkdir -p ${cfg.stateDir}/plugins
-          chown ${cfg.user}:"$primary_group" ${cfg.stateDir} ${cfg.stateDir}/plugins
+          plugins_dir=${cfg.stateDir}/plugins
+          mkdir -p "$plugins_dir"
+          chown ${cfg.user}:"$primary_group" ${cfg.stateDir} "$plugins_dir"
+
+          # Plugin dir names this generation stages. Any *other* entry that is
+          # a symlink is a previously-staged plugin this module no longer owns
+          # (typically left behind under an old name after a catalog rename) —
+          # remove it so it stops being loaded. A real directory is a plugin
+          # the user installed by hand through Decky's UI; leave those alone.
+          managed=(${
+            lib.concatStringsSep " " (map (name: lib.escapeShellArg name) (lib.attrNames cfg.plugins))
+          })
+          for entry in "$plugins_dir"/*; do
+            if [ ! -L "$entry" ]; then
+              continue
+            fi
+            name="$(basename "$entry")"
+            keep=0
+            for m in "''${managed[@]}"; do
+              if [ "$m" = "$name" ]; then
+                keep=1
+                break
+              fi
+            done
+            if [ "$keep" -eq 0 ]; then
+              echo "Removing stale staged Decky plugin: $name"
+              rm -f "''${entry:?}"
+            fi
+          done
 
           ${lib.concatStrings (
             lib.mapAttrsToList (name: _: ''

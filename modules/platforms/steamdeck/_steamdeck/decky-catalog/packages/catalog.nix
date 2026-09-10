@@ -8,6 +8,26 @@ let
   # tested), read their real, committed lockfile with the pnpm major it was
   # generated for.
   pnpm9 = import ./_pnpm9.nix { inherit pkgs; };
+  # Shared backend helpers for moi952's Decky plugins (decky-quick-tab). Not on
+  # PyPI: upstream's package.sh vendors it into py_modules/ with
+  #   pip3 install --target py_modules --no-deps git+…/decky-plugin-toolkit@v0.1.0
+  # Packaged here so it can go through mkDeckyPlugin's `pythonDeps` like any
+  # other backend dependency. Pure Python, no deps; pinned to the tag upstream
+  # pins. `import decky` at module load is provided by Decky Loader at runtime,
+  # so there is nothing to import-check at build time.
+  deckyPluginToolkit = pkgs.python3Packages.buildPythonPackage {
+    pname = "decky-plugin-toolkit";
+    version = "0.1.0";
+    pyproject = true;
+    src = pkgs.fetchFromGitHub {
+      owner = "moi952";
+      repo = "decky-plugin-toolkit";
+      rev = "v0.1.0";
+      hash = "sha256-E9+X/htvr3eKAc80KH3y6++byjEY5VRYI55EtrSb9oo=";
+    };
+    build-system = [ pkgs.python3Packages.setuptools ];
+    doCheck = false;
+  };
   mk =
     {
       pname,
@@ -19,10 +39,16 @@ let
       verifyMainPy ? true,
       executablePaths ? [ ],
       legacyLockfile ? false,
+      pythonDeps ? [ ],
     }:
     mkDeckyPlugin (
       {
-        inherit pname verifyMainPy executablePaths;
+        inherit
+          pname
+          verifyMainPy
+          executablePaths
+          pythonDeps
+          ;
         version = if rev == "main" || rev == "master" then "unstable" else rev;
         src = pkgs.fetchFromGitHub {
           inherit owner repo rev;
@@ -108,6 +134,9 @@ in
     rev = "main";
     srcHash = "sha256-kpwAHrFf35OlYR4S7zcyvQJgIuXoYZiLv8yfYPAsLQA=";
     pnpmHash = "sha256-Hf2tFLlScnHh97EthKNXxkEbykU6xjC3s1iA7AqJ1r4=";
+    # requirements.txt: `jeepney==0.9.0`; main.py imports it. nixpkgs ships
+    # jeepney 0.9 (zero deps).
+    pythonDeps = [ pkgs.python3Packages.jeepney ];
   };
   "decky-kdeconnect" = mk {
     pname = "decky-kdeconnect";
@@ -144,5 +173,10 @@ in
     rev = "main";
     srcHash = "sha256-ztalV1+O8a/LWntWQHXiWb5B0xQnJtaU9JGWKadNE3M=";
     pnpmHash = "sha256-PSrmejddekXI2MoFZiLb/WSWdDdUW0v1isiFFn8YJ2k=";
+    # main.py -> quick_tab.plugin imports decky_plugin_toolkit; its __init__
+    # swallows the resulting ImportError, so without the toolkit the backend
+    # never exposes `Plugin` and get/set_tab_settings, restart_steam and the
+    # update check all silently fail. Vendored via package.sh upstream.
+    pythonDeps = [ deckyPluginToolkit ];
   };
 }
