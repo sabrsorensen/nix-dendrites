@@ -38,10 +38,10 @@ in
       enable = true;
       package = wrappedClaude;
       plugins.context-mode = inputs.context-mode;
-        # Superpowers agentic-skills framework (github:obra/superpowers),
-        # installed as a personal plugin. The repo ships a
-        # .claude-plugin/plugin.json manifest plus skills/ and
-        # hooks/hooks.json, which Claude Code discovers automatically.
+      # Superpowers agentic-skills framework (github:obra/superpowers),
+      # installed as a personal plugin. The repo ships a
+      # .claude-plugin/plugin.json manifest plus skills/ and
+      # hooks/hooks.json, which Claude Code discovers automatically.
       plugins.superpowers = inputs.superpowers;
       settings = {
         statusLine = {

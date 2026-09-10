@@ -30,8 +30,7 @@ in
   flake.modules.nixos.claude =
     { lib, ... }:
     {
-      options.my.host.features.claude =
-        lib.mkEnableOption "Claude tooling (Code, Desktop app)";
+      options.my.host.features.claude = lib.mkEnableOption "Claude tooling (Code, Desktop app)";
     };
 
   # flake-file makes the claude-desktop input available after bootstrap; delay
