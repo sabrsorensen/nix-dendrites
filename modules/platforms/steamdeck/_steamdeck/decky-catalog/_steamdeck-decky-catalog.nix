@@ -185,6 +185,7 @@ in
         "XR Gaming"
         "Web Browser"
         "TabMaster"
+        "Quick Tab"
         "Nexus Mods"
         "Syncthing"
         "SteamGridDB"

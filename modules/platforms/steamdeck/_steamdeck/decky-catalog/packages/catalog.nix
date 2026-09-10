@@ -106,7 +106,7 @@ in
     owner = "Outpox";
     repo = "Bluetooth";
     rev = "main";
-    srcHash = "sha256-E09yECuizhPKSnbn4FGvU4+1jNn4dq5oxJCuloqX30Q=";
+    srcHash = "sha256-kpwAHrFf35OlYR4S7zcyvQJgIuXoYZiLv8yfYPAsLQA=";
     pnpmHash = "sha256-Hf2tFLlScnHh97EthKNXxkEbykU6xjC3s1iA7AqJ1r4=";
   };
   "decky-kdeconnect" = mk {
@@ -136,5 +136,13 @@ in
     srcHash = "sha256-jCZoGmLcwS1CuY99lsYJ98l9+EvpGh8Kj2hDW5157yM=";
     pnpmHash = "sha256-1TKYD24kVNwgOWQzVKebHnGh4QHSXRTnKxZpRjGFIEo=";
     verifyMainPy = false;
+  };
+  "decky-quick-tab" = mk {
+    pname = "decky-quick-tab";
+    owner = "moi952";
+    repo = "decky-quick-tab";
+    rev = "main";
+    srcHash = "sha256-ztalV1+O8a/LWntWQHXiWb5B0xQnJtaU9JGWKadNE3M=";
+    pnpmHash = "sha256-PSrmejddekXI2MoFZiLb/WSWdDdUW0v1isiFFn8YJ2k=";
   };
 }
