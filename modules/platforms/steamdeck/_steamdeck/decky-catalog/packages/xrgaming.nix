@@ -7,14 +7,75 @@
 }:
 let
   writeSourceReplacementScript = import ./_write-source-replacement-script.nix { inherit pkgs; };
+  # Upstream's plugin.json declares these as `remote_binary` assets that the
+  # Decky Store normally fetches at runtime. We pre-fetch them at build time
+  # instead so the plugin has no runtime network dependency, but they must be
+  # the exact assets from this release: main.py passes decky-XRGaming's own
+  # bin/ dir as breezy_vulkan_setup's local-directory argument, and the real
+  # script (vendored below, not reimplemented) looks inside it by these exact
+  # filenames.
   breezyVulkanPayload = fetchurl {
     url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.9.11/breezyVulkan-x86_64.tar.gz";
     sha256 = "sha256-stp1KLMT5pgFEXDuq4ii80L7/QUlnoFDVJfGeZdX0F0=";
   };
+  breezyVulkanLibsPayload = fetchurl {
+    url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.9.11/breezyVulkan-libs-x86_64.tar.gz";
+    sha256 = "sha256-A8KZPuCWpr/nXFGASemSeZli0UxdgxSD4WYnPwo9m3U=";
+  };
+  # The real launcher script from the same release, vendored verbatim rather
+  # than reimplemented: it just extracts the two archives above into a temp
+  # dir and hands off to bin/setup inside breezyVulkan-x86_64.tar.gz, which
+  # does the actual driver/vkBasalt install and in turn fetches+extracts
+  # xrDriver's own archives the same way. Almost none of that inner logic
+  # needs patching for NixOS -- it just needs getent/curl/tar/gzip/lsmod/su
+  # on PATH at runtime (see jovian.decky-loader.extraPackages) -- except one
+  # thing patched below: xr_driver's own setup unconditionally falls back to
+  # writing udev rules under /etc/udev/rules.d, which on any NixOS system is
+  # a symlink into the read-only Nix store (udev rules are generated
+  # declaratively at build time, not dropped in at runtime). That `cp`
+  # always fails there, and with `set -e` it aborts the rest of setup
+  # (systemd service install, uinput check, ...). The rules themselves are
+  # declared instead via services.udev.extraRules in
+  # _steamdeck-decky-loader.nix.
+  breezyVulkanSetupScript = fetchurl {
+    url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.9.11/breezy_vulkan_setup";
+    sha256 = "sha256-CXFThyPkpixqfyXdb7T2f5/F5GO1lmeCIVuMHr1lEOA=";
+  };
+  # breezyVulkanPayload with xrDriver-x86_64.tar.gz's own bundled `setup`
+  # script patched (see comment above) -- unpack the outer archive, unpack
+  # the nested xrDriver archive, patch it, and repack both with the same
+  # internal directory names main.py's whole call chain expects.
+  patchedBreezyVulkanPayload =
+    pkgs.runCommand "breezyVulkan-x86_64-patched.tar.gz"
+      {
+        nativeBuildInputs = [
+          pkgs.gnutar
+          pkgs.gzip
+        ];
+      }
+      ''
+        work=$(mktemp -d)
+        cd "$work"
+        tar -xzf ${breezyVulkanPayload}
+        cd breezy_vulkan
+        tar -xzf xrDriver-x86_64.tar.gz
+        sed -i 's#cp udev/\* $UDEV_RULES_DIR#cp udev/* $UDEV_RULES_DIR || true#' xr_driver/setup
+        grep -qF 'cp udev/* $UDEV_RULES_DIR || true' xr_driver/setup
+        rm xrDriver-x86_64.tar.gz
+        tar -czf xrDriver-x86_64.tar.gz xr_driver
+        rm -rf xr_driver
+        cd ..
+        tar -czf "$out" breezy_vulkan
+      '';
 
+  # No escaping needed for the `$(id -u)` command substitutions: this string
+  # becomes one argv element passed straight to `su -c` via
+  # subprocess.check_output([...]) (a list, so no shell ever sees it before
+  # su's own -c parses it) -- a stray `\$` here is a literal backslash by
+  # the time su's shell parses it, which is a syntax error, not an escape.
   xrGamingDriverStatusCommand =
-    "XDG_RUNTIME_DIR=/run/user/\\$(id -u) "
-    + "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\\$(id -u)/bus "
+    "XDG_RUNTIME_DIR=/run/user/$(id -u) "
+    + "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus "
     + "${pkgs.systemd}/bin/systemctl --user is-active xr-driver";
 
   xrGamingMainPyPatches = [
@@ -28,29 +89,67 @@ let
     }
     {
       kind = "literal";
-      reason = "Resolve su from the Nix store instead of relying on the SteamOS host PATH.";
+      reason = ''
+        Resolve su by absolute path instead of relying on PATH: on NixOS
+        `su` is a security wrapper, not a plain package -- it only exists
+        at /run/wrappers/bin/su (pkgs.shadow itself doesn't ship it).
+      '';
       old = "['su', '-l', '-c',";
-      new = "['${pkgs.shadow}/bin/su', '-l', '-c',";
+      new = "['/run/wrappers/bin/su', '-l', '-c',";
       expectedCount = 1;
     }
     {
       kind = "regex";
       reason = "Replace Decky's helper with a NixOS-safe user-service probe.";
-      pattern = ''ipc\.is_driver_running\(as_user=decky\.DECKY_USER\)'';
+      pattern = ''return ipc\.is_driver_running\(as_user=decky\.DECKY_USER\)'';
       replacement = ''
         try:
                     subprocess.check_output([
-                        '${pkgs.shadow}/bin/su', '-l', '-c',
+                        '/run/wrappers/bin/su', '-l', '-c',
                         '${xrGamingDriverStatusCommand}',
                         decky.DECKY_USER,
                     ], stderr=subprocess.STDOUT)
                     return True
                 except subprocess.CalledProcessError as exc:
-                    decky.logger.error(f\"Error checking driver status {exc.output}\")
+                    decky.logger.error(f"Error checking driver status {exc.output}")
                     return False
                 except FileNotFoundError as exc:
-                    decky.logger.error(f\"Error checking driver status {exc}\")
+                    decky.logger.error(f"Error checking driver status {exc}")
                     return False'';
+      expectedCount = 1;
+    }
+    {
+      # Vendored via the PyXRLinuxDriverIPC git submodule, not upstream's own
+      # main.py.
+      file = "defaults/PyXRLinuxDriverIPC/xrdriveripc.py";
+      kind = "literal";
+      reason = ''
+        write_config wrote its temp file to a relative "temp.txt" (the
+        plugin's CWD, which lives in the read-only Nix store) then
+        os.replace()'d it into ~/.config/xr_driver/config.ini -- an atomic
+        rename across filesystems, which raises EXDEV. Write the temp file
+        into the destination's own directory instead.
+      '';
+      old = ''
+        temp_file = "temp.txt"
+
+                    # Write to a temporary file
+                    with open(temp_file, 'w') as f:
+                        f.write(output)
+
+                    # Atomically replace the old config file with the new one
+                    os.makedirs(os.path.dirname(self.config_file_path), exist_ok=True)
+                    os.replace(temp_file, self.config_file_path)'';
+      new = ''
+        os.makedirs(os.path.dirname(self.config_file_path), exist_ok=True)
+                    temp_file = self.config_file_path + ".tmp"
+
+                    # Write to a temporary file
+                    with open(temp_file, 'w') as f:
+                        f.write(output)
+
+                    # Atomically replace the old config file with the new one
+                    os.replace(temp_file, self.config_file_path)'';
       expectedCount = 1;
     }
   ];
@@ -73,83 +172,12 @@ let
     git submodule update --init --recursive
   '';
 
-  breezySetupWrapper = pkgs.writeShellApplication {
-    name = "breezy_vulkan_setup";
-    runtimeInputs = with pkgs; [
-      coreutils
-      glibc.bin
-      gnutar
-      gzip
-    ];
-    text = ''
-      set -eu
-      if [ "$(id -u)" = "0" ]; then
-         echo "Running as root - proceeding with setup"
-      else
-         echo "Running as user - this is expected in NixOS"
-      fi
-      target_user="''${DECKY_USER:-''${SUDO_USER:-''${USER:-deck}}}"
-      target_home="$(getent passwd "$target_user" | while IFS=: read -r _ _ _ _ _ home _; do printf '%s' "$home"; done)"
-      if [ -z "$target_home" ]; then
-        echo "Could not resolve home directory for user: $target_user"
-        exit 1
-      fi
-      start_dir=$(pwd)
-      arch=$(uname -m)
-      if [ "$arch" != "x86_64" ]; then
-        echo "Breezy Vulkan only supports x86_64 currently"
-        exit 1
-      fi
-      metrics_version_arg=""
-      binary_path_arg=""
-      while [[ $# -gt 0 ]]; do
-        case $1 in
-          -v) metrics_version_arg="$2"; shift 2 ;;
-          *) binary_path_arg="$1"; shift ;;
-        esac
-      done
-      if [ -z "$binary_path_arg" ]; then
-        echo "No breezy vulkan binary path supplied"
-        exit 1
-      fi
-      tmp_dir="$(mktemp -d -t breezy-vulkan-XXXXXX)"
-      cleanup() {
-        if [ -n "''${tmp_dir:-}" ] && [ -d "$tmp_dir" ]; then
-          rm -rf "''${tmp_dir:?}"
-        fi
-      }
-      trap cleanup EXIT
-      pushd "$tmp_dir" > /dev/null
-      if [[ "$binary_path_arg" = /* ]]; then abs_path="$binary_path_arg"; else abs_path="$(realpath "$start_dir/$binary_path_arg")"; fi
-      cp "$abs_path" "$tmp_dir"
-      echo "Created temp directory: $tmp_dir"
-      echo "Extracting to: ''${tmp_dir}/breezy_vulkan"
-      gzip -dc "$(basename "$binary_path_arg")" | tar -xf -
-      pushd breezy_vulkan > /dev/null
-      echo "Cleaning up the previous installation"
-      echo "Copying the breezy_vulkan scripts to $target_home/.local/bin and related files to $target_home/.local/share/breezy_vulkan"
-      mkdir -p "$target_home/.local/bin" "$target_home/.local/share/breezy_vulkan"
-      echo "Installing xrDriver"
-      echo "version=$metrics_version_arg" > "$target_home/.local/share/breezy_vulkan/manifest"
-      cat > "$target_home/.local/bin/breezy_vulkan_verify" << 'VERIFY_EOF'
-      #!/bin/bash
-      echo "Verification succeeded"
-      VERIFY_EOF
-      chmod +x "$target_home/.local/bin/breezy_vulkan_verify"
-      chown -R "$target_user" "$target_home/.local/bin" "$target_home/.local/share/breezy_vulkan"
-      echo "Skipping udev rules installation - handled by NixOS configuration"
-      echo "XRGaming setup completed successfully"
-      popd > /dev/null
-      popd > /dev/null
-      echo "Deleting temp directory: ''${tmp_dir}"
-    '';
-  };
-
   xrGamingBundleRuntimeAssets = pkgs.writeShellScript "decky-xrgaming-bundle-runtime-assets" ''
     set -eu
     mkdir -p bin
-    cp ${breezyVulkanPayload} bin/breezyVulkan-x86_64.tar.gz
-    install -m 0755 ${breezySetupWrapper}/bin/breezy_vulkan_setup bin/breezy_vulkan_setup
+    cp ${patchedBreezyVulkanPayload} bin/breezyVulkan-x86_64.tar.gz
+    cp ${breezyVulkanLibsPayload} bin/breezyVulkan-libs-x86_64.tar.gz
+    install -m 0755 ${breezyVulkanSetupScript} bin/breezy_vulkan_setup
   '';
 in
 mkDeckyPlugin {
@@ -180,6 +208,10 @@ mkDeckyPlugin {
   extraInstallCheck = ''
     if [ ! -f $out/bin/breezyVulkan-x86_64.tar.gz ]; then
       echo "Error: breezyVulkan binary not found"
+      exit 1
+    fi
+    if [ ! -f $out/bin/breezyVulkan-libs-x86_64.tar.gz ]; then
+      echo "Error: breezyVulkan libs archive not found"
       exit 1
     fi
   '';

@@ -31,6 +31,16 @@
     localNetworkGameTransfers.openFirewall = true;
     extraPackages = [ pkgs.hidapi ];
   };
+  # XR Gaming's vendored xrDriver setup script probes `find /usr/lib*` for
+  # these libraries before running -- NixOS has no /usr/lib at all, so the
+  # probe fails outright rather than just not finding the library. Missing
+  # libcurl is a hard exit; missing libwayland-client is only a warning (and
+  # disables gamescope integration).
+  system.activationScripts.usrlibcompat = ''
+    mkdir -p /usr/lib
+    ln -sf ${pkgs.curl.out}/lib/libcurl.so /usr/lib/libcurl.so
+    ln -sf ${pkgs.wayland}/lib/libwayland-client.so /usr/lib/libwayland-client.so
+  '';
   # Steam's bundled runtime needs these fonts available as extra
   # libraries for CJK and emoji text in Gaming Mode.
   nixpkgs.config.packageOverrides = pkgs': {

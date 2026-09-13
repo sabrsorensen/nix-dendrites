@@ -13,14 +13,17 @@
     roles.workstation = true;
     features = {
       atuin = true;
+      bitwarden = true;
       decky = true;
       gui = true;
       deskflow = true;
+      firefox = true;
       firmware = true;
       lutris = true;
       minecraft = true;
       noson = true;
       w3dHubLauncher = true;
+      wine = true;
     };
   };
   users.groups.sam.gid = 1000;

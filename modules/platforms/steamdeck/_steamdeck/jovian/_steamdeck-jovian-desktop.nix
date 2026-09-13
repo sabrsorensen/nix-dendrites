@@ -26,7 +26,6 @@
       kdePackages.kcalc
       kdePackages.krdc
       lm_sensors.bin
-      maliit-keyboard
       nix-output-monitor
       nix-tree
       openssh

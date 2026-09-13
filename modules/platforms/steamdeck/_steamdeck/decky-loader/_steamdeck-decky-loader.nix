@@ -47,12 +47,35 @@ in
     package = deckyLoaderPackage;
     user = "sam";
     extraPackages = with pkgs; [
+      # Scripts extracted from a plugin's own vendored tarballs at runtime
+      # (e.g. XR Gaming's breezy_vulkan/xr_driver setup chain) keep their
+      # original `#!/usr/bin/env bash` shebang -- Nix's patchShebangs only
+      # ever sees files present at build time. `env` needs bash on PATH.
+      bash
       coreutils
       hidapi
       psmisc
       python3
       steam-run
       systemd
+      # None of these are otherwise on decky-loader's PATH (its systemd unit
+      # gets an explicit PATH built only from this list, not
+      # /run/current-system/sw/bin). All are needed by XR Gaming's vendored
+      # breezy_vulkan/xr_driver setup chain, not reimplemented by us:
+      # curl is hard-required (xr_driver/setup's check_command "curl"),
+      # getent/gnutar resolve the target user and extract the vendored
+      # tarballs, gzip and jq are used optionally in the same chain, kmod
+      # provides lsmod for the uinput kernel module check, and procps
+      # provides `ps` for xr_driver/setup's own systemd-detection check
+      # (`ps -p 1 -o comm=`) -- without it that check silently fails closed
+      # and the script wrongly concludes systemd isn't running and aborts.
+      curl
+      getent
+      gnutar
+      gzip
+      jq
+      kmod
+      procps
     ];
     extraPythonPackages =
       pythonPackages: with pythonPackages; [
@@ -81,6 +104,16 @@ in
     SUBSYSTEM=="usb", ATTRS{idVendor}=="0486", ATTRS{idProduct}=="5740", MODE="0664", GROUP="plugdev"
     SUBSYSTEM=="usb", ATTRS{idVendor}=="0486", ATTRS{idProduct}=="5744", MODE="0664", GROUP="plugdev"
     KERNEL=="uinput", MODE="0664", GROUP="input"
+    # XR Gaming's vendored xr_driver ships these same rules under
+    # /etc/udev/rules.d, but that's a symlink into the read-only Nix store
+    # on any NixOS system -- writing there always fails, so it never
+    # actually took effect at runtime. Declare them here instead.
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="1bbb", MODE="0664", GROUP="plugdev"
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="04d2", MODE="0664", GROUP="plugdev"
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="35ca", MODE="0664", GROUP="plugdev"
+    SUBSYSTEM=="usb", KERNEL=="hiddev[0-9]*", ATTRS{idVendor}=="35ca", MODE="0664", GROUP="plugdev"
+    SUBSYSTEM=="tty", KERNEL=="ttyACM[0-9]*", ATTRS{idVendor}=="35ca", MODE="0664", GROUP="plugdev"
+    SUBSYSTEM=="hidraw", KERNEL=="hidraw[0-9]*", ATTRS{idVendor}=="35ca", MODE="0664", GROUP="plugdev"
   '';
   systemd.services.steam-cef-debug = {
     description = "Seed Steam CEF debugging toggle for Decky Loader";
@@ -98,4 +131,9 @@ in
     }/bus";
     DBUS_SYSTEM_BUS_ADDRESS = "unix:path=/run/dbus/system_bus_socket";
   };
+  # `su` is a NixOS security wrapper, not a plain package -- it only exists
+  # at /run/wrappers/bin/su, so extraPackages (which only ever adds
+  # <pkg>/bin dirs) can't reach it. XR Gaming's vendored xr_driver/setup
+  # calls bare `su` to drop from root to the target user.
+  systemd.services.decky-loader.path = [ "/run/wrappers" ];
 }

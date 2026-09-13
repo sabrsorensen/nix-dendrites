@@ -150,17 +150,21 @@ stdenvNoCC.mkDerivation (finalAttrs: {
         # d3dcompiler_47 (Wine's built-in vkd3d-shader-based reimplementation
         # fails to compile some W3D shaders -- confirmed by reproducing an
         # APB crash down to that exact code path). Native win7 override is
-        # needed for dotnet452. Guarded by a sentinel so it only runs once;
-        # only marked done on success so a transient (e.g. network) failure
-        # is retried on the next launch instead of silently skipped forever.
-        # Caveat: since this targets Wine's own default prefix, it also
-        # affects any other Wine app sharing that same default $HOME/.wine.
+        # needed for dotnet452. dxvk is needed too: APB's `-launcher` UI is a
+        # DX11/CEF overlay in front of the actual (DX9-era) game engine, and
+        # Wine ships no dxgi.dll/d3d11.dll of its own -- without dxvk it
+        # fails to import those DLLs (status c0000135) and exits in ~6s.
+        # Guarded by a sentinel so it only runs once; only marked done on
+        # success so a transient (e.g. network) failure is retried on the
+        # next launch instead of silently skipped forever. Caveat: since
+        # this targets Wine's own default prefix, it also affects any other
+        # Wine app sharing that same default $HOME/.wine.
         w3dhub_wineprefix="''${WINEPREFIX:-$HOME/.wine}"
         w3dhub_bootstrap_sentinel="$w3dhub_runtime/.wine-bootstrap-complete"
         if [ ! -e "$w3dhub_bootstrap_sentinel" ]; then
           WINEPREFIX="$w3dhub_wineprefix" winetricks -q \
             corefonts vcrun2008 vcrun2010 xact xact_x64 d3dx9 d3dx9_43 \
-            msxml3 dotnet452 win7 d3dcompiler_47 \
+            msxml3 dotnet452 win7 d3dcompiler_47 dxvk \
             && touch "$w3dhub_bootstrap_sentinel"
         fi
       ''}
