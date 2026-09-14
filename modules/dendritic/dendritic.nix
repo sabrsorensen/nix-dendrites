@@ -17,7 +17,7 @@
       # Bootstrap inputs stay together in the Dendritic module. Feature
       # integrations declare their own dependencies alongside their consumers.
       flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/*";
-      flake-file.url = "github:vic/flake-file";
+      flake-file.url = "github:denful/flake-file";
       flake-parts = {
         url = "https://flakehub.com/f/hercules-ci/flake-parts/*";
         inputs.nixpkgs-lib.follows = "nixpkgs";

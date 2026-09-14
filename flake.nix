@@ -1,4 +1,4 @@
-# DO-NOT-EDIT. This file was auto-generated using github:vic/flake-file.
+# DO-NOT-EDIT. This file was auto-generated using github:denful/flake-file.
 # Use `nix run .#write-flake` to regenerate it.
 {
   description = "sabrsorensen's Dendritic Nix configurations";
@@ -37,7 +37,7 @@
       flake = false;
     };
     flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/*";
-    flake-file.url = "github:vic/flake-file";
+    flake-file.url = "github:denful/flake-file";
     flake-parts = {
       url = "https://flakehub.com/f/hercules-ci/flake-parts/*";
       inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -62,7 +62,7 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
-    import-tree.url = "github:vic/import-tree";
+    import-tree.url = "github:denful/import-tree";
     jovian-nixos = {
       url = "github:Jovian-Experiments/Jovian-NixOS";
       inputs.nixpkgs.follows = "nixpkgs";

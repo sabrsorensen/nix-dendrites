@@ -26,7 +26,7 @@ just install-hooks                # pre-commit install
 just run-hooks                    # pre-commit run --all-files
 just develop                      # nix develop
 
-# Focused evaluation of one host while porting/debugging (faster than a full check):
+# Focused evaluation of one host while debugging (faster than a full check):
 nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath
 
 # Deployment helpers (see scripts/):
@@ -37,11 +37,6 @@ just bootstrap-final-config <host>
 just bootstrap-image <host>
 just bootstrap-enroll <target>
 just install-anywhere <host> <target>
-
-# Predecessor-repo comparison (read-only reference checkout, never edit it):
-just audit-reference
-just audit-diff modules/home-manager/vscode   # any repo-relative path
-# MAIN_AUDIT env var overrides the default ../nix-dendrites-main-audit location
 ```
 
 `flake.nix` is generated — never hand-edit it. Add/change an input in
@@ -137,26 +132,6 @@ CPU architecture and platform integration are different concerns (e.g. Steam
 Deck is `x86_64-linux` *and* `platform = "steamdeck"`) — don't invent a new
 architecture layer just because a host has a special integration stack.
 
-## Porting method (predecessor → this repo)
-
-A persistent, read-only reference checkout of the predecessor repo lives at
-`../nix-dendrites-main-audit` (override with `MAIN_AUDIT`) — use
-`just audit-reference` / `just audit-diff <path>` to compare, never edit it.
-
-- Port one behavior at a time as a new module; the new module must stand on
-  its own (no imports of old modules, no compat wrappers, no descriptor
-  bridge).
-- Preserve predecessor scripts, patches, fallback paths, validation checks,
-  and user-facing behavior verbatim unless there's a concrete incompatibility
-  or a documented policy decision — "shorter/more idiomatic" alone isn't
-  sufficient justification.
-- Order: host facts/schema → generic feature/role modules → host-edge
-  hardware/boot/filesystem/network → service implementations behind
-  `my.host.services.*` → shared publication/data layers → evaluate
-  per-host, then broad checks once real host-edge config exists.
-- Don't fake a passing check with generic root filesystem/boot settings that
-  don't describe the real machine.
-
 ## Editing discipline
 
 - Read a file's current on-disk contents in the current worktree before
@@ -190,6 +165,3 @@ A persistent, read-only reference checkout of the predecessor repo lives at
   manual Lutris installer script for Renegade X, and the Wine/GE-Proton
   `powershell.exe` stub fix (packaged as `wine-powershell-stub-install`)
   needed for the Totem Arts Launcher to run at all.
-- [docs/archive/broadcast-rewrite/](docs/archive/broadcast-rewrite/README.md)
-  — historical conversion/validation evidence, useful for regression
-  investigation, not a living task list.

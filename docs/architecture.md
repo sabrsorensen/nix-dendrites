@@ -160,30 +160,6 @@ a provider migration until selecting the first ephemeral-root host.
 owns its Dendritic/flake-file bootstrap and repository-wide flake inputs; it
 is not a separate integration category.
 
-## Historical predecessor audit
-
-The completed predecessor conversion evidence is archived in
-[`archive/broadcast-rewrite/`](archive/broadcast-rewrite/README.md). It is
-useful when investigating a suspected regression, but is not a living module
-inventory or task list. Current implementation decisions belong in this guide
-and current runtime follow-up belongs beside the affected module or in a
-focused operational document.
-
-The persistent sibling `../nix-dendrites-main-audit` checkout remains available
-for targeted historical comparison. It is intentionally separate from the
-rewrite worktree and must not receive implementation edits. The helpers are:
-
-```bash
-just audit-reference
-just audit-diff modules/home-manager/vscode
-```
-
-Set `MAIN_AUDIT` when the reference checkout lives elsewhere. Classify a
-difference before changing it: structural glue, intentional design change, or
-an implementation gap. Record an active finding in the affected module, this
-guide, or a focused operational document, rather than reviving the archive as
-a task tracker.
-
 ## Docker and Podman are separate choices
 
 `features.docker` and `features.podman` are deliberately separate. A generic
@@ -395,34 +371,6 @@ multi-hour local rebuild.
 Secrets are data inputs, not architecture. A host hardware module may read a
 UUID from the secrets input directly when that is the source of truth, but it
 must not import configuration from another repository.
-
-## Porting method
-
-Port one behavior at a time as a new module. It may consult the prior
-configuration to preserve derivation content, but the new module must stand on
-its own: no imports of old modules, no compatibility wrappers, and no
-descriptor bridge.
-
-Preserve predecessor content by default. The rewrite may change registration,
-module boundaries, and activation gates, but it must carry forward scripts,
-patches, fallback paths, validation checks, and user-facing behavior verbatim
-unless a concrete incompatibility or an explicitly documented policy decision
-requires a change. A shorter or more idiomatic replacement is not sufficient
-justification by itself.
-
-Recommended order:
-
-1. Create the host facts and shared option schema.
-2. Port generic feature and role modules with self-gating.
-3. Port host-edge hardware, boot, filesystem, and network modules into the
-   relevant host directory.
-4. Port service implementations behind `my.host.services.*`.
-5. Port shared publication/data layers needed by service stacks.
-6. Evaluate each affected configuration, then run broad checks once required
-   host-edge configuration exists.
-
-Do not fake a successful full check by adding generic root filesystems or boot
-settings that do not describe the actual machine.
 
 ## Editing discipline
 

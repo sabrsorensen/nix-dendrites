@@ -180,6 +180,7 @@ in
       branch = 0;
       store = 0;
       pluginOrder = [
+        "Unifideck"
         "Bluetooth"
         "KDE Connect"
         "XR Gaming"

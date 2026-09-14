@@ -21,13 +21,8 @@ behind them.
 
 ## Project guide
 
-The system-level migration is substantially ported: host facts, hardware
-edges, platforms, DNS/DHCP and reverse-proxy publication, the enabled service
-stacks, Flatpak, secrets, Disko, Jovian, Home Manager (including the private
-WSL work profile), and the declared NixOS outputs are in the broadcast-and-
-gate structure. Remaining work is focused on runtime deployment validation.
-
-The broadcast rewrite is complete. See the
-[architecture guide](docs/architecture.md) for current conventions; historical
-conversion and validation evidence is retained in the
-[broadcast rewrite archive](docs/archive/broadcast-rewrite/README.md).
+Host facts, hardware edges, platforms, DNS/DHCP and reverse-proxy
+publication, the enabled service stacks, Flatpak, secrets, Disko, Jovian,
+Home Manager (including the private WSL work profile), and the declared
+NixOS outputs all live in the broadcast-and-gate structure. See the
+[architecture guide](docs/architecture.md) for current conventions.

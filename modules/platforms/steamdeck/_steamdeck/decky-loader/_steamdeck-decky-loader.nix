@@ -76,6 +76,14 @@ in
       jq
       kmod
       procps
+      # unifideck's Edge-based OAuth/xCloud flow (auth/edge_browser/detection.py)
+      # probes `shutil.which("microsoft-edge")`/`"microsoft-edge-stable"` on the
+      # decky-loader process's own PATH before falling back to installing the
+      # `com.microsoft.Edge` flatpak itself. Providing it here means Epic/GOG
+      # login and xCloud work without the plugin doing its own flatpak install.
+      # nixpkgs' package installs its `mainProgram` as `microsoft-edge`, which
+      # matches the first name unifideck searches for.
+      microsoft-edge
     ];
     extraPythonPackages =
       pythonPackages: with pythonPackages; [

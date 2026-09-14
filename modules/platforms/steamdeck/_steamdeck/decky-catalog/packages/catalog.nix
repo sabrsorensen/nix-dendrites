@@ -179,4 +179,43 @@ in
     # update check all silently fail. Vendored via package.sh upstream.
     pythonDeps = [ deckyPluginToolkit ];
   };
+  "unifideck" = mk {
+    pname = "unifideck";
+    owner = "mubaraknumann";
+    repo = "unifideck";
+    # rev = "main" (not a release tag) is deliberate here: tracks
+    # https://github.com/mubaraknumann/unifideck/issues/447 (Battle.net
+    # library sync only returns StarCraft / can hang on "Fetching
+    # battlenet (1/1)" — a first-sync race with the client's PUB catalog
+    # plus incomplete ownership facts, per the maintainer's own analysis
+    # in the issue). Open, unfixed, no diagnostics commit yet as of the
+    # srcHash below (main HEAD 2423d32a, 2026-09-09 — the same commit
+    # issue #447 was still open against). Re-run the hash-discovery
+    # build (see decky-plugin-catalog memory) periodically to pick up
+    # whatever lands; there's nothing more targeted to pin to yet.
+    rev = "main";
+    srcHash = "sha256-CCgm84AWN+nQpXxso7WW4GB0QNR10KT8/Id9iHZ6hL4=";
+    pnpmHash = "sha256-xpkbLSaMVU3FfROkUKr6+BNC7uB1/dLJtj0wYgaDJGM=";
+    executablePaths = [ "*/bin/*" ];
+    # requirements.txt: aiohttp (auth/CDP/store clients, 38 import sites),
+    # cryptography (security/secure_token_store.py AES-GCM token
+    # encryption), jsonschema (config/validator.py, imported lazily inside
+    # a try/except so a mismatch only skips validation, never crashes —
+    # see its docstring: "there is no degraded mode"). requests, urllib3,
+    # certifi, charset_normalizer, vdf, steamgrid and websockets are
+    # already vendored into upstream's committed py_modules/ and ship via
+    # the plain source copy, so they're not listed here. withPackages
+    # merges each dep's full transitive closure (multidict/yarl/frozenlist
+    # for aiohttp; cffi for cryptography; attrs/referencing/rpds-py for
+    # jsonschema) into one site-packages tree.
+    pythonDeps = [
+      (pkgs.python3.withPackages (
+        ps: with ps; [
+          aiohttp
+          cryptography
+          jsonschema
+        ]
+      ))
+    ];
+  };
 }
