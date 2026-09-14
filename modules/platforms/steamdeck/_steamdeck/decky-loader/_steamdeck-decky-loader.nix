@@ -84,6 +84,26 @@ in
       # nixpkgs' package installs its `mainProgram` as `microsoft-edge`, which
       # matches the first name unifideck searches for.
       microsoft-edge
+      # unifideck's shared prefix_clone.py shells out to `rsync` (plain
+      # subprocess, no absolute path) to clone a game's base Proton prefix
+      # onto a picked storage location -- confirmed live: installing a
+      # Battle.net game to external storage failed with
+      # `FileNotFoundError: [Errno 2] No such file or directory: 'rsync'`
+      # and the abandoned-prefix cleanup log right after it, since rsync
+      # isn't on decky-loader's PATH otherwise (same closed-PATH situation
+      # documented on every other extraPackages entry here).
+      rsync
+      # unifideck's GOGStore shells out to `gogdl` (GOG's own downloader,
+      # vendored from Heroic Games Launcher) via BinaryResolver, whose
+      # System PATH tier is a plain `shutil.which("gogdl")` -- confirmed
+      # live: GOG sign-in failed with the backend logging
+      # "[BinaryResolver] gogdl not found in any tier" /
+      # "[GOGStore] gogdl unavailable -- reporting store as unavailable"
+      # on every attempt, since it isn't on decky-loader's PATH otherwise
+      # (same closed-PATH situation as every other extraPackages entry
+      # here). nixpkgs' gogdl is 1.3.0, matching binary_signatures.py's
+      # own pinned expectation exactly.
+      gogdl
     ];
     extraPythonPackages =
       pythonPackages: with pythonPackages; [
@@ -91,7 +111,24 @@ in
         vdf
       ];
   };
-  environment.systemPackages = with pkgs; [ python3 ];
+  environment.systemPackages = with pkgs; [
+    python3
+    # unifideck's browser-OAuth flow (Epic/GOG/Amazon/Microsoft sign-in)
+    # doesn't run inside decky-loader's own process -- signing in launches
+    # a non-Steam shortcut ("<store>:<game-key>-auth-temp-...") that Steam
+    # runs in its own gamescope session, under the ordinary system PATH,
+    # not decky-loader's extraPackages-scoped one. Confirmed live: the
+    # per-launch log (~/.local/share/unifideck/launches/*.log) for a GOG
+    # sign-in attempt got as far as
+    # "[Edge] Session env detected from PID ... (steam): DISPLAY=..."
+    # and then just stopped -- no error, no browser window -- because
+    # `microsoft-edge` (already in decky-loader's own extraPackages,
+    # above) wasn't reachable from *this* process's PATH at all. Having
+    # it here too, system-wide, is what the launcher subprocess actually
+    # needs; decky-loader's own copy stays for its own internal checks
+    # (see that entry's comment).
+    microsoft-edge
+  ];
   nixpkgs.config.permittedInsecurePackages = [ "pnpm-9.15.9" ];
   programs.nix-ld = {
     enable = true;

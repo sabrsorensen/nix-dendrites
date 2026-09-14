@@ -181,20 +181,29 @@ in
   };
   "unifideck" = mk {
     pname = "unifideck";
-    owner = "mubaraknumann";
-    repo = "unifideck";
-    # rev = "main" (not a release tag) is deliberate here: tracks
+    # Fork, not upstream: tracks
     # https://github.com/mubaraknumann/unifideck/issues/447 (Battle.net
-    # library sync only returns StarCraft / can hang on "Fetching
-    # battlenet (1/1)" — a first-sync race with the client's PUB catalog
-    # plus incomplete ownership facts, per the maintainer's own analysis
-    # in the issue). Open, unfixed, no diagnostics commit yet as of the
-    # srcHash below (main HEAD 2423d32a, 2026-09-09 — the same commit
-    # issue #447 was still open against). Re-run the hash-discovery
-    # build (see decky-plugin-catalog memory) periodically to pick up
-    # whatever lands; there's nothing more targeted to pin to yet.
+    # library sync only returns license-backed titles — game_account_programs
+    # had a consumer and no producer, audit §3.5 finding A), fixed in our
+    # fork via a background fetch off account.battle.net/api/games-and-subs
+    # through the shared Edge profile's CDP cookie read (see
+    # ownership/game_accounts.py, docs/architecture-audit.md item 29). Move
+    # back to upstream (owner = "mubaraknumann") if/when this lands there —
+    # check whether store.py's _game_account_programs still calls it a gap.
+    #
+    # The fork briefly grew a from-scratch W3D Hub store on top of this
+    # (2026-09-14/15) — removed again a day later once live testing showed
+    # every real content-package download 404ing regardless of auth,
+    # backend, or fallback strategy tried (a genuine upstream CDN gap, not
+    # a client bug). Back to hand-crafted Steam shortcuts + the W3D Hub
+    # server browser for that game family; srcHash pinned to main HEAD
+    # 57fba5b4 (2026-09-16), the removal commit. Re-run the hash-discovery
+    # build (see decky-plugin-catalog memory) to pick up further fork
+    # commits.
+    owner = "sabrsorensen";
+    repo = "unifideck";
     rev = "main";
-    srcHash = "sha256-CCgm84AWN+nQpXxso7WW4GB0QNR10KT8/Id9iHZ6hL4=";
+    srcHash = "sha256-ZKGp93PBnAZV4NpQvlO17yPoA4DG29LO4moAEuNaRBw=";
     pnpmHash = "sha256-xpkbLSaMVU3FfROkUKr6+BNC7uB1/dLJtj0wYgaDJGM=";
     executablePaths = [ "*/bin/*" ];
     # requirements.txt: aiohttp (auth/CDP/store clients, 38 import sites),
