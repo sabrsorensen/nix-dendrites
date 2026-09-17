@@ -37,9 +37,7 @@
   # Bound journald's footprint on the SD card. Kept persistent (not
   # volatile) so crash/reboot logs -- e.g. from the undervoltage events
   # rpi-status surfaces -- survive a power cycle.
-  services.journald.extraConfig = ''
-    SystemMaxUse=200M
-  '';
+  services.journald.settings.Journal.SystemMaxUse = "200M";
   swapDevices = [ ];
   networking.useDHCP = lib.mkDefault true;
   networking.interfaces.end0.useDHCP = lib.mkDefault true;

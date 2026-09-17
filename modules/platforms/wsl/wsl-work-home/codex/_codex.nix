@@ -57,6 +57,12 @@ let
         '';
       };
       herdrPackage = inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.herdr;
+      # The skill doc is authoritative from the herdr binary itself (`herdr
+      # --skill`), so it's generated at build time instead of hand-copied —
+      # it can't drift from the pinned herdr-nix version.
+      herdrSkill = pkgs.runCommand "herdr-skill.md" { nativeBuildInputs = [ herdrPackage ]; } ''
+        herdr --skill > "$out"
+      '';
       codexConfig = "${homeDirectory}/.codex/config.toml";
       azdoMcpLibraryPath = lib.makeLibraryPath (
         with pkgs;
@@ -90,7 +96,7 @@ let
         ]
         ++ lib.optional (pkgs ? spec-kit) pkgs.spec-kit;
         home.file.".codex/skills/herdr/SKILL.md" = {
-          source = ./herdr-skill.md;
+          source = herdrSkill;
           force = true;
         };
         # Home Manager normally links this file from the Nix store.  Herdr's
