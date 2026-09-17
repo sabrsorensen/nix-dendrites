@@ -640,11 +640,11 @@
     "nix-work-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1786048184,
-        "narHash": "sha256-S6Y43YY36e02vSo2cWhRW51pNVm50uFRPCxSvfCNREw=",
+        "lastModified": 1789679508,
+        "narHash": "sha256-Rufo6JeId4IYhiQzHQTJ5MOYeezuDO5iUblmBicsb64=",
         "ref": "refs/heads/main",
-        "rev": "de700c77de48d73607ae3d513dc8492563d1ef6a",
-        "revCount": 33,
+        "rev": "f7436dd8394522b2adf1f9de728dbff4d019f4ea",
+        "revCount": 34,
         "type": "git",
         "url": "https://github.com/sabrsorensen/nix-work-secrets.git"
       },
