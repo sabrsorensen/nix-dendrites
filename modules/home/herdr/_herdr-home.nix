@@ -26,6 +26,7 @@ in
           panel_bg = "reset";
           active_row_bg = "#1D3B53";
           selection_bg = "#1B90DD";
+          surface0 = "#102A3D";
           accent = "#82AAFF";
           text = "#CCCCCC";
           subtext0 = "#969696";
