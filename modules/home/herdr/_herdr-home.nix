@@ -15,8 +15,53 @@ in
     # Herdr falls back to $SHELL, then /bin/sh, for the panes it spawns.
     # Every managed user has Fish enabled (see home/home/_home.nix), so point
     # Herdr at it directly instead of relying on $SHELL/login-shell setup.
-    settings.terminal = lib.optionalAttrs config.programs.fish.enable {
-      default_shell = lib.getExe pkgs.fish;
+    settings = {
+      # Party Owl '84 — derive the base palette from the enclosing terminal
+      # (Windows Terminal on WSL), then align Herdr's chrome with it. Herdr's
+      # `terminal` is a built-in backend name; custom names are not supported.
+      theme = {
+        name = "terminal";
+        custom = {
+          sidebar_bg = "#011627";
+          panel_bg = "reset";
+          active_row_bg = "#1D3B53";
+          selection_bg = "#1B90DD";
+          accent = "#82AAFF";
+          text = "#CCCCCC";
+          subtext0 = "#969696";
+          mauve = "#C792EA";
+          blue = "#82AAFF";
+          teal = "#21C7A8";
+          green = "#22DA6E";
+          yellow = "#C5E478";
+          red = "#EF5350";
+        };
+      };
+      ui = {
+        accent = "#82AAFF";
+        tab_bar_right = [
+          { type = "zoom"; }
+          { type = "hostname"; }
+          {
+            type = "datetime";
+            format = "%H:%M";
+          }
+          #{
+          #  type = "text";
+          #  text = "prod";
+          #}
+          #{
+          #  type = "command";
+          #  command = "~/.config/herdr/status.sh";
+          #  interval_seconds = 5;
+          #  timeout_seconds = 2;
+          #}
+        ];
+        tab_bar_right_separator = " · ";
+      };
+      terminal = lib.optionalAttrs config.programs.fish.enable {
+        default_shell = lib.getExe pkgs.fish;
+      };
     };
   };
 
