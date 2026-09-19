@@ -66,11 +66,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789692010,
-        "narHash": "sha256-701w5Fl6LqNTz4ISU5XUz6PeoTrgLqVyr9bXdl4tKwI=",
+        "lastModified": 1789762479,
+        "narHash": "sha256-4KCSgkNu6206dYNXEgUSd4XznX+8De/T/KYQDWAmqY8=",
         "owner": "sadjow",
         "repo": "codex-cli-nix",
-        "rev": "43f38448fbabf5c7edb2febf42011f74225694ee",
+        "rev": "a7ed999eef6da100f126543dd5ab8817ddf003e6",
         "type": "github"
       },
       "original": {
@@ -181,11 +181,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781152676,
-        "narHash": "sha256-RxWs5ND31KzTG7wvMM+PMfUjyNpmIEr999lqNARaM5o=",
+        "lastModified": 1789770686,
+        "narHash": "sha256-uZkBR7yHdIKUFB5SZdfgh1qkGfI3XmYmI/lTiquxbck=",
         "owner": "nix-community",
         "repo": "disko",
-        "rev": "ff8702b4de27f72b4c78573dfb89ec74e36abdf1",
+        "rev": "725ea35e410ad83be4931d1bff7e090eacaf3563",
         "type": "github"
       },
       "original": {
@@ -429,11 +429,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789695075,
-        "narHash": "sha256-HREFWgmCTp28ZdMkSFOW2QW8uI17v5CNc04W46h6aPo=",
+        "lastModified": 1789765459,
+        "narHash": "sha256-voJJ5IZR4w2149u2Jm/j2zifeWROlpZQ+JzmCQwjgn8=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "4ac5a2ae9025eab1ebece4f9df8c315fd84a738a",
+        "rev": "17903129f47656fa4d07e78ad87f6592ff4f2527",
         "type": "github"
       },
       "original": {
@@ -497,29 +497,6 @@
       "original": {
         "owner": "Jovian-Experiments",
         "repo": "Jovian-NixOS",
-        "type": "github"
-      }
-    },
-    "lazyvim": {
-      "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1788971242,
-        "narHash": "sha256-XGWQ4CtmuRH+4NijKC5OlMMd32Au7plsIaiaCWuM4to=",
-        "owner": "pfassina",
-        "repo": "lazyvim-nix",
-        "rev": "21893371738a6734c2a8ca455d92d57cc8accf83",
-        "type": "github"
-      },
-      "original": {
-        "owner": "pfassina",
-        "repo": "lazyvim-nix",
         "type": "github"
       }
     },
@@ -827,11 +804,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789761337,
-        "narHash": "sha256-mjfeK0GHvQPhlxQjh4AXPmyoS0XpO+TH4vqsAgLqzCA=",
+        "lastModified": 1789778177,
+        "narHash": "sha256-1d8/QYuymGNxCnvJqDcNP7UVRDsbUfxKpjUXhbvMTYw=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "247ee11c320178a419a2147c0bd21a0c8ab00df3",
+        "rev": "b074ad2b6100306ab2679ce6a5f68a264e1f344d",
         "type": "github"
       },
       "original": {
@@ -907,7 +884,6 @@
         "impermanence": "impermanence",
         "import-tree": "import-tree",
         "jovian-nixos": "jovian-nixos",
-        "lazyvim": "lazyvim",
         "nix-auto-follow": "nix-auto-follow",
         "nix-flatpak": "nix-flatpak",
         "nix-index-database": "nix-index-database",
@@ -950,11 +926,11 @@
     "superpowers": {
       "flake": false,
       "locked": {
-        "lastModified": 1786553601,
-        "narHash": "sha256-EsGNO0dULWf5Bx6bGrCv2kI2Z8aKH0kRvGiuN23wChQ=",
+        "lastModified": 1789777895,
+        "narHash": "sha256-rgeJhjQyABYlhlyFRmgyhbZmmmIPPNkch4CXyTkGEyM=",
         "owner": "obra",
         "repo": "superpowers",
-        "rev": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+        "rev": "5bf4e78011075bcfc0dc295f0724994cd123ee71",
         "type": "github"
       },
       "original": {
