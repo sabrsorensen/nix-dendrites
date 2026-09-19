@@ -9,6 +9,10 @@ lib.recursiveUpdate baseModule {
   my.host.home.enable = false;
   my.host.bootstrap.finalConfigName = finalConfigName;
   my.deployment.enableRemoteUser = false;
+  # Mirror the installer's override (_host-installer.nix) -- the bootstrap
+  # config exists to get a minimal, secrets-less machine reachable over SSH,
+  # so it shouldn't also fetch and build the full Decky plugin catalog.
+  jovian.decky-loader.enable = lib.mkForce false;
   users.users.sam = {
     isNormalUser = true;
     description = "Sam";

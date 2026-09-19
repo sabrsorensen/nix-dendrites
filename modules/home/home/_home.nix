@@ -54,7 +54,6 @@
           gpg = true;
           gdrive = host.features.gdrive;
           herdr = host.features.codex || host.features.claude;
-          lazyvim = host.features.lazyvim;
           mcpCommon = host.features.mcpCommon;
           "nix-index" = true;
           noson = host.features.noson;

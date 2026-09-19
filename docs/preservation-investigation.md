@@ -29,9 +29,11 @@ already evaluate with `boot.initrd.systemd.enable = true`.
 
 The current persistence policy is already separated by concern:
 
-- `modules/features/impermanence/_content.nix` owns baseline system state;
+- `modules/features/impermanence/_impermanence-module.nix` owns baseline
+  system state;
 - Bluetooth and Firefox add their own persistence payloads;
-- `modules/home/persistence/_content.nix` owns shell and browser user state;
+- `modules/home/persistence/_persistence.nix` owns shell and browser user
+  state;
 - `features.impermanence` aggregates the component feature defaults.
 
 That separation is a good migration boundary. The public feature/broadcast

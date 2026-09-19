@@ -36,7 +36,7 @@ let
   # always fails there, and with `set -e` it aborts the rest of setup
   # (systemd service install, uinput check, ...). The rules themselves are
   # declared instead via services.udev.extraRules in
-  # _steamdeck-decky-loader.nix.
+  # _decky-loader.nix.
   breezyVulkanSetupScript = fetchurl {
     url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.9.11/breezy_vulkan_setup";
     sha256 = "sha256-CXFThyPkpixqfyXdb7T2f5/F5GO1lmeCIVuMHr1lEOA=";

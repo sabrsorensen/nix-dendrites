@@ -28,16 +28,17 @@ just develop                      # nix develop
 
 # Focused evaluation of one host while debugging (faster than a full check):
 nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath
-
-# Deployment helpers (see scripts/):
-just bootstrap-config <host>
-just bootstrap-output <host>
-just bootstrap-image-output <host>
-just bootstrap-final-config <host>
-just bootstrap-image <host>
-just bootstrap-enroll <target>
-just install-anywhere <host> <target>
 ```
+
+There is no remote bare-metal install/enroll helper right now -- the previous
+`scripts/bootstrap-target.sh`/`install-anywhere.sh`/`bootstrap-enroll-remote.sh`
+only worked for EmeraldEcho and NixPi and were removed once their
+`<host>-bootstrap-image` naming assumption drifted from EmeraldEcho's actual
+`<host>-installer` outputs. The underlying per-host bootstrap plumbing
+(`my.host.tags` containing `"bootstrap"`, `my.host.bootstrap.finalConfigName`,
+`modules/tooling/bootstrap-enroll/`) still exists and still works via `nix
+build`/`nix run github:nix-community/nixos-anywhere` directly; a general
+driver will be designed fresh when the next bare-metal bringup happens.
 
 `flake.nix` is generated — never hand-edit it. Add/change an input in
 `modules/dendritic/dendritic.nix` (bootstrap inputs) or beside the module

@@ -83,17 +83,12 @@
         # modules/services/plex/plex.nix). What remains here are aggregate
         # flags that cascade defaults onto several sub-features in
         # _host-context.nix, plus a couple of options with no single owning
-        # module (see docs/architecture.md for the reasoning). Two flags
-        # (wifi, personalMcpServers) are currently declared but consumed
-        # nowhere in the repo -- left as-is pending a decision on whether
-        # they're vestigial.
+        # module (see docs/architecture.md for the reasoning).
         features = {
           gui = lib.mkEnableOption "local graphical environment";
-          wifi = lib.mkEnableOption "Wi-Fi";
           homeGuiPackages = lib.mkEnableOption "default graphical Home Manager packages";
           decky = lib.mkEnableOption "Decky Loader and declarative Decky plugins";
           impermanence = lib.mkEnableOption "persistent state on an ephemeral root filesystem";
-          personalMcpServers = lib.mkEnableOption "Sam's personal MCP servers";
         };
 
         vscodeTheme = lib.mkOption {
@@ -133,6 +128,10 @@
             readOnly = true;
           };
           headless = lib.mkOption {
+            type = lib.types.bool;
+            readOnly = true;
+          };
+          finalSystem = lib.mkOption {
             type = lib.types.bool;
             readOnly = true;
           };

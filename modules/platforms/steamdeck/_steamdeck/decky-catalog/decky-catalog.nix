@@ -10,7 +10,7 @@ let
     {
       options.my.host.features.deckyCatalog = lib.mkEnableOption "declarative Decky plugin catalogue";
       config = lib.mkIf (config.my.host.platform == "steamdeck" && config.my.host.features.deckyCatalog) (
-        import ./_steamdeck-decky-catalog.nix args
+        import ./_decky-catalog.nix args
       );
     };
 in

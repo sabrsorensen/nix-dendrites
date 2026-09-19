@@ -34,10 +34,7 @@ lib.mkMerge [
   })
 
   (lib.mkIf config.my.host.features.personalMcp {
-    my.host.features = {
-      mcpCommon = lib.mkDefault true;
-      personalMcpServers = lib.mkDefault true;
-    };
+    my.host.features.mcpCommon = lib.mkDefault true;
   })
 
   # Common MCP clients are part of the interactive workstation profile. Keep
@@ -64,6 +61,12 @@ lib.mkMerge [
       rpi = config.my.host.platform == "rpi";
       steamdeck = config.my.host.platform == "steamdeck";
       headless = !config.my.host.features.gui;
+      # True once a host has left the bootstrap/installer lifecycle stages
+      # (see my.host.tags) and is running its final, fully-provisioned
+      # config. Defaults true for every host, since only the EmeraldEcho
+      # bootstrap/installer variants ever set these tags.
+      finalSystem =
+        !builtins.elem "bootstrap" config.my.host.tags && !builtins.elem "installer" config.my.host.tags;
     };
     nixpkgs.config.allowUnfreePredicate =
       pkg: builtins.elem (lib.getName pkg) config.my.unfreePackageNames;

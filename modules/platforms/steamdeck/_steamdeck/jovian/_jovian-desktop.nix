@@ -54,16 +54,11 @@
     ];
   };
   services.flatpak.enable = true;
-  programs.kdeconnect.enable = lib.mkIf (
-    !builtins.elem "bootstrap" config.my.host.tags && !builtins.elem "installer" config.my.host.tags
-  ) true;
-  services.flatpak.packages =
-    lib.mkIf
-      (!builtins.elem "bootstrap" config.my.host.tags && !builtins.elem "installer" config.my.host.tags)
-      [
-        "io.github.Geocld.XStreamingDesktop"
-        "io.github.unknownskl.greenlight"
-      ];
+  programs.kdeconnect.enable = lib.mkIf config.my.host.is.finalSystem true;
+  services.flatpak.packages = lib.mkIf config.my.host.is.finalSystem [
+    "io.github.Geocld.XStreamingDesktop"
+    "io.github.unknownskl.greenlight"
+  ];
   xdg.portal = {
     enable = true;
     extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];

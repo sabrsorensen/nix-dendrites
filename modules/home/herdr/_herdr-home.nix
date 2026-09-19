@@ -40,6 +40,8 @@ in
       };
       ui = {
         accent = "#82AAFF";
+        status_indicators = "symbols";
+        toast.delivery = "system";
         tab_bar_right = [
           { type = "zoom"; }
           { type = "hostname"; }

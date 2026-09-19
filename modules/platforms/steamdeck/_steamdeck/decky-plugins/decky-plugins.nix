@@ -40,7 +40,7 @@ let
         description = "JSON files to preseed under Decky Loader's settings directory.";
       };
 
-      config = import ./_steamdeck-decky-plugins.nix (args // { inherit cfg; });
+      config = import ./_decky-plugins.nix (args // { inherit cfg; });
     };
 in
 module

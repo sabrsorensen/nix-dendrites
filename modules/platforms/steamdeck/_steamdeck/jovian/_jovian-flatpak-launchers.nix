@@ -5,8 +5,7 @@
   ...
 }:
 let
-  guard =
-    !builtins.elem "bootstrap" config.my.host.tags && !builtins.elem "installer" config.my.host.tags;
+  guard = config.my.host.is.finalSystem;
 
   # Steam's Gaming Mode force-preloads gameoverlayrenderer.so into every
   # shortcut it launches. That library needs libGL.so.1, which is absent
