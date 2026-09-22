@@ -48,7 +48,7 @@
       flake = false;
     };
     herdr-nix = {
-      url = "github:herdrdev/herdr-nix";
+      url = "github:kevinpita/herdr-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {

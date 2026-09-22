@@ -77,7 +77,7 @@ in
     owner = "SteamGridDB";
     repo = "decky-steamgriddb";
     rev = "HEAD";
-    srcHash = "sha256-3+7k24L3nYW7zoKzTPC3khOubs00plbGoIuFmxT6jB8=";
+    srcHash = "sha256-q4MA/U3qtgmlWicEKJJPyLLGAlTnUCK4WWrH7b0mUhE=";
     pnpmHash = "sha256-FRIkp2GuP/kVaxpq7Sn6DYsUbE2O/g8vxin+pl+3ZNw=";
     legacyLockfile = true;
   };
@@ -106,7 +106,7 @@ in
     owner = "bschelst";
     repo = "protondb-decky";
     rev = "main";
-    srcHash = "sha256-gXJH16PQNSiOPzWldeqShq0UxT9KUeaygINsNPHWifs=";
+    srcHash = "sha256-b8qfZhg3Hgxs5qnHrT0YLAIWA+jYYmgQgO54jBSW/BU=";
     pnpmHash = "sha256-I5RNOInDZE0hFZ48kf9iLtGe8cTKWrFRMGVufF5P3xI=";
     executablePaths = [ "*/bin/*" ];
   };
@@ -114,6 +114,14 @@ in
     pname = "decky-tabmaster";
     owner = "Tormak9970";
     repo = "TabMaster";
+    # Pinned to a tag, not main/HEAD like its siblings: main (and the newer
+    # v2.16.2 tag, identical tree to main right now) ships a pnpm-lock.yaml
+    # that's out of sync with package.json (@rollup/plugin-node-resolve
+    # ^16.0.3 in the lock vs ^13.3.0 in the manifest), which fails our
+    # --frozen-lockfile install outright -- an upstream lockfile bug, not a
+    # hash to bump. Re-check by rebuilding against rev = "main" next time
+    # upstream cuts a release; move back to the drift-tracking scheme once
+    # a tag builds clean again.
     rev = "v2.15.1";
     srcHash = "sha256-2BdTeVXeioxMRjjM9W/Vm/IYGVCWFsH2MOwDWIack4E=";
     pnpmHash = "sha256-3ZBIhYfEAfMVRJd6AL2viL/UrBUbzMKH4/++P7Jk6Z8=";
@@ -172,7 +180,7 @@ in
     repo = "decky-quick-tab";
     rev = "main";
     srcHash = "sha256-ztalV1+O8a/LWntWQHXiWb5B0xQnJtaU9JGWKadNE3M=";
-    pnpmHash = "sha256-PSrmejddekXI2MoFZiLb/WSWdDdUW0v1isiFFn8YJ2k=";
+    pnpmHash = "sha256-e0jIH09BAZlcMPLyPn0krJzAPAE2ku3ev6+PPnDsfd8=";
     # main.py -> quick_tab.plugin imports decky_plugin_toolkit; its __init__
     # swallows the resulting ImportError, so without the toolkit the backend
     # never exposes `Plugin` and get/set_tab_settings, restart_steam and the

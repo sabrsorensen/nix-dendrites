@@ -1,9 +1,9 @@
 { ... }:
 {
   nix.settings = {
-    extra-substituters = [ "https://herdr.cachix.org" ];
+    extra-substituters = [ "https://kevinpita.cachix.org" ];
     extra-trusted-public-keys = [
-      "herdr.cachix.org-1:3nH7IStRsS0ASfdonA0DCRR2ZrSCeWitZ7Kwew0cR4I="
+      "kevinpita.cachix.org-1:Cu9UtCDSfDq3/WDnI7N1N/LzAh90SPS+1R+nWao/hz0="
     ];
   };
 }

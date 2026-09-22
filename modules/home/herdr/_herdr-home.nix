@@ -7,15 +7,36 @@
 }:
 let
   herdrConfig = "${config.xdg.configHome}/herdr/config.toml";
+  plugins = import ./_herdr-plugins.nix { inherit pkgs; };
 in
 {
   programs.herdr = {
     enable = true;
     package = inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.herdr;
+    plugins = {
+      "auto-title".source = plugins.autoTitle;
+      spreader = {
+        source = plugins.spreader;
+        configFiles."config.yaml".text = ''
+          workspaces:
+            - name: nix-dendrites
+              root: ~/src/nix-dendrites
+              tabs:
+                - label: Agent
+                - label: Kamino
+                - label: ZaphodBeeblebrox
+                - label: AtlasUponRaiden
+                - label: Naboo
+                - label: Nevarro
+                - label: EmeraldEcho
+        '';
+      };
+    };
     # Herdr falls back to $SHELL, then /bin/sh, for the panes it spawns.
     # Every managed user has Fish enabled (see home/home/_home.nix), so point
     # Herdr at it directly instead of relying on $SHELL/login-shell setup.
     settings = {
+      onboarding = false;
       # Party Owl '84 — derive the base palette from the enclosing terminal
       # (Windows Terminal on WSL), then align Herdr's chrome with it. Herdr's
       # `terminal` is a built-in backend name; custom names are not supported.
@@ -36,7 +57,27 @@ in
           green = "#22DA6E";
           yellow = "#C5E478";
           red = "#EF5350";
+          surface_dim = "#001122"; # sideBar.background
+          surface1 = "#234D70"; # list.activeSelectionBackground
+          overlay0 = "#4B6479"; # editorLineNumber.foreground
+          overlay1 = "#5F7E97"; # badge.background
+          peach = "#F78C6C"; # constant/numeric token orange used throughout
         };
+      };
+      keys = {
+        prefix = "ctrl+b";
+        #goto = "prefix+g";
+        new_workspace = "prefix+shift+n";
+        new_tab = "prefix+t";
+        next_tab = "prefix+n";
+        previous_tab = "prefix+p";
+        #focus_pane_left = "prefix+h"
+        #navigate_workspace_down = "j"
+        #navigate_pane_down = "ctrl+j"
+        split_horizontal = "prefix+minus";
+        split_vertical = "prefix+|";
+        zoom = "prefix+z";
+
       };
       ui = {
         accent = "#82AAFF";

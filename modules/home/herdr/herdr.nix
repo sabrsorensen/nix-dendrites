@@ -10,13 +10,14 @@ let
     }:
     {
       options.my.features.herdr = lib.mkEnableOption "Herdr";
+      imports = [ inputs.herdr-nix.homeModules.default ];
       config = lib.mkIf config.my.features.herdr (homeModule args);
     };
   nixosModule = import ./_herdr-nixos.nix;
 in
 {
   flake-file.inputs.herdr-nix = {
-    url = "github:herdrdev/herdr-nix";
+    url = "github:kevinpita/herdr-nix";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
