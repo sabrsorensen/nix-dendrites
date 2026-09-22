@@ -62,15 +62,16 @@
   swapDevices = [ { device = "/dev/disk/by-uuid/${swapUuid}"; } ];
   hardware = {
     cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-    nvidia = {
-      # Quadro P520 (Pascal) has no GSP, so the open kernel module can't drive it,
-      # and Pascal support ended after the 580 driver branch.
-      open = lib.mkForce false;
-      package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
-      prime = {
-        intelBusId = "PCI:0@0:2:0";
-        nvidiaBusId = "PCI:108@0:0:0";
-      };
+    # Quadro P520 (Pascal) has no GSP, so the shared module's open = true never
+    # probes it - GPU sits unused, Intel handles everything. Tried fixing this
+    # (open = false + legacy_580): worked, but the card would intermittently
+    # hit Xid 62 (fatal RC error), including hangs on later suspend attempts.
+    # Tried nouveau instead: stable, but no Pascal reclocking, and worse - apps
+    # seem to prefer the "discrete" GPU it exposes over Intel, so performance
+    # was worse than just leaving the card unclaimed. Leaving it unclaimed.
+    nvidia.prime = {
+      intelBusId = "PCI:0@0:2:0";
+      nvidiaBusId = "PCI:108@0:0:0";
     };
   };
   networking.networkmanager.enable = true;

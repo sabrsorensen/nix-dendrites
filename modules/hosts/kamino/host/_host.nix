@@ -30,6 +30,7 @@ in
       flatpak = true;
       lutris = true;
       minecraft = true;
+      # true here is a no-op on this hardware: see hardware/_hardware.nix for why.
       nvidia = true;
       noMansSky = true;
       noson = true;
