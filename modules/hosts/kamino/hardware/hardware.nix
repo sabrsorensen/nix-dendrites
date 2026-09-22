@@ -9,7 +9,11 @@ let
 in
 {
   flake.modules.nixos.hardware-kamino =
-    args@{ config, lib, ... }:
+    args@{
+      config,
+      lib,
+      ...
+    }:
     lib.mkIf (config.my.host.name == "Kamino") (
       import ./_hardware.nix (
         args

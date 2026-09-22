@@ -14,7 +14,11 @@
     extraModulePackages = [ ];
     loader = {
       efi.canTouchEfiVariables = true;
-      systemd-boot.enable = true;
+      systemd-boot = {
+        enable = true;
+        # The 1 GB ESP holds ~200 MB per distinct initrd; without a limit it filled up.
+        configurationLimit = 6;
+      };
     };
     initrd = {
       availableKernelModules = [
@@ -58,9 +62,15 @@
   swapDevices = [ { device = "/dev/disk/by-uuid/${swapUuid}"; } ];
   hardware = {
     cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-    nvidia.prime = {
-      intelBusId = "PCI:0@0:2:0";
-      nvidiaBusId = "PCI:108@0:0:0";
+    nvidia = {
+      # Quadro P520 (Pascal) has no GSP, so the open kernel module can't drive it,
+      # and Pascal support ended after the 580 driver branch.
+      open = lib.mkForce false;
+      package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
+      prime = {
+        intelBusId = "PCI:0@0:2:0";
+        nvidiaBusId = "PCI:108@0:0:0";
+      };
     };
   };
   networking.networkmanager.enable = true;
