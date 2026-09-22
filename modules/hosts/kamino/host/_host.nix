@@ -31,6 +31,7 @@ in
       lutris = true;
       minecraft = true;
       nvidia = true;
+      noMansSky = true;
       noson = true;
       office = true;
       plasma = true;

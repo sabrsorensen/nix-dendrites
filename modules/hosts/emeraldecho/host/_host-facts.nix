@@ -21,6 +21,7 @@
       firmware = true;
       lutris = true;
       minecraft = true;
+      noMansSky = true;
       noson = true;
       w3dHubLauncher = true;
       wine = true;
