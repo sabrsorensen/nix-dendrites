@@ -122,6 +122,9 @@ let
           enableMcpIntegration = true;
           settings = {
             features.hooks = true;
+            # Context Mode ships its MCP server, skills, and hook definitions
+            # as a Codex plugin. Plugin hooks remain feature-gated upstream.
+            features.plugin_hooks = true;
             model = "gpt-5.6-terra";
             model_reasoning_effort = "medium";
             notice.model_migrations = {
@@ -150,6 +153,7 @@ let
                   "server"
                   "start"
                 ];
+                startup_timeout_sec = 600;
               };
               AZDOLocal = {
                 command = "${azdoMcp}/bin/azdo-mcp";
@@ -161,7 +165,7 @@ let
                   "pat"
                 ];
                 env_vars = [ "PERSONAL_ACCESS_TOKEN" ];
-                startup_timeout_sec = 300;
+                startup_timeout_sec = 600;
               };
               Context7 = {
                 url = "https://mcp.context7.com/mcp";
@@ -177,32 +181,32 @@ let
               };
               HigiConfluence.url = "https://mcp.atlassian.com/v1/mcp/authv2";
               HigiJira.url = "https://mcp.atlassian.com/v1/mcp/authv2";
-              Pulumi = {
-                url = "https://mcp.ai.pulumi.com/mcp";
-                bearer_token_env_var = "PULUMI_NIXOS_MCP_TOKEN";
-              };
-              Postman = {
-                command = "npx";
-                args = [
-                  "@postman/postman-mcp-server"
-                  "--full"
-                  "--region"
-                  "us"
-                ];
-                env_vars = [ "POSTMAN_API_KEY" ];
-              };
-              Snyk = {
-                command = "npx";
-                args = [
-                  "-y"
-                  "snyk@latest"
-                  "mcp"
-                  "-t"
-                  "stdio"
-                ];
-                env_vars = [ "SNYK_TOKEN" ];
-                startup_timeout_sec = 300;
-              };
+              #Pulumi = {
+              #  url = "https://mcp.ai.pulumi.com/mcp";
+              #  bearer_token_env_var = "PULUMI_NIXOS_MCP_TOKEN";
+              #};
+              #Postman = {
+              #  command = "npx";
+              #  args = [
+              #    "@postman/postman-mcp-server"
+              #    "--full"
+              #    "--region"
+              #    "us"
+              #  ];
+              #  env_vars = [ "POSTMAN_API_KEY" ];
+              #};
+              #Snyk = {
+              #  command = "npx";
+              #  args = [
+              #    "-y"
+              #    "snyk@latest"
+              #    "mcp"
+              #    "-t"
+              #    "stdio"
+              #  ];
+              #  env_vars = [ "SNYK_TOKEN" ];
+              #  startup_timeout_sec = 300;
+              #};
             };
             hooks.state = {
               "${homeDirectory}/.codex/hooks.json:session_start:0:0" = {
