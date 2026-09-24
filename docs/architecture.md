@@ -343,18 +343,39 @@ Keep a NixOS input host-scoped only when importing it is itself unsafe: for
 example, it has unconditional platform behavior, assertions, incompatible
 evaluation, or special-argument requirements. Record that exception and why.
 
-### The WSL exception
+### Platform inputs: Jovian and NixOS-WSL
 
-`nixos-wsl` is deliberately host-scoped. Its option-provider module is added
-only to the `nixos-wsl` output in `modules/platforms/wsl/nixos-wsl/nixos-wsl.nix`; the ordinary
-broadcast module contains only portable user policy gated by `platform = "wsl"`.
+Both platform inputs are imported by their broadcast platform module on every
+host, so their option names (`jovian.*`, `wsl.*`) are shared vocabulary and
+steamdeck/wsl modules can set them under their own `platform` gate.
+`lib.mkIf` gates configuration values, not the evaluation of option names, so
+host-scoping the import instead would force every module that sets those
+options to be host-scoped too.
 
-This is not a stylistic exception. `lib.mkIf` gates configuration values, not
-the evaluation of option names. Putting `wsl.enable` in a broadcast module
-would still make non-WSL hosts encounter an unknown `wsl` option before the
-WSL module supplied it. When an input's options are unavailable to ordinary
-hosts, scope the import at the output boundary instead of trying to hide it
-behind `mkIf`.
+Broadcasting an input is only safe once its **unconditional** config has been
+audited. Check each module's top-level `config` (and bare top-level
+attributes) for anything not behind the input's own enable option.
+
+- **NixOS-WSL** (`modules/platforms/wsl/nixos-wsl/nixos-wsl.nix`): everything
+  is behind `wsl.enable`. Its one unconditional value, `recovery.nix`'s
+  `wsl.extraBin`, is only consumed under `wsl.enable`. Safe as is.
+- **Jovian** (`modules/platforms/steamdeck/_steamdeck/jovian/jovian.nix`): two
+  modules leak. `modules/jovian/overlay.nix` adds Jovian's package overlay
+  (gamescope, mangohud, steam, ...) unconditionally, which silently replaced
+  those packages on every desktop and cost cache hits for everything built on
+  them (Bottles was being built locally on Kamino). `modules/jovian/workarounds.nix`
+  defaults `ignoreMissingKernelModules = true`, making `makeModulesClosure`
+  tolerate missing initrd kernel modules on every host. The platform module
+  removes `overlay.nix` via `disabledModules`, re-adds
+  `inputs.jovian-nixos.overlays.default` only for `platform = "steamdeck"`,
+  and defaults the workaround to `platform == "steamdeck"`.
+
+Rule: prefer neutralising an input's specific unconditional modules
+(`disabledModules` + re-adding the behaviour under the platform gate) over
+host-scoping its whole option surface. Re-audit after bumping such an input.
+Validate by comparing every host's `config.system.build.toplevel.drvPath`
+before and after: platform hosts should be unchanged, and other hosts should
+lose only the leaked behaviour.
 
 ### Raspberry Pi kernel cache policy
 

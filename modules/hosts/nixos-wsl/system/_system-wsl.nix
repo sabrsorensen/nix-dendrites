@@ -42,10 +42,8 @@ in
   wsl = {
     defaultUser = username;
     docker-desktop.enable = true;
-    startMenuLaunchers = true;
   };
 
-  services.openssh.openFirewall = lib.mkForce false;
   programs.nix-ld.libraries = with pkgs; [
     icu
     libsecret

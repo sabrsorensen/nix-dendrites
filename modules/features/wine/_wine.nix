@@ -26,35 +26,6 @@
     allowUnsupportedSystem = true;
   };
 
-  # OpenLDAP's test017-syncreplication-refresh is currently flaky in this setup.
-  # Bottles depends on OpenLDAP transitively, so disable tests to unblock builds.
-  nixpkgs.overlays = [
-    (
-      final: prev:
-      let
-        patool = prev.python314Packages.patool.overrideAttrs (_: {
-          # Patool 4.0.5's archive-discovery tests assume older file and
-          # compressor behavior. Bottles needs Patool at runtime, but not
-          # this incompatible test suite.
-          doInstallCheck = false;
-        });
-      in
-      {
-        openldap = prev.openldap.overrideAttrs (_: {
-          doCheck = false;
-        });
-        bottles-unwrapped = prev.bottles-unwrapped.overrideAttrs (old: {
-          propagatedBuildInputs = map (
-            dependency: if ((dependency.pname or null) == "patool") then patool else dependency
-          ) old.propagatedBuildInputs;
-        });
-        bottles = prev.bottles.override {
-          bottles-unwrapped = final.bottles-unwrapped;
-        };
-      }
-    )
-  ];
-
   # Wine-specific system configuration
   programs.dconf.enable = true; # Required for Bottles GUI
 

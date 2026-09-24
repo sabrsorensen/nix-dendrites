@@ -66,8 +66,11 @@ Consequently:
   Gate configuration, not the import.
 - The exception is when an input's option surface is itself unsafe to
   broadcast (unconditional platform behavior, assertions, special-arg
-  requirements) — those stay host-scoped at the output boundary, with the
-  reason recorded (`nixos-wsl` is the documented example).
+  requirements) — first try neutralising the offending input modules
+  (`disabledModules` + re-adding the behaviour under the platform gate, as
+  `jovian.nix` does), and only host-scope the import at the output boundary
+  as a last resort, with the reason recorded. See "Platform inputs" in
+  docs/architecture.md.
 - Home Manager features follow the same pattern via
   `dendritic.homeManagerModules`, composed once at the managed-user
   boundary — never a `flake.modules.nixos.home-<program>` module that just
@@ -158,6 +161,10 @@ architecture layer just because a host has a special integration stack.
 
 - [docs/architecture.md](docs/architecture.md) — normative design guide;
   read before structural changes.
+- [docs/upstream-tracking.md](docs/upstream-tracking.md) — every patch,
+  override, fork and workaround carried against upstream, and when each can
+  go. Adding one? Add a `warnings` entry (with a recheck command) if it's an
+  upstream bug, otherwise list it here.
 - [docs/postgresql-17-to-18-migration.md](docs/postgresql-17-to-18-migration.md)
 - [docs/preservation-investigation.md](docs/preservation-investigation.md) —
   impermanence is the current persistence provider; don't start a migration

@@ -25,5 +25,13 @@ in
         "dotnet-sdk-6.0.428"
         "dotnet-sdk-7.0.410"
       ];
+      warnings = [
+        ''
+          EOL dotnet-sdk-6.0.428 and dotnet-sdk-7.0.410 are permitted as
+          insecure for the WSL work profile's combined .NET SDK. Drop them from
+          modules/platforms/wsl/wsl-work-home/{wsl-work-home,_wsl-work-home}.nix
+          once no work project still targets net6.0/net7.0.
+        ''
+      ];
     };
 }

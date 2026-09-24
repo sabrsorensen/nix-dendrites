@@ -63,6 +63,14 @@ in
       recursive = true;
     };
   };
+  warnings = lib.optional (azureDevOpsExtension != null) ''
+    azure-cli's azure-devops extension is overridden to propagate
+    python3Packages.keyring, which the nixpkgs package omits. Remove the
+    override in modules/platforms/wsl/wsl-work-home/_wsl-work-home.nix once
+    nixpkgs adds it -- check with:
+      nix eval .#nixosConfigurations.nixos-wsl.pkgs.azure-cli.extensions.azure-devops.propagatedBuildInputs \
+        --apply 'map (p: p.pname or p.name)'
+  '';
   sops.templates.nuget-higi-config = lib.mkIf (config.sops.secrets ? nuget_higi_source_url) {
     path = "${config.home.homeDirectory}/.nuget/NuGet/NuGet.Config";
     mode = "0600";

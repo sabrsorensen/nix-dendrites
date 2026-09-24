@@ -12,23 +12,16 @@ let
       options.my.features.bitwarden = lib.mkEnableOption "Bitwarden";
       config = lib.mkIf config.my.features.bitwarden (homeModule args);
     };
-  nixosModule = import ./_bitwarden-nixos.nix;
 in
 {
   dendritic.homeManagerModules = [ featureModule ];
   flake.modules.homeManager.bitwarden = featureModule;
 
+  # Host-level switch only; the managed-user boundary (home/_home.nix) maps it
+  # onto my.features.bitwarden.
   flake.modules.nixos.bitwarden =
-    args@{
-      config,
-      lib,
-      ...
-    }:
-    let
-      host = config.my.host;
-    in
+    { lib, ... }:
     {
       options.my.host.features.bitwarden = lib.mkEnableOption "Bitwarden";
-      config = lib.mkIf host.features.bitwarden (nixosModule args);
     };
 }

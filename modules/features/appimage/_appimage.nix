@@ -10,4 +10,14 @@
       extraPkgs = pkgs: [ pkgs.libunwind ];
     };
   };
+  warnings = [
+    ''
+      programs.appimage.package is appimage-run overridden with libunwind in
+      its FHS env (bundled-Wine AppImages such as NMSE link ntdll.so against
+      libunwind.so.8). Remove the override in
+      modules/features/appimage/_appimage.nix once nixpkgs ships libunwind in
+      appimage-run itself -- check with:
+        grep -n libunwind "$(nix eval --raw .#nixosConfigurations.kamino.pkgs.path)"/pkgs/build-support/appimage/default.nix
+    ''
+  ];
 }

@@ -163,9 +163,6 @@ let
     "decky-free-loader" = pkgs.callPackage ./packages/free-loader.nix {
       inherit mkDeckyPlugin;
     };
-    "decky-nexus" = pkgs.callPackage ./packages/decky-nexus.nix {
-      inherit mkDeckyPlugin;
-    };
     "decky-syncthing" = pkgs.callPackage ./packages/syncthing.nix {
       inherit mkDeckyPlugin;
     };
@@ -187,7 +184,6 @@ in
         "Web Browser"
         "TabMaster"
         "Quick Tab"
-        "Nexus Mods"
         "Syncthing"
         "SteamGridDB"
         "ProtonDB Badges"
@@ -240,4 +236,39 @@ in
     // {
       "decky-brightness-bar" = brightnessBar;
     };
+  warnings = [
+    ''
+      Decky plugins SDH-AnimationChanger, SDH-CssLoader, decky-brightness-bar,
+      decky-steamgriddb, IsThereAnyDeal-DeckyPlugin and Decky-KDE-Connect ship
+      a lockfileVersion 6.0 pnpm-lock.yaml, which pnpm_11 won't read under
+      --frozen-lockfile, so they build with a rebuilt EOL pnpm 9.15.9
+      (decky-catalog/packages/_pnpm9.nix, `legacyLockfile = true` in
+      catalog.nix, and the "pnpm-9.15.9" permittedInsecurePackages entry in
+      decky-loader/_decky-loader.nix). Drop each plugin's pnpm9 use once its
+      upstream lockfile reaches v9 -- check with:
+        for r in TheLogicMaster/SDH-AnimationChanger suchmememanyskill/SDH-CssLoader \
+          rasitayaz/decky-brightness-bar SteamGridDB/decky-steamgriddb \
+          JtdeGraaf/IsThereAnyDeal-DeckyPlugin safijari/Decky-KDE-Connect; do
+          echo "$r: $(gh api repos/$r/contents/pnpm-lock.yaml \
+            -H 'Accept: application/vnd.github.raw' | head -1)"; done
+      and delete _pnpm9.nix plus the insecure-package entry when none remain.
+    ''
+    ''
+      decky-tabmaster is pinned to v2.15.1 in decky-catalog/packages/catalog.nix
+      because upstream main (and v2.16.2) ship a pnpm-lock.yaml out of sync with
+      package.json (@rollup/plugin-node-resolve ^16.0.3 locked vs ^13.3.0
+      declared), which fails --frozen-lockfile. After each upstream release, try
+      rev = "main" (with fresh hashes) and build:
+        nix build .#nixosConfigurations.emeraldecho.config.jovian.decky-loader.plugins.decky-tabmaster
+    ''
+    ''
+      unifideck builds from the sabrsorensen/unifideck fork, not
+      mubaraknumann/unifideck, for the Battle.net games-and-subs library sync
+      (upstream issue #447). Switch catalog.nix back to owner = "mubaraknumann"
+      once upstream has it -- check with:
+        gh issue view 447 -R mubaraknumann/unifideck --json state
+        gh api 'repos/mubaraknumann/unifideck/compare/staging...sabrsorensen:unifideck:main' \
+          --jq '"fork ahead_by=\(.ahead_by) behind_by=\(.behind_by)"'
+    ''
+  ];
 }
