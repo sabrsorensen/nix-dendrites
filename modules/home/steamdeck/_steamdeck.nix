@@ -60,7 +60,7 @@ let
     display.setdefault("Current", collections.OrderedDict()).update({"ScaleFactor": "1.2"})
     display.setdefault('Internal: gamescope 7"', collections.OrderedDict()).update({"ScaleFactor": "1.2"})
     root.setdefault("SteamOS", collections.OrderedDict()).update({
-        "ChargeLimitEnabled": "1",
+        "ChargeLimitEnabled": "0",
         "ChargeLimit": "90",
     })
 
