@@ -53,9 +53,14 @@
       source-han-serif
     ];
   };
-  services.flatpak.enable = true;
   programs.kdeconnect.enable = lib.mkIf config.my.host.is.finalSystem true;
-  services.flatpak.packages = lib.mkIf config.my.host.is.finalSystem [
+  # Flatpak itself (service, shared app list, remotes) comes from the
+  # features/flatpak module; only the Steam Deck-specific apps live here.
+  my.host.features.flatpak = lib.mkIf config.my.host.is.finalSystem (lib.mkDefault true);
+  # Keep hand-installed Flatpaks (e.g. a locally built Pulsar that isn't
+  # published to any remote yet) instead of pruning everything unmanaged.
+  services.flatpak.uninstallUnmanaged = lib.mkForce false;
+  services.flatpak.packages = lib.mkIf config.my.host.features.flatpak [
     "io.github.Geocld.XStreamingDesktop"
     "io.github.unknownskl.greenlight"
   ];
