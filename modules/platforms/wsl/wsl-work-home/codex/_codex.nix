@@ -99,6 +99,11 @@ let
           source = herdrSkill;
           force = true;
         };
+        # Context Mode's hooks are supplied by the Codex plugin, so they must
+        # not be copied into hooks.json (which Herdr owns).  Install the
+        # companion instructions declaratively instead, so routing guidance is
+        # available even before a plugin SessionStart hook runs.
+        home.file.".codex/AGENTS.md".source = "${inputs.context-mode}/configs/codex/AGENTS.md";
         # Home Manager normally links this file from the Nix store.  Herdr's
         # Codex integration must update it to enable hooks, so the activation
         # bridge below turns the generated link into a mutable user file after
