@@ -17,18 +17,35 @@ in
       "auto-title".source = plugins.autoTitle;
       spreader = {
         source = plugins.spreader;
+        # Every tab needs at least one pane: spreader treats validation
+        # *warnings* (e.g. "tab has no panes") as fatal and `apply` exits 1
+        # without touching the workspace. `{}` is a plain shell pane.
         configFiles."config.yaml".text = ''
           workspaces:
             - name: nix-dendrites
               root: ~/src/nix-dendrites
               tabs:
                 - label: Agent
+                  panes:
+                    - {}
                 - label: Kamino
+                  panes:
+                    - {}
                 - label: ZaphodBeeblebrox
+                  panes:
+                    - {}
                 - label: AtlasUponRaiden
+                  panes:
+                    - {}
                 - label: Naboo
+                  panes:
+                    - {}
                 - label: Nevarro
+                  panes:
+                    - {}
                 - label: EmeraldEcho
+                  panes:
+                    - {}
         '';
       };
     };
