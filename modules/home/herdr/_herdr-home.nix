@@ -28,10 +28,7 @@ in
                 - label: Agent
                   panes:
                     - {}
-                - label: Kamino
-                  panes:
-                    - {}
-                - label: ZaphodBeeblebrox
+                - label: Local
                   panes:
                     - {}
                 - label: AtlasUponRaiden
