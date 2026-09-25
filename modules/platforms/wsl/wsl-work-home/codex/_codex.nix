@@ -148,6 +148,13 @@ let
               "${homeDirectory}/src/nix-dendrites".trust_level = "trusted";
               "${homeDirectory}/src/nix-dendrites-rewrite".trust_level = "trusted";
               "${homeDirectory}/src/nix-dendrites-broadcast".trust_level = "trusted";
+              "${homeDirectory}/higi".trust_level = "trusted";
+              "${homeDirectory}/higi/core-member-reporting".trust_level = "trusted";
+              "${homeDirectory}/higi/prbuddy".trust_level = "trusted";
+            };
+            tui = {
+              model_availability_nux."gpt-6-astra" = 1;
+              screen_reader_detection_done = true;
             };
             mcp_servers = {
               Azure = {
@@ -217,6 +224,18 @@ let
               "${homeDirectory}/.codex/hooks.json:session_start:0:0" = {
                 trusted_hash = "sha256:219a76f1453ea3d5eaa859c97679f86f7faf3d8669db007cb16e071381f1d573";
               };
+              "context-mode@home-manager:.codex-plugin/hooks.json:post_tool_use:0:0".trusted_hash =
+                "sha256:0d237345f8d46110d36cd0ef08e79b55fa151a07691dee36d492aa6f64bc0efd";
+              "context-mode@home-manager:.codex-plugin/hooks.json:pre_compact:0:0".trusted_hash =
+                "sha256:ac1f9e5eb71ca262492150381d8f078b897056fc691f9973fc56d7b1b402e648";
+              "context-mode@home-manager:.codex-plugin/hooks.json:pre_tool_use:0:0".trusted_hash =
+                "sha256:56da0c4249dc7af048f42ae458fb83931926a8af41ec6fab5ae819ff3a8c83ae";
+              "context-mode@home-manager:.codex-plugin/hooks.json:session_start:0:0".trusted_hash =
+                "sha256:a6cc6a322d0931bdd68a5969e523cd71e6eedccab4850e8996c8948311173618";
+              "context-mode@home-manager:.codex-plugin/hooks.json:stop:0:0".trusted_hash =
+                "sha256:9205c1763e40c0256ab334e2e96c037c1cdf5b8bfaddba31ed19d93d3388586a";
+              "context-mode@home-manager:.codex-plugin/hooks.json:user_prompt_submit:0:0".trusted_hash =
+                "sha256:114549c484c131b94782d3424527dd1042d48bc3a8616a11299acdf60b112572";
             };
           };
         };

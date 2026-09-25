@@ -160,6 +160,37 @@ a provider migration until selecting the first ephemeral-root host.
 owns its Dendritic/flake-file bootstrap and repository-wide flake inputs; it
 is not a separate integration category.
 
+### Historical note: the host-model rewrite
+
+An earlier migration experiment established the principles behind this layout:
+outputs should map directly to adjacent host modules; reusable modules should
+be discovered and self-gate from host facts; and host files should contain only
+facts plus real hardware, filesystem, networking, or other one-off edge data.
+That avoids separate family descriptors, host registries, registration builders,
+and generated per-host Home Manager modules.
+
+The migration strategy was deliberately incremental: retain an adapter around
+the existing implementation, move a shared module only once its gating
+interface is understood, then replace each host adapter with direct host-edge
+imports. Platform image and lifecycle behavior belongs with the relevant RPi or
+Steam Deck host, rather than in registration helpers. This is historical design
+rationale, not an instruction to revive the experimental repository.
+
+### Historical note: content and RPi migration
+
+The content-splitting migration treated payload configuration as durable and
+assembly glue as replaceable. Private `_` paths hold implementation details that
+should not be broadcast automatically; public modules select, gate, and compose
+that content. Keep topology and host context explicit enough that shared
+declarations can be reused without mutating services directly.
+
+A separate RPi alignment proposal aimed to express scenario differences as data
+behind one primary RPi interface, while retaining explicit RPi-specific image,
+hardware, and lifecycle behavior. Its migration rule was behavioral parity
+first: align the family incrementally and do not treat structural cleanup as a
+reason to change deployed behavior. These are historical notes, not a pending
+descriptor-model migration.
+
 ## Docker and Podman are separate choices
 
 `features.docker` and `features.podman` are deliberately separate. A generic

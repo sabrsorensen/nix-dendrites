@@ -56,6 +56,7 @@ in
       # `terminal` is a built-in backend name; custom names are not supported.
       theme = {
         name = "terminal";
+        auto_switch = false;
         custom = {
           sidebar_bg = "#011627";
           panel_bg = "reset";
