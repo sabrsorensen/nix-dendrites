@@ -77,6 +77,26 @@ they silently paper over.
   launcher's own dependency-install step doing nothing. Check upstream
   launcher releases.
 
+### Source-only inputs
+
+These read files out of an upstream repo (`flake = false`) rather than using
+its flake outputs, so they depend on upstream's repo layout. A layout change
+fails evaluation loudly rather than silently.
+
+- **reolink-cli** (`modules/features/reolink-cli/`). Version comes from
+  upstream's `package.json` and the release-tarball hash from
+  `checksums/v<version>.sha256`, so a `flake.lock` bump of `reolink-cli` is
+  the whole update; read upstream's `CHANGELOG.md` before committing one. If
+  an update 404s on the tarball, upstream bumped `package.json` before
+  publishing the release assets; rerun the update later. To hold a release
+  back, pin the input to a tag (`github:reolink/reolink-cli/v<version>`) and
+  record the pin and its reason here.
+- **boot-gardener** (`modules/features/boot-gardener/`). Built from upstream's
+  `boot-gardener/boot-gardener.nix` with our nixpkgs, bypassing their flake
+  (which pins nixos-26.05 and flake-utils). On a bump, check the file hasn't
+  moved and its `callPackage` arguments still resolve. Pinning is unused here:
+  it's Limine-only and needs an out-of-tree module plus `--impure` rebuilds.
+
 ### Platform inputs
 
 - **Jovian overlay and `ignoreMissingKernelModules`** are neutralised on
