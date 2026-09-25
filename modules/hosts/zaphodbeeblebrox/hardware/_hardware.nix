@@ -75,7 +75,11 @@ in
     kernelModules = [ "kvm-intel" ];
     loader = {
       efi.canTouchEfiVariables = true;
-      systemd-boot.enable = true;
+      systemd-boot = {
+        enable = true;
+        # The 1 GB ESP holds ~200 MB per distinct initrd; without a limit it filled up.
+        configurationLimit = 6;
+      };
     };
   };
 

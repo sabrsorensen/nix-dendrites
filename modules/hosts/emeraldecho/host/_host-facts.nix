@@ -14,6 +14,7 @@
     features = {
       atuin = true;
       bitwarden = true;
+      bootGardener = true;
       decky = true;
       gui = true;
       deskflow = true;

@@ -1,8 +1,5 @@
 { inputs }:
 { pkgs, ... }:
-let
-  reolinkCli = pkgs.callPackage ../../../tooling/reolink-cli/_package.nix { };
-in
 {
   networking.hostName = "Kamino";
   my.host = {
@@ -16,6 +13,9 @@ in
     };
     features = {
       gui = true;
+      reolinkCli = true;
+      omnibin = true;
+      bootGardener = true;
       gdrive = true;
       atuin = true;
       personalMcp = true;
@@ -69,9 +69,7 @@ in
   };
   environment.systemPackages = [
     pkgs.czkawka
-    reolinkCli
   ];
-  my.unfreePackageNames = [ "reolink-cli" ];
   my.deployment = {
     enableRemoteUser = true;
     canDeployRemotely = true;

@@ -57,130 +57,132 @@ let
   # the same absent-field-tolerant read as
   # https://code.claude.com/docs/en/statusline#rate-limit-usage, since that
   # object is only present for Pro/Max subscribers after the first API call.
-  claudeStatusline = pkgs.writers.writePython3Bin "claude-code-statusline" { flakeIgnore = [ "E501" ]; } ''
-    """Claude Code statusLine: cmonitor + context-mode, one line each."""
+  claudeStatusline =
+    pkgs.writers.writePython3Bin "claude-code-statusline" { flakeIgnore = [ "E501" ]; }
+      ''
+        """Claude Code statusLine: cmonitor + context-mode, one line each."""
 
-    import json
-    import re
-    import subprocess
-    import sys
-    import time
+        import json
+        import re
+        import subprocess
+        import sys
+        import time
 
-    CMONITOR = "${pkgs.claude-monitor}/bin/cmonitor"
-    NODE = "${lib.getExe pkgs.nodejs}"
-    CONTEXT_MODE_CLI = "${contextModeCli}/bin/statusline.mjs"
+        CMONITOR = "${pkgs.claude-monitor}/bin/cmonitor"
+        NODE = "${lib.getExe pkgs.nodejs}"
+        CONTEXT_MODE_CLI = "${contextModeCli}/bin/statusline.mjs"
 
-    TIMEOUT_SECONDS = 5
+        TIMEOUT_SECONDS = 5
 
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    RED = "\033[31m"
-    RESET = "\033[0m"
-
-
-    def run(cmd, stdin_bytes):
-        try:
-            result = subprocess.run(
-                cmd,
-                input=stdin_bytes,
-                capture_output=True,
-                timeout=TIMEOUT_SECONDS,
-                check=False,
-            )
-        except (OSError, subprocess.SubprocessError):
-            return ""
-        if result.returncode != 0:
-            return ""
-        return result.stdout.decode(errors="replace").strip()
+        GREEN = "\033[32m"
+        YELLOW = "\033[33m"
+        RED = "\033[31m"
+        RESET = "\033[0m"
 
 
-    def bar_only(pct):
-        pct = max(0.0, min(100.0, pct))
-        color = RED if pct >= 90 else YELLOW if pct >= 70 else GREEN
-        filled = int(pct) // 10
-        bar = "█" * filled + "░" * (10 - filled)
-        return f"{color}{bar}{RESET}"
+        def run(cmd, stdin_bytes):
+            try:
+                result = subprocess.run(
+                    cmd,
+                    input=stdin_bytes,
+                    capture_output=True,
+                    timeout=TIMEOUT_SECONDS,
+                    check=False,
+                )
+            except (OSError, subprocess.SubprocessError):
+                return ""
+            if result.returncode != 0:
+                return ""
+            return result.stdout.decode(errors="replace").strip()
 
 
-    WINDOW_KEYS = {"5h": "five_hour", "7d": "seven_day"}
+        def bar_only(pct):
+            pct = max(0.0, min(100.0, pct))
+            color = RED if pct >= 90 else YELLOW if pct >= 70 else GREEN
+            filled = int(pct) // 10
+            bar = "█" * filled + "░" * (10 - filled)
+            return f"{color}{bar}{RESET}"
 
 
-    # cmonitor doesn't expose resets_at itself, but it's right there on
-    # stdin, straight from Anthropic's API -- compute a countdown from it
-    # ourselves rather than trusting any tool's local-estimate guess.
-    def time_left(resets_at):
-        if resets_at is None:
-            return None
-        seconds = resets_at - time.time()
-        if seconds <= 0:
-            return None
-        seconds = int(seconds)
-        days, seconds = divmod(seconds, 86400)
-        hours, seconds = divmod(seconds, 3600)
-        minutes = seconds // 60
-        if days:
-            return f"{days}d{hours}h"
-        if hours:
-            return f"{hours}h{minutes}m"
-        return f"{minutes}m"
+        WINDOW_KEYS = {"5h": "five_hour", "7d": "seven_day"}
 
 
-    # cmonitor's own statusline text looks like "Sonnet · 5h 28% · 7d 64%"
-    # (either window may be absent). Insert a colored bar (and a reset
-    # countdown) between each window's label and its percentage rather than
-    # reformatting the whole line, so whatever else cmonitor prints (model
-    # name, cost, ...) is left untouched.
-    RATE_LIMIT_RE = re.compile(r"(5h|7d) (\d+(?:\.\d+)?)%")
+        # cmonitor doesn't expose resets_at itself, but it's right there on
+        # stdin, straight from Anthropic's API -- compute a countdown from it
+        # ourselves rather than trusting any tool's local-estimate guess.
+        def time_left(resets_at):
+            if resets_at is None:
+                return None
+            seconds = resets_at - time.time()
+            if seconds <= 0:
+                return None
+            seconds = int(seconds)
+            days, seconds = divmod(seconds, 86400)
+            hours, seconds = divmod(seconds, 3600)
+            minutes = seconds // 60
+            if days:
+                return f"{days}d{hours}h"
+            if hours:
+                return f"{hours}h{minutes}m"
+            return f"{minutes}m"
 
 
-    def inject_bars(line, rate_limits):
-        def replace(match):
-            label, pct_str = match.group(1), match.group(2)
-            window = (rate_limits.get(WINDOW_KEYS[label]) or {})
-            left = time_left(window.get("resets_at"))
-            suffix = f" ⏳{left}" if left else ""
-            return f"{label} {bar_only(float(pct_str))} {pct_str}%{suffix}"
-
-        return RATE_LIMIT_RE.sub(replace, line)
+        # cmonitor's own statusline text looks like "Sonnet · 5h 28% · 7d 64%"
+        # (either window may be absent). Insert a colored bar (and a reset
+        # countdown) between each window's label and its percentage rather than
+        # reformatting the whole line, so whatever else cmonitor prints (model
+        # name, cost, ...) is left untouched.
+        RATE_LIMIT_RE = re.compile(r"(5h|7d) (\d+(?:\.\d+)?)%")
 
 
-    def rate_limit_fallback(data):
-        rate_limits = data.get("rate_limits") or {}
-        parts = []
-        for label, window in (("5h", "five_hour"), ("7d", "seven_day")):
-            win = rate_limits.get(window) or {}
-            pct = win.get("used_percentage")
-            if pct is not None:
-                left = time_left(win.get("resets_at"))
+        def inject_bars(line, rate_limits):
+            def replace(match):
+                label, pct_str = match.group(1), match.group(2)
+                window = (rate_limits.get(WINDOW_KEYS[label]) or {})
+                left = time_left(window.get("resets_at"))
                 suffix = f" ⏳{left}" if left else ""
-                parts.append(f"{label} {bar_only(pct)} {pct:.0f}%{suffix}")
-        return " · ".join(parts)
+                return f"{label} {bar_only(float(pct_str))} {pct_str}%{suffix}"
+
+            return RATE_LIMIT_RE.sub(replace, line)
 
 
-    def main():
-        raw = sys.stdin.buffer.read()
-        try:
-            data = json.loads(raw)
-        except json.JSONDecodeError:
-            data = {}
-        rate_limits = data.get("rate_limits") or {}
-
-        usage_line = run([CMONITOR, "--statusline"], raw)
-        if usage_line:
-            usage_line = inject_bars(usage_line, rate_limits)
-        else:
-            usage_line = rate_limit_fallback(data)
-
-        context_mode_line = run([NODE, CONTEXT_MODE_CLI], raw)
-
-        line = " | ".join(part for part in (usage_line, context_mode_line) if part)
-        if line:
-            print(line)
+        def rate_limit_fallback(data):
+            rate_limits = data.get("rate_limits") or {}
+            parts = []
+            for label, window in (("5h", "five_hour"), ("7d", "seven_day")):
+                win = rate_limits.get(window) or {}
+                pct = win.get("used_percentage")
+                if pct is not None:
+                    left = time_left(win.get("resets_at"))
+                    suffix = f" ⏳{left}" if left else ""
+                    parts.append(f"{label} {bar_only(pct)} {pct:.0f}%{suffix}")
+            return " · ".join(parts)
 
 
-    if __name__ == "__main__":
-        main()
-  '';
+        def main():
+            raw = sys.stdin.buffer.read()
+            try:
+                data = json.loads(raw)
+            except json.JSONDecodeError:
+                data = {}
+            rate_limits = data.get("rate_limits") or {}
+
+            usage_line = run([CMONITOR, "--statusline"], raw)
+            if usage_line:
+                usage_line = inject_bars(usage_line, rate_limits)
+            else:
+                usage_line = rate_limit_fallback(data)
+
+            context_mode_line = run([NODE, CONTEXT_MODE_CLI], raw)
+
+            line = " | ".join(part for part in (usage_line, context_mode_line) if part)
+            if line:
+                print(line)
+
+
+        if __name__ == "__main__":
+            main()
+      '';
 in
 {
   options.my.features.claude = lib.mkEnableOption "Claude Code";

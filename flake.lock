@@ -95,6 +95,22 @@
         "type": "github"
       }
     },
+    "danieltallon-nix-packages": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790350928,
+        "narHash": "sha256-1OgA5G/B/womJzSiYGKa8vaR2KfVr8GXpCPFqNv0kTI=",
+        "owner": "DanielTallon",
+        "repo": "nix-packages",
+        "rev": "4983b17192fc8b2108f592ed989ee83fdc0dbcec",
+        "type": "github"
+      },
+      "original": {
+        "owner": "DanielTallon",
+        "repo": "nix-packages",
+        "type": "github"
+      }
+    },
     "demlo": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -817,6 +833,26 @@
         "type": "github"
       }
     },
+    "omnibin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790354177,
+        "narHash": "sha256-ZgKnKCkoEBAA5Ei3wEyxS/hLMHd9ASXWoC07ySXb1Gs=",
+        "owner": "fzakaria",
+        "repo": "omnibin",
+        "rev": "04fca97d797b23b58afcc76b49eeea38af1ab8e8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "fzakaria",
+        "repo": "omnibin",
+        "type": "github"
+      }
+    },
     "partyowl84-vscode-theme": {
       "inputs": {
         "flake-utils": [
@@ -863,6 +899,22 @@
         "type": "github"
       }
     },
+    "reolink-cli": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790242413,
+        "narHash": "sha256-ljMyRWcK40XWV4qpMCqbYAhH9t6pcooF4ZtHuRzBin4=",
+        "owner": "reolink",
+        "repo": "reolink-cli",
+        "rev": "5888855a318bf73de62922b49cf1ed8debfb03ac",
+        "type": "github"
+      },
+      "original": {
+        "owner": "reolink",
+        "repo": "reolink-cli",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "armory-runtime-nixpkgs": "armory-runtime-nixpkgs",
@@ -870,6 +922,7 @@
         "claude-desktop": "claude-desktop",
         "codex-nix": "codex-nix",
         "context-mode": "context-mode",
+        "danieltallon-nix-packages": "danieltallon-nix-packages",
         "demlo": "demlo",
         "determinate": "determinate",
         "disko": "disko",
@@ -894,8 +947,10 @@
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_5",
         "nur": "nur",
+        "omnibin": "omnibin",
         "partyowl84-vscode-theme": "partyowl84-vscode-theme",
         "plasma-manager": "plasma-manager",
+        "reolink-cli": "reolink-cli",
         "sops-nix": "sops-nix",
         "superpowers": "superpowers",
         "synthwave-84-vscode-theme": "synthwave-84-vscode-theme",

@@ -65,7 +65,9 @@ in
         gen_sync = mkFolder "gen_sync" nonGamingDevices;
         MobileDownloads = mkFolder "MobileDownloads" (mobileDevices ++ serverDevices ++ desktopDevices);
         NewMusic = mkFolder "NewMusic" nonGamingDevices;
-        NoMansSky = mkFolder "NoMansSky" (serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices);
+        NoMansSky = mkFolder "NoMansSky" (
+          serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices
+        );
         SteamPipe = mkFolder "SteamPipe" (serverDevices ++ desktopDevices ++ gamingDevices);
         StardewValley = mkFolder "StardewValley" (
           serverDevices ++ desktopDevices ++ mobileDevices ++ gamingDevices ++ [ "LavenderHaze" ]

@@ -23,6 +23,10 @@
       url = "github:mksglu/context-mode";
       flake = false;
     };
+    danieltallon-nix-packages = {
+      url = "github:DanielTallon/nix-packages";
+      flake = false;
+    };
     demlo = {
       url = "github:sabrsorensen/demlo/v3.8.1";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -104,6 +108,10 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
+    omnibin = {
+      url = "github:fzakaria/omnibin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     partyowl84-vscode-theme = {
       url = "github:sabrsorensen/partyowl84-vscode-theme";
       inputs = {
@@ -117,6 +125,10 @@
         home-manager.follows = "home-manager";
         nixpkgs.follows = "nixpkgs";
       };
+    };
+    reolink-cli = {
+      url = "github:reolink/reolink-cli";
+      flake = false;
     };
     sops-nix = {
       url = "https://flakehub.com/f/Mic92/sops-nix/*";
