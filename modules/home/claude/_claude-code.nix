@@ -195,6 +195,31 @@ in
       # hooks/hooks.json, which Claude Code discovers automatically.
       plugins.superpowers = inputs.superpowers;
       settings = {
+        enabledPlugins = {
+          "context-mode@context-mode" = true;
+        };
+        hooks = {
+          SessionStart = [
+            {
+              hooks = [
+                {
+                  command = "bash '/home/sam/.claude/hooks/herdr-agent-state.sh' session";
+                  timeout = 10;
+                  type = "command";
+                }
+              ];
+              matcher = "^(startup|resume|clear|compact|fork)$";
+            }
+            {
+              hooks = [
+                {
+                  command = "\"/home/sam/.claude/hooks/context-mode-cache-heal.mjs\"";
+                  type = "command";
+                }
+              ];
+            }
+          ];
+        };
         statusLine = {
           type = "command";
           command = lib.getExe claudeStatusline;

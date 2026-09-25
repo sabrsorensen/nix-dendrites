@@ -377,17 +377,40 @@ Validate by comparing every host's `config.system.build.toplevel.drvPath`
 before and after: platform hosts should be unchanged, and other hosts should
 lose only the leaked behaviour.
 
-### Raspberry Pi kernel cache policy
+### Kernel selection
 
-The RPi cache module uses the generic Nixpkgs `pkgs.linuxPackages` as the
-default kernel package set. The normal NixOS binary cache supplies that kernel
-and the active Nixpkgs firmware packages; the retired `nixos-raspberrypi`
-Cachix cache is neither required nor trusted.
+`modules/system/kernel/` owns the repo-wide `boot.kernelPackages` default:
+`pkgs.linuxPackages_latest` at `lib.mkOverride 900`, for every host except
+`platform = "steamdeck"`, which keeps Jovian's Valve kernel (`mkDefault`).
+Priority 900 deliberately outranks input `mkDefault`s such as
+nixos-hardware's `raspberry-pi-4` `linux_rpi` kernel, while any plain host
+definition (priority 100) still wins. On WSL `boot.kernel.enable = false`, so
+the value has no effect there.
 
-Do not switch a Pi host to a downstream `linux_rpi` package set merely because
-it sounds more specific. First verify a substitute for the exact derivation.
-An otherwise-valid downstream kernel can turn routine DNS-rule changes into a
-multi-hour local rebuild.
+A host-specific override is a plain `boot.kernelPackages = ...;` in that
+host's `hosts/<host>/hardware/_hardware.nix` payload, with a comment giving
+the reason. Do not add a second priority-900 definition in a platform or
+feature module; it would conflict with the default.
+
+`_latest` moves to each new mainline series when nixpkgs bumps it, so a
+routine `nix flake update` can bring a new major kernel with it. Out-of-tree
+modules such as the stable NVIDIA driver are not marked broken on newer
+kernels, so they fail at build time rather than at evaluation. If a bump
+breaks a host (e.g. NVIDIA on Kamino/ZaphodBeeblebrox), pin that host to the
+previous series, e.g. `boot.kernelPackages = pkgs.linuxPackages_7_2;`, in its
+hardware payload. Record the pin in docs/upstream-tracking.md and remove it
+once the driver catches up.
+
+Raspberry Pi hosts use the generic aarch64 kernel. cache.nixos.org has it
+along with the active Nixpkgs firmware packages. Neither `linux_rpi` build is
+cached anywhere: not nixpkgs' `linuxPackages_rpi4` (deprecated), and not
+nixos-hardware's `raspberry-pi/common/kernel.nix`, since nixos-hardware
+publishes no binary cache or Hydra jobset. The retired `nixos-raspberrypi`
+Cachix cache is neither required nor trusted. Do not switch a Pi host to a
+`linux_rpi` package set just because it sounds more specific. First confirm
+that `https://cache.nixos.org/<hash>.narinfo` exists for the exact kernel
+derivation. An otherwise-valid downstream kernel can turn routine DNS-rule
+changes into a multi-hour local rebuild.
 
 Secrets are data inputs, not architecture. A host hardware module may read a
 UUID from the secrets input directly when that is the source of truth, but it
