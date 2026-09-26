@@ -45,6 +45,8 @@
       };
     };
   };
+  # mkBefore keeps nvidia ahead of the desktop feature's intel/modesetting.
+  services.xserver.videoDrivers = lib.mkBefore [ "nvidia" ];
   my.unfreePackageNames = [
     "nvidia-persistenced"
     "nvidia-settings"

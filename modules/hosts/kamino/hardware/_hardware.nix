@@ -75,9 +75,4 @@
     };
   };
   networking.networkmanager.enable = true;
-  services.xserver.videoDrivers = [
-    "nvidia"
-    "intel"
-    "modesetting"
-  ];
 }
