@@ -8,7 +8,7 @@ let
   ];
 in
 {
-  disko.devices.disk.main = {
+  disko.devices.disk.nvme0n1 = {
     type = "disk";
     device = "/dev/nvme0n1";
     content = {
@@ -26,45 +26,50 @@ in
         };
         luks = {
           size = "100%";
-          label = "disk-main-luks";
+          label = "luks";
           content = {
             type = "luks";
-            name = "crypted";
+            name = "cryptroot";
             settings.allowDiscards = true;
             content = {
               type = "btrfs";
-              extraArgs = [ "-f" ];
+              extraArgs = [ "-L" "nixos" "-f" ];
               subvolumes = {
                 "/root" = {
                   mountpoint = "/";
-                  mountOptions = commonMountOpts;
+                  mountOptions = commonMountOpts ++ [ "subvol=root" ];
+                };
+                "/root-blank" = {
+                  mountpoint = "/";
+                  mountOptions = commonMountOpts ++ [ "subvol=root-blank" "nodatacow" ];
                 };
                 "/home" = {
                   mountpoint = "/home";
-                  mountOptions = commonMountOpts;
+                  mountOptions = commonMountOpts ++ [ "subvol=home" ];
                 };
                 "/nix" = {
                   mountpoint = "/nix";
-                  mountOptions = commonMountOpts;
+                  mountOptions = commonMountOpts ++ [ "subvol=nix" ];
                 };
                 "/persist" = {
                   mountpoint = "/persist";
-                  mountOptions = commonMountOpts;
+                  mountOptions = commonMountOpts ++ [ "subvol=persist" ];
                 };
                 "/log" = {
                   mountpoint = "/var/log";
-                  mountOptions = commonMountOpts;
+                  mountOptions = commonMountOpts ++ [ "subvol=log" ];
+                };
+                "/lib" = {
+                  mountpoint = "/var/lib";
+                  mountOptions = commonMountOpts ++ [ "subvol=lib" ];
+                };
+                "/persist/swap" = {
+                  mountpoint = "/persist/swap";
+                  mountOptions = ["subvol=swap" "noatime" "nodatacow" "compress=no"];
+                  swap.swapfile.size = "20G";
                 };
               };
             };
-          };
-        };
-        swap = {
-          size = "20G";
-          content = {
-            type = "swap";
-            discardPolicy = "both";
-            resumeDevice = true;
           };
         };
       };
@@ -72,4 +77,5 @@ in
   };
   fileSystems."/persist".neededForBoot = true;
   fileSystems."/var/log".neededForBoot = true;
+  fileSystems."/var/lib".neededForBoot = true;
 }
