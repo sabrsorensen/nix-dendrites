@@ -20,6 +20,12 @@ in
         package = codexPackage;
       })
       {
+        # codex >= 0.157 auto-starts a background app-server daemon, which
+        # refuses to install unless it finds the official "complete package"
+        # layout (codex-package.json beside bin/). codex-nix ships the bare
+        # release binary, so every launch fails with "this CLI has no complete
+        # local package" (openai/codex#48050). Restore the 0.156 default.
+        settings.features.daemon_auto_start = false;
         plugins = [
           inputs.context-mode
           # Superpowers agentic-skills framework (github:obra/superpowers).
@@ -28,6 +34,17 @@ in
           inputs.superpowers
         ];
       }
+    ];
+
+    warnings = [
+      ''
+        programs.codex sets features.daemon_auto_start = false because the
+        codex-nix binary lacks the complete-package layout the 0.157 daemon
+        installer requires (openai/codex#48050). Remove it from
+        modules/home/codex/_codex.nix once the issue is fixed upstream and
+        `codex --enable daemon_auto_start` starts normally -- check with:
+          gh issue view 48050 -R openai/codex --json state,closedAt
+      ''
     ];
 
     home.packages = with pkgs; [
