@@ -130,7 +130,7 @@ let
             # Context Mode ships its MCP server, skills, and hook definitions
             # as a Codex plugin. Plugin hooks remain feature-gated upstream.
             features.plugin_hooks = true;
-            model = "gpt-5.6-terra";
+            model = "gpt-6-sol";
             model_reasoning_effort = "medium";
             notice.model_migrations = {
               "gpt-5.3-codex" = "gpt-5.5";
@@ -144,11 +144,10 @@ let
               }
             ];
             projects = {
-              "${homeDirectory}/src/".trust_level = "trusted";
+              "${homeDirectory}/src".trust_level = "trusted";
               "${homeDirectory}/src/nix-dendrites".trust_level = "trusted";
-              "${homeDirectory}/src/nix-dendrites-rewrite".trust_level = "trusted";
-              "${homeDirectory}/src/nix-dendrites-broadcast".trust_level = "trusted";
               "${homeDirectory}/higi".trust_level = "trusted";
+              "${homeDirectory}/higi/ce-llp".trust_level = "trusted";
               "${homeDirectory}/higi/core-member-reporting".trust_level = "trusted";
               "${homeDirectory}/higi/prbuddy".trust_level = "trusted";
             };
