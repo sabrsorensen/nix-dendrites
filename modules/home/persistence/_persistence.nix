@@ -8,7 +8,7 @@ let
   homePackages = config.home.packages;
 in
 {
-  home.persistence."/persistent" = {
+  home.persistence."/persist" = {
     directories = [
       ".config/fish"
     ]

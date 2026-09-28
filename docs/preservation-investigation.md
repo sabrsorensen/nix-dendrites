@@ -53,7 +53,7 @@ allowance may no longer be necessary.
    and a recovery path.
 2. Add Preservation as a delayed input/module provider; do not enable it on
    any other host.
-3. Translate current baseline paths into `preservation.preserveAt."/persistent"`.
+3. Translate current baseline paths into `preservation.preserveAt."/persist"`.
    Mark early state with `inInitrd = true` and specify permissions where they
    differ from the defaults.
 4. Translate user state through Preservation's `users.<name>` paths. Ensure

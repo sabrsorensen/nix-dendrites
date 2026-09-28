@@ -77,6 +77,17 @@ in
           "context-mode@context-mode" = true;
         };
         hooks = {
+          PreToolUse = [
+            {
+              hooks = [
+                {
+                  command = "rtk hook claude";
+                  type = "command";
+                }
+              ];
+              matcher = "Bash";
+            }
+          ];
           SessionStart = [
             {
               hooks = [

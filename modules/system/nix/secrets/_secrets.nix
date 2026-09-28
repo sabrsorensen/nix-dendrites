@@ -20,7 +20,8 @@
       ];
       sops = {
         defaultSopsFormat = "yaml";
-        age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+        # Impermanence hosts move the host key under /persist.
+        age.sshKeyPaths = lib.mkDefault [ "/etc/ssh/ssh_host_ed25519_key" ];
         # This personal-registry credential belongs only to the two services
         # that consume it.  Defining it unconditionally made WSL try to
         # decrypt the unrelated personal secrets file during activation.

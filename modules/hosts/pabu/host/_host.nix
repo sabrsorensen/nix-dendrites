@@ -30,6 +30,10 @@ in
       office = true;
       plasma = true;
       wine = true;
+      impermanence = true;
+      # /home is its own persistent subvolume, so Home Manager bind mounts
+      # into /persist would be redundant.
+      persistenceHome = false;
     };
     services.ssh = true;
   };
@@ -50,7 +54,7 @@ in
   environment.systemPackages = [
     pkgs.czkawka
   ];
-  my.unfreePackageNames = [];
+  my.unfreePackageNames = [ ];
   my.deployment = {
     enableRemoteUser = true;
     canDeployRemotely = true;

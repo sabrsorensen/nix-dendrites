@@ -33,15 +33,21 @@ in
             settings.allowDiscards = true;
             content = {
               type = "btrfs";
-              extraArgs = [ "-L" "nixos" "-f" ];
+              extraArgs = [
+                "-L"
+                "nixos"
+                "-f"
+              ];
               subvolumes = {
                 "/root" = {
                   mountpoint = "/";
                   mountOptions = commonMountOpts ++ [ "subvol=root" ];
                 };
                 "/root-blank" = {
-                  mountpoint = "/";
-                  mountOptions = commonMountOpts ++ [ "subvol=root-blank" "nodatacow" ];
+                  mountOptions = commonMountOpts ++ [
+                    "subvol=root-blank"
+                    "nodatacow"
+                  ];
                 };
                 "/home" = {
                   mountpoint = "/home";
@@ -65,7 +71,12 @@ in
                 };
                 "/persist/swap" = {
                   mountpoint = "/persist/swap";
-                  mountOptions = ["subvol=swap" "noatime" "nodatacow" "compress=no"];
+                  mountOptions = [
+                    "subvol=swap"
+                    "noatime"
+                    "nodatacow"
+                    "compress=no"
+                  ];
                   swap.swapfile.size = "20G";
                 };
               };
@@ -74,6 +85,11 @@ in
         };
       };
     };
+  };
+  my.host.persistence = {
+    # /var/log and /var/lib are the "log" and "lib" subvolumes above.
+    varOnOwnSubvolumes = true;
+    rollback.enable = true;
   };
   fileSystems."/persist".neededForBoot = true;
   fileSystems."/var/log".neededForBoot = true;

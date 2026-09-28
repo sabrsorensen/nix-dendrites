@@ -8,10 +8,5 @@ in
       lib,
       ...
     }:
-    lib.mkIf (config.my.host.name == "Pabu") (
-      import ./_hardware.nix (
-        args
-        // { }
-      )
-    );
+    lib.mkIf (config.my.host.name == "Pabu") (import ./_hardware.nix (args // { }));
 }

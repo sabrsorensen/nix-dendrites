@@ -136,7 +136,9 @@ by `features.atuin`, while the Atuin sync server is selected by
 `services.atuinServer`. A host can keep the aggregate enabled and disable or
 force-enable a component when needed.
 
-The current persistence provider is impermanence, but no host enables it yet.
+The current persistence provider is impermanence; Pabu is the first host to
+enable it (btrfs root rolled back to a blank snapshot each boot, state under
+`/persist`).
 The recorded assessment of Preservation as a future replacement is in
 [`preservation-investigation.md`](preservation-investigation.md); do not begin
 a provider migration until selecting the first ephemeral-root host.
