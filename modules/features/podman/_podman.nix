@@ -29,13 +29,15 @@
   systemd.services.podman-healthcheck-reset-failed = {
     description = "Reset orphaned Podman healthcheck transient units";
     serviceConfig.Type = "oneshot";
+    # Bash builtins only: a unit's default PATH has no awk.
     script = ''
       set -uo pipefail
-      mapfile -t stale < <(
-        systemctl list-units --all --plain --no-legend --state=failed \
-          | awk '{ print $1 }' \
-          | grep -E '^[0-9a-f]{64}(-startup)?-[0-9a-f]+\.(service|timer)$' || true
-      )
+      stale=()
+      while read -r unit _; do
+        if [[ $unit =~ ^[0-9a-f]{64}(-startup)?-[0-9a-f]+\.(service|timer)$ ]]; then
+          stale+=("$unit")
+        fi
+      done < <(systemctl list-units --all --plain --no-legend --state=failed)
       if [ "''${#stale[@]}" -gt 0 ]; then
         systemctl reset-failed "''${stale[@]}"
       fi
