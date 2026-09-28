@@ -144,15 +144,10 @@ let
               }
             ];
             projects = {
-              "${homeDirectory}/src".trust_level = "trusted";
               "${homeDirectory}/src/nix-dendrites".trust_level = "trusted";
-              "${homeDirectory}/higi".trust_level = "trusted";
-              "${homeDirectory}/higi/ce-llp".trust_level = "trusted";
-              "${homeDirectory}/higi/core-member-reporting".trust_level = "trusted";
-              "${homeDirectory}/higi/prbuddy".trust_level = "trusted";
             };
             tui = {
-              model_availability_nux."gpt-6-astra" = 1;
+              model_availability_nux."gpt-6-astra" = 2;
               screen_reader_detection_done = true;
             };
             mcp_servers = {
