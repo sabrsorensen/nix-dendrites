@@ -20,6 +20,7 @@ authoritative record; this table is just an index.
 | azure-devops extension + keyring | `modules/platforms/wsl/wsl-work-home/_wsl-work-home.nix` | WSL |
 | EOL dotnet 6/7 SDK insecure permits | `modules/platforms/wsl/wsl-work-home/` | WSL |
 | Codex `daemon_auto_start = false` (openai/codex#48050) | `modules/home/codex/_codex.nix` | codex hosts |
+| sonolin test_tags.py missing `import os` | `modules/features/sonos/_sonolin.nix` | sonos hosts |
 
 `decky-catalog/` is `modules/platforms/steamdeck/_steamdeck/decky-catalog/`.
 

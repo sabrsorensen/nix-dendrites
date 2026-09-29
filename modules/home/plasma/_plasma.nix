@@ -7,12 +7,54 @@ let
   # docs/architecture.md. Keep this file to keys whose value is identical on
   # every Plasma host.
   homeModule =
-    { ... }:
+    { lib, pkgs, ... }:
+    let
+      sweetAmbarBlue = pkgs.callPackage ./_sweet-ambar-blue.nix { };
+    in
     {
+      # Kvantum SVG theme engine, per
+      # https://github.com/tsujan/Kvantum/blob/master/Kvantum/INSTALL.md#nixos
+      # (upstream only lists the Qt5 build; Plasma 6 apps need the Qt6 one).
+      # The colour scheme, Aurorae decoration and Konsole scheme are found via
+      # the profile's share/ on XDG_DATA_DIRS.
+      home.packages = [
+        pkgs.kdePackages.qtstyleplugin-kvantum
+        pkgs.libsForQt5.qtstyleplugin-kvantum
+        pkgs.candy-icons
+        sweetAmbarBlue
+      ];
+
+      # Kvantum's user theme dir is always searched, whatever XDG_DATA_DIRS is.
+      xdg.configFile."Kvantum/Sweet-Ambar-Blue".source =
+        "${sweetAmbarBlue}/share/Kvantum/Sweet-Ambar-Blue";
+      xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
+        [General]
+        theme=Sweet-Ambar-Blue
+      '';
+
       programs.plasma = {
         enable = true;
+        # Sweet Ambar Blue, applied piecewise rather than via its global theme
+        # (store.kde.org p/2157756), which only points at these same pieces.
+        workspace = {
+          theme = "Sweet-Ambar-Blue";
+          cursor.theme = "Sweet-cursors";
+          widgetStyle = "kvantum";
+          colorScheme = "SweetAmbarBlue";
+          iconTheme = "candy-icons";
+          windowDecorations = {
+            library = "org.kde.kwin.aurorae";
+            theme = "__aurorae__svg__Sweet-ambar-blue";
+          };
+        };
         shortcuts = {
+          Clementine.next_album = "Shift+Media Next";
+          Clementine.next_track = [ ];
+          Clementine.play_pause = [ ];
+          Clementine.prev_track = [ ];
+          Clementine.stop = [ ];
           "KDE Keyboard Layout Switcher"."Switch keyboard layout to English (Dvorak)" = [ ];
+          "KDE Keyboard Layout Switcher"."Switch keyboard layout to English (US)" = [ ];
           "KDE Keyboard Layout Switcher"."Switch to Last-Used Keyboard Layout" = "Meta+Alt+L";
           "KDE Keyboard Layout Switcher"."Switch to Next Keyboard Layout" = "Ctrl+Shift";
           kaccess."Toggle Screen Reader On and Off" = "Meta+Alt+S";
@@ -44,6 +86,15 @@ let
           kwin."Cycle Overview Opposite" = [ ];
           kwin."Decrease Opacity" = [ ];
           kwin."Edit Tiles" = "Meta+T";
+          kwin.Expose = [
+            "Meta+F9"
+          ];
+          kwin.ExposeAll = [
+            "Meta+F10"
+          ];
+          kwin.ExposeClass = [
+            "Meta+F7"
+          ];
           kwin.ExposeClassCurrentDesktop = [ ];
           kwin."Grid View" = "Meta+G";
           kwin."Increase Opacity" = [ ];
@@ -51,6 +102,7 @@ let
           kwin."Move Tablet to Next LogicalOutput" = [ ];
           kwin.MoveMouseToCenter = "Meta+F6";
           kwin.MoveMouseToFocus = "Meta+F5";
+          kwin."Move Tablet to Next Output" = [ ];
           kwin.MoveZoomDown = [ ];
           kwin.MoveZoomLeft = [ ];
           kwin.MoveZoomRight = [ ];
@@ -66,6 +118,9 @@ let
           kwin."Switch Window Left" = "Meta+Alt+Left";
           kwin."Switch Window Right" = "Meta+Alt+Right";
           kwin."Switch Window Up" = "Meta+Alt+Up";
+          kwin."Switch to Desktop 1" = [
+            "Meta+F1"
+          ];
           kwin."Switch to Desktop 10" = [ ];
           kwin."Switch to Desktop 11" = [ ];
           kwin."Switch to Desktop 12" = [ ];
@@ -76,12 +131,21 @@ let
           kwin."Switch to Desktop 17" = [ ];
           kwin."Switch to Desktop 18" = [ ];
           kwin."Switch to Desktop 19" = [ ];
+          kwin."Switch to Desktop 2" = [
+            "Meta+F2"
+          ];
           kwin."Switch to Desktop 20" = [ ];
           kwin."Switch to Desktop 21" = [ ];
           kwin."Switch to Desktop 22" = [ ];
           kwin."Switch to Desktop 23" = [ ];
           kwin."Switch to Desktop 24" = [ ];
           kwin."Switch to Desktop 25" = [ ];
+          kwin."Switch to Desktop 3" = [
+            "Meta+F3"
+          ];
+          kwin."Switch to Desktop 4" = [
+            "Meta+F4"
+          ];
           kwin."Switch to Desktop 5" = [ ];
           kwin."Switch to Desktop 6" = [ ];
           kwin."Switch to Desktop 7" = [ ];
@@ -105,8 +169,20 @@ let
           kwin."Switch to Screen to the Right" = [ ];
           kwin."Toggle Night Color" = [ ];
           kwin."Toggle Window Raise/Lower" = [ ];
+          kwin."Walk Through Windows" = [
+            "Alt+Tab"
+          ];
+          kwin."Walk Through Windows (Reverse)" = [
+            "Alt+Shift+Tab"
+          ];
           kwin."Walk Through Windows Alternative" = [ ];
           kwin."Walk Through Windows Alternative (Reverse)" = [ ];
+          kwin."Walk Through Windows of Current Application" = [
+            "Meta+Tab"
+          ];
+          kwin."Walk Through Windows of Current Application (Reverse)" = [
+            "Meta+Shift+Tab"
+          ];
           kwin."Walk Through Windows of Current Application Alternative" = [ ];
           kwin."Walk Through Windows of Current Application Alternative (Reverse)" = [ ];
           kwin."Window Above Other Windows" = [ ];
@@ -152,6 +228,7 @@ let
           kwin."Window Raise" = [ ];
           kwin."Window Resize" = [ ];
           kwin."Window Restore" = "Meta+Backspace";
+          kwin."Window Shade" = [ ];
           kwin."Window Shrink Horizontal" = [ ];
           kwin."Window Shrink Vertical" = [ ];
           kwin."Window to Desktop 1" = [ ];
@@ -261,10 +338,19 @@ let
         };
         configFile = {
           baloofilerc.General.dbVersion = 2;
+          dolphinrc.IconsMode.PreviewSize = 256;
           dolphinrc."KFileDialog Settings"."Places Icons Auto-resize" = false;
           dolphinrc."KFileDialog Settings"."Places Icons Static Size" = 22;
           kded5rc.Module-browserintegrationreminder.autoload = false;
           kded5rc.Module-device_automounter.autoload = false;
+          kdeglobals.General.XftAntialias = true;
+          kdeglobals.General.XftHintStyle = "hintslight";
+          kdeglobals.General.XftSubPixel = "none";
+          kdeglobals.General.fixed = "CaskaydiaCove Nerd Font Mono,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          kdeglobals.General.font = "CaskaydiaCove Nerd Font Mono,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          kdeglobals.General.menuFont = "CaskaydiaCove Nerd Font Mono,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          kdeglobals.General.smallestReadableFont = "CaskaydiaCove Nerd Font Mono,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
+          kdeglobals.General.toolBarFont = "CaskaydiaCove Nerd Font Mono,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
           kdeglobals."KFileDialog Settings"."Allow Expansion" = false;
           kdeglobals."KFileDialog Settings"."Automatically select filename extension" = true;
           kdeglobals."KFileDialog Settings"."Breadcrumb Navigation" = true;
@@ -279,28 +365,47 @@ let
           kdeglobals."KFileDialog Settings"."Sort hidden files last" = false;
           kdeglobals."KFileDialog Settings"."Sort reversed" = false;
           kdeglobals."KFileDialog Settings"."View Style" = "DetailTree";
+          kdeglobals.WM.activeFont = "CaskaydiaCove Nerd Font,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1";
           kiorc.Confirmations.ConfirmDelete = true;
+          kiorc.Confirmations.ConfirmEmptyTrash = true;
+          kiorc.Confirmations.ConfirmTrash = false;
+          kiorc."Executable scripts".behaviourOnLaunch = "alwaysAsk";
+          kscreenlockerrc.Daemon.LockGrace = 30;
+          kscreenlockerrc.Daemon.Timeout = 15;
+          kscreenlockerrc.Greeter.WallpaperPlugin = "org.kde.slideshow";
+          kscreenlockerrc."Greeter/Wallpaper/org.kde.slideshow/General".SlidePaths =
+            "/run/current-system/sw/share/wallpapers/,/home/sam/gen_sync/HQ Wallpapers/,/home/sam/gen_sync/Megastructures Wallpapers/";
           kwalletrc.Wallet."Close When Idle" = false;
           kwalletrc.Wallet."Close on Screensaver" = false;
           kwalletrc.Wallet."Default Wallet" = "kdewallet";
           kwalletrc.Wallet.Enabled = true;
           kwalletrc.Wallet."First Use" = false;
           kwalletrc.Wallet."Idle Timeout" = 10;
-          kwalletrc.Wallet."Leave Manager Open" = false;
+          kwalletrc.Wallet."Launch Manager" = true;
+          kwalletrc.Wallet."Leave Manager Open" = true;
+          kwalletrc.Wallet."Leave Open" = true;
           kwalletrc.Wallet."Prompt on Open" = false;
           kwalletrc.Wallet."Use One Wallet" = true;
           kwalletrc."org.freedesktop.secrets".apiEnabled = true;
           kwinrc.Desktops.Number = 1;
           kwinrc.Desktops.Rows = 1;
+          kwinrc.Effect-wobblywindows.Drag = 97;
+          kwinrc.Effect-wobblywindows.MoveFactor = 25;
+          kwinrc.Effect-wobblywindows.Stiffness = 1;
+          kwinrc.Effect-wobblywindows.WobblynessLevel = 4;
+          kwinrc.NightColor.Active = true;
+          kwinrc.Plugins.glideEnabled = true;
+          kwinrc.Plugins.magiclampEnabled = true;
+          kwinrc.Plugins.scaleEnabled = false;
+          kwinrc.Plugins.squashEnabled = false;
+          kwinrc.Plugins.translucencyEnabled = true;
           kwinrc.Xwayland.Scale = 1;
           kwinrulesrc.General.rules = "";
+          kxkbrc.Layout.Use = true;
           kxkbrc.Layout.DisplayNames = ",";
           kxkbrc.Layout.LayoutList = "us,us";
-          kxkbrc.Layout.Use = true;
+          kxkbrc.Layout.VariantList = lib.mkDefault "dvorak,";
           plasma-localerc.Formats.LANG = "en_US.UTF-8";
-          plasmanotifyrc."Applications/ferdium".Seen = true;
-          plasmanotifyrc."Applications/firefox".Seen = true;
-          plasmanotifyrc."Applications/signal".Seen = true;
           plasmarc.Wallpapers.usersWallpapers = "";
           spectaclerc.ImageSave.translatedScreenshotsFolder = "Screenshots";
           spectaclerc.VideoSave.translatedScreencastsFolder = "Screencasts";
