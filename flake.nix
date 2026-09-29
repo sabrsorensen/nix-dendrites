@@ -23,6 +23,10 @@
       url = "github:mksglu/context-mode";
       flake = false;
     };
+    crispy-recall = {
+      url = "github:TheSylvester/crispy-recall/v0.4.0";
+      flake = false;
+    };
     danieltallon-nix-packages = {
       url = "github:DanielTallon/nix-packages";
       flake = false;

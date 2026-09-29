@@ -95,6 +95,23 @@
         "type": "github"
       }
     },
+    "crispy-recall": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789157446,
+        "narHash": "sha256-0Kqgmru/Sd3yRdQNMG8MzPuIzPGboKZSCWHg1Ekzog0=",
+        "owner": "TheSylvester",
+        "repo": "crispy-recall",
+        "rev": "7fb5d0a2bb2b9cd446a99391c73bcdd7f50547f8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "TheSylvester",
+        "ref": "v0.4.0",
+        "repo": "crispy-recall",
+        "type": "github"
+      }
+    },
     "danieltallon-nix-packages": {
       "flake": false,
       "locked": {
@@ -617,11 +634,11 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1790395696,
-        "narHash": "sha256-auzS6NRW+5pVxMZes71+5MErIsKOdUu1fPZLZ6ZzbyQ=",
+        "lastModified": 1790696758,
+        "narHash": "sha256-+rnwneSim13XjA10uKVDcItGALIFKQko994AK43yKqo=",
         "owner": "sabrsorensen",
         "repo": "nix-secrets",
-        "rev": "07dfc09177f510dd81882cea7e660455228a624a",
+        "rev": "8e7ca83aaddb472a2281da2c093fc8160bd05c14",
         "type": "github"
       },
       "original": {
@@ -938,6 +955,7 @@
         "claude-desktop": "claude-desktop",
         "codex-nix": "codex-nix",
         "context-mode": "context-mode",
+        "crispy-recall": "crispy-recall",
         "danieltallon-nix-packages": "danieltallon-nix-packages",
         "demlo": "demlo",
         "determinate": "determinate",

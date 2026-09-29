@@ -78,6 +78,7 @@
           vscode = host.features.vscode;
           claude = host.features.claude;
           codex = host.features.codex;
+          recall = host.features.recall;
         };
         my.bash.isSteamDeck = host.platform == "steamdeck";
         my.fish = {
@@ -119,6 +120,7 @@
           hostName = host.name;
           canDeployRemotely = config.my.deployment.canDeployRemotely;
         };
+        my.recall.hostName = lib.toLower host.name;
         my.sops = {
           homeDirectory = homeDirectory;
           isManagedPersonal = host.platform != "wsl";

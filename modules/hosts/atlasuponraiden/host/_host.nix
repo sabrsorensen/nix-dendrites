@@ -48,6 +48,7 @@
         profilarr = true;
         prowlarr = true;
         radarr = true;
+        recallHub = true;
         sonarr = true;
         ntfy = true;
         nextcloud = true;

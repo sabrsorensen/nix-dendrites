@@ -108,6 +108,21 @@ fails evaluation loudly rather than silently.
   (which pins nixos-26.05 and flake-utils). On a bump, check the file hasn't
   moved and its `callPackage` arguments still resolve. Pinning is unused here:
   it's Limine-only and needs an out-of-tree module plus `--impure` rebuilds.
+- **crispy-recall** (`modules/services/crispy-recall/`). Pinned to a release
+  tag (`github:TheSylvester/crispy-recall/v<version>`) because satellites
+  upload raw transcripts; bump the tag deliberately after reading
+  `CHANGELOG.md`, and refresh `npmDepsHash` in `_package.nix`. Everything
+  `recall install` would do imperatively is declared instead (bundles
+  symlinked into `~/.recall/bin`, Stop hook, skill, `config.json`, tokens from
+  sops), so a release that changes its on-disk layout, bundle list
+  (`STAGED_BUNDLES`/`SATELLITE_BUNDLES` in `src/installer/install.ts`) or
+  needs an attended DB migration (`recall install`/`recall repair` on the hub,
+  via `recall-hub`) has to be mirrored by hand. `_llama-cpp.nix` repackages
+  upstream's pinned llama.cpp prebuilt (`LLAMA_RELEASE_TAG`, currently b5300)
+  with autoPatchelf, because nixpkgs' llama-cpp no longer ships
+  `llama-embedding`; bump it only when upstream bumps its tag. The CLAUDE.md
+  nudge `recall install` appends is intentionally skipped; the skill carries
+  the same guidance.
 
 ### Platform inputs
 
