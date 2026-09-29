@@ -121,10 +121,25 @@ let
 
   # KConfig INI -> one fully qualified "[group][sub] key=value" line per key,
   # sorted, so diff lines stand alone without needing the group header as
-  # context and key order/blank lines don't show up as noise.
+  # context and key order/blank lines don't show up as noise. Values are
+  # reduced to what plasma-manager actually declares, so KDE's runtime
+  # rewrites of the same setting don't show up as drift.
   normalizeKconfigPy = pkgs.writeText "config-drift-normalize-kconfig.py" ''
+    import os
     import re
     import sys
+
+    # kglobalshortcutsrc values are "active,default,description". plasma-manager
+    # writes only the active field ("Meta+D,,") and kglobalaccel fills in the
+    # other two at login, so only the active field is declarative.
+    shortcuts = os.path.basename(sys.argv[1]) == "kglobalshortcutsrc"
+
+
+    def unescape(value):
+        # plasma-manager writes some characters as \xNN ("Meta+\x3d"); KDE
+        # rewrites them literally ("Meta+="). Compare the decoded form.
+        return re.sub(r"\\x([0-9a-fA-F]{2})", lambda m: chr(int(m.group(1), 16)), value)
+
 
     group = ""
     lines = []
@@ -137,7 +152,11 @@ let
                 group = line
                 continue
             key, sep, value = line.partition("=")
-            lines.append(f"{group} {key.strip()}{sep}{value.strip()}".lstrip())
+            key = key.strip()
+            value = value.strip()
+            if shortcuts and key != "_k_friendly_name":
+                value = re.split(r"(?<!\\),", value, maxsplit=1)[0]
+            lines.append(f"{group} {key}{sep}{unescape(value)}".lstrip())
     for line in sorted(lines):
         print(line)
   '';

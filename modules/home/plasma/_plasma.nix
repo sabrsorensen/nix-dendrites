@@ -43,7 +43,9 @@ let
           colorScheme = "SweetAmbarBlue";
           iconTheme = "candy-icons";
           windowDecorations = {
-            library = "org.kde.kwin.aurorae";
+            # SVG Aurorae themes load via the .v2 plugin; KWin migrates
+            # the plain "org.kde.kwin.aurorae" value to it at login.
+            library = "org.kde.kwin.aurorae.v2";
             theme = "__aurorae__svg__Sweet-ambar-blue";
           };
         };
