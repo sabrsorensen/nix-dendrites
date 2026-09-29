@@ -41,7 +41,8 @@ let
           cursor.theme = "Sweet-cursors";
           widgetStyle = "kvantum";
           colorScheme = "SweetAmbarBlue";
-          iconTheme = "candy-icons";
+          # Sweet-folders' blue folders; inherits candy-icons for the rest.
+          iconTheme = "Sweet-Blue";
           windowDecorations = {
             # SVG Aurorae themes load via the .v2 plugin; KWin migrates
             # the plain "org.kde.kwin.aurorae" value to it at login.
