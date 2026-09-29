@@ -78,6 +78,16 @@ they silently paper over.
   (`modules/features/w3d-hub-launcher/_package.nix`). Works around the
   launcher's own dependency-install step doing nothing. Check upstream
   launcher releases.
+- **Deskflow continuous build + private libportal 0.11.0**
+  (`modules/features/deskflow/_deskflow.nix`). Pins Deskflow to a post-1.26.0
+  `continuous` commit for Input Capture permission persistence
+  (deskflow/deskflow#9415), built against libportal >= 0.10 (needed for
+  `xdp_input_capture_session_get_restore_token`; nixpkgs is on 0.9.1,
+  NixOS/nixpkgs#548917). The libportal override is scoped to Deskflow only.
+  Also replaces nixpkgs' `postPatch`/`checkPhase`/`postInstall`, which target
+  files upstream has since removed. Drop the Deskflow pin once nixpkgs ships
+  Deskflow >= 1.27, and the libportal override once nixpkgs' libportal is
+  >= 0.10 (`nix eval --raw nixpkgs#libportal.version`).
 
 ### Source-only inputs
 
