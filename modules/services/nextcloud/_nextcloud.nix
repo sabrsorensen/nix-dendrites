@@ -46,15 +46,14 @@ in
     datadir = cfg.dataDir;
     database.createLocally = true;
     config = {
-      adminuser = "sam";
+      adminuser = "sorenssa";
       adminpassFile = config.sops.secrets.nextcloud_admin_password.path;
       dbtype = "pgsql";
     };
-    extraApps = {
-      inherit (pkgs.nextcloud34Packages.apps) richdocuments;
-    };
-    # Retain the App Store for non-core apps while pinning the office
-    # integration to the Nextcloud version selected above.
+    # The App Store owns every non-core app, including richdocuments.  Don't
+    # also pin a store app via extraApps: `occ upgrade` then installs the newer
+    # store copy beside the Nix one, PHP fatals on the duplicate autoloader,
+    # and nextcloud-setup leaves the instance stuck in maintenance mode.
     appstoreEnable = true;
     settings = {
       overwrite.cli.url = "https://${nextcloudHost}";
@@ -99,15 +98,17 @@ in
 
   # Keep the richdocuments connection declarative.  These commands are
   # idempotent, so running them after either service is restarted also repairs
-  # a manually changed office URL.
+  # a manually changed office URL or a removed app.
   systemd.services.nextcloud-richdocuments = {
     description = "Configure Nextcloud Richdocuments for Collabora Online";
     wantedBy = [ "multi-user.target" ];
     after = [
       "caddy.service"
       "coolwsd.service"
+      "network-online.target"
       "nextcloud-setup.service"
     ];
+    wants = [ "network-online.target" ];
     requires = [
       "coolwsd.service"
       "nextcloud-setup.service"
@@ -117,6 +118,10 @@ in
       User = "nextcloud";
     };
     script = ''
+      if ! ${lib.getExe config.services.nextcloud.occ} app:getpath richdocuments >/dev/null; then
+        ${lib.getExe config.services.nextcloud.occ} app:install --keep-disabled richdocuments
+      fi
+      ${lib.getExe config.services.nextcloud.occ} app:enable richdocuments
       ${lib.getExe config.services.nextcloud.occ} config:app:set --value ${lib.escapeShellArg "https://${collaboraHost}"} richdocuments wopi_url
       ${lib.getExe config.services.nextcloud.occ} config:app:set --value ${lib.escapeShellArg "https://${collaboraHost}"} richdocuments public_wopi_url
       ${lib.getExe config.services.nextcloud.occ} richdocuments:activate-config
