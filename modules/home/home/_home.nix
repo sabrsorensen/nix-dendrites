@@ -135,7 +135,7 @@
         home = {
           username = lib.mkForce username;
           homeDirectory = lib.mkForce homeDirectory;
-          stateVersion = "26.05";
+          stateVersion = "26.11";
           packages =
             with pkgs;
             [

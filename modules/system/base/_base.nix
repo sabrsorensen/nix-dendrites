@@ -45,6 +45,6 @@
   # Installed hosts retain their existing compatibility default. The
   # installation media module supplies its own state version.
   system.stateVersion = lib.mkIf (!builtins.elem "installer" config.my.host.tags) (
-    lib.mkDefault "26.05"
+    lib.mkDefault "26.11"
   );
 }

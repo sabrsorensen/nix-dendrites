@@ -3,7 +3,7 @@
   home = {
     username = "deck";
     homeDirectory = "/home/deck";
-    stateVersion = "26.05";
+    stateVersion = "26.11";
   };
   home.activation.setupSteamLibraryMount = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     export PATH="/usr/bin:/bin:$PATH"
