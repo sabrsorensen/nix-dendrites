@@ -5,7 +5,7 @@
       {
         "id": "1",
         "type": "model",
-        "color": "brightCyan"
+        "color": "gradient:vice"
       },
       {
         "id": "2",
@@ -18,7 +18,7 @@
           "display": "slider"
         },
         "rawValue": true,
-        "color": "gradient:vice"
+        "color": "gradient:mind"
       },
       {
         "id": "1327983f-0aad-4daf-b2df-bde58dfcb27e",
@@ -29,7 +29,7 @@
         "id": "63eebeed-2f78-4264-8636-9f813360e4a8",
         "type": "custom-text",
         "customText": "5h",
-        "color": "white"
+        "color": "gradient:vice"
       },
       {
         "id": "ddb2adac-bac1-4457-afc8-4cdc9ce56037",
@@ -48,7 +48,7 @@
         "numberFormat": {
           "style": "compact"
         },
-        "color": "gradient:vice",
+        "color": "gradient:mind",
         "rawValue": true
       },
       {
@@ -84,7 +84,8 @@
       {
         "id": "a0dc8cdb-1d65-49f5-a265-5ad280e57fb7",
         "type": "custom-text",
-        "customText": "7d"
+        "customText": "7d",
+        "color": "gradient:vice"
       },
       {
         "id": "853fe1bc-a84d-441d-b797-8a7c956ba5ea",
@@ -99,7 +100,7 @@
           "cursor": "true"
         },
         "rawValue": true,
-        "color": "gradient:vice"
+        "color": "gradient:mind"
       },
       {
         "id": "28e1d5da-ea1b-4698-bca2-2060596d0132",
