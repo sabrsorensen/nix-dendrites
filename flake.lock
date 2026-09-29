@@ -915,6 +915,22 @@
         "type": "github"
       }
     },
+    "reolink-native-linux": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786547757,
+        "narHash": "sha256-2h9J5hGjlzkVHSS7hckQcCvXxWOaK6MaeLjKwq9GFpk=",
+        "owner": "TodesengelX",
+        "repo": "reolink-native-linux",
+        "rev": "9a88ebda75edf43a41aed2b05c4e765c811b5e5b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "TodesengelX",
+        "repo": "reolink-native-linux",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "armory-runtime-nixpkgs": "armory-runtime-nixpkgs",
@@ -951,12 +967,30 @@
         "partyowl84-vscode-theme": "partyowl84-vscode-theme",
         "plasma-manager": "plasma-manager",
         "reolink-cli": "reolink-cli",
+        "reolink-native-linux": "reolink-native-linux",
+        "sonolin": "sonolin",
         "sops-nix": "sops-nix",
         "superpowers": "superpowers",
         "synthwave-84-vscode-theme": "synthwave-84-vscode-theme",
         "synthwave-blues-vscode-theme": "synthwave-blues-vscode-theme",
         "terminal-rain-lightning": "terminal-rain-lightning",
         "treefmt-nix": "treefmt-nix"
+      }
+    },
+    "sonolin": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790536934,
+        "narHash": "sha256-Az5VTLiaTO9530HbLZdukrziUH2jble59bCn4LwJr+0=",
+        "owner": "alexsson-xexpanderx",
+        "repo": "sonolin",
+        "rev": "9bb06a292a12052ba5755437f2af0a34e86fcd7b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "alexsson-xexpanderx",
+        "repo": "sonolin",
+        "type": "github"
       }
     },
     "sops-nix": {

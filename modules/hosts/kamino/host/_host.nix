@@ -13,7 +13,7 @@
     };
     features = {
       gui = true;
-      reolinkCli = true;
+      reolink = true;
       omnibin = true;
       bootGardener = true;
       gdrive = true;
@@ -32,7 +32,7 @@
       minecraft = true;
       nvidia = false; # dGPU is failing, keep it disabled
       noMansSky = true;
-      noson = true;
+      sonos = true;
       office = true;
       plasma = true;
       steam = true;

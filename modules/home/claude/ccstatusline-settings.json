@@ -148,7 +148,7 @@
         "type": "custom-command",
         "commandPath": "@contextModeStatusline@",
         "timeout": 1000,
-        "color": "brightBlue"
+        "color": "gradient:vice"
       }
     ],
     []
@@ -165,12 +165,8 @@
   "minimalistMode": false,
   "powerline": {
     "enabled": false,
-    "separators": [
-      ""
-    ],
-    "separatorInvertBackground": [
-      false
-    ],
+    "separators": [""],
+    "separatorInvertBackground": [false],
     "startCaps": [],
     "endCaps": [],
     "autoAlign": false,

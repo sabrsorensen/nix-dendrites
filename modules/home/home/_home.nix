@@ -56,7 +56,7 @@
           herdr = host.features.codex || host.features.claude;
           mcpCommon = host.features.mcpCommon;
           "nix-index" = true;
-          noson = host.features.noson;
+          sonos = host.features.sonos;
           office = host.features.office;
           personalMcp = host.features.personalMcp;
           persistence = host.features.persistenceHome;

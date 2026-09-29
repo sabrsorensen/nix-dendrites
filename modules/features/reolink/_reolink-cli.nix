@@ -18,7 +18,7 @@ let
 in
 stdenvNoCC.mkDerivation {
   # This is intentionally a private package recipe, installed only on hosts
-  # with my.host.features.reolinkCli (which also allows the unfree license).
+  # with my.host.features.reolink (which also allows the unfree license).
   pname = "reolink-cli";
   inherit version;
 

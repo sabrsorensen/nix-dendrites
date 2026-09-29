@@ -84,7 +84,7 @@ These read files out of an upstream repo (`flake = false`) rather than using
 its flake outputs, so they depend on upstream's repo layout. A layout change
 fails evaluation loudly rather than silently.
 
-- **reolink-cli** (`modules/features/reolink-cli/`). Version comes from
+- **reolink-cli** (`modules/features/reolink/`). Version comes from
   upstream's `package.json` and the release-tarball hash from
   `checksums/v<version>.sha256`, so a `flake.lock` bump of `reolink-cli` is
   the whole update; read upstream's `CHANGELOG.md` before committing one. If
@@ -92,6 +92,17 @@ fails evaluation loudly rather than silently.
   publishing the release assets; rerun the update later. To hold a release
   back, pin the input to a tag (`github:reolink/reolink-cli/v<version>`) and
   record the pin and its reason here.
+- **reolink-native-linux** (`modules/features/reolink/`). Built from source
+  off upstream's default branch (its git tags lag its releases); the version
+  is parsed from `project(... VERSION x.y.z)` in `CMakeLists.txt`, so a
+  `flake.lock` bump is the whole update. Read upstream's `CHANGELOG.md`
+  before committing one. If the build breaks on a bump, check `CMakeLists.txt`
+  for new `find_package`/`pkg_check_modules` dependencies.
+- **sonolin** (`modules/features/sonos/`). Built from source off upstream's
+  default branch (no tags yet); the version is read from `pyproject.toml`, so
+  a `flake.lock` bump is the whole update. If a bump fails, check
+  `pyproject.toml` for new dependencies and the test suite for new
+  network/display assumptions.
 - **boot-gardener** (`modules/features/boot-gardener/`). Built from upstream's
   `boot-gardener/boot-gardener.nix` with our nixpkgs, bypassing their flake
   (which pins nixos-26.05 and flake-utils). On a bump, check the file hasn't

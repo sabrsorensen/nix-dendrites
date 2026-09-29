@@ -26,7 +26,7 @@ in
       bitwarden = true;
       deskflow = true;
       flatpak = true;
-      noson = true;
+      sonos = true;
       office = true;
       plasma = true;
       wine = true;

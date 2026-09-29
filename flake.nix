@@ -130,6 +130,14 @@
       url = "github:reolink/reolink-cli";
       flake = false;
     };
+    reolink-native-linux = {
+      url = "github:TodesengelX/reolink-native-linux";
+      flake = false;
+    };
+    sonolin = {
+      url = "github:alexsson-xexpanderx/sonolin";
+      flake = false;
+    };
     sops-nix = {
       url = "https://flakehub.com/f/Mic92/sops-nix/*";
       inputs.nixpkgs.follows = "nixpkgs";
