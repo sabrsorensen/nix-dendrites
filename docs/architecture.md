@@ -268,9 +268,11 @@ flake.modules.nixos = lib.optionalAttrs (inputs ? plasma-manager) {
 Rules:
 
 - The base module keeps only keys whose value is identical on every host that
-  has the feature. Anything that differs, or is host-only, moves entirely into
-  the per-host payload, so base and delta merge with no conflict and no
-  `lib.mkForce`.
+  has the feature. Anything host-only moves entirely into the per-host payload,
+  so base and delta merge with no conflict and no `lib.mkForce`. A key shared
+  by most hosts but differing on one or two may stay in the base as
+  `lib.mkDefault` (e.g. `kxkbrc.Layout.VariantList`, `kwinrc.Xwayland.Scale`),
+  with the outliers setting their own value.
 - The per-host module self-gates on `my.host.name` plus the feature and
   `home.enable` booleans. It is broadcast, not conditionally imported.
 - It reaches Home Manager by setting `home-manager.users.<user>.programs.<x>`
@@ -278,8 +280,14 @@ Rules:
   that list is fixed at flake composition and cannot be host-aware.
 - Wrap the registration in `lib.optionalAttrs (inputs ? <input>)` when the
   feature's own module is guarded on an optional flake input.
-- Capture host deltas verbatim (rc2nix output, UUIDs, device ids). Do not tidy
-  churn keys — that is the porting discipline.
+- Start a port from verbatim rc2nix output, then drop runtime-state keys before
+  splitting between base and host: generated UUIDs (activities, virtual
+  desktops, and `Tiling/<uuid>` sections keyed by them), timestamps
+  (`ViewPropsTimestamp`), notification `Seen` flags, dialog geometry and
+  history, `/nix/store` paths, and values derived from the active colour scheme
+  (`kdeglobals.WM.*`). Keep genuine host facts such as input-device ids and the
+  existing wallet name. If a dropped key carried a real choice (e.g. a tiling
+  layout), re-express it some other way rather than pinning the UUID.
 
 To resplit after editing host state: evaluate
 `config.home-manager.users.<user>.programs.<x>` for each host, diff the rendered

@@ -23,6 +23,7 @@
       lutris = true;
       minecraft = true;
       noMansSky = true;
+      plasma = true;
       sonos = true;
       w3dHubLauncher = true;
       wine = true;

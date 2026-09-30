@@ -1,11 +1,12 @@
 { inputs, ... }:
 let
-  # Settings shared by every Plasma host. Per-host deltas (activity / virtual-
-  # desktop / tile UUIDs, input-device ids, keyboard-layout order, fonts, screen
-  # locking, wobbly-window tuning, ...) are applied from each host's own module
-  # at modules/hosts/<host>/plasma/ - see "Host-specific overrides" in
-  # docs/architecture.md. Keep this file to keys whose value is identical on
-  # every Plasma host.
+  # Settings shared by every Plasma host. Per-host deltas (input-device ids,
+  # keyboard layouts, Xwayland scale, wallet name, ...) are applied from each
+  # host's own module at modules/hosts/<host>/plasma/ - see "Host-specific
+  # overrides" in docs/architecture.md. Keep this file to keys whose value is
+  # identical on every Plasma host, or lib.mkDefault where one host differs.
+  # Runtime-state keys (UUIDs, timestamps, Seen flags, store paths) belong
+  # nowhere.
   homeModule =
     { lib, pkgs, ... }:
     let
@@ -380,7 +381,7 @@ let
             "/run/current-system/sw/share/wallpapers/,/home/sam/gen_sync/HQ Wallpapers/,/home/sam/gen_sync/Megastructures Wallpapers/";
           kwalletrc.Wallet."Close When Idle" = false;
           kwalletrc.Wallet."Close on Screensaver" = false;
-          kwalletrc.Wallet."Default Wallet" = "kdewallet";
+          kwalletrc.Wallet."Default Wallet" = lib.mkDefault "kdewallet";
           kwalletrc.Wallet.Enabled = true;
           kwalletrc.Wallet."First Use" = false;
           kwalletrc.Wallet."Idle Timeout" = 10;
@@ -402,9 +403,9 @@ let
           kwinrc.Plugins.scaleEnabled = false;
           kwinrc.Plugins.squashEnabled = false;
           kwinrc.Plugins.translucencyEnabled = true;
-          kwinrc.Xwayland.Scale = 1;
+          kwinrc.Xwayland.Scale = lib.mkDefault 1;
           kwinrulesrc.General.rules = "";
-          kxkbrc.Layout.Use = true;
+          kxkbrc.Layout.Use = lib.mkDefault true;
           kxkbrc.Layout.DisplayNames = ",";
           kxkbrc.Layout.LayoutList = "us,us";
           kxkbrc.Layout.VariantList = lib.mkDefault "dvorak,";
