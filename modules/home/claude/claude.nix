@@ -17,6 +17,13 @@ in
     claude-desktop = {
       url = "github:heytcass/claude-desktop-linux-flake";
     };
+
+    # Packaged by _claude-carbon.nix; pinned to a release tag since the
+    # wrapped script list there tracks upstream's scripts/ layout.
+    claude-carbon = {
+      url = "github:gwittebolle/claude-carbon/v1.8.0";
+      flake = false;
+    };
   };
 
   dendritic.homeManagerModules = [ homeModule ];

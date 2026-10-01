@@ -150,6 +150,18 @@
         "commandPath": "@contextModeStatusline@",
         "timeout": 1000,
         "color": "gradient:vice"
+      },
+      {
+        "id": "4b8e1f6a-3c2d-4e7f-9a15-6d0c2b7e8f31",
+        "type": "separator",
+        "character": "|"
+      },
+      {
+        "id": "9e2f7c14-8a3b-4d6e-b5c0-1f4a9d2e6b73",
+        "type": "custom-command",
+        "commandPath": "@claudeCarbonSegment@",
+        "timeout": 1000,
+        "color": "gradient:mind"
       }
     ],
     []

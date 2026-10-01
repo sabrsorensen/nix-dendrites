@@ -49,15 +49,23 @@ let
     url = "https://registry.npmjs.org/context-mode/-/context-mode-${contextModeCliVersion}.tgz";
     hash = "sha256-ZZbcDagn2MC1dVZfNRIpNB4WwO4PVqHrP0rryoNkEmw=";
   };
+  # Installed as a plugin below: its hooks record each session to
+  # ~/.claude/claude-carbon/carbon.db, which the status line segment prefers
+  # over its context-window estimate.
+  claudeCarbon = pkgs.callPackage ./_claude-carbon.nix { src = inputs.claude-carbon; };
   # Claude Code's statusLine. Its layout is ccstatusline-settings.json (an
-  # export from its TUI); line two is a Custom Command widget running
-  # context-mode's statusline, whose command ccstatusline runs through a shell.
+  # export from its TUI); line two is Custom Command widgets running
+  # context-mode's statusline and claude-carbon's cost + CO2 segment, whose
+  # commands ccstatusline runs through a shell.
   ccstatusline = pkgs.callPackage ./_ccstatusline.nix { };
   ccstatuslineSettingsFile = "${config.xdg.configHome}/ccstatusline/settings.json";
   ccstatuslineSettings =
     builtins.replaceStrings
-      [ "@contextModeStatusline@" ]
-      [ "${lib.getExe pkgs.nodejs} ${contextModeCli}/bin/statusline.mjs" ]
+      [ "@contextModeStatusline@" "@claudeCarbonSegment@" ]
+      [
+        "${lib.getExe pkgs.nodejs} ${contextModeCli}/bin/statusline.mjs"
+        "${claudeCarbon}/scripts/statusline.sh --segment"
+      ]
       (builtins.readFile ./ccstatusline-settings.json);
 in
 {
@@ -72,6 +80,9 @@ in
       # .claude-plugin/plugin.json manifest plus skills/ and
       # hooks/hooks.json, which Claude Code discovers automatically.
       plugins.superpowers = inputs.superpowers;
+      # Carbon footprint tracking (github:gwittebolle/claude-carbon): Stop /
+      # SessionEnd / SessionStart hooks plus the /carbon-* skills.
+      plugins.claude-carbon = claudeCarbon;
       settings = {
         enabledPlugins = {
           "context-mode@context-mode" = true;

@@ -16,6 +16,23 @@
         "type": "github"
       }
     },
+    "claude-carbon": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790168957,
+        "narHash": "sha256-ast/mJGG4VGqvBSZZNwD7r2tAkvBSJSRxNrVeDm7py4=",
+        "owner": "gwittebolle",
+        "repo": "claude-carbon",
+        "rev": "0061d7efc97c9bf71061188ca0328453ff86475a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "gwittebolle",
+        "ref": "v1.8.0",
+        "repo": "claude-carbon",
+        "type": "github"
+      }
+    },
     "claude-code": {
       "inputs": {
         "nixpkgs": [
@@ -951,6 +968,7 @@
     "root": {
       "inputs": {
         "armory-runtime-nixpkgs": "armory-runtime-nixpkgs",
+        "claude-carbon": "claude-carbon",
         "claude-code": "claude-code",
         "claude-desktop": "claude-desktop",
         "codex-nix": "codex-nix",

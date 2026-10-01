@@ -20,7 +20,7 @@ let
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "nmse";
-  version = "1.3.16";
+  version = "1.4.22";
 
   # Upstream only ships prebuilt releases (AppImage / macOS dmg), no source
   # build. The asset filename embeds the version, so `/latest/download/`
@@ -30,7 +30,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   # fetchurl still enforces the pinned hash).
   src = fetchurl {
     url = "https://github.com/vectorcmdr/NMSE/releases/latest/download/NMSE-${finalAttrs.version}-Release-x64.AppImage";
-    hash = "sha256-vP2eSevVI5qynM0KDnrFbIw6QGBmh50ANK9P+3/Ol8Y=";
+    hash = "sha256-cDrdskxZBGNZ6g7u50pxyacy9yVB92O3pBCJ3SuVOm8=";
   };
 
   # Only needed to pull nmse.png out for the desktop icon; the AppImage
