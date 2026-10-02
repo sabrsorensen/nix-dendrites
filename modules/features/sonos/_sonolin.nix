@@ -50,17 +50,6 @@ python3Packages.buildPythonApplication {
     install -Dm644 data/icons/sonolin.svg $out/share/icons/hicolor/scalable/apps/sonolin.svg
   '';
 
-  # tests/test_tags.py calls os.mkfifo without importing os (upstream bug at
-  # 1429e886); see the warning in _sonos-home.nix. Fails loudly once upstream
-  # adds the import so this gets dropped.
-  postPatch = ''
-    if grep -q '^import os$' tests/test_tags.py; then
-      echo "sonolin: tests/test_tags.py now imports os; drop this postPatch" >&2
-      exit 1
-    fi
-    sed -i '1i import os' tests/test_tags.py
-  '';
-
   # tests/test_ws.py generates a throwaway TLS cert with the openssl CLI.
   nativeCheckInputs = [
     python3Packages.pytestCheckHook
