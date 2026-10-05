@@ -21,6 +21,7 @@ authoritative record; this table is just an index.
 | EOL dotnet 6/7 SDK insecure permits | `modules/platforms/wsl/wsl-work-home/` | WSL |
 | Codex `daemon_auto_start = false` (openai/codex#48050) | `modules/home/codex/_codex.nix` | codex hosts |
 | sonolin test_tags.py missing `import os` | `modules/features/sonos/_sonolin.nix` | sonos hosts |
+| mealie.service `HOME` for nltk under DynamicUser | `modules/services/mealie/_mealie.nix` | mealie hosts |
 
 `decky-catalog/` is `modules/platforms/steamdeck/_steamdeck/decky-catalog/`.
 

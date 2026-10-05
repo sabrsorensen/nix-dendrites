@@ -30,4 +30,18 @@
     credentialsFile = null;
     database.createLocally = true;
   };
+  # nltk's import-time Downloader() raises "Could not find a default download
+  # directory" when ~ can't be expanded, which kills init_db under the
+  # upstream module's DynamicUser (no HOME, no resolvable passwd home).
+  systemd.services.mealie.environment.HOME = "/var/lib/mealie";
+  warnings = [
+    ''
+      services.mealie: setting HOME=/var/lib/mealie on mealie.service so nltk
+      can import under DynamicUser (upstream nixos/modules/services/web-apps/
+      mealie.nix sets no HOME; init_db otherwise dies with "ValueError: Could
+      not find a default download directory"). Remove the override in
+      modules/services/mealie/_mealie.nix once upstream sets HOME -- check with:
+        grep -n HOME "$(nix eval --raw .#nixosConfigurations.atlasuponraiden.pkgs.path)/nixos/modules/services/web-apps/mealie.nix"
+    ''
+  ];
 }
