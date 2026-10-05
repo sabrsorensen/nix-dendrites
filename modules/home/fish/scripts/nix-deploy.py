@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shlex
 import shutil
 import subprocess
@@ -38,7 +39,16 @@ SECURE_CONFIG = {
         "probeDomains": ["naboo.{domain}", "nevarro.{domain}", "atlasuponraiden.{domain}"],
         "targetServices": ["blocky", "coredns", "dhcp-coredns-kea"],
     },
+    # No DNS peer: the checks are the deploy lock, core services, and no
+    # newly failed units after the switch.
+    "atlasuponraiden": {
+        "targetServices": ["caddy", "postgresql"],
+    },
 }
+
+# Podman healthcheck runs are transient `<container id>-<hex>.service` units;
+# failed ones linger until the reset-failed sweep and aren't a deploy regression.
+TRANSIENT_UNIT = re.compile(r"^[0-9a-f]{64}-[0-9a-f]+\.(service|timer)$")
 
 HOME_OUTPUTS = {"emeraldecho": "emeraldecho-steamos"}
 HOME_USERS = {
@@ -128,35 +138,58 @@ def secure_config(target: str, domain: str) -> dict | None:
     return json.loads(json.dumps(template).replace("{domain}", domain))
 
 
-def secure_preflight(target: str, config: dict, tail: bool) -> tuple[str, bool]:
+def failed_units(target_ssh: str) -> set[str] | None:
+    result = run(
+        ["ssh", target_ssh, "systemctl list-units --state=failed --plain --no-legend"],
+        capture=True,
+    )
+    if result.returncode != 0:
+        return None
+    units = {line.split()[0] for line in result.stdout.splitlines() if line.strip()}
+    return {unit for unit in units if not TRANSIENT_UNIT.match(unit)}
+
+
+def peer_preflight(target: str, config: dict) -> bool:
     peer_name = config["peerName"]
     peer_ip = config["peerIp"]
     peer_ssh = f"nix-{peer_name.lower()}"
+
+    print(f"🔍 Checking health of {peer_name} ({peer_ip}) before deploying to {target}...")
+    if run(["timeout", "10", "dig", f"@{peer_ip}", "-p", "53", "google.com", "+short"], quiet=True).returncode != 0:
+        print(f"❌ ERROR: {peer_name} DNS on :53 is not responding!", file=sys.stderr)
+        return False
+    for domain in config["probeDomains"]:
+        if run(["timeout", "10", "dig", f"@{peer_ip}", "-p", "53", domain, "+short"], quiet=True).returncode != 0:
+            print(f"❌ ERROR: {peer_name} cannot resolve {domain} through Blocky/CoreDNS!", file=sys.stderr)
+            return False
+    if run(["ssh", peer_ssh, service_command(config["peerServices"])], quiet=True).returncode != 0:
+        print(f"❌ ERROR: {peer_name} is not healthy for safe deployment!", file=sys.stderr)
+        print(f"   Expected active services: {', '.join(config['peerServices'])}", file=sys.stderr)
+        return False
+    if run(["ssh", peer_ssh, "test -f /tmp/.deploy-lock"], quiet=True).returncode == 0:
+        print(f"❌ ERROR: Deployment already in progress on {peer_name}!", file=sys.stderr)
+        return False
+    return True
+
+
+def secure_preflight(target: str, config: dict, tail: bool) -> tuple[str, bool, set[str] | None]:
     target_ssh = f"nix-{target.lower()}"
     lock_host = target_ssh
     if tail:
         target_ssh = f"{target_ssh}-tail"
 
-    print(f"🔍 Checking health of {peer_name} ({peer_ip}) before deploying to {target}...")
-    if run(["timeout", "10", "dig", f"@{peer_ip}", "-p", "53", "google.com", "+short"], quiet=True).returncode != 0:
-        print(f"❌ ERROR: {peer_name} DNS on :53 is not responding!", file=sys.stderr)
-        return target_ssh, False
-    for domain in config["probeDomains"]:
-        if run(["timeout", "10", "dig", f"@{peer_ip}", "-p", "53", domain, "+short"], quiet=True).returncode != 0:
-            print(f"❌ ERROR: {peer_name} cannot resolve {domain} through Blocky/CoreDNS!", file=sys.stderr)
-            return target_ssh, False
-    if run(["ssh", peer_ssh, service_command(config["peerServices"])], quiet=True).returncode != 0:
-        print(f"❌ ERROR: {peer_name} is not healthy for safe deployment!", file=sys.stderr)
-        print(f"   Expected active services: {', '.join(config['peerServices'])}", file=sys.stderr)
-        return target_ssh, False
-    if run(["ssh", peer_ssh, "test -f /tmp/.deploy-lock"], quiet=True).returncode == 0:
-        print(f"❌ ERROR: Deployment already in progress on {peer_name}!", file=sys.stderr)
-        return target_ssh, False
-    lock_command = 'printf "%s: Deploying from %s\\n" "$(date)" "$(hostname)" > /tmp/.deploy-lock'
+    if "peerName" in config and not peer_preflight(target, config):
+        return target_ssh, False, None
+    # noclobber makes the redirect fail if another deploy holds the lock.
+    lock_command = 'set -C; printf "%s: Deploying from %s\\n" "$(date)" "$(hostname)" > /tmp/.deploy-lock'
     if run(["ssh", lock_host, lock_command], quiet=True).returncode != 0:
         print("Refusing deployment: target deployment lock is present or inaccessible", file=sys.stderr)
-        return target_ssh, False
-    return target_ssh, True
+        run(["ssh", lock_host, "cat /tmp/.deploy-lock"])
+        return target_ssh, False, None
+    baseline = failed_units(target_ssh)
+    if baseline:
+        print(f"⚠️  Already failed on {target} before deploying: {', '.join(sorted(baseline))}", file=sys.stderr)
+    return target_ssh, True, baseline
 
 
 def cleanup_lock(lock_host: str, locked: bool) -> None:
@@ -164,27 +197,42 @@ def cleanup_lock(lock_host: str, locked: bool) -> None:
         run(["ssh", lock_host, "rm -f /tmp/.deploy-lock"])
 
 
-def postflight(target: str, target_ssh: str, config: dict) -> bool:
+def postflight(target: str, target_ssh: str, config: dict, baseline: set[str] | None) -> bool:
     print(f"🔍 Running post-deployment validation on {target}...")
     time.sleep(10)
-    dns = run(
-        ["ssh", target_ssh, "timeout 10 dig @127.0.0.1 -p 53 google.com +short"],
-        capture=True,
-    )
-    if dns.returncode != 0:
-        if dns.stdout:
-            print(dns.stdout, end="")
-        print(f"❌ CRITICAL: Post-deployment DNS check failed on {target}!", file=sys.stderr)
-        return False
+    probe_domains = config.get("probeDomains", [])
+    if probe_domains:
+        dns = run(
+            ["ssh", target_ssh, "timeout 10 dig @127.0.0.1 -p 53 google.com +short"],
+            capture=True,
+        )
+        if dns.returncode != 0:
+            if dns.stdout:
+                print(dns.stdout, end="")
+            print(f"❌ CRITICAL: Post-deployment DNS check failed on {target}!", file=sys.stderr)
+            return False
     target_command = service_command(config["targetServices"])
     if target_command and run(["ssh", target_ssh, target_command], quiet=True).returncode != 0:
         print(f"❌ CRITICAL: Post-deployment service health check failed on {target}!", file=sys.stderr)
         print(f"   Expected active services: {', '.join(config['targetServices'])}", file=sys.stderr)
         return False
-    for domain in config["probeDomains"]:
+    for domain in probe_domains:
         if run(["ssh", target_ssh, f"timeout 10 dig @127.0.0.1 -p 53 {shlex.quote(domain)} +short"], quiet=True).returncode != 0:
             print(f"❌ CRITICAL: Post-deployment local DNS integration check failed for {domain}!", file=sys.stderr)
             return False
+    failed = failed_units(target_ssh)
+    if failed is None:
+        print(f"❌ CRITICAL: Could not list failed units on {target}!", file=sys.stderr)
+        return False
+    new_failures = failed - (baseline or set())
+    if new_failures:
+        print(f"❌ CRITICAL: Units failed on {target} after deploying:", file=sys.stderr)
+        for unit in sorted(new_failures):
+            print(f"   {unit}  (journalctl -u {unit} -b)", file=sys.stderr)
+        return False
+    still_failed = failed & (baseline or set())
+    if still_failed:
+        print(f"⚠️  Still failed from before the deploy: {', '.join(sorted(still_failed))}", file=sys.stderr)
     print(f"✅ Deployment to {target} completed successfully")
     return True
 
@@ -199,6 +247,7 @@ def deploy_nixos(config: Config, mode: str, target: str, extra: list[str], unsaf
     secure = None if unsafe else secure_config(target, config.domain)
     reachable = target_reachable(target, config.domain)
     locked = False
+    baseline: set[str] | None = None
     try:
         if reachable:
             print(f"{target} is reachable. Starting remote deployment...")
@@ -212,7 +261,7 @@ def deploy_nixos(config: Config, mode: str, target: str, extra: list[str], unsaf
             print(f"Build completed for {target}.")
             wait_for_target(target, config.domain)
         if secure is not None:
-            target_ssh, locked = secure_preflight(target, secure, tail)
+            target_ssh, locked, baseline = secure_preflight(target, secure, tail)
             if not locked:
                 return 1
         switch = [
@@ -222,7 +271,7 @@ def deploy_nixos(config: Config, mode: str, target: str, extra: list[str], unsaf
         result = run_inhibited(config, switch)
         if result.returncode != 0:
             return result.returncode
-        if secure is not None and not postflight(target, target_ssh, secure):
+        if secure is not None and not postflight(target, target_ssh, secure, baseline):
             return 1
         return 0
     finally:

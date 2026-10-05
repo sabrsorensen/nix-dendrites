@@ -67,6 +67,8 @@ let
         "${claudeCarbon}/scripts/statusline.sh --segment"
       ]
       (builtins.readFile ./ccstatusline-settings.json);
+  # Custom theme; the file's basename is the slug `theme` selects below.
+  themeSlug = "party-owl-84";
 in
 {
   options.my.features.claude = lib.mkEnableOption "Claude Code";
@@ -84,9 +86,6 @@ in
       # SessionEnd / SessionStart hooks plus the /carbon-* skills.
       plugins.claude-carbon = claudeCarbon;
       settings = {
-        enabledPlugins = {
-          "context-mode@context-mode" = true;
-        };
         hooks = {
           PreToolUse = [
             {
@@ -103,20 +102,15 @@ in
             {
               hooks = [
                 {
-                  command = "bash '/home/sam/.claude/hooks/herdr-agent-state.sh' session";
+                  # Quoted exactly as `herdr integration install claude` writes it, so
+                  # the installer below sees its own entry rather than adding a
+                  # second one.
+                  command = "bash '${config.programs.claude-code.configDir}/hooks/herdr-agent-state.sh' session";
                   timeout = 10;
                   type = "command";
                 }
               ];
               matcher = "^(startup|resume|clear|compact|fork)$";
-            }
-            {
-              hooks = [
-                {
-                  command = "\"/home/sam/.claude/hooks/context-mode-cache-heal.mjs\"";
-                  type = "command";
-                }
-              ];
             }
           ];
         };
@@ -128,11 +122,14 @@ in
           # advance while the session is idle.
           refreshInterval = 10;
         };
-        theme = "dark";
+        theme = "custom:${themeSlug}";
         agentPushNotifEnabled = true;
         inputNeededNotifEnabled = true;
       };
     };
+
+    home.file."${config.programs.claude-code.configDir}/themes/${themeSlug}.json".text =
+      builtins.toJSON (import ./_party-owl-84-theme.nix);
 
     # On PATH for its TUI; settings.statusLine.command above uses the store
     # path directly.

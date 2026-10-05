@@ -23,6 +23,7 @@
         gdrive = true;
         nix-ld = true;
         podman = true;
+        unitFailureAlerts = true;
       };
       services = {
         ankerctl = true;
