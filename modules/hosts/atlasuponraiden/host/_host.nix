@@ -38,7 +38,7 @@
         flaresolverr = true;
         gonic = true;
         gotify = true;
-        hawkbit = true;
+        hawkbit = false;
         immich = true;
         jellyfin = true;
         mealie = true;

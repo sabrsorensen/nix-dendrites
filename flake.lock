@@ -58,11 +58,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1790974898,
-        "narHash": "sha256-hlXNVCDT7ek84budcUCXznMks5AdJOAY6a7yyeWof18=",
+        "lastModified": 1791071338,
+        "narHash": "sha256-YBAFoulgm9qEavWtmb2gHwk7lgpVZL7vtr4+yi6H3UU=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "82c2606e9fb92836f7f98443b8a0bbbbf4090099",
+        "rev": "b17e42820330bd34ab890632c2f6f80daf4e517f",
         "type": "github"
       },
       "original": {
@@ -116,11 +116,11 @@
     "context-mode": {
       "flake": false,
       "locked": {
-        "lastModified": 1790986350,
-        "narHash": "sha256-FPgsF55IFI9+qqIW+vwXhKkDUtCVkI0NJQiCCTq5Wkw=",
+        "lastModified": 1791202079,
+        "narHash": "sha256-ZBkI5iHhVVxAAx7UTH+ROlP7d579oGI6Q7/TgjgKU/U=",
         "owner": "mksglu",
         "repo": "context-mode",
-        "rev": "9f3ecc8b0aafd25d3592ffc31e4b02b1767f6089",
+        "rev": "e5fcca6802d484db3f4ec04f6d2021938852b2a0",
         "type": "github"
       },
       "original": {
@@ -149,11 +149,11 @@
     "danieltallon-nix-packages": {
       "flake": false,
       "locked": {
-        "lastModified": 1790906786,
-        "narHash": "sha256-vFyK19Iqkt75TLPpPveaoJUs8ss3qSzYaw+TGynSN5U=",
+        "lastModified": 1791209974,
+        "narHash": "sha256-B8LbUaWonfhoi/6CsI4s3BDupeot2wU34+0R4vO+RJM=",
         "owner": "DanielTallon",
         "repo": "nix-packages",
-        "rev": "571482995604038a8cef03d5f25ae5502eee0f3a",
+        "rev": "a8ef6c5dc061f8670660541d191cf42ed4eafb8e",
         "type": "github"
       },
       "original": {
@@ -496,11 +496,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790989254,
-        "narHash": "sha256-ZN+riaeFuE+DZ5zfqJiXlM12jLwZzeIXiNkU1YeHMXI=",
+        "lastModified": 1791163078,
+        "narHash": "sha256-DiuwfdoZtEqVRsWuAhXcHa+cfvkr0t/xWW8ugkcxNyI=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "acd21c5a3420a9d5fd0ed06299b10828267ef9ba",
+        "rev": "f53f3267f5d009dd8f99443505e609389d7ff267",
         "type": "github"
       },
       "original": {
@@ -554,11 +554,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790923860,
-        "narHash": "sha256-ouYjiaMs7+wz287wTYKvbV8cJiOO6OFWfTEtm6kIjPY=",
+        "lastModified": 1791213596,
+        "narHash": "sha256-fH2r4JtciTq01FMGBLqU33Od5ipPYNyIWop+Nhtdj4c=",
         "owner": "Jovian-Experiments",
         "repo": "Jovian-NixOS",
-        "rev": "23be28be9808ebc8f8bf1da5eed673fd6c6b62bc",
+        "rev": "707a5942289087ae95262e327ea62f5bc49d331e",
         "type": "github"
       },
       "original": {
@@ -653,11 +653,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790499302,
-        "narHash": "sha256-Gbf/U9ptJhQh0qnDnJ/+a8MAcq1HXunbArUTHR2wNYk=",
+        "lastModified": 1791105314,
+        "narHash": "sha256-oTM7QFgRQ+vxBpMBMc7hEYpqBtpXAzXu2xuB/tru84U=",
         "owner": "nix-community",
         "repo": "nix-index-database",
-        "rev": "161d7c91accd93034bb3c295224d9d895a778573",
+        "rev": "e740bc4e9d8918d7819a51486d5099930c65c72e",
         "type": "github"
       },
       "original": {
@@ -706,11 +706,11 @@
         "systems": "systems_6"
       },
       "locked": {
-        "lastModified": 1790918173,
-        "narHash": "sha256-qBSPfnqRb067XFbVgN8VOUeZZatiDgCiyRzFhplWaEc=",
+        "lastModified": 1791176908,
+        "narHash": "sha256-TEFDh+sVjKbXSdx6R9iRv4Ve4pHU94wxoouDmQctEj0=",
         "owner": "nix-community",
         "repo": "nix4vscode",
-        "rev": "de74067044ec0cb870b4c97da4dadd203fc8aa62",
+        "rev": "08dbf34bde162fcbc6602c5162378051a1068a0b",
         "type": "github"
       },
       "original": {
@@ -724,11 +724,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1790948122,
-        "narHash": "sha256-fDMYyzY1lI5b8RuCMrvoaIgTeRwNnTG4dNk1ucROlQE=",
+        "lastModified": 1791128201,
+        "narHash": "sha256-rlsYY/Dg/LhbIj51Aa6TLvRpZeb3KZgUTd7llQ5XcJE=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "0953bb1a609df63013176e3463393f8df993d3ef",
+        "rev": "31cc5f4d9b9ba601071e8b8504601b9b176e2756",
         "type": "github"
       },
       "original": {
@@ -872,11 +872,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790986810,
-        "narHash": "sha256-ssuTGcxURy/S8uMgKY68rQnqWp5xulGg/sS92qxVC4I=",
+        "lastModified": 1791209777,
+        "narHash": "sha256-HYfSRUpivwycz29zef23SZvNiP5KjDH2fxrOzZlG02k=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "fb84df15f5c54a572112295248b445c3fe8c5674",
+        "rev": "ad5f7696b542e872a3d01872088bfeb1951d5cea",
         "type": "github"
       },
       "original": {
@@ -1034,11 +1034,11 @@
     "sonolin": {
       "flake": false,
       "locked": {
-        "lastModified": 1790709516,
-        "narHash": "sha256-07XkVZLpWb3uWl7ZZq/14WlM+8JTYepWi8zKxoeFJTM=",
+        "lastModified": 1791104358,
+        "narHash": "sha256-yNlINk+1EjPTquelb8/P9e78hEQg2IZnF7ZKqn5hLPY=",
         "owner": "alexsson-xexpanderx",
         "repo": "sonolin",
-        "rev": "86a3f6e6f1059a24b35305d5a2b17b06fce50383",
+        "rev": "873f9e7eb9773e4b328aa2e117fae9dce3e9a5d0",
         "type": "github"
       },
       "original": {
@@ -1054,12 +1054,12 @@
         ]
       },
       "locked": {
-        "lastModified": 1790498116,
-        "narHash": "sha256-rs9meAYxW3zzrh43yaW7htrqCD+X9+pupDPHN86fumI=",
-        "rev": "5efb5a6f4f5ab192817d28557dd4d650fa14d866",
-        "revCount": 1248,
+        "lastModified": 1791103873,
+        "narHash": "sha256-nFxM+pKoZ8LJAEnUXARyCaOAloWgaW9kZQOSjWzKcTE=",
+        "rev": "dcd241ba97088c22569d1573286e1b9daad340c0",
+        "revCount": 1249,
         "type": "tarball",
-        "url": "https://api.flakehub.com/f/pinned/Mic92/sops-nix/0.1.1248%2Brev-5efb5a6f4f5ab192817d28557dd4d650fa14d866/01a0e208-9630-7672-88f3-63de1c46a13f/source.tar.gz"
+        "url": "https://api.flakehub.com/f/pinned/Mic92/sops-nix/0.1.1249%2Brev-dcd241ba97088c22569d1573286e1b9daad340c0/01a1063d-a58e-7913-b901-67c702926755/source.tar.gz"
       },
       "original": {
         "type": "tarball",

@@ -262,12 +262,15 @@ in
         nix build .#nixosConfigurations.emeraldecho.config.jovian.decky-loader.plugins.decky-tabmaster
     ''
     ''
-      unifideck builds from the sabrsorensen/unifideck fork, not
-      mubaraknumann/unifideck, for the Battle.net games-and-subs library sync
-      (upstream issue #447). Switch catalog.nix back to owner = "mubaraknumann"
-      once upstream has it -- check with:
+      unifideck builds from the sabrsorensen/unifideck fork's rebase-0.7.6
+      branch (upstream Release-0.7.6 + the Battle.net games-and-subs producer
+      for upstream issue #447 + three collection/shortcut fixes), not
+      mubaraknumann/unifideck. Upstream 0.7.6 presumes every Battle.net
+      game account instead of fetching them. Switch catalog.nix back to
+      owner = "mubaraknumann" once upstream has these -- check with:
         gh issue view 447 -R mubaraknumann/unifideck --json state
-        gh api 'repos/mubaraknumann/unifideck/compare/staging...sabrsorensen:unifideck:main' \
+        gh release view -R mubaraknumann/unifideck --json tagName
+        gh api 'repos/mubaraknumann/unifideck/compare/main...sabrsorensen:unifideck:rebase-0.7.6' \
           --jq '"fork ahead_by=\(.ahead_by) behind_by=\(.behind_by)"'
     ''
   ];

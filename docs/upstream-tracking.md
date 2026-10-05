@@ -14,7 +14,7 @@ authoritative record; this table is just an index.
 | flashrom `doCheck = false` (NixOS/nixpkgs#558302, fix PR #563332) | `modules/platforms/rpi/rpi-base/_rpi-base.nix` | RPi |
 | pnpm 9.15.9 for six lockfile-v6 Decky plugins | `decky-catalog/packages/_pnpm9.nix`, `catalog.nix`, `_decky-loader.nix` | Steam Deck |
 | decky-tabmaster pinned to v2.15.1 | `decky-catalog/packages/catalog.nix` | Steam Deck |
-| unifideck built from the sabrsorensen fork (upstream #447) | `decky-catalog/packages/catalog.nix` | Steam Deck |
+| unifideck built from the sabrsorensen fork's rebase-0.7.6 branch (upstream #447) | `decky-catalog/packages/catalog.nix` | Steam Deck |
 | appimage-run + libunwind | `modules/features/appimage/_appimage.nix` | appimage hosts |
 | nmse's appimage-run + libunwind | `modules/features/nomanssky/_nmse.nix` | noMansSky hosts |
 | azure-devops extension + keyring | `modules/platforms/wsl/wsl-work-home/_wsl-work-home.nix` | WSL |

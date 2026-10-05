@@ -189,29 +189,27 @@ in
   };
   "unifideck" = mk {
     pname = "unifideck";
-    # Fork, not upstream: tracks
+    # Fork, not upstream: our rebase-0.7.6 branch is upstream Release-0.7.6
+    # plus four commits. The main one is for
     # https://github.com/mubaraknumann/unifideck/issues/447 (Battle.net
-    # library sync only returns license-backed titles — game_account_programs
-    # had a consumer and no producer, audit §3.5 finding A), fixed in our
-    # fork via a background fetch off account.battle.net/api/games-and-subs
-    # through the shared Edge profile's CDP cookie read (see
-    # ownership/game_accounts.py, docs/architecture-audit.md item 29). Move
-    # back to upstream (owner = "mubaraknumann") if/when this lands there —
-    # check whether store.py's _game_account_programs still calls it a gap.
-    #
-    # The fork briefly grew a from-scratch W3D Hub store on top of this
-    # (2026-09-14/15) — removed again a day later once live testing showed
-    # every real content-package download 404ing regardless of auth,
-    # backend, or fallback strategy tried (a genuine upstream CDN gap, not
-    # a client bug). Back to hand-crafted Steam shortcuts + the W3D Hub
-    # server browser for that game family; srcHash pinned to main HEAD
-    # 57fba5b4 (2026-09-16), the removal commit. Re-run the hash-discovery
-    # build (see decky-plugin-catalog memory) to pick up further fork
+    # free-to-play/subscription titles need game_account facts the client
+    # doesn't store locally). 0.7.6 works around it by *presuming* a game
+    # account for every catalog program (library.grant_ownership), so every
+    # account sees WoW, Hearthstone, HotS etc. Our fork fetches the real set
+    # from account.battle.net/api/games-and-subs via the shared Edge
+    # profile's CDP cookie read (ownership/game_accounts.py); grant_ownership
+    # uses those real facts once cached and falls back to the presumption
+    # until then. The other three are collection/shortcut fixes (skip
+    # collections for tabs with a native Steam equivalent, wait for the game
+    # cache before the boot sync, write `sortas` on new shortcuts). Move back
+    # to upstream (owner = "mubaraknumann") if those land there or stop
+    # mattering. srcHash pins rebase-0.7.6 at 57eb96b9 (2026-10-05); bump
+    # both hashes (set them to lib.fakeHash and build) to pick up new
     # commits.
     owner = "sabrsorensen";
     repo = "unifideck";
-    rev = "main";
-    srcHash = "sha256-ZKGp93PBnAZV4NpQvlO17yPoA4DG29LO4moAEuNaRBw=";
+    rev = "rebase-0.7.6";
+    srcHash = "sha256-sFaqypuTvn7plyJ1sYk0xMqJTy/5rSAEnI9trNKvfs4=";
     pnpmHash = "sha256-xpkbLSaMVU3FfROkUKr6+BNC7uB1/dLJtj0wYgaDJGM=";
     executablePaths = [ "*/bin/*" ];
     # requirements.txt: aiohttp (auth/CDP/store clients, 38 import sites),
