@@ -77,8 +77,8 @@ in
     owner = "SteamGridDB";
     repo = "decky-steamgriddb";
     rev = "HEAD";
-    srcHash = "sha256-q4MA/U3qtgmlWicEKJJPyLLGAlTnUCK4WWrH7b0mUhE=";
-    pnpmHash = "sha256-FRIkp2GuP/kVaxpq7Sn6DYsUbE2O/g8vxin+pl+3ZNw=";
+    srcHash = "sha256-5e9Xx/gcm09UJcSeBZvI3OVd1MimtYUArGBfmrmH+1g=";
+    pnpmHash = "sha256-oReXKybPJbO4xKk2w0/cvx9HgQ+RL1jgl8Uod4AKqmA=";
     legacyLockfile = true;
   };
   "decky-lookup" = mk {
