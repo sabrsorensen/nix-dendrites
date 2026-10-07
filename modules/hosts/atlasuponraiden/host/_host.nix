@@ -44,6 +44,7 @@
         jellyfin = true;
         mealie = true;
         minecraft = true;
+        moria = true;
         monitoring = true;
         plex = true;
         profilarr = true;
