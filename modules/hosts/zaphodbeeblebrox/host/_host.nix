@@ -40,6 +40,7 @@
       threedprinter = true;
       w3dHubLauncher = true;
       wine = true;
+      zed = true;
       zsa = true;
     };
     services.ssh = true;

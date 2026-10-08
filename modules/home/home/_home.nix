@@ -76,6 +76,7 @@
           wslWorkHome = host.platform == "wsl";
           wslVscode = host.platform == "wsl";
           vscode = host.features.vscode;
+          zed = host.features.zed;
           claude = host.features.claude;
           codex = host.features.codex;
           recall = host.features.recall;
