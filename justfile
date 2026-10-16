@@ -27,6 +27,3 @@ run-hooks:
 
 develop:
     nix develop
-
-config-drift:
-    config-drift

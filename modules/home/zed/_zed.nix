@@ -82,6 +82,7 @@ in
       buffer_font_family = font;
       buffer_font_features.calt = true;
       colorize_brackets = true;
+      cursor_animation.enabled = true;
       edit_predictions.provider = "none";
       file_scan_exclusions = [
         # Zed defaults (setting this replaces them).

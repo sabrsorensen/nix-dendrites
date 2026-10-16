@@ -106,7 +106,7 @@ in
     owner = "bschelst";
     repo = "protondb-decky";
     rev = "main";
-    srcHash = "sha256-b8qfZhg3Hgxs5qnHrT0YLAIWA+jYYmgQgO54jBSW/BU=";
+    srcHash = "sha256-PoZlcMMkgcLrPCHB07wFVXuz6siazZOrDoTtbeG4Gtw=";
     pnpmHash = "sha256-I5RNOInDZE0hFZ48kf9iLtGe8cTKWrFRMGVufF5P3xI=";
     executablePaths = [ "*/bin/*" ];
   };
@@ -170,7 +170,7 @@ in
     owner = "Nezreka";
     repo = "Museck";
     rev = "main";
-    srcHash = "sha256-jCZoGmLcwS1CuY99lsYJ98l9+EvpGh8Kj2hDW5157yM=";
+    srcHash = "sha256-8Om2+nXd4oY7LSEQ4IRamruqqzzqWKOL1sn9qDRq1vA=";
     pnpmHash = "sha256-1TKYD24kVNwgOWQzVKebHnGh4QHSXRTnKxZpRjGFIEo=";
     verifyMainPy = false;
   };
