@@ -37,7 +37,7 @@ local function trim(s)
 	if empty(s) then
 		return ''
 	end
-	return (s:gsub('^%s+', ''):gsub('%s+$', ''))
+	return (s:gsub([[^\s+]], ''):gsub([[\s+$]], ''))
 end
 
 local function normalize_spaces(s)
@@ -45,9 +45,9 @@ local function normalize_spaces(s)
 	if s == '' then
 		return s
 	end
-	s = s:gsub('%s+', ' ')
-	s = s:gsub('%s+([%]%):;,%.])', '%1')
-	s = s:gsub('([%[%(])%s+', '%1')
+	s = s:gsub([[\s+]], ' ')
+	s = s:gsub([=[\s+([\]):;,.])]=], '${1}')
+	s = s:gsub([=[([\[(])\s+]=], '${1}')
 	return trim(s)
 end
 
@@ -77,9 +77,9 @@ local function standardize_feat_keyword(s)
 	if empty(s) then
 		return ''
 	end
-	s = s:gsub('[Ff]eaturing%s+', 'feat. ')
-	s = s:gsub('[Ff]eat%.?%s+', 'feat. ')
-	s = s:gsub('[Ff][Tt]%.?%s+', 'feat. ')
+	s = s:gsub([[\b[Ff]eaturing\s+]], 'feat. ')
+	s = s:gsub([[\b[Ff]eat\.?\s+]], 'feat. ')
+	s = s:gsub([[\b[Ff][Tt]\.?\s+]], 'feat. ')
 	return s
 end
 
@@ -90,9 +90,9 @@ local function normalize_trailing_remix_group(group)
 	local open_char = group:sub(1, 1)
 	local content = group:sub(2, -2)
 	content = normalize_spaces(content)
-	content = content:gsub('%f[%a][Rr][Mm][Xx]%f[%A]', 'Remix')
-	content = content:gsub('%f[%a][Rr]emix%f[%A]', 'Remix')
-	content = content:gsub('%f[%a][Mm]ix%f[%A]', 'Mix')
+	content = content:gsub([[\b[Rr][Mm][Xx]\b]], 'Remix')
+	content = content:gsub([[\b[Rr]emix\b]], 'Remix')
+	content = content:gsub([[\b[Mm]ix\b]], 'Mix')
 	if open_char == '[' then
 		return '[' .. content .. ']'
 	end
@@ -100,11 +100,11 @@ local function normalize_trailing_remix_group(group)
 end
 
 local function pop_trailing_group(s, matcher)
-	local base, group = s:match('^(.-)%s*(%b())%s*$')
+	local base, group = s:match([[^(.*?)\s*(\([^()]*\))\s*$]])
 	if group and matcher(group) then
 		return trim(base), group
 	end
-	base, group = s:match('^(.-)%s*(%b[])%s*$')
+	base, group = s:match([=[^(.*?)\s*(\[[^\[\]]*\])\s*$]=])
 	if group and matcher(group) then
 		return trim(base), group
 	end
@@ -113,9 +113,9 @@ end
 
 local function is_remix_group(group)
 	local content = group:sub(2, -2):lower()
-	return content:match('%f[%a]remix%f[%A]') ~= nil
-		or content:match('%f[%a]rmx%f[%A]') ~= nil
-		or content:match('%f[%a]mix%f[%A]') ~= nil
+	return content:match([[\bremix\b]]) ~= nil
+		or content:match([[\brmx\b]]) ~= nil
+		or content:match([[\bmix\b]]) ~= nil
 end
 
 local function pop_all_trailing_remix_groups(s)
@@ -137,17 +137,17 @@ local function split_feature_suffix(s)
 	end
 	s = normalize_spaces(standardize_feat_keyword(s))
 
-	local base, feat = s:match('^(.-)%s*%(%s*(feat%. .-)%s*%)%s*$')
+	local base, feat = s:match([[^(.*?)\s*\(\s*(feat\. .*?)\s*\)\s*$]])
 	if base and feat then
 		return normalize_spaces(base), normalize_spaces(feat)
 	end
 
-	base, feat = s:match('^(.-)%s*%[%s*(feat%. .-)%s*%]%s*$')
+	base, feat = s:match([=[^(.*?)\s*\[\s*(feat\. .*?)\s*\]\s*$]=])
 	if base and feat then
 		return normalize_spaces(base), normalize_spaces(feat)
 	end
 
-	base, feat = s:match('^(.-)%s+(feat%. .-)%s*$')
+	base, feat = s:match([[^(.*?)\s+(feat\. .*?)\s*$]])
 	if base and feat then
 		return normalize_spaces(base), normalize_spaces(feat)
 	end
@@ -159,13 +159,13 @@ local function feature_names_from_suffix(feat_suffix)
 	if empty(feat_suffix) then
 		return {}
 	end
-	local raw = feat_suffix:gsub('^[Ff]eat%.%s*', '')
-	raw = raw:gsub('%s*[&/]%s*', ', ')
-	raw = raw:gsub('%s+[Aa][Nn][Dd]%s+', ', ')
+	local raw = feat_suffix:gsub([[^[Ff]eat\.\s*]], '')
+	raw = raw:gsub([[\s*[&/]\s*]], ', ')
+	raw = raw:gsub([[\s+[Aa][Nn][Dd]\s+]], ', ')
 	raw = normalize_spaces(raw)
 
 	local names = {}
-	for part in raw:gmatch('[^,;]+') do
+	for part in raw:gmatch([=[[^,;]+]=]) do
 		part = normalize_spaces(part)
 		if part ~= '' then
 			names[#names + 1] = part
