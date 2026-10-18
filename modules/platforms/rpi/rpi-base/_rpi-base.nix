@@ -34,6 +34,16 @@
     fsType = "ext4";
     options = [ "noatime" ];
   };
+  # The SD image's FAT firmware partition (sdImage.firmwarePartitionName).
+  # sd-image.nix only declares this mount inside the image build, so without
+  # it here the installed system never mounts it and config.txt/firmware
+  # updates have nowhere to land. nofail keeps a missing/damaged partition
+  # from blocking boot.
+  fileSystems."/boot/firmware" = {
+    device = "/dev/disk/by-label/FIRMWARE";
+    fsType = "vfat";
+    options = [ "nofail" ];
+  };
   # Bound journald's footprint on the SD card. Kept persistent (not
   # volatile) so crash/reboot logs -- e.g. from the undervoltage events
   # rpi-status surfaces -- survive a power cycle.
