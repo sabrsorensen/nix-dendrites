@@ -22,7 +22,7 @@
       gh
       git
       htop
-      jupiter-dock-updater-bin
+      jovianPackages.jupiter-dock-updater-bin
       kdePackages.kcalc
       kdePackages.krdc
       lm_sensors.bin
@@ -32,7 +32,7 @@
       rsync
       sops
       ssh-to-age
-      steamdeck-firmware
+      jovianPackages.steamdeck-firmware
       vim
       wget
     ];

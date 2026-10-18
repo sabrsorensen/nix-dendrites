@@ -13,10 +13,10 @@ let
       openssl
     ]
   );
-  # Jovian ships Decky Loader 3.2.8, which sets PATH alongside LD_LIBRARY_PATH in
+  # Jovian ships Decky Loader 3.3.0, which sets PATH alongside LD_LIBRARY_PATH in
   # localplatformlinux's `run` default env; only the systemd/python3 absolute-path
   # patches remain necessary.
-  deckyLoaderPackage = pkgs.decky-loader.overridePythonAttrs (old: {
+  deckyLoaderPackage = pkgs.jovianPackages.decky-loader.overridePythonAttrs (old: {
     postPatch = (old.postPatch or "") + ''
       substituteInPlace backend/decky_loader/localplatform/localplatformlinux.py \
         --replace-fail '["systemctl", "is-active", service_name]' '["${pkgs.systemd}/bin/systemctl", "is-active", service_name]' \
@@ -25,8 +25,8 @@ let
         --replace-fail '["systemctl", "stop", service_name]' '["${pkgs.systemd}/bin/systemctl", "stop", service_name]' \
         --replace-fail '["systemctl", "start", service_name]' '["${pkgs.systemd}/bin/systemctl", "start", service_name]'
       substituteInPlace backend/decky_loader/helpers.py \
-        --replace-fail '["python3" if localplatform.ON_LINUX else "python", "-c",' '["${pkgs.python3}/bin/python3" if localplatform.ON_LINUX else "python", "-c",' \
-        --replace-fail 'env={} if localplatform.ON_LINUX else None' 'env={"PATH": os.environ.get("PATH", "")} if localplatform.ON_LINUX else None'
+        --replace-fail '["python3" if is_linux_or_mac else "python", "-c",' '["${pkgs.python3}/bin/python3" if is_linux_or_mac else "python", "-c",' \
+        --replace-fail 'env={} if is_linux_or_mac else None' 'env={"PATH": os.environ.get("PATH", "")} if is_linux_or_mac else None'
     '';
   });
   steamCefDebugScript = pkgs.writeShellScript "steam-cef-debug" ''

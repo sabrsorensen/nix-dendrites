@@ -68,7 +68,9 @@ in
         NoMansSky = mkFolder "NoMansSky" (
           serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices
         );
-        ReturnToMoria = mkFolder "ReturnToMoria" (serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices ++ [ "LavenderHaze" ]);
+        ReturnToMoria = mkFolder "ReturnToMoria" (
+          serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices ++ [ "LavenderHaze" ]
+        );
         SteamPipe = mkFolder "SteamPipe" (serverDevices ++ desktopDevices ++ gamingDevices);
         StardewValley = mkFolder "StardewValley" (
           serverDevices ++ desktopDevices ++ mobileDevices ++ gamingDevices ++ [ "LavenderHaze" ]
