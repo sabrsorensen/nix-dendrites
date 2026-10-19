@@ -43,7 +43,7 @@ in
       "networkmanager"
     ];
     openssh.authorizedKeys.keyFiles = [
-      #"${inputs.nix-secrets}/ssh-keys/kamino/pabu.pub"
+      "${inputs.nix-secrets}/ssh-keys/kamino/pabu.pub"
       #"${inputs.nix-secrets}/ssh-keys/zaphod/pabu.pub"
     ];
   };
