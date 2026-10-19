@@ -1,5 +1,11 @@
 # PostgreSQL 17 to 18 migration
 
+> **Status: done.** Migrated 2026-09-29 (commit `7bf160a`, which raised the
+> shared `system.stateVersion` default in `modules/system/base/_base.nix` to
+> `26.11` rather than overriding Atlas alone).  The `upgrade-pg-cluster` tool
+> was removed after a stable soak; see "Finishing" for the on-host cleanup.
+> The rest of this document is kept as the record of how it was done.
+
 AtlasUponRaiden's local PostgreSQL cluster lives at `/var/lib/postgresql/17`
 and holds four databases, one per service:
 
@@ -276,10 +282,47 @@ Then check each application:
 - **Atuin**: `atuin sync` from a client succeeds without re-registering.
 
 Keep `/var/lib/postgresql/17` and the backups until everything has run
-normally for a while.  Then remove the migration tool module, and delete the
-old cluster, the `delete_old_cluster.sh` that `pg_upgrade` left in
-`/var/lib/postgresql/18`, and the tool's marker file
-`/var/lib/postgresql/18.upgrade-pg-cluster-initdb`.
+normally for a while (at least one normal backup cycle).
+
+## Finishing
+
+1. Take a PostgreSQL 18 baseline dump and copy it off Atlas; it replaces the
+   17 backups as the recovery path:
+
+   ```sh
+   sudo -u postgres pg_dumpall --clean --if-exists \
+     | sudo tee /var/lib/postgresql/postgres-18-baseline.sql >/dev/null
+   ```
+
+   If it warns `database "<db>" has a collation version mismatch`, glibc was
+   upgraded underneath the cluster (2.42 -> 2.44 here) and text indexes may
+   be misordered.  With the consumers stopped, rebuild and then record the
+   new version, in that order:
+
+   ```sh
+   for db in postgres template1 atuin immich mealie nextcloud; do
+     sudo -u postgres psql -d "$db" -v ON_ERROR_STOP=1 \
+       -c "REINDEX DATABASE \"$db\";" \
+       -c "ALTER DATABASE \"$db\" REFRESH COLLATION VERSION;"
+   done
+   ```
+
+2. Remove `modules/hosts/atlasuponraiden/pg-upgrade/` and deploy.
+3. On Atlas, confirm the live cluster is the new one, then delete the
+   leftovers:
+
+   ```sh
+   sudo -u postgres psql -d postgres -Atc 'show data_directory;'
+   # /var/lib/postgresql/18
+   sudo rm -rf /var/lib/postgresql/17 \
+     /var/lib/postgresql/18.stray-2026-07-25 \
+     /var/lib/postgresql/18/pg_upgrade_output.d
+   sudo rm -f /var/lib/postgresql/18.upgrade-pg-cluster-initdb \
+     /var/lib/postgresql/18/delete_old_cluster.sh \
+     /var/lib/postgresql/postgres-17-before-upgrade.sql \
+     /var/lib/postgresql/postgres-17-before-upgrade.tar \
+     /var/lib/mealie-before-upgrade.tar
+   ```
 
 ## Rollback
 

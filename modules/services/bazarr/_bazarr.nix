@@ -37,7 +37,7 @@
   services.bazarr = {
     enable = true;
     openFirewall = false;
-    listenPort = 6767;
+    settings.general.port = 6767;
     group = "media";
   };
 
