@@ -58,11 +58,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1792184490,
-        "narHash": "sha256-h0ocvti7xZNzf6bhS1bvwr7L0fLTicWfvO11Xn1zR3s=",
+        "lastModified": 1792364479,
+        "narHash": "sha256-HZ/ssK2bqVxSRVm6MoIcdLSAYZ4s67vcl7rbeoPiv90=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "69ea6acabd545898cd2764a12c293ead05fd7e84",
+        "rev": "c932f70402686f018d829534d71f9e8ba7859cfb",
         "type": "github"
       },
       "original": {
@@ -77,11 +77,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1792155847,
-        "narHash": "sha256-9bYFcgdQKbOO4JhNfm+WGAbVhGwwgKGXyzmDROf6JmE=",
+        "lastModified": 1792416610,
+        "narHash": "sha256-sKxvQrHYb5VFYHYO3MrjWw6KWgUNCWXPCAzmwT8kBdw=",
         "owner": "heytcass",
         "repo": "claude-desktop-linux-flake",
-        "rev": "347f722c0f9e44eb8b3794415027fd58b9c849d5",
+        "rev": "faa45e0649f908839d73350bca35752e8d13f1bd",
         "type": "github"
       },
       "original": {
@@ -116,11 +116,11 @@
     "context-mode": {
       "flake": false,
       "locked": {
-        "lastModified": 1792346681,
-        "narHash": "sha256-mMd/mm25Z1s3hUU0MlqWtYNGsPpbuBx6jblDdp/pcPU=",
+        "lastModified": 1792433164,
+        "narHash": "sha256-8JqTFoIZNeqWc5szTzBrfhYQDAwH6CMraKQS4m3D8lU=",
         "owner": "mksglu",
         "repo": "context-mode",
-        "rev": "6006a3511ea2afde3e413cf635ba1da85ac8a8aa",
+        "rev": "b31c7ee853cb9ea76121e24d368599390972a997",
         "type": "github"
       },
       "original": {
@@ -496,11 +496,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792098797,
-        "narHash": "sha256-u4DIIZgznEGzByxXrxWCXK19VcMtTBmi/M9gZ7Jk9bM=",
+        "lastModified": 1792438393,
+        "narHash": "sha256-C9hsBAUY/K7W7+CBSRdrT7XaX/ulVm3RuRBJNjmEM/A=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "640725978b99076e18e069f6e7d2959124584f8f",
+        "rev": "b74e23e34d3172802fdd60d4a1a01978f95e1898",
         "type": "github"
       },
       "original": {
@@ -554,11 +554,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792349298,
-        "narHash": "sha256-msZDN/dIj+5MTX8PGHcwN4WHpDDdyV+Tv7aPLPz9N4c=",
+        "lastModified": 1792433241,
+        "narHash": "sha256-7LdFtXns3MDD/cg5VvPo0Hsk45C7UU19SH8HbhNu6A8=",
         "owner": "Jovian-Experiments",
         "repo": "Jovian-NixOS",
-        "rev": "b3f4daa9c61909a611b95a3ea4fc46658440ad16",
+        "rev": "42a1d2e0cc26a37bb27f9fd62eda3322201d8cc4",
         "type": "github"
       },
       "original": {
@@ -705,11 +705,11 @@
         "systems": "systems_6"
       },
       "locked": {
-        "lastModified": 1792296736,
-        "narHash": "sha256-Ku5RrhHu5PU4gOCtnub8yrFrSOZmnYzRi7SczZfPu0A=",
+        "lastModified": 1792383685,
+        "narHash": "sha256-eV04X/XH5DWNjJe86njd+Q6IckFDrCtqKTt88ZstBfA=",
         "owner": "nix-community",
         "repo": "nix4vscode",
-        "rev": "1986e6b54fc19c16757be51d628ae70b355fe6a1",
+        "rev": "b0e423a609631a379e8b72a9847f8da7e7b6c60e",
         "type": "github"
       },
       "original": {
@@ -871,11 +871,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792356675,
-        "narHash": "sha256-bG5kZZiMjS8eKAPdWZ3ivyDutZjdWWbMEun8cwKWU1w=",
+        "lastModified": 1792442123,
+        "narHash": "sha256-uqYQSbGUG4wqrMuURkKCOv3kwpGvrqG808UA3m377qg=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "9aac95980d322465b67034f9d261ba88f674e38c",
+        "rev": "c268cb86cc68ba983d2cc81f44985b99dbf3b0d1",
         "type": "github"
       },
       "original": {
@@ -891,11 +891,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792332627,
-        "narHash": "sha256-oovPSWJn8O7gD0jOeXc2FeolPtWkgO1nztot+lHy86Q=",
+        "lastModified": 1792385552,
+        "narHash": "sha256-Xo3o/ErDcJUP296THVa60T1jJ8oHtlzbGfEFA6tcbfw=",
         "owner": "fzakaria",
         "repo": "omnibin",
-        "rev": "cbf55d75b394dca03202d96e5b7b2012718e89be",
+        "rev": "72b7bb0abcc081cb8b04a9a725e017b8259abb63",
         "type": "github"
       },
       "original": {
