@@ -8,6 +8,7 @@ let
   serverDevices = [ "AtlasUponRaiden" ];
   desktopDevices = [
     "Kamino"
+    "Pabu"
     "ZaphodBeeblebrox"
   ];
   mobileDevices = [ "No-phone" ];
