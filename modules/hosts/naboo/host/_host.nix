@@ -27,6 +27,7 @@
     users.users.sam.openssh.authorizedKeys.keyFiles = [
       "${inputs.nix-secrets}/ssh-keys/atlasuponraiden/naboo.pub"
       "${inputs.nix-secrets}/ssh-keys/kamino/naboo.pub"
+      "${inputs.nix-secrets}/ssh-keys/pabu/naboo.pub"
       "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/naboo.pub"
     ];
     my.deployment = {
@@ -35,6 +36,7 @@
       authorizedKeyFiles = [
         "${inputs.nix-secrets}/ssh-keys/atlasuponraiden/naboo_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/kamino/naboo_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/pabu/naboo_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/naboo_nix.pub"
       ];
     };

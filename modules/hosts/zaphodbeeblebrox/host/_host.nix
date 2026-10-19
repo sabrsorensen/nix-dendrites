@@ -50,7 +50,10 @@
       "dialout"
       "networkmanager"
     ];
-    openssh.authorizedKeys.keyFiles = [ "${inputs.nix-secrets}/ssh-keys/kamino/zaphod.pub" ];
+    openssh.authorizedKeys.keyFiles = [
+      "${inputs.nix-secrets}/ssh-keys/kamino/zaphod.pub"
+      "${inputs.nix-secrets}/ssh-keys/pabu/zaphod.pub"
+    ];
   };
   services.displayManager.autoLogin = {
     enable = true;

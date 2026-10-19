@@ -27,6 +27,7 @@
     users.users.sam.openssh.authorizedKeys.keyFiles = [
       "${inputs.nix-secrets}/ssh-keys/atlasuponraiden/nevarro.pub"
       "${inputs.nix-secrets}/ssh-keys/kamino/nevarro.pub"
+      "${inputs.nix-secrets}/ssh-keys/pabu/nevarro.pub"
       "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/nevarro.pub"
     ];
     my.deployment = {
@@ -35,6 +36,7 @@
       authorizedKeyFiles = [
         "${inputs.nix-secrets}/ssh-keys/atlasuponraiden/nevarro_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/kamino/nevarro_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/pabu/nevarro_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/nevarro_nix.pub"
       ];
     };

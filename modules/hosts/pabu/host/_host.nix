@@ -19,6 +19,7 @@ in
       atuin = true;
       personalMcp = true;
       vscode = true;
+      zed = true;
       claude = true;
       firmware = true;
       nix-ld = true;

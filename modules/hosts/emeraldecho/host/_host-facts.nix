@@ -36,6 +36,7 @@
     openssh.authorizedKeys.keyFiles = [
       "${inputs.nix-secrets}/ssh-keys/atlasuponraiden/emeraldecho.pub"
       "${inputs.nix-secrets}/ssh-keys/kamino/emeraldecho.pub"
+      "${inputs.nix-secrets}/ssh-keys/pabu/emeraldecho.pub"
       "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/emeraldecho.pub"
     ];
   };
@@ -45,6 +46,7 @@
     authorizedKeyFiles = [
       "${inputs.nix-secrets}/ssh-keys/atlasuponraiden/emeraldecho_nix.pub"
       "${inputs.nix-secrets}/ssh-keys/kamino/emeraldecho_nix.pub"
+      "${inputs.nix-secrets}/ssh-keys/pabu/emeraldecho_nix.pub"
       "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/emeraldecho_nix.pub"
     ];
   };

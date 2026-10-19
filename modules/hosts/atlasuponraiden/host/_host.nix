@@ -65,6 +65,7 @@
       extraGroups = [ "dialout" ];
       openssh.authorizedKeys.keyFiles = [
         "${inputs.nix-secrets}/ssh-keys/kamino/atlas.pub"
+        "${inputs.nix-secrets}/ssh-keys/pabu/atlas.pub"
         "${inputs.nix-secrets}/ssh-keys/no-phone/atlas.pub"
         "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/atlas.pub"
       ];
@@ -77,6 +78,7 @@
       sleepy = false;
       authorizedKeyFiles = [
         "${inputs.nix-secrets}/ssh-keys/kamino/atlas_nix.pub"
+        "${inputs.nix-secrets}/ssh-keys/pabu/atlas_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/zaphodbeeblebrox/atlas_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/naboo/atlas_nix.pub"
         "${inputs.nix-secrets}/ssh-keys/nevarro/atlas_nix.pub"
