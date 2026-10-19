@@ -14,17 +14,17 @@ let
       User = "sam";
       IdentityFile = "~/.ssh/atlasuponraiden_id_ed25519";
     };
+    emeraldecho = {
+      alias = "EmeraldEcho";
+      HostName = "EmeraldEcho.${domain}";
+      User = "sam";
+      IdentityFile = "~/.ssh/emeraldecho_id_ed25519";
+    };
     kamino = {
       alias = "Kamino";
       HostName = "Kamino.${domain}";
       User = "sam";
       IdentityFile = "~/.ssh/kamino_id_ed25519";
-    };
-    zaphodbeeblebrox = {
-      alias = "ZaphodBeeblebrox";
-      HostName = "ZaphodBeeblebrox.${domain}";
-      User = "sam";
-      IdentityFile = "~/.ssh/zaphod_id_ed25519";
     };
     naboo = {
       alias = "Naboo";
@@ -38,11 +38,17 @@ let
       User = "sam";
       IdentityFile = "~/.ssh/nevarro_id_ed25519";
     };
-    emeraldecho = {
-      alias = "EmeraldEcho";
-      HostName = "EmeraldEcho.${domain}";
+    pabu = {
+      alias = "Pabu";
+      HostName = "Pabu.${domain}";
       User = "sam";
-      IdentityFile = "~/.ssh/emeraldecho_id_ed25519";
+      IdentityFile = "~/.ssh/pabu_id_ed25519";
+    };
+    zaphodbeeblebrox = {
+      alias = "ZaphodBeeblebrox";
+      HostName = "ZaphodBeeblebrox.${domain}";
+      User = "sam";
+      IdentityFile = "~/.ssh/zaphod_id_ed25519";
     };
   };
   sshHostBlocks = lib.mapAttrs' (
