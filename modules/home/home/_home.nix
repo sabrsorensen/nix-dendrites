@@ -64,9 +64,10 @@
           starship = true;
           steamdeck = host.platform == "steamdeck";
           syncthing = builtins.elem host.name [
-            "Kamino"
-            "ZaphodBeeblebrox"
             "EmeraldEcho"
+            "Kamino"
+            "Pabu"
+            "ZaphodBeeblebrox"
           ];
           ssh = true;
           tmux = true;
