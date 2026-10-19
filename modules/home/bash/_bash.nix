@@ -18,7 +18,8 @@
     # If not running interactively, don't do anything
     [[ $- != *i* ]] && return
 
-    if [[ $(ps --no-header --pid=$PPID --format=comm) != "fish" && $SHLVL == 1 || -n $TMUX ]]
+    # Never hijack `bash -c ...` (e.g. editors capturing env via `bash -l -i -c`)
+    if [[ -z $BASH_EXECUTION_STRING ]] && [[ $(ps --no-header --pid=$PPID --format=comm) != "fish" && $SHLVL == 1 || -n $TMUX ]]
     then
             shopt -q login_shell && LOGIN_OPTION="--login" || LOGIN_OPTION=""
             exec fish $LOGIN_OPTION

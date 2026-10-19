@@ -79,6 +79,16 @@ in
         "variable.special".color = "#8eace3";
       };
 
+      agent.dock = "right";
+      agent_servers.claude-acp.type = "registry";
+      default_open_behavior = "new_window";
+      reveal_if_open = true;
+      session.trust_all_worktrees = true;
+      collaboration_panel.dock = "left";
+      git_panel.dock = "left";
+      outline_panel.dock = "left";
+      project_panel.dock = "left";
+
       buffer_font_family = font;
       buffer_font_features.calt = true;
       colorize_brackets = true;
@@ -105,7 +115,7 @@ in
       ];
       horizontal_scroll_margin = 10;
       indent_guides.coloring = "indent_aware";
-      restore_on_startup = "none";
+      restore_on_startup = "launchpad";
       show_whitespaces = "boundary";
       tab_size = 2;
       telemetry = {

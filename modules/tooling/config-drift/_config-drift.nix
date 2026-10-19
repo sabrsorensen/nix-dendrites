@@ -67,6 +67,27 @@ let
     nixHint = "modules/home/claude/ccstatusline-settings.json (export from the ccstatusline TUI)";
   };
 
+  # With mutableUser* (the default) Home Manager doesn't link Zed's files --
+  # its zed*Activation steps merge the declared values into the live files in
+  # place, so the baseline is a post-activation snapshot like plasma's. Zed
+  # accepts comments/trailing commas, hence "jsonc".
+  zedCfg = config.programs.zed-editor;
+  zedEntry =
+    file: option:
+    mkEntry {
+      app = "zed";
+      format = "jsonc";
+      baselineKind = "snapshot";
+      live = "${config.xdg.configHome}/zed/${file}";
+      nixHint = "modules/home/zed/_zed.nix (programs.zed-editor.${option})";
+      note = "Baseline is this file as Home Manager's merge left it at the last switch, so this shows every change made from Zed since then. The next switch only resets keys declared in Nix -- undeclared changes stay live but drop out of this report.";
+    };
+  zedEntries =
+    lib.optional zedCfg.mutableUserSettings (zedEntry "settings.json" "userSettings")
+    ++ lib.optional (zedCfg.mutableUserKeymaps && zedCfg.userKeymaps != [ ]) (
+      zedEntry "keymap.json" "userKeymaps"
+    );
+
   # plasma-manager (github:nix-community/plasma-manager) doesn't link its rc
   # files -- its configure-plasma activation step merges the declared keys
   # into the live files in place. Check every file it writes to.
@@ -98,6 +119,7 @@ let
     ]
     ++ lib.optional config.my.features.herdr herdrEntry
     ++ lib.optional config.my.features.wslCodex codexEntry
+    ++ lib.optionals config.my.features.zed zedEntries
     # my.features.plasma only exists when the plasma-manager input does.
     ++ lib.optionals (config.my.features.plasma or false) plasmaEntries;
 
@@ -108,6 +130,9 @@ let
   manifestFile = pkgs.writeText "config-drift-manifest.json" (
     builtins.toJSON config.my.configDrift.entries
   );
+
+  # Same JSON5 reader Home Manager's zed-editor module merges with.
+  json5 = pkgs.python3Packages.toPythonApplication pkgs.python3Packages.json5;
 
   normalizeTomlPy = pkgs.writeText "config-drift-normalize-toml.py" ''
     import json
@@ -183,6 +208,10 @@ let
         jq -S . "$1"
       }
 
+      normalize_jsonc() {
+        ${lib.getExe json5} --as-json "$1" | jq -S .
+      }
+
       normalize_toml() {
         python3 ${normalizeTomlPy} "$1"
       }
@@ -245,6 +274,20 @@ let
               continue
             fi
             if ! live_norm=$(normalize_json "$live"); then
+              echo "  error: failed to parse live file ($live)" >&2
+              echo
+              failed=1
+              continue
+            fi
+            ;;
+          jsonc)
+            if ! base_norm=$(normalize_jsonc "$resolved_baseline"); then
+              echo "  error: failed to parse baseline ($resolved_baseline)" >&2
+              echo
+              failed=1
+              continue
+            fi
+            if ! live_norm=$(normalize_jsonc "$live"); then
               echo "  error: failed to parse live file ($live)" >&2
               echo
               failed=1
@@ -320,6 +363,7 @@ in
             format = lib.mkOption {
               type = lib.types.enum [
                 "json"
+                "jsonc"
                 "toml"
                 "kconfig"
               ];
@@ -359,19 +403,27 @@ in
     my.configDrift.entries = lib.mkIf enabled entries;
     home.packages = lib.mkIf enabled [ configDriftPackage ];
 
-    # Refresh snapshot baselines once plasma-manager has rewritten its files.
-    # (entryAfter a step that doesn't exist on this host is ignored.)
+    # Refresh snapshot baselines once plasma-manager / Zed's merge steps have
+    # rewritten their files. (entryAfter a step that doesn't exist on this
+    # host is ignored.)
     home.activation.configDriftSnapshot = lib.mkIf (snapshotEntries != [ ]) (
-      lib.hm.dag.entryAfter [ "writeBoundary" "configure-plasma" ] (
-        lib.concatMapStringsSep "\n" (entry: ''
-          if [ -f ${lib.escapeShellArg entry.live} ]; then
-            run mkdir -p ${lib.escapeShellArg (dirOf entry.baselinePath)}
-            run cp ${lib.escapeShellArg entry.live} ${lib.escapeShellArg entry.baselinePath}
-          else
-            run rm -f ${lib.escapeShellArg entry.baselinePath}
-          fi
-        '') snapshotEntries
-      )
+      lib.hm.dag.entryAfter
+        [
+          "writeBoundary"
+          "configure-plasma"
+          "zedSettingsActivation"
+          "zedKeymapActivation"
+        ]
+        (
+          lib.concatMapStringsSep "\n" (entry: ''
+            if [ -f ${lib.escapeShellArg entry.live} ]; then
+              run mkdir -p ${lib.escapeShellArg (dirOf entry.baselinePath)}
+              run cp ${lib.escapeShellArg entry.live} ${lib.escapeShellArg entry.baselinePath}
+            else
+              run rm -f ${lib.escapeShellArg entry.baselinePath}
+            fi
+          '') snapshotEntries
+        )
     );
   };
 }
