@@ -25,10 +25,10 @@ let
     "3DPrinting" = "3D Printing";
     MobileDownloads = "Mobile Downloads";
   };
-  mkFolder = name: devices: {
+  mkFolder = homeDirectory: name: devices: {
     id = topology.folderIds.${name};
     label = folderLabels.${name} or name;
-    path = "/home/sam/${folderPaths.${name} or name}/";
+    path = "${homeDirectory}/${folderPaths.${name} or name}/";
     inherit devices;
     ignorePatterns = [ ];
     type = "sendreceive";
@@ -37,9 +37,45 @@ let
       params.keep = "10";
     };
   };
+  mkDefaultFolders =
+    homeDirectory:
+    let
+      mkFolder' = mkFolder homeDirectory;
+    in
+    {
+      "3DPrinting" = mkFolder' "3DPrinting" nonGamingDevices;
+      Downloads = mkFolder' "Downloads" (serverDevices ++ desktopDevices);
+      gen_sync = mkFolder' "gen_sync" nonGamingDevices;
+      MobileDownloads = mkFolder' "MobileDownloads" (mobileDevices ++ serverDevices ++ desktopDevices);
+      NewMusic = mkFolder' "NewMusic" nonGamingDevices;
+      NoMansSky = mkFolder' "NoMansSky" (
+        serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices
+      );
+      ReturnToMoria = mkFolder' "ReturnToMoria" (
+        serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices ++ [ "LavenderHaze" ]
+      );
+      SteamPipe = mkFolder' "SteamPipe" (serverDevices ++ desktopDevices ++ gamingDevices);
+      StardewValley = mkFolder' "StardewValley" (
+        serverDevices ++ desktopDevices ++ mobileDevices ++ gamingDevices ++ [ "LavenderHaze" ]
+      );
+    };
+  devices = builtins.mapAttrs mkDevice topology.deviceIds;
+  homeModule = import ./_syncthing-home.nix { inherit inputs; };
 in
 {
-  dendritic.homeManagerModules = [ (import ./_syncthing-home.nix { inherit inputs; }) ];
+  dendritic.homeManagerModules = [ homeModule ];
+  flake.modules.homeManager.syncthing = homeModule;
+
+  # Topology defaults for standalone Home Manager (e.g. SteamOS), where there
+  # is no NixOS `my.syncthing` to pass devices/folders through.
+  flake.modules.homeManager.syncthing-topology =
+    { config, lib, ... }:
+    {
+      my.syncthingClient = {
+        devices = lib.mkDefault devices;
+        folders = lib.mkDefault (mkDefaultFolders config.home.homeDirectory);
+      };
+    };
 
   flake.modules.nixos.syncthing =
     args@{
@@ -60,23 +96,6 @@ in
       filteredFolders = lib.filterAttrs (
         _: folder: builtins.elem config.networking.hostName folder.devices
       ) cfg.folders;
-      defaultFolders = {
-        "3DPrinting" = mkFolder "3DPrinting" nonGamingDevices;
-        Downloads = mkFolder "Downloads" (serverDevices ++ desktopDevices);
-        gen_sync = mkFolder "gen_sync" nonGamingDevices;
-        MobileDownloads = mkFolder "MobileDownloads" (mobileDevices ++ serverDevices ++ desktopDevices);
-        NewMusic = mkFolder "NewMusic" nonGamingDevices;
-        NoMansSky = mkFolder "NoMansSky" (
-          serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices
-        );
-        ReturnToMoria = mkFolder "ReturnToMoria" (
-          serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices ++ [ "LavenderHaze" ]
-        );
-        SteamPipe = mkFolder "SteamPipe" (serverDevices ++ desktopDevices ++ gamingDevices);
-        StardewValley = mkFolder "StardewValley" (
-          serverDevices ++ desktopDevices ++ mobileDevices ++ gamingDevices ++ [ "LavenderHaze" ]
-        );
-      };
     in
     {
       options.my.host.services.syncthing = lib.mkEnableOption "system Syncthing";
@@ -103,11 +122,11 @@ in
         };
         devices = lib.mkOption {
           type = lib.types.attrs;
-          default = builtins.mapAttrs mkDevice topology.deviceIds;
+          default = devices;
         };
         folders = lib.mkOption {
           type = lib.types.attrs;
-          default = defaultFolders;
+          default = mkDefaultFolders "/home/${cfg.serverUser}";
         };
       };
       config = import ./_syncthing-nixos.nix (

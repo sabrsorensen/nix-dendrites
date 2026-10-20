@@ -138,28 +138,10 @@
           username = lib.mkForce username;
           homeDirectory = lib.mkForce homeDirectory;
           stateVersion = "26.11";
-          packages =
-            with pkgs;
-            [
-              cowsay
-              fortune
-              jq
-              lolcat
-              mediainfo
-              nerd-fonts.caskaydia-cove
-              (runCommandLocal "gitignore" { } ''
-                install -Dm755 ${inputs.gitignore}/gitignore "$out/bin/gitignore"
-              '')
-            ]
-            ++ lib.optionals host.features.homeGuiPackages [
-              clementine
-              discord
-              ferdium
-              plex-desktop
-              qdirstat
-              signal-desktop
-              vlc
-            ];
+          packages = import ./_packages.nix {
+            inherit inputs lib pkgs;
+            gui = host.features.homeGuiPackages;
+          };
           sessionVariables.XDG_CONFIG_HOME = lib.mkDefault "$HOME/.config";
         };
 
