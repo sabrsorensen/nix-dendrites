@@ -246,7 +246,7 @@ in
       catalog.nix, and the "pnpm-9.15.9" permittedInsecurePackages entry in
       decky-loader/_decky-loader.nix). Drop each plugin's pnpm9 use once its
       upstream lockfile reaches v9 -- check with:
-        for r in TheLogicMaster/SDH-AnimationChanger suchmememanyskill/SDH-CssLoader \
+        for r in TheLogicMaster/SDH-AnimationChanger DeckThemes/SDH-CssLoader \
           rasitayaz/decky-brightness-bar SteamGridDB/decky-steamgriddb \
           JtdeGraaf/IsThereAnyDeal-DeckyPlugin safijari/Decky-KDE-Connect; do
           echo "$r: $(gh api repos/$r/contents/pnpm-lock.yaml \

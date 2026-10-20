@@ -39,12 +39,13 @@ let
 in
 mkDeckyPlugin {
   pname = "decky-css-loader";
-  version = "2.1.2";
+  # 2.1.3 is untagged upstream (latest release is still v2.1.2).
+  version = "2.1.3";
   src = fetchFromGitHub {
-    owner = "suchmememanyskill";
+    owner = "DeckThemes";
     repo = "SDH-CssLoader";
-    rev = "v2.1.2";
-    hash = "sha256-dEhK1LcOMerSQsOiUahMm/RX78ABNsKReQfRfspyw68=";
+    rev = "295150180e278fac6c3f45e2295f1ff1f28f92f8";
+    hash = "sha256-Dhbob682RILKXfyK52dqPtkDfs69MB5wPNbV2l0uU2U=";
   };
   hash = "sha256-cdKYY2+1wJR7ME7Tj0FZnhP00nrsUetcxbjFZGbGZfg=";
   # Upstream's pnpm-lock.yaml is lockfileVersion 6.0, too old for pnpm_11 to
@@ -61,7 +62,7 @@ mkDeckyPlugin {
   '';
   meta = with lib; {
     description = "CSS theme loader for Steam Deck";
-    homepage = "https://github.com/suchmememanyskill/SDH-CssLoader";
+    homepage = "https://github.com/DeckThemes/SDH-CssLoader";
     license = licenses.gpl3;
     platforms = platforms.linux;
   };
