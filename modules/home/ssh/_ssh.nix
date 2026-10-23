@@ -54,7 +54,7 @@ let
   sshHostBlocks = lib.mapAttrs' (
     _: peer:
     lib.nameValuePair peer.alias (
-      builtins.removeAttrs peer [ "alias" ]
+      removeAttrs peer [ "alias" ]
       // {
         Port = 22;
         IdentitiesOnly = true;
