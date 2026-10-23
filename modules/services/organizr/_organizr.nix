@@ -28,6 +28,7 @@ in
   virtualisation.oci-containers.containers.${serviceName} = {
     image = "ghcr.io/organizr/organizr";
     autoStart = true;
+    pull = "newer";
     environment = {
       "PUID" = lib.toString config.users.users.${serviceName}.uid;
       "PGID" = lib.toString config.users.groups.${groupName}.gid;
