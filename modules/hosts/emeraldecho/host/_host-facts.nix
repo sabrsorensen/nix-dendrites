@@ -27,6 +27,7 @@
       sonos = true;
       w3dHubLauncher = true;
       wine = true;
+      zed = true;
     };
   };
   users.groups.sam.gid = 1000;
