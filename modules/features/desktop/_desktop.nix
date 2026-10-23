@@ -22,6 +22,9 @@
     kate
   ];
   programs = {
+    # plasma6 mkDefault-enables this, and it adds kmail/kontact/merkuro/akonadi
+    # to systemPackages directly -- excludePackages can't remove them.
+    kde-pim.enable = false;
     kdeconnect.enable = true;
     partition-manager.enable = true;
   };

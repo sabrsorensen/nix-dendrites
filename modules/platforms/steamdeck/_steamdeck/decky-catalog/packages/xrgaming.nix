@@ -15,12 +15,12 @@ let
   # script (vendored below, not reimplemented) looks inside it by these exact
   # filenames.
   breezyVulkanPayload = fetchurl {
-    url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.9.11/breezyVulkan-x86_64.tar.gz";
-    sha256 = "sha256-stp1KLMT5pgFEXDuq4ii80L7/QUlnoFDVJfGeZdX0F0=";
+    url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.12.2/breezyVulkan-x86_64.tar.gz";
+    sha256 = "sha256-adeOSIXkKcIsIJ/xSYZrAW0o3TeAMyhow6FaRTcoWyg=";
   };
   breezyVulkanLibsPayload = fetchurl {
-    url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.9.11/breezyVulkan-libs-x86_64.tar.gz";
-    sha256 = "sha256-A8KZPuCWpr/nXFGASemSeZli0UxdgxSD4WYnPwo9m3U=";
+    url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.12.2/breezyVulkan-libs-x86_64.tar.gz";
+    sha256 = "sha256-aepIKuIP2oTTI49xFvJk0euD3qXbI+fvKEsyNLoCp1s=";
   };
   # The real launcher script from the same release, vendored verbatim rather
   # than reimplemented: it just extracts the two archives above into a temp
@@ -38,7 +38,7 @@ let
   # declared instead via services.udev.extraRules in
   # _decky-loader.nix.
   breezyVulkanSetupScript = fetchurl {
-    url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.9.11/breezy_vulkan_setup";
+    url = "https://github.com/wheaney/breezy-desktop/releases/download/v2.12.2/breezy_vulkan_setup";
     sha256 = "sha256-CXFThyPkpixqfyXdb7T2f5/F5GO1lmeCIVuMHr1lEOA=";
   };
   # breezyVulkanPayload with xrDriver-x86_64.tar.gz's own bundled `setup`
@@ -182,12 +182,12 @@ let
 in
 mkDeckyPlugin {
   pname = "decky-XRGaming";
-  version = "1.5.4";
+  version = "1.6.2";
   src = fetchFromGitHub {
     owner = "wheaney";
     repo = "decky-XRGaming";
-    rev = "646d431c19cb361c91cd3adf10a91d9ca886feda";
-    sha256 = "sha256-YEsCMfWR4ohXBhhyqVYrwhs5j49OuBFxahTaYarRv/o=";
+    rev = "d38b1fa4831228169be192847fb4fc6f8a643b53";
+    sha256 = "sha256-vr4m83dTD2QRib7VdLmL1EJe+Xu3t0jN2sBeKkclcNs=";
     fetchSubmodules = true;
   };
   hash = "sha256-USsFNT8+c2ekBcShzdkjaq5980ctDwK8LYKp8wOoFIw=";

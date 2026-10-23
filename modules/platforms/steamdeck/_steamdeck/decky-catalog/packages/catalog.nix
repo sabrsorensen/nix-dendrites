@@ -140,7 +140,7 @@ in
     owner = "Outpox";
     repo = "Bluetooth";
     rev = "main";
-    srcHash = "sha256-kpwAHrFf35OlYR4S7zcyvQJgIuXoYZiLv8yfYPAsLQA=";
+    srcHash = "sha256-f37+sYudEpqCe71kI5kAGZPEGnVLxTg87buKSwuyT0s=";
     pnpmHash = "sha256-Hf2tFLlScnHh97EthKNXxkEbykU6xjC3s1iA7AqJ1r4=";
     # requirements.txt: `jeepney==0.9.0`; main.py imports it. nixpkgs ships
     # jeepney 0.9 (zero deps).

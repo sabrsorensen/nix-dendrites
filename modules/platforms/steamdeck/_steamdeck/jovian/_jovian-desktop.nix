@@ -6,6 +6,9 @@
 }:
 {
   programs.partition-manager.enable = true;
+  # plasma6 mkDefault-enables this, and it adds kmail/kontact/merkuro/akonadi
+  # to systemPackages directly -- excludePackages can't remove them.
+  programs.kde-pim.enable = false;
   services.desktopManager.plasma6.enable = true;
   services.xserver.xkb = {
     layout = "us";
