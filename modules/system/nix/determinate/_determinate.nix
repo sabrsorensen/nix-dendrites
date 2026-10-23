@@ -35,7 +35,7 @@
                     prev.fetchpatch2 {
                       url = "https://patch-diff.githubusercontent.com/raw/maralorn/nix-output-monitor/pull/321.patch";
                       relative = "nix-output-monitor";
-                      hash = "sha256-d20jaA7iTSZ+3s7fV2Ql//tfnpqu6lJQmpOX1kfy4V8=";
+                      hash = "sha256-OVem8p/Q2MAo+fZk2MmqO8cBANDFRJQdtpd6ypUIdP0=";
                     }
                   ))
                 ];

@@ -29,7 +29,7 @@ in
       owner = "kryptamine";
       repo = "herdr-auto-title";
       rev = "main";
-      hash = "sha256-Ji9kibLF5lxtPSbwe74YO1ADZzCUUlwW7lMN2uaqwAo="; # main as of 2026-10-19
+      hash = "sha256-EAbQ1hekLhJ/BP6ypn0HrNlHJd08fSsJmYgGC3jnNh4="; # main as of 2026-10-23
     };
     vendorHash = "sha256-QxFp1b7pf7bn3Hh0hyaj8ke5Z61N+WwjhHt3pFiapTs="; # also breaks loudly if go.sum drifts
     subPackages = [ "cmd/herdr-auto-title" ];
