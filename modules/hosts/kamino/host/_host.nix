@@ -36,6 +36,7 @@
       office = true;
       plasma = true;
       steam = true;
+      stm32 = true;
       threedprinter = true;
       w3dHubLauncher = true;
       wine = true;

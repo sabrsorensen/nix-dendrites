@@ -66,7 +66,7 @@ in
         lib.mkEnableOption "crispy-recall hub (transcript index for every satellite)";
 
       config = lib.mkMerge [
-        { my.host.features.recall = lib.mkDefault config.my.host.features.claude; }
+        { my.host.features.recall = lib.mkDefault config.my.host.features.claudeCode; }
         (lib.mkIf config.my.host.services.recallHub (
           import ./_hub.nix (
             args

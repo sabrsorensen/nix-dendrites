@@ -15,13 +15,13 @@ in
       ...
     }:
     {
-      # Gated on the shared my.host.features.claude flag (declared in
-      # claude.nix) rather than a flag of its own.
-      config = lib.mkIf config.my.host.features.claude {
+      # my.host.features.claudeDesktop is declared in claude.nix, defaulted on
+      # by the `claude` aggregate for GUI hosts.
+      config = lib.mkIf config.my.host.features.claudeDesktop {
         assertions = [
           {
             assertion = lib.elem pkgs.stdenv.hostPlatform.system supportedSystems;
-            message = "my.host.features.claude (Desktop app) only supports ${lib.concatStringsSep " / " supportedSystems}; the upstream flake ships no package for ${pkgs.stdenv.hostPlatform.system}.";
+            message = "my.host.features.claudeDesktop only supports ${lib.concatStringsSep " / " supportedSystems}; the upstream flake ships no package for ${pkgs.stdenv.hostPlatform.system}.";
           }
         ];
 

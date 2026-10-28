@@ -1,6 +1,18 @@
 { inputs, lib, ... }:
 let
-  homeModule = import ./_claude-code.nix { inherit inputs; };
+  # The my.features.claude option is declared here, always, so the
+  # managed-user boundary (_home.nix) can set it before bootstrap; the
+  # implementation is delayed until the inputs it consumes exist.
+  homeModule =
+    { lib, ... }:
+    {
+      options.my.features.claude = lib.mkEnableOption "Claude Code";
+    };
+  codeModule = import ./_claude-code.nix { inherit inputs; };
+  homeModules = [
+    homeModule
+  ]
+  ++ lib.optional (inputs ? claude-code && inputs ? claude-carbon) codeModule;
 in
 {
   flake-file.inputs = {
@@ -9,13 +21,9 @@ in
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Not `inputs.nixpkgs.follows = "nixpkgs"`: upstream's package recipe still
-    # uses `nodePackages.asar`, which our newer nixpkgs has removed. Upstream's
-    # own flake.nix tracks `nixpkgs-unstable` (a moving ref that also no longer
-    # has it), so pin a dedicated nixpkgs at the exact rev upstream last locked
-    # and tested against (same tactic as armory-runtime-nixpkgs).
     claude-desktop = {
       url = "github:heytcass/claude-desktop-linux-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Packaged by _claude-carbon.nix; pinned to a release tag since the
@@ -26,18 +34,30 @@ in
     };
   };
 
-  dendritic.homeManagerModules = [ homeModule ];
-  flake.modules.homeManager.claude = homeModule;
+  dendritic.homeManagerModules = homeModules;
+  flake.modules.homeManager.claude.imports = homeModules;
 
-  # Single gate for all Claude tooling: Claude Code (Home Manager, via
-  # _claude-code.nix) and the Claude Desktop app (NixOS, via
-  # _claude-desktop.nix). Declared here -- always broadcast -- rather than in
-  # the bootstrap-delayed desktop module, so the option exists even before the
-  # claude-desktop input lands during flake generation.
+  # `claude` is the aggregate: it defaults Claude Code on, and the Desktop app
+  # on only for GUI hosts. Components gate on their own narrow flag so a host
+  # can override one piece. Declared here -- always broadcast -- rather than
+  # in the bootstrap-delayed desktop module, so the options exist even before
+  # the claude-desktop input lands during flake generation.
   flake.modules.nixos.claude =
-    { lib, ... }:
+    { config, lib, ... }:
+    let
+      features = config.my.host.features;
+    in
     {
-      options.my.host.features.claude = lib.mkEnableOption "Claude tooling (Code, Desktop app)";
+      options.my.host.features = {
+        claude = lib.mkEnableOption "Claude tooling (Code, plus the Desktop app on GUI hosts)";
+        claudeCode = lib.mkEnableOption "Claude Code";
+        claudeDesktop = lib.mkEnableOption "the Claude Desktop app";
+      };
+
+      config.my.host.features = lib.mkIf features.claude {
+        claudeCode = lib.mkDefault true;
+        claudeDesktop = lib.mkDefault features.gui;
+      };
     };
 
   # flake-file makes the claude-desktop input available after bootstrap; delay

@@ -71,7 +71,7 @@ let
   themeSlug = "party-owl-84";
 in
 {
-  options.my.features.claude = lib.mkEnableOption "Claude Code";
+  # my.features.claude is declared in claude.nix.
   config = lib.mkIf config.my.features.claude {
     programs.claude-code = {
       enable = true;

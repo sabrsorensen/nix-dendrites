@@ -53,7 +53,7 @@
           git = true;
           gpg = true;
           gdrive = host.features.gdrive;
-          herdr = host.features.codex || host.features.claude;
+          herdr = host.features.codex || host.features.claudeCode;
           mcpCommon = host.features.mcpCommon;
           "nix-index" = true;
           sonos = host.features.sonos;
@@ -62,6 +62,7 @@
           persistence = host.features.persistenceHome;
           sops = host.platform != "wsl";
           starship = true;
+          stm32 = host.features.stm32;
           steamdeck = host.platform == "steamdeck";
           syncthing = builtins.elem host.name [
             "EmeraldEcho"
@@ -78,7 +79,7 @@
           wslVscode = host.platform == "wsl";
           vscode = host.features.vscode;
           zed = host.features.zed;
-          claude = host.features.claude;
+          claude = host.features.claudeCode;
           codex = host.features.codex;
           recall = host.features.recall;
         };

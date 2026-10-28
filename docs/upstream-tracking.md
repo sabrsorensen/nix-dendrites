@@ -40,6 +40,20 @@ they silently paper over.
   which has been dormant since 2018. The only local commit updates it for
   current Go toolchains and adds flake packaging. This is effectively a
   permanent fork; only revisit if upstream comes back to life.
+- **stm32cubeide** (`modules/home/stm32/_stm32cubeide/`). Copied from
+  `git.sr.ht/~shelvacu/stm32cubeide-nix` (CC0; dormant since 458ac9e,
+  2025-08-21, which packaged 1.19.0) and bumped to 2.2.0. Local changes:
+  - an SWT 4.38 override (`swt.nix`), matching the IDE's bundled Eclipse;
+  - a Makeself extractor that works from a file, since upstream's piped
+    version dies of SIGPIPE under pipefail;
+  - JNA's non-Linux native libraries are pruned;
+  - CubeProgrammer's EGL-on-Wayland Qt plugin dependency is ignored;
+  - top-level `libx*`/`libxcb-*` attributes replace `xorg.*`.
+
+  On each IDE bump, update the `requireFile` name and hash, and move
+  `swt.nix` to the Eclipse release named by the IDE's
+  `plugins/org.eclipse.platform_*` directory. If upstream revives, diff
+  against it before switching back.
 
 ### Steam Deck / Decky
 
@@ -143,11 +157,3 @@ fails evaluation loudly rather than silently.
   non-Deck hosts in `jovian/jovian.nix`. Re-audit Jovian's modules for new
   unconditional config on each bump; see "Platform inputs" in
   [architecture.md](architecture.md).
-
-### Stale notes
-
-- `modules/home/claude/claude.nix` says `claude-desktop` gets a dedicated
-  nixpkgs pin because upstream uses the removed `nodePackages.asar`. No such
-  pin exists: the lock resolves it to the same FlakeHub `nixpkgs-weekly`, and
-  it evaluates fine. The upstream problem appears fixed. Drop the comment,
-  and consider `inputs.nixpkgs.follows = "nixpkgs"`.
