@@ -33,6 +33,26 @@
         "type": "github"
       }
     },
+    "bedrock-on-linux": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793207310,
+        "narHash": "sha256-HgVto63GftwPNWDNVSUPA4HrXy8A60bqTJxNphF9Z5E=",
+        "owner": "Wyze3306",
+        "repo": "BedrockOnLinux",
+        "rev": "99172a2311ac2380d10f57a1fbd3f24d4d0f058b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Wyze3306",
+        "repo": "BedrockOnLinux",
+        "type": "github"
+      }
+    },
     "claude-carbon": {
       "flake": false,
       "locked": {
@@ -118,11 +138,11 @@
     "context-mode": {
       "flake": false,
       "locked": {
-        "lastModified": 1793124243,
-        "narHash": "sha256-uQupGPCUH41l2ubP6L8D2h/a0rRCGURW6vVL/ieN7sE=",
+        "lastModified": 1793210774,
+        "narHash": "sha256-LmvuZZKnOnX/b4uJfq25EXH2H7o5sNuNn0mxeMfaicU=",
         "owner": "mksglu",
         "repo": "context-mode",
-        "rev": "b77ba447f51ff193962d6f0fb78c061c76ae871c",
+        "rev": "0f8ba1010411bc6b1c6b1147b4ef0c5c5e2bc694",
         "type": "github"
       },
       "original": {
@@ -151,11 +171,11 @@
     "danieltallon-nix-packages": {
       "flake": false,
       "locked": {
-        "lastModified": 1793147913,
-        "narHash": "sha256-xYusD+ZLL9G+n1uePjEyGFBniyflzAE5Jr9Ho7FYgYs=",
+        "lastModified": 1793195403,
+        "narHash": "sha256-ubN9/Ma9DyynOZKkuqk/sasbQCdoHwsS/nLlF/gR+hg=",
         "owner": "DanielTallon",
         "repo": "nix-packages",
-        "rev": "162a2c96e63c112eaab33834e9c34e2a4d3ea8e7",
+        "rev": "4bcab6b7072d02f1342bd47b5b6f171c54fc3048",
         "type": "github"
       },
       "original": {
@@ -498,11 +518,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793124281,
-        "narHash": "sha256-KdGTOgYXgMDA/ymTV10yLMt9tOjz9EmTgnTvaD+bhe4=",
+        "lastModified": 1793193205,
+        "narHash": "sha256-X6xa6sGA7RnJQuZGbFMC+K+KToWAlBDCCjJXfTwEPsw=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "1e3ebeb683d055d1675d3f64e6d2b186cb2ee504",
+        "rev": "095fef2f265c3c0da4fe315efba8f8a04495ab34",
         "type": "github"
       },
       "original": {
@@ -707,11 +727,11 @@
         "systems": "systems_6"
       },
       "locked": {
-        "lastModified": 1793076176,
-        "narHash": "sha256-BtHh8NQYsjXPAtT+KSI62AyMWhi7uhkSxRAEuojknEI=",
+        "lastModified": 1793164529,
+        "narHash": "sha256-PCiNCsXB2SNQl47cRyLEa87CyD8LVfqTnFfp/W/IeJ8=",
         "owner": "nix-community",
         "repo": "nix4vscode",
-        "rev": "9c0e2961faa0640ad81a559e7336a5c8930c3cb6",
+        "rev": "181a9ff29f265fbcf68615ad2095a106ac2af4ba",
         "type": "github"
       },
       "original": {
@@ -859,11 +879,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793155131,
-        "narHash": "sha256-50hDLVgV4ROqtatEki2SVhcOwaP7FYPbUetm3YOfuSs=",
+        "lastModified": 1793213754,
+        "narHash": "sha256-YDzOEBkuT6meKhwbzc3o828wDa0gWaUk40NERZYmkxs=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "df24f4eca02eff33d6f29118dfc41aab55f3c7c4",
+        "rev": "c7d589a4db816a94b82e16a094db8380c709cc76",
         "type": "github"
       },
       "original": {
@@ -879,11 +899,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792938344,
-        "narHash": "sha256-GVatZWOz2rDd9+qmhoRxVMmowB7REUE2k5zYjziQ+Mg=",
+        "lastModified": 1793206805,
+        "narHash": "sha256-4jpZjvv3zSZYOLAdmuiGWUJSjeE375p6OoyTtB0n870=",
         "owner": "fzakaria",
         "repo": "omnibin",
-        "rev": "5701f4ad7dd29acbc8fd04bb7cd843ff59e5f1a2",
+        "rev": "86b487badd935eb79b13887758570f2351fc3a76",
         "type": "github"
       },
       "original": {
@@ -973,6 +993,7 @@
     "root": {
       "inputs": {
         "armory-runtime-nixpkgs": "armory-runtime-nixpkgs",
+        "bedrock-on-linux": "bedrock-on-linux",
         "claude-carbon": "claude-carbon",
         "claude-code": "claude-code",
         "claude-desktop": "claude-desktop",

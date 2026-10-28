@@ -26,6 +26,11 @@
     allowUnsupportedSystem = true;
   };
 
+  # Wine/Proton use /dev/ntsync for in-kernel NT sync primitives when present
+  # (mainline since 6.14, built as a module); otherwise they fall back to
+  # wineserver round-trips.
+  boot.kernelModules = [ "ntsync" ];
+
   # Wine-specific system configuration
   programs.dconf.enable = true; # Required for Bottles GUI
 
