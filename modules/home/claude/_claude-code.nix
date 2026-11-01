@@ -31,7 +31,7 @@ let
     '';
   };
   claudeSettings = "${config.home.homeDirectory}/.claude/settings.json";
-  herdrPackage = inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.herdr;
+  herdrPackage = inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.herdr-tui;
   # context-mode's bin/statusline.mjs dynamically imports a compiled
   # build/session/analytics.js for its real per-session/lifetime $ and %
   # savings. That build/ directory is gitignored upstream (produced by their

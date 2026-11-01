@@ -65,6 +65,7 @@
   services.flatpak.uninstallUnmanaged = lib.mkForce false;
   services.flatpak.packages = lib.mkIf config.my.host.features.flatpak [
     "io.github.Geocld.XStreamingDesktop"
+    "io.github.streetpea.Chiaki4deck"
     "io.github.unknownskl.greenlight"
   ];
   xdg.portal = {

@@ -56,7 +56,7 @@ let
           wrapProgram "$out/bin/codex" --run ${lib.escapeShellArg secretExports}
         '';
       };
-      herdrPackage = inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.herdr;
+      herdrPackage = inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.herdr-tui;
       # The skill doc is authoritative from the herdr binary itself (`herdr
       # --skill`), so it's generated at build time instead of hand-copied —
       # it can't drift from the pinned herdr-nix version.

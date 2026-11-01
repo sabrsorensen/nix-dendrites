@@ -190,7 +190,7 @@ in
   "unifideck" = mk {
     pname = "unifideck";
     # Fork, not upstream: our rebase-0.7.6 branch is upstream Release-0.7.6
-    # plus four commits. The main one is for
+    # plus eight commits. The main one is for
     # https://github.com/mubaraknumann/unifideck/issues/447 (Battle.net
     # free-to-play/subscription titles need game_account facts the client
     # doesn't store locally). 0.7.6 works around it by *presuming* a game
@@ -199,17 +199,32 @@ in
     # from account.battle.net/api/games-and-subs via the shared Edge
     # profile's CDP cookie read (ownership/game_accounts.py); grant_ownership
     # uses those real facts once cached and falls back to the presumption
-    # until then. The other three are collection/shortcut fixes (skip
-    # collections for tabs with a native Steam equivalent, wait for the game
-    # cache before the boot sync, write `sortas` on new shortcuts). Move back
-    # to upstream (owner = "mubaraknumann") if those land there or stop
-    # mattering. srcHash pins rebase-0.7.6 at 57eb96b9 (2026-10-05); bump
+    # until then. Three are collection/shortcut fixes (skip collections for
+    # tabs with a native Steam equivalent, wait for the game cache before
+    # the boot sync, write `sortas` on new shortcuts). The fifth makes
+    # bin/unifideck-launcher restore PATH from CS_PATH when Steam's
+    # containerised steamrt64 client launches it with PATH unset -- without
+    # it every browser sign-in failed to spawn `microsoft-edge` on NixOS
+    # (see the decky-loader module's systemPackages comment). The sixth
+    # makes ge_installer keep GE-Proton's read-only file modes on extract
+    # (tarfile's "data" filter forced owner-write): Steam runs every compat
+    # tool concurrently against the shared compatdata/0 prefix at login,
+    # and Wine then wrote other versions' DLLs through the prefix's
+    # symlinks into any writable install -- that is what broke Battle.net
+    # sign-in (GE-Proton11-11 crashed at Wine startup). The seventh fixes
+    # the #447 commit's own read_install_state/install_row calls, which
+    # pointed at library.py instead of install_state.py and crashed the
+    # first Battle.net library sync after sign-in. The eighth commits the
+    # websockets 16.1.1 files the repo's `py_modules/*` ignore rule had
+    # silently dropped (see pythonDeps below). Move back to upstream
+    # (owner = "mubaraknumann") if those land there or stop mattering.
+    # srcHash pins rebase-0.7.6 at 16cc25d0 (2026-10-30); bump
     # both hashes (set them to lib.fakeHash and build) to pick up new
     # commits.
     owner = "sabrsorensen";
     repo = "unifideck";
     rev = "rebase-0.7.6";
-    srcHash = "sha256-sFaqypuTvn7plyJ1sYk0xMqJTy/5rSAEnI9trNKvfs4=";
+    srcHash = "sha256-0/NgoTr2iD6v9OBeIF/wqq1LYa3TK0g7pDUixxqdKjc=";
     pnpmHash = "sha256-xpkbLSaMVU3FfROkUKr6+BNC7uB1/dLJtj0wYgaDJGM=";
     executablePaths = [ "*/bin/*" ];
     # requirements.txt: aiohttp (auth/CDP/store clients, 38 import sites),
@@ -218,8 +233,13 @@ in
     # a try/except so a mismatch only skips validation, never crashes —
     # see its docstring: "there is no degraded mode"). requests, urllib3,
     # certifi, charset_normalizer, vdf, steamgrid and websockets are
-    # already vendored into upstream's committed py_modules/ and ship via
-    # the plain source copy, so they're not listed here. withPackages
+    # vendored into upstream's committed py_modules/ and ship via the plain
+    # source copy, so they're not listed here. Upstream's .gitignore
+    # ignores `py_modules/*`, so a vendored package can be silently
+    # incomplete in git while upstream's pip-built release zips mask it --
+    # websockets was missing proxy.py (fixed in the fork; every Epic
+    # sign-in timed out on "No module named 'websockets.proxy'"). After
+    # bumping, import-check each vendored package's submodules. withPackages
     # merges each dep's full transitive closure (multidict/yarl/frozenlist
     # for aiohttp; cffi for cryptography; attrs/referencing/rpds-py for
     # jsonschema) into one site-packages tree.

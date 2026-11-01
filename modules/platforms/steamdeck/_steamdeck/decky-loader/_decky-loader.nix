@@ -116,17 +116,19 @@ in
     # unifideck's browser-OAuth flow (Epic/GOG/Amazon/Microsoft sign-in)
     # doesn't run inside decky-loader's own process -- signing in launches
     # a non-Steam shortcut ("<store>:<game-key>-auth-temp-...") that Steam
-    # runs in its own gamescope session, under the ordinary system PATH,
-    # not decky-loader's extraPackages-scoped one. Confirmed live: the
-    # per-launch log (~/.local/share/unifideck/launches/*.log) for a GOG
-    # sign-in attempt got as far as
-    # "[Edge] Session env detected from PID ... (steam): DISPLAY=..."
-    # and then just stopped -- no error, no browser window -- because
-    # `microsoft-edge` (already in decky-loader's own extraPackages,
-    # above) wasn't reachable from *this* process's PATH at all. Having
-    # it here too, system-wide, is what the launcher subprocess actually
-    # needs; decky-loader's own copy stays for its own internal checks
-    # (see that entry's comment).
+    # runs in its own gamescope session, not under decky-loader's
+    # extraPackages-scoped PATH. Steam's containerised steamrt64 client
+    # starts that shortcut alongside itself (steam-runtime-launch-client
+    # --alongside-steam + steam-runtime-supervisor) with PATH *unset*, so
+    # the launcher can only reach Edge through glibc's CS_PATH, which on
+    # NixOS is /run/current-system/sw/bin:/bin:/usr/bin:... -- i.e. it
+    # must be installed system-wide, here. The fork's bin/unifideck-launcher
+    # seeds PATH from CS_PATH (see the unifideck entry in
+    # decky-catalog/packages/catalog.nix); without that, detection's
+    # shutil.which found Edge but subprocess fell back to /bin:/usr/bin and
+    # the spawn failed with `FileNotFoundError: 'microsoft-edge'`.
+    # decky-loader's own extraPackages copy stays for its own internal
+    # checks (see that entry's comment).
     microsoft-edge
   ];
   nixpkgs.config.permittedInsecurePackages = [ "pnpm-9.15.9" ];

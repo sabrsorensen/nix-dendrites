@@ -8,11 +8,32 @@
 let
   herdrConfig = "${config.xdg.configHome}/herdr/config.toml";
   plugins = import ./_herdr-plugins.nix { inherit pkgs; };
+  # herdr-nix's `herdr` is the desktop app (the TUI is `herdr-tui`). Its
+  # static libghostty-vt bundles Zig 0.16's compiler_rt, whose objects no
+  # linker accepts (ld.bfd: ".eh_frame_hdr refers to overlapping FDEs";
+  # lld: undefined empty-named symbol from compiler_rt's cos table). Rust's
+  # compiler_builtins and libgcc already provide those symbols, so don't
+  # bundle it.
+  herdrApp = inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.herdr.overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace vendor/ghostty/src/build/GhosttyLibVt.zig \
+        --replace-fail "lib.bundle_compiler_rt = true;" "lib.bundle_compiler_rt = false;"
+    '';
+  });
 in
 {
+  home.packages = lib.optional config.my.herdr.app.enable herdrApp;
+  warnings = lib.optional config.my.herdr.app.enable ''
+    herdr-app is built with libghostty-vt's bundled Zig compiler_rt disabled
+    (its objects fail to link: ".eh_frame_hdr refers to overlapping FDEs").
+    Drop the overrideAttrs in modules/home/herdr/_herdr-home.nix once
+    herdr-app links unpatched -- check with:
+      nix build --no-link github:kevinpita/herdr-nix#herdr --override-input nixpkgs "$(nix eval --raw .#nixosConfigurations.kamino.pkgs.path)"
+  '';
+
   programs.herdr = {
     enable = true;
-    package = inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.herdr;
+    package = inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.herdr-tui;
     plugins = {
       "auto-title".source = plugins.autoTitle;
       spreader = {

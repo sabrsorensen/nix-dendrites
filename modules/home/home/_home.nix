@@ -105,6 +105,7 @@
         my.atuin.domain = builtins.replaceStrings [ "\n" ] [ "" ] (
           builtins.readFile "${inputs.nix-secrets}/domain.txt"
         );
+        my.herdr.app.enable = host.features.gui;
         my.features.konsole = host.features.konsole;
         my.features.plasma = host.features.plasma;
         my.gpg = {

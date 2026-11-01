@@ -10,6 +10,8 @@ let
     }:
     {
       options.my.features.herdr = lib.mkEnableOption "Herdr";
+      options.my.herdr.app.enable =
+        lib.mkEnableOption "the Herdr desktop app (herdr-app) alongside the TUI";
       imports = [ inputs.herdr-nix.homeModules.default ];
       config = lib.mkIf config.my.features.herdr (homeModule args);
     };
