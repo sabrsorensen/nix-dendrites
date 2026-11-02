@@ -24,13 +24,16 @@ let
       ];
     }
   );
+
+  javaServerName = "Hendoboom Zone";
+  javaPort = 25565;
 in
 {
   networking.firewall = {
     allowedTCPPorts = [
       19132
       geyserPort
-      25565
+      javaPort
     ];
     allowedUDPPorts = [
       19132
@@ -57,7 +60,7 @@ in
       pull = "newer";
       environment = {
         EULA = "TRUE";
-        SERVER_NAME = "Hendoboom Zone";
+        SERVER_NAME = javaServerName;
         TYPE = "PAPER";
         TZ = "America/Boise";
         VERSION = "LATEST";
@@ -71,7 +74,7 @@ in
         "${geyserPatches}:/patches:ro"
       ];
       ports = [
-        "25565:25565/tcp"
+        "${toString javaPort}:25565/tcp"
         "${toString geyserPort}:19132/tcp"
         "${toString geyserPort}:19132/udp"
       ];
