@@ -86,13 +86,6 @@
         })
 
         (lib.mkIf rollback.enable {
-          assertions = [
-            {
-              assertion = config.boot.initrd.systemd.enable;
-              message = "my.host.persistence.rollback runs as an initrd systemd service and requires boot.initrd.systemd.enable.";
-            }
-          ];
-
           boot.initrd.systemd.services.rollback-root = {
             description = "Roll back btrfs root subvolume to a blank snapshot";
             wantedBy = [ "initrd.target" ];

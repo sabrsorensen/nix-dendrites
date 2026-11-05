@@ -42,7 +42,6 @@ in
             inherit
               cfg
               domain
-              inputs
               pkgs
               ;
           }

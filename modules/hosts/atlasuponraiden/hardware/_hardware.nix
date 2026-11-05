@@ -17,8 +17,6 @@
       ];
       includeDefaultModules = true;
       kernelModules = [ "nvme" ];
-      systemd.enable = true;
-      verbose = false;
     };
     kernelModules = [
       "kvm-intel"

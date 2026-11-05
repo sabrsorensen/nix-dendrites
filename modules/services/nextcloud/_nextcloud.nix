@@ -2,7 +2,6 @@
   config,
   cfg,
   domain,
-  inputs,
   lib,
   pkgs,
   ...
@@ -13,13 +12,6 @@ let
   nextcloudPort = 8090;
 in
 {
-  sops.secrets.nextcloud_admin_password = {
-    owner = "nextcloud";
-    group = "nextcloud";
-    mode = "0400";
-    sopsFile = "${inputs.nix-secrets}/secrets.yaml";
-  };
-
   my.localDns.records = [
     { hostname = cfg.hostName; }
     { hostname = cfg.collaboraHostName; }
@@ -46,8 +38,9 @@ in
     datadir = cfg.dataDir;
     database.createLocally = true;
     config = {
-      adminuser = "sorenssa";
-      adminpassFile = config.sops.secrets.nextcloud_admin_password.path;
+      # nixpkgs installs with --disable-admin-user, so a fresh install has no admin.
+      # Create one by hand: nextcloud-occ user:add <username>, then
+      # nextcloud-occ group:adduser admin <username>.
       dbtype = "pgsql";
     };
     # The App Store owns every non-core app, including richdocuments.  Don't

@@ -19,6 +19,7 @@ authoritative record; this table is just an index.
 | nmse's appimage-run + libunwind | `modules/features/nomanssky/_nmse.nix` | noMansSky hosts |
 | azure-devops extension + keyring | `modules/platforms/wsl/wsl-work-home/_wsl-work-home.nix` | WSL |
 | EOL dotnet 6/7 SDK insecure permits | `modules/platforms/wsl/wsl-work-home/` | WSL |
+| python3Packages.invoke pinned to 2.2.1 for fabric/azure-cli (fabric/fabric#2376) | `modules/platforms/wsl/wsl-work-home/wsl-work-home.nix` | WSL |
 | Codex `daemon_auto_start = false` (openai/codex#48050) | `modules/home/codex/_codex.nix` | codex hosts |
 | sonolin test_tags.py missing `import os` | `modules/features/sonos/_sonolin.nix` | sonos hosts |
 | mealie.service `HOME` for nltk under DynamicUser | `modules/services/mealie/_mealie.nix` | mealie hosts |

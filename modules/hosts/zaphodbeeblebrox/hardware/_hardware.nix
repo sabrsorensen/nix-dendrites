@@ -65,8 +65,6 @@ in
         "dm-crypt"
         "nvme"
       ];
-      systemd.enable = true;
-      verbose = false;
       luks.devices.crypted = {
         device = lib.mkForce "/dev/disk/by-uuid/${rootLuksUuid}";
         allowDiscards = true;

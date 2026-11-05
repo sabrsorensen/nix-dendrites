@@ -16,4 +16,11 @@ in
 
   dendritic.homeManagerModules = [ homeModule ];
   flake.modules.homeManager.ai-tools = homeModule;
+
+  flake.modules.nixos.ai-tools =
+    { config, lib, ... }:
+    lib.mkIf (config.my.host.features.claudeCode || config.my.host.features.codex) {
+      # Home Manager uses the global pkgs, and rtk is licensed asl20 + bsl11.
+      my.unfreePackageNames = [ "rtk" ];
+    };
 }

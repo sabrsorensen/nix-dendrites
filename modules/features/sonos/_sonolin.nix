@@ -33,15 +33,18 @@ python3Packages.buildPythonApplication {
   # espeak-ng. All are looked up by bare name.
   dontWrapQtApps = true;
   makeWrapperArgs = [
-    "\${qtWrapperArgs[@]}"
-    "--prefix PATH : ${
-      lib.makeBinPath [
-        ffmpeg
-        pulseaudio
-        espeak-ng
-      ]
-    }"
+    "--prefix"
+    "PATH"
+    ":"
+    (lib.makeBinPath [
+      ffmpeg
+      pulseaudio
+      espeak-ng
+    ])
   ];
+  preFixup = ''
+    makeWrapperArgs+=("''${qtWrapperArgs[@]}")
+  '';
 
   # Upstream's `python -m sonolin.desktop install` writes a per-user entry;
   # install the packaged one instead.
