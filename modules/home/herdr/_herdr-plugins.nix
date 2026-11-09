@@ -7,11 +7,15 @@
 #
 # `rev` is deliberately the moving branch name, not a commit/tag -- fetching
 # is still a fixed-output derivation (network access is fine, sandboxed or
-# not), but the *hash* stays pinned to whatever `main` last resolved to. When
-# upstream moves `main` forward, the fetch's real content hash stops matching
-# and the build fails loudly with the correct new hash in the error, instead
-# of silently pulling in unreviewed plugin changes. To update: read what
-# changed upstream, then paste the new hash the failure reports.
+# not), but the *hash* stays pinned to whatever `main` last resolved to. Once
+# upstream moves `main` forward, a fresh fetch's real content hash stops
+# matching and the build fails with the correct new hash in the error, instead
+# of silently pulling in unreviewed plugin changes. A fixed-output derivation
+# is only fetched when its path is missing, so a machine or builder still
+# holding the old source keeps building it without noticing `main` moved.
+# To update: read what changed upstream, then paste the new hash the failure
+# reports. For autoTitle, also clear vendorHash and paste the hash that failure
+# reports, whether or not go.sum changed.
 { pkgs }:
 let
   spreaderSrc = pkgs.fetchFromGitHub {
@@ -29,9 +33,9 @@ in
       owner = "kryptamine";
       repo = "herdr-auto-title";
       rev = "main";
-      hash = "sha256-EAbQ1hekLhJ/BP6ypn0HrNlHJd08fSsJmYgGC3jnNh4="; # main as of 2026-10-23
+      hash = "sha256-Z9XWD7H6ityrKKvTlCY0eGV4oIAdgp34ghl982kCia4="; # main as of 2026-11-09 (e78dfca5)
     };
-    vendorHash = "sha256-QxFp1b7pf7bn3Hh0hyaj8ke5Z61N+WwjhHt3pFiapTs="; # also breaks loudly if go.sum drifts
+    vendorHash = "sha256-UfIpYaA2eIRl29fhi7ESEoHEsyiXmEZ4MO78T0Q6OCs="; # a stale value reuses the cached vendor tree; see the update note above
     subPackages = [ "cmd/herdr-auto-title" ];
     postInstall = ''
       cp $out/bin/herdr-auto-title $out/herdr-auto-title
