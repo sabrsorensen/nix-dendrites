@@ -114,17 +114,11 @@ in
     pname = "decky-tabmaster";
     owner = "Tormak9970";
     repo = "TabMaster";
-    # Pinned to a tag, not main/HEAD like its siblings: main (and the newer
-    # v2.16.2 tag, identical tree to main right now) ships a pnpm-lock.yaml
-    # that's out of sync with package.json (@rollup/plugin-node-resolve
-    # ^16.0.3 in the lock vs ^13.3.0 in the manifest), which fails our
-    # --frozen-lockfile install outright -- an upstream lockfile bug, not a
-    # hash to bump. Re-check by rebuilding against rev = "main" next time
-    # upstream cuts a release; move back to the drift-tracking scheme once
-    # a tag builds clean again.
-    rev = "v2.15.1";
-    srcHash = "sha256-2BdTeVXeioxMRjjM9W/Vm/IYGVCWFsH2MOwDWIack4E=";
-    pnpmHash = "sha256-3ZBIhYfEAfMVRJd6AL2viL/UrBUbzMKH4/++P7Jk6Z8=";
+    # Tracks main again: v3.1.0 and later build cleanly, the pnpm-lock.yaml
+    # mismatch that forced a v2.15.1 pin is gone.
+    rev = "main";
+    srcHash = "sha256-i26YmZ4Lur9/LWi3kD6I+mN8WEc6NkluFw0lqI6nvgA=";
+    pnpmHash = "sha256-hn0zcSyThPOeSM1nyBVPiSIgnXnGXLGnd5Cs34+90yA=";
     verifyMainPy = false;
   };
   "decky-autoflatpaks" = mk {
@@ -189,42 +183,37 @@ in
   };
   "unifideck" = mk {
     pname = "unifideck";
-    # Fork, not upstream: our rebase-0.7.6 branch is upstream Release-0.7.6
-    # plus eight commits. The main one is for
-    # https://github.com/mubaraknumann/unifideck/issues/447 (Battle.net
-    # free-to-play/subscription titles need game_account facts the client
-    # doesn't store locally). 0.7.6 works around it by *presuming* a game
-    # account for every catalog program (library.grant_ownership), so every
-    # account sees WoW, Hearthstone, HotS etc. Our fork fetches the real set
-    # from account.battle.net/api/games-and-subs via the shared Edge
-    # profile's CDP cookie read (ownership/game_accounts.py); grant_ownership
-    # uses those real facts once cached and falls back to the presumption
-    # until then. Three are collection/shortcut fixes (skip collections for
-    # tabs with a native Steam equivalent, wait for the game cache before
-    # the boot sync, write `sortas` on new shortcuts). The fifth makes
-    # bin/unifideck-launcher restore PATH from CS_PATH when Steam's
-    # containerised steamrt64 client launches it with PATH unset -- without
-    # it every browser sign-in failed to spawn `microsoft-edge` on NixOS
-    # (see the decky-loader module's systemPackages comment). The sixth
-    # makes ge_installer keep GE-Proton's read-only file modes on extract
-    # (tarfile's "data" filter forced owner-write): Steam runs every compat
-    # tool concurrently against the shared compatdata/0 prefix at login,
-    # and Wine then wrote other versions' DLLs through the prefix's
-    # symlinks into any writable install -- that is what broke Battle.net
-    # sign-in (GE-Proton11-11 crashed at Wine startup). The seventh fixes
-    # the #447 commit's own read_install_state/install_row calls, which
-    # pointed at library.py instead of install_state.py and crashed the
-    # first Battle.net library sync after sign-in. The eighth commits the
-    # websockets 16.1.1 files the repo's `py_modules/*` ignore rule had
-    # silently dropped (see pythonDeps below). Move back to upstream
-    # (owner = "mubaraknumann") if those land there or stop mattering.
-    # srcHash pins rebase-0.7.6 at 16cc25d0 (2026-10-30); bump
+    # Fork, not upstream: our rebase-0.8.0 branch is upstream Release-0.8.0
+    # plus eight commits, none of them upstream yet:
+    # - #447 (https://github.com/mubaraknumann/unifideck/issues/447): 0.8.0
+    #   still *presumes* a Battle.net game account for every catalog program
+    #   (library.grant_ownership). The fork fetches the real set from
+    #   account.battle.net/api/games-and-subs through the shared browser
+    #   profile's CDP cookies (ownership/game_accounts.py) and falls back to
+    #   the presumption until cached.
+    # - Skip collections for tabs with a native Steam equivalent, write
+    #   `sortas` on new shortcuts, and a test cleanup.
+    # - bin/unifideck-launcher restores PATH from CS_PATH when Steam's
+    #   containerised steamrt64 client launches it with PATH unset.
+    # - ge_download keeps GE-Proton's read-only file modes on extract
+    #   (tarfile's "data" filter forces owner-write): Steam runs every compat
+    #   tool against the shared compatdata/0 prefix at login, and Wine then
+    #   writes other versions' DLLs through its symlinks into any writable
+    #   install. 0.8.0 only repairs that damage after the fact.
+    # - Commits the websockets 16.1.1 files the repo's `py_modules/*` ignore
+    #   rule dropped (see pythonDeps below).
+    # - chrome_installer prefers a `chromium` on PATH over its pinned
+    #   ungoogled-chromium download, a generic-Linux binary that cannot start
+    #   on NixOS (see the decky-loader module's systemPackages comment).
+    # Move back to upstream (owner = "mubaraknumann") if those land there or
+    # stop mattering.
+    # srcHash pins rebase-0.8.0 at 09e73ee9 (2026-11-09); bump
     # both hashes (set them to lib.fakeHash and build) to pick up new
     # commits.
     owner = "sabrsorensen";
     repo = "unifideck";
-    rev = "rebase-0.7.6";
-    srcHash = "sha256-0/NgoTr2iD6v9OBeIF/wqq1LYa3TK0g7pDUixxqdKjc=";
+    rev = "rebase-0.8.0";
+    srcHash = "sha256-0HXO8rEj1qJ1sUig/4K2e6WAq7U9FZ74xGNmesAWliM=";
     pnpmHash = "sha256-xpkbLSaMVU3FfROkUKr6+BNC7uB1/dLJtj0wYgaDJGM=";
     executablePaths = [ "*/bin/*" ];
     # requirements.txt: aiohttp (auth/CDP/store clients, 38 import sites),
