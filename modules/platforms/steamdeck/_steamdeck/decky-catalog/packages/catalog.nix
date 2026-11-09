@@ -170,7 +170,7 @@ in
     owner = "Nezreka";
     repo = "Museck";
     rev = "main";
-    srcHash = "sha256-cBiAze2/H1awHPN8hSQY6NiFauK8+8fXJik6EqBJeU0=";
+    srcHash = "sha256-kGh+iNTicaqjQ4CxMCV7VXd+IgwhxHRVAs3dQYU5Ves=";
     pnpmHash = "sha256-1TKYD24kVNwgOWQzVKebHnGh4QHSXRTnKxZpRjGFIEo=";
     verifyMainPy = false;
   };
