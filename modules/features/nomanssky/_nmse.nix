@@ -33,14 +33,14 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     hash = "sha256-lLQ9oVPAoxwRqtn5ttgpPSXGIqDVIQqwISjx1dNIGb8=";
   };
 
-  # Only needed to pull nmse.png out for the desktop icon; the AppImage
-  # itself is run as-is (unextracted) through appimage-run below.
   appdir = appimageTools.extract {
     inherit (finalAttrs) pname version src;
   };
 
   dontUnpack = true;
   dontBuild = true;
+  # The AppDir is prebuilt Wine (ELF plus PE files); leave it byte-for-byte.
+  dontFixup = true;
 
   nativeBuildInputs = [
     makeWrapper
@@ -64,11 +64,19 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   installPhase = ''
     runHook preInstall
 
-    install -Dm755 "$src" "$out/libexec/nmse.AppImage"
+    # Since 1.5.x the bundled Wine ships both i386-unix and x86_64-unix, and
+    # when i386-unix exists the 64-bit launcher re-execs the 32-bit loader,
+    # which dies on /lib/ld-linux.so.2 (appimage-run's FHS env isn't multiarch).
+    # Without i386-unix Wine uses x86_64-unix and runs 32-bit code via WoW64.
+    mkdir -p "$out/libexec"
+    cp -a "$appdir" "$out/libexec/nmse"
+    chmod -R u+w "$out/libexec/nmse"
+    rm -rf "$out/libexec/nmse/wine/lib/wine/i386-unix"
+
     install -Dm444 "$appdir/nmse.png" "$out/share/icons/hicolor/256x256/apps/nmse.png"
 
     makeWrapper ${lib.getExe appimageRun} "$out/bin/nmse" \
-      --add-flags "$out/libexec/nmse.AppImage"
+      --add-flags "-w $out/libexec/nmse --"
 
     runHook postInstall
   '';

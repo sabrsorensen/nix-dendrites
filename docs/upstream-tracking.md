@@ -16,6 +16,7 @@ authoritative record; this table is just an index.
 | unifideck built from the sabrsorensen fork's rebase-0.8.0 branch (upstream #447, NixOS browser) | `decky-catalog/packages/catalog.nix` | Steam Deck |
 | appimage-run + libunwind | `modules/features/appimage/_appimage.nix` | appimage hosts |
 | nmse's appimage-run + libunwind | `modules/features/nomanssky/_nmse.nix` | noMansSky hosts |
+| nmse AppDir with bundled Wine's `i386-unix` removed (otherwise Wine re-execs the 32-bit loader, and appimage-run's FHS env has no `/lib/ld-linux.so.2`); recheck on each NMSE bump | `modules/features/nomanssky/_nmse.nix` | noMansSky hosts |
 | azure-devops extension + keyring | `modules/platforms/wsl/wsl-work-home/_wsl-work-home.nix` | WSL |
 | EOL dotnet 6/7 SDK insecure permits | `modules/platforms/wsl/wsl-work-home/` | WSL |
 | python3Packages.invoke pinned to 2.2.1 for fabric/azure-cli (fabric/fabric#2376) | `modules/platforms/wsl/wsl-work-home/wsl-work-home.nix` | WSL |
