@@ -18,7 +18,7 @@ authoritative record; this table is just an index.
 | nmse's appimage-run + libunwind | `modules/features/nomanssky/_nmse.nix` | noMansSky hosts |
 | nmse AppDir with bundled Wine's `i386-unix` removed (otherwise Wine re-execs the 32-bit loader, and appimage-run's FHS env has no `/lib/ld-linux.so.2`); recheck on each NMSE bump | `modules/features/nomanssky/_nmse.nix` | noMansSky hosts |
 | azure-devops extension + keyring | `modules/platforms/wsl/wsl-work-home/_wsl-work-home.nix` | WSL |
-| EOL dotnet 6/7 SDK insecure permits | `modules/platforms/wsl/wsl-work-home/` | WSL |
+| Docker Compose 5.7.1 user CLI plugin until Docker Desktop WSL bundles the fix (docker/compose#14285) | `modules/platforms/wsl/wsl-work-home/_wsl-work-home.nix` | WSL |
 | python3Packages.invoke pinned to 2.2.1 for fabric/azure-cli (fabric/fabric#2376) | `modules/platforms/wsl/wsl-work-home/wsl-work-home.nix` | WSL |
 | Codex `daemon_auto_start = false` (openai/codex#48050) | `modules/home/codex/_codex.nix` | codex hosts |
 | sonolin test_tags.py missing `import os` | `modules/features/sonos/_sonolin.nix` | sonos hosts |

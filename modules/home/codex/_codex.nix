@@ -40,10 +40,10 @@ in
       ''
         programs.codex sets features.daemon_auto_start = false because the
         codex-nix binary lacks the complete-package layout the 0.157 daemon
-        installer requires (openai/codex#48050). Remove it from
-        modules/home/codex/_codex.nix once the issue is fixed upstream and
-        `codex --enable daemon_auto_start` starts normally -- check with:
-          gh issue view 48050 -R openai/codex --json state,closedAt
+        installer requires (openai/codex#48050). That issue is closed, but
+        the pinned codex-nix package still lacks codex-package.json. Remove
+        the override from modules/home/codex/_codex.nix once the packaged
+        `codex --enable daemon_auto_start` starts normally.
       ''
     ];
 

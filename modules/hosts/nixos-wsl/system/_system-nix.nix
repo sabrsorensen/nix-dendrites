@@ -27,7 +27,7 @@
       ];
     };
     extraOptions = lib.mkAfter ''
-      !include ${config.sops.secrets.github_nixos_wsl_token.path}
+      !include ${config.sops.secrets.github_gitlab_nixos_wsl_token.path}
     '';
   };
 }

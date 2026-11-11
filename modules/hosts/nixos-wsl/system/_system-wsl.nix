@@ -42,6 +42,11 @@ in
   wsl = {
     defaultUser = username;
     docker-desktop.enable = true;
+    # Docker Desktop invokes these directly via wsl.exe, without a login shell.
+    extraBin = with pkgs; [
+      { src = "${coreutils}/bin/stat"; }
+      { src = "${coreutils}/bin/test"; }
+    ];
   };
 
   programs.nix-ld.libraries = with pkgs; [

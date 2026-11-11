@@ -77,6 +77,7 @@
           wslCodex = host.platform == "wsl" && host.features.codex;
           wslWorkHome = host.platform == "wsl";
           wslVscode = host.platform == "wsl";
+          zedWindowsDeploy = host.platform == "wsl";
           vscode = host.features.vscode;
           zed = host.features.zed;
           claude = host.features.claudeCode;

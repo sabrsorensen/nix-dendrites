@@ -1,7 +1,7 @@
 { inputs, ... }:
 {
   flake-file.inputs.nix-work-secrets = {
-    url = "git+https://github.com/sabrsorensen/nix-work-secrets.git";
+    url = "github:sabrsorensen/nix-work-secrets";
     flake = false;
   };
 

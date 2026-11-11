@@ -5,9 +5,25 @@
   ...
 }:
 let
+  composeSources = {
+    aarch64-linux = {
+      url = "https://github.com/docker/compose/releases/download/v5.7.1/docker-compose-linux-aarch64";
+      hash = "sha256-8vSfkDJAiV+nZMDco6FFSLdUrZQm9rYJzK9V7Fo6oqU=";
+    };
+    x86_64-linux = {
+      url = "https://github.com/docker/compose/releases/download/v5.7.1/docker-compose-linux-x86_64";
+      hash = "sha256-r0JnIqivXegS/O4wzBw58GOfX3I8ut77JeXU2wVAZM8=";
+    };
+  };
+  composeSource =
+    composeSources.${pkgs.stdenv.hostPlatform.system}
+      or (throw "Docker Compose has no WSL artifact for ${pkgs.stdenv.hostPlatform.system}");
+  composePlugin = pkgs.runCommand "docker-compose-cli-plugin-5.7.1" {
+    src = pkgs.fetchurl composeSource;
+  } ''
+    install -Dm755 "$src" "$out/lib/docker/cli-plugins/docker-compose"
+  '';
   dotnetCombined = pkgs.dotnetCorePackages.combinePackages [
-    pkgs.dotnetCorePackages.sdk_6_0-bin
-    pkgs.dotnetCorePackages.sdk_7_0-bin
     pkgs.dotnetCorePackages.sdk_8_0-bin
     pkgs.dotnetCorePackages.sdk_9_0-bin
     pkgs.dotnetCorePackages.sdk_10_0-bin
@@ -58,12 +74,26 @@ in
       DOTNET_SDK_VULNERABILITY_CHECK_DISABLE = "true";
       SOPS_AGE_KEY_CMD = "${pkgs.ssh-to-age}/bin/ssh-to-age -private-key < ${config.home.homeDirectory}/.ssh/sops_ed25519";
     };
+    file.".docker/cli-plugins/docker-compose".source =
+      "${composePlugin}/lib/docker/cli-plugins/docker-compose";
     file.".nuget/plugins/netcore/CredentialProvider.Microsoft" = lib.mkIf (credentialPlugin != null) {
       source = credentialPlugin;
       recursive = true;
     };
   };
-  warnings = lib.optional (azureDevOpsExtension != null) ''
+  warnings = [
+    ''
+      Docker Desktop's WSL Compose 5.6.1 cannot build VS Code dev containers
+      when Buildx denies access to the generated Dockerfile outside the build
+      context (docker/compose#14285). Compose fixed this in 5.7.0. This profile
+      installs Compose 5.7.1 as a user CLI plugin until Docker Desktop bundles
+      the fix. Recheck the Desktop-provided plugin with:
+        /usr/local/lib/docker/cli-plugins/docker-compose version
+      Remove the plugin override in
+      modules/platforms/wsl/wsl-work-home/_wsl-work-home.nix once it reports
+      5.7.0 or newer.
+    ''
+  ] ++ lib.optional (azureDevOpsExtension != null) ''
     azure-cli's azure-devops extension is overridden to propagate
     python3Packages.keyring, which the nixpkgs package omits. Remove the
     override in modules/platforms/wsl/wsl-work-home/_wsl-work-home.nix once

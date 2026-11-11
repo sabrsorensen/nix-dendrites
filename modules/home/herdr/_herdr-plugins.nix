@@ -33,7 +33,7 @@ in
       owner = "kryptamine";
       repo = "herdr-auto-title";
       rev = "main";
-      hash = "sha256-Z9XWD7H6ityrKKvTlCY0eGV4oIAdgp34ghl982kCia4="; # main as of 2026-11-09 (e78dfca5)
+      hash = "sha256-ebLE7rkpENQJpGs4gYO2G96n29S6Jt5kQ2zk7JQ3WXk="; # main as of 2026-11-11
     };
     vendorHash = "sha256-UfIpYaA2eIRl29fhi7ESEoHEsyiXmEZ4MO78T0Q6OCs="; # a stale value reuses the cached vendor tree; see the update note above
     subPackages = [ "cmd/herdr-auto-title" ];
