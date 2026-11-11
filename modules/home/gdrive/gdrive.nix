@@ -4,6 +4,7 @@ let
     {
       config,
       lib,
+      pkgs,
       ...
     }:
     let
@@ -28,7 +29,7 @@ let
       config = lib.mkIf config.my.features.gdrive (
         lib.mkMerge [
           (import ./_gdrive.nix {
-            inherit config lib;
+            inherit config lib pkgs;
             inherit (cfg) secretFile tokenName;
           })
           {

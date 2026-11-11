@@ -30,7 +30,7 @@
       flatpak = true;
       lutris = true;
       minecraft = true;
-      nvidia = false; # dGPU is failing, keep it disabled
+      nvidia = false; # dGPU is failing; see hardware/_hardware.nix
       noMansSky = true;
       sonos = true;
       office = true;
