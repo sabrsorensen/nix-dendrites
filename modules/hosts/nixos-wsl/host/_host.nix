@@ -13,6 +13,7 @@
     features = {
       nix-ld = true;
       codex = true;
+      zed = true;
     };
   };
   my.deployment = {
