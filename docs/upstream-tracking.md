@@ -24,6 +24,7 @@ authoritative record; this table is just an index.
 | sonolin test_tags.py missing `import os` | `modules/features/sonos/_sonolin.nix` | sonos hosts |
 | mealie.service `HOME` for nltk under DynamicUser | `modules/services/mealie/_mealie.nix` | mealie hosts |
 | herdr-app without libghostty-vt's bundled Zig compiler_rt ("overlapping FDEs" link failure) | `modules/home/herdr/_herdr-home.nix` | herdr + gui hosts |
+| gtk2 (`gtk+`) broken-problem ignored for lutris's FHS env (NixOS/nixpkgs#410814) | `modules/features/lutris/lutris.nix` | lutris hosts |
 | nix-output-monitor + PR #321 (Determinate Nix activity types, issue #320) | `modules/system/nix/determinate/_determinate.nix` | determinateNix hosts |
 
 `decky-catalog/` is `modules/platforms/steamdeck/_steamdeck/decky-catalog/`.

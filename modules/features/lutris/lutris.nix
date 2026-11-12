@@ -25,6 +25,22 @@
           "steam-unwrapped"
         ];
 
+        # nixpkgs marks gtk2 (pname "gtk+") broken ahead of its removal
+        # (NixOS/nixpkgs#410814), but pkgs/by-name/lu/lutris still lists it
+        # in the FHS env's multiPkgs, so evaluating pkgs.lutris refuses.
+        # "ignore" rather than "warn" -- the warnings entry below already
+        # carries the recheck command.
+        nixpkgs.config.problems.handlers."gtk+".broken = "ignore";
+        warnings = [
+          ''
+            lutris: allowing broken gtk2 ("gtk+") because nixpkgs' lutris FHS
+            env still pulls it in (NixOS/nixpkgs#410814). Remove the
+            problems.handlers override in modules/features/lutris/lutris.nix
+            once this prints nothing:
+              grep -n gtk2 "$(nix eval --raw .#nixosConfigurations.kamino.pkgs.path)/pkgs/by-name/lu/lutris/package.nix"
+          ''
+        ];
+
         # Fixes a real Wine/Proton compatibility gap (unimplemented
         # powershell.exe stub breaking apps that use it for singleton-
         # instance detection, e.g. the Totem Arts Launcher used to install
