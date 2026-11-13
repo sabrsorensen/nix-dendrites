@@ -52,6 +52,7 @@
     ];
   };
   environment.systemPackages = with hostPkgs; [
+    kdePackages.kdialog
     rclone
     signal-desktop
     vlc

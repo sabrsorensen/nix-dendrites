@@ -2,10 +2,7 @@
 {
   services.xserver = {
     enable = true;
-    videoDrivers = [
-      "intel"
-      "modesetting"
-    ];
+    videoDrivers = [ "modesetting" ];
   };
   services = {
     desktopManager.plasma6.enable = true;

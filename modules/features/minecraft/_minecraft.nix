@@ -5,9 +5,17 @@
 }:
 {
   networking.firewall = {
-    allowedTCPPorts = [ 19132 19133 25565 ];
+    allowedTCPPorts = [
+      19132
+      19133
+      25565
+    ];
     # 4445: Java clients listen here for LAN server announcements.
-    allowedUDPPorts = [ 4445 19132 19133 ];
+    allowedUDPPorts = [
+      4445
+      19132
+      19133
+    ];
   };
   # Bedrock on Linux bundles its own Wine (independent of features.wine) and
   # warns about poor performance without /dev/ntsync.

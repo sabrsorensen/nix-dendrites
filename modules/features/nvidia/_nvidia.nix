@@ -1,48 +1,21 @@
+{ lib, ... }:
 {
-  config,
-  lib,
-  ...
-}:
-{
-  # Hardware modules needed for boot
-  boot = {
-    initrd = {
-      kernelModules = [
-        "nvidia"
-        "nvidia_drm"
-        "nvidia_modeset"
-        "nvidia_uvm"
-      ];
-    };
-    kernelModules = [
-      "nvidia"
-      "nvidia_drm"
-      "nvidia_modeset"
-      "nvidia_uvm"
-    ];
-    kernelParams = [
-      "nvidia-drm.modeset=1" # Enable NVIDIA DRM kernel mode setting
-    ];
-  };
+  # modesetting.enable already sets nvidia-drm modeset=1 (and fbdev=1), and
+  # udev loads the modules by modalias. They're deliberately not in the initrd:
+  # they add a lot of initrd size and early KMS on the dGPU buys nothing on
+  # hybrid laptops whose panel is wired to the iGPU.
   hardware = {
-    cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     graphics = {
       enable = true;
       enable32Bit = true;
     };
     nvidia = {
       modesetting.enable = true;
-      powerManagement = {
-        enable = false;
-        finegrained = false;
-      };
+      powerManagement.enable = lib.mkDefault false;
       open = true;
       nvidiaSettings = true;
-      prime = {
-        sync.enable = true;
-        #intelBusId = "PCI:0@0:2:0"; Device specific
-        #nvidiaBusId = "PCI:1@0:0:0"; Device specific
-      };
+      # PRIME mode (offload/sync/reverseSync), bus IDs and fine-grained power
+      # management are device-specific: set them in the host's hardware file.
     };
   };
   # mkBefore keeps nvidia ahead of the desktop feature's intel/modesetting.

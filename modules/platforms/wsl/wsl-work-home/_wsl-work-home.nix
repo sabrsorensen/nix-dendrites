@@ -18,11 +18,14 @@ let
   composeSource =
     composeSources.${pkgs.stdenv.hostPlatform.system}
       or (throw "Docker Compose has no WSL artifact for ${pkgs.stdenv.hostPlatform.system}");
-  composePlugin = pkgs.runCommand "docker-compose-cli-plugin-5.7.1" {
-    src = pkgs.fetchurl composeSource;
-  } ''
-    install -Dm755 "$src" "$out/lib/docker/cli-plugins/docker-compose"
-  '';
+  composePlugin =
+    pkgs.runCommand "docker-compose-cli-plugin-5.7.1"
+      {
+        src = pkgs.fetchurl composeSource;
+      }
+      ''
+        install -Dm755 "$src" "$out/lib/docker/cli-plugins/docker-compose"
+      '';
   dotnetCombined = pkgs.dotnetCorePackages.combinePackages [
     pkgs.dotnetCorePackages.sdk_8_0-bin
     pkgs.dotnetCorePackages.sdk_9_0-bin
@@ -93,7 +96,8 @@ in
       modules/platforms/wsl/wsl-work-home/_wsl-work-home.nix once it reports
       5.7.0 or newer.
     ''
-  ] ++ lib.optional (azureDevOpsExtension != null) ''
+  ]
+  ++ lib.optional (azureDevOpsExtension != null) ''
     azure-cli's azure-devops extension is overridden to propagate
     python3Packages.keyring, which the nixpkgs package omits. Remove the
     override in modules/platforms/wsl/wsl-work-home/_wsl-work-home.nix once

@@ -83,10 +83,25 @@ in
 
   hardware = {
     cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-    nvidia.prime = {
-      intelBusId = "PCI:0@0:2:0";
-      nvidiaBusId = "PCI:1@0:0:0";
+    # Panel and USB-C DP outputs hang off the Intel iGPU; only HDMI is on the
+    # dGPU. Plasma runs on Wayland, where PRIME sync is inert (X11-only), so
+    # use offload and let the RTX 3060 runtime-suspend (D3) when idle.
+    nvidia = {
+      powerManagement.finegrained = true;
+      prime = {
+        offload = {
+          enable = true;
+          enableOffloadCmd = true;
+        };
+        intelBusId = "PCI:0@0:2:0";
+        nvidiaBusId = "PCI:1@0:0:0";
+      };
     };
+    # TigerLake iGPU video decode (VA-API iHD) and QuickSync (oneVPL).
+    graphics.extraPackages = [
+      pkgs.intel-media-driver
+      pkgs.vpl-gpu-rt
+    ];
   };
 
   environment.systemPackages = [ pkgs.alsa-tools ];

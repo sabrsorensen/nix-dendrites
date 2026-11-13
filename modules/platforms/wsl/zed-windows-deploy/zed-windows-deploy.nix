@@ -8,11 +8,8 @@ let
       ...
     }:
     {
-      options.my.features.zedWindowsDeploy =
-        lib.mkEnableOption "deploying the shared Zed profile to Windows from WSL";
-      config = lib.mkIf config.my.features.zedWindowsDeploy (
-        import ./_zed-windows-deploy.nix args
-      );
+      options.my.features.zedWindowsDeploy = lib.mkEnableOption "deploying the shared Zed profile to Windows from WSL";
+      config = lib.mkIf config.my.features.zedWindowsDeploy (import ./_zed-windows-deploy.nix args);
     };
 in
 {
