@@ -40,6 +40,7 @@
       threedprinter = true;
       w3dHubLauncher = true;
       wine = true;
+      ghostty = true;
       zed = true;
       zsa = true;
     };

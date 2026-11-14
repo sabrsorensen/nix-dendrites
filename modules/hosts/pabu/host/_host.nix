@@ -20,6 +20,7 @@ in
       personalMcp = true;
       vscode = true;
       zed = true;
+      ghostty = true;
       claude = true;
       firmware = true;
       nix-ld = true;

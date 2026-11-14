@@ -80,6 +80,7 @@
           zedWindowsDeploy = host.platform == "wsl";
           vscode = host.features.vscode;
           zed = host.features.zed;
+          ghostty = host.features.ghostty;
           claude = host.features.claudeCode;
           codex = host.features.codex;
           recall = host.features.recall;

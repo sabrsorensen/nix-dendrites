@@ -1,4 +1,45 @@
-{ config, lib }:
+{
+  config,
+  lib,
+  pkgs,
+}:
+let
+  cfg = config.services.clamav;
+
+  normalUserHomes = lib.mapAttrsToList (_: user: user.home) (
+    lib.filterAttrs (_: user: user.isNormalUser) config.users.users
+  );
+
+  # Where files from outside arrive: browser downloads and the phone's
+  # Syncthing drop folder. The rest of /home (games, Wine prefixes, media,
+  # source trees) is not scanned -- re-reading hundreds of GB daily pinned
+  # every core for hours and mostly turned up third-party-signature false
+  # positives in Wine/mono binaries.
+  untrustedHomeDirs = lib.concatMap (home: [
+    "${home}/Downloads"
+    "${home}/mobile_downloads"
+  ]) normalUserHomes;
+
+  # Not every host/user has every directory, and clamdscan exits non-zero
+  # (failing the unit) on a missing path, so only pass the ones that exist.
+  clamdscanExisting = pkgs.writeShellApplication {
+    name = "clamdscan-existing";
+    runtimeInputs = [ cfg.package ];
+    text = ''
+      dirs=()
+      for dir in "$@"; do
+        if [ -e "$dir" ]; then
+          dirs+=("$dir")
+        fi
+      done
+      if [ "''${#dirs[@]}" -eq 0 ]; then
+        echo "clamdscan: none of the configured scan directories exist; nothing to do"
+        exit 0
+      fi
+      exec clamdscan --multiscan --fdpass --infected --allmatch "''${dirs[@]}"
+    '';
+  };
+in
 {
   # The nixpkgs module already adds services.clamav.package to
   # environment.systemPackages when the daemon or updater is enabled.
@@ -9,13 +50,12 @@
         # Don't hold a second copy of the signature DB in RAM while reloading
         # after a freshclam/fangfrisch update; scans just wait for the reload.
         ConcurrentDatabaseReload = false;
+        # clamdscan --multiscan fans out one file per clamd thread (default
+        # 10). Two is plenty for the small download/temp scan set and keeps
+        # the scan from taking over the machine.
+        MaxThreads = 2;
         # Regexes; clamdscan honours these while walking scanDirectories.
         ExcludePath = [
-          # Installed game files: hundreds of GB, re-read daily for little gain.
-          "/steamapps/(common|shadercache|downloading|temp)/"
-          "^/home/[^/]+/\\.cache/"
-          # Rootless podman image layers.
-          "^/home/[^/]+/\\.local/share/containers/"
           # Nextcloud-generated thumbnails.
           "/appdata_[^/]+/preview/"
         ];
@@ -29,16 +69,27 @@
 
     scanner = {
       enable = true;
-      # Daily at 04:00 (nixpkgs default interval). Not /var/lib: on Atlas that is
-      # databases and service state, not user-supplied files.
+      # Daily at 04:00 (nixpkgs default interval). Only download/untrusted
+      # locations: not /etc (Nix-generated) and not /var/lib (on Atlas that is
+      # databases and service state). Nextcloud's datadir holds user uploads.
       scanDirectories = [
-        "/home"
         "/tmp"
         "/var/tmp"
-        "/etc"
       ]
+      ++ untrustedHomeDirs
       ++ lib.optional config.my.host.services.nextcloud config.services.nextcloud.datadir;
     };
+  };
+
+  # clamd does the actual scanning (clamdscan --fdpass only hands it file
+  # descriptors), so the throttling has to live on the daemon, not just on
+  # clamdscan. Not CPUSchedulingPolicy=idle: clamd also serves on-demand
+  # scans, which shouldn't starve indefinitely under sustained load.
+  systemd.services.clamav-daemon.serviceConfig = {
+    Nice = 19;
+    IOSchedulingClass = "idle";
+    CPUWeight = 20;
+    IOWeight = 20;
   };
 
   # Laptops and the Deck are usually asleep at 04:00: catch up after wake, but
@@ -50,6 +101,7 @@
   systemd.services.clamdscan = {
     unitConfig.ConditionACPower = true;
     serviceConfig = {
+      ExecStart = lib.mkForce "${lib.getExe clamdscanExisting} ${lib.escapeShellArgs cfg.scanner.scanDirectories}";
       Nice = 19;
       IOSchedulingClass = "idle";
       CPUSchedulingPolicy = "idle";

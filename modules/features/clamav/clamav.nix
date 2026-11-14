@@ -1,7 +1,12 @@
 { ... }:
 {
   flake.modules.nixos.clamav =
-    { config, lib, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     let
       host = config.my.host;
     in
@@ -24,6 +29,8 @@
             !(is.rpi || platform == "wsl" || elem "bootstrap" tags || elem "installer" tags)
           '';
         };
-      config = lib.mkIf config.my.host.features.clamav (import ./_clamav.nix { inherit config lib; });
+      config = lib.mkIf config.my.host.features.clamav (
+        import ./_clamav.nix { inherit config lib pkgs; }
+      );
     };
 }
