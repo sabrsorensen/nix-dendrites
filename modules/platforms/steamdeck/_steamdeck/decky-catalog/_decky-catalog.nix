@@ -254,14 +254,6 @@ in
       and delete _pnpm9.nix plus the insecure-package entry when none remain.
     ''
     ''
-      decky-tabmaster is pinned to v2.15.1 in decky-catalog/packages/catalog.nix
-      because upstream main (and v2.16.2) ship a pnpm-lock.yaml out of sync with
-      package.json (@rollup/plugin-node-resolve ^16.0.3 locked vs ^13.3.0
-      declared), which fails --frozen-lockfile. After each upstream release, try
-      rev = "main" (with fresh hashes) and build:
-        nix build .#nixosConfigurations.emeraldecho.config.jovian.decky-loader.plugins.decky-tabmaster
-    ''
-    ''
       unifideck builds from the sabrsorensen/unifideck fork's rebase-0.8.0
       branch (upstream Release-0.8.0 + the Battle.net games-and-subs producer
       for upstream issue #447 + NixOS and collection/shortcut fixes), not
