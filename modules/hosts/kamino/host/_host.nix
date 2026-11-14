@@ -19,8 +19,10 @@
       gdrive = true;
       atuin = true;
       personalMcp = true;
-      vscode = true;
+      vscode = false;
+      zed = true;
       claude = true;
+      ghostty = true;
       firmware = true;
       nix-ld = true;
       docker = true;
@@ -28,20 +30,18 @@
       bitwarden = true;
       deskflow = false;
       flatpak = true;
-      lutris = true;
-      minecraft = true;
+      lutris = false;
+      minecraft = false;
       nvidia = false; # dGPU is failing; see hardware/_hardware.nix
-      noMansSky = true;
+      noMansSky = false;
       sonos = true;
       office = true;
       plasma = true;
       steam = true;
       stm32 = true;
       threedprinter = true;
-      w3dHubLauncher = true;
+      w3dHubLauncher = false;
       wine = true;
-      ghostty = true;
-      zed = true;
       zsa = true;
     };
     services.ssh = true;
