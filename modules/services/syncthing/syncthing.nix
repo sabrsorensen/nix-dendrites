@@ -17,18 +17,10 @@ let
     "EmeraldEchoSteamOS"
   ];
   nonGamingDevices = serverDevices ++ desktopDevices ++ mobileDevices;
-  folderPaths = {
-    "3DPrinting" = "3d_printing";
-    MobileDownloads = "mobile_downloads";
-  };
-  folderLabels = {
-    "3DPrinting" = "3D Printing";
-    MobileDownloads = "Mobile Downloads";
-  };
-  mkFolder = homeDirectory: name: devices: {
+  mkFolder = homeDirectory: name: path: devices: {
     id = topology.folderIds.${name};
-    label = folderLabels.${name} or name;
-    path = "${homeDirectory}/${folderPaths.${name} or name}/";
+    label = name;
+    path = "${homeDirectory}/${path}/";
     inherit devices;
     ignorePatterns = [ ];
     type = "sendreceive";
@@ -43,19 +35,19 @@ let
       mkFolder' = mkFolder homeDirectory;
     in
     {
-      "3DPrinting" = mkFolder' "3DPrinting" nonGamingDevices;
-      Downloads = mkFolder' "Downloads" (serverDevices ++ desktopDevices);
-      gen_sync = mkFolder' "gen_sync" nonGamingDevices;
-      MobileDownloads = mkFolder' "MobileDownloads" (mobileDevices ++ serverDevices ++ desktopDevices);
-      NewMusic = mkFolder' "NewMusic" nonGamingDevices;
-      NoMansSky = mkFolder' "NoMansSky" (
+      "3DPrinting" = mkFolder' "3D Printing" "3d_printing" nonGamingDevices;
+      Downloads = mkFolder' "Downloads" "Downloads" (serverDevices ++ desktopDevices);
+      gen_sync = mkFolder' "gen_sync" "gen_sync" nonGamingDevices;
+      MobileDownloads = mkFolder' "Mobile Downloads" "mobile_downloads" (mobileDevices ++ serverDevices ++ desktopDevices);
+      NewMusic = mkFolder' "NewMusic" "NewMusic" nonGamingDevices;
+      NoMansSky = mkFolder' "NoMansSky" "Games/NoMansSky" (
         serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices
       );
-      ReturnToMoria = mkFolder' "ReturnToMoria" (
+      ReturnToMoria = mkFolder' "ReturnToMoria" "Games/ReturnToMoria" (
         serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices ++ [ "LavenderHaze" ]
       );
-      SteamPipe = mkFolder' "SteamPipe" (serverDevices ++ desktopDevices ++ gamingDevices);
-      StardewValley = mkFolder' "StardewValley" (
+      SteamPipe = mkFolder' "SteamPipe" "Games/SteamPipe" (serverDevices ++ desktopDevices ++ gamingDevices);
+      StardewValley = mkFolder' "StardewValley" "Games/StardewValley" (
         serverDevices ++ desktopDevices ++ mobileDevices ++ gamingDevices ++ [ "LavenderHaze" ]
       );
     };
