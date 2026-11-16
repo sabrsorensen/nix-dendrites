@@ -11,11 +11,20 @@ in
     enable = true;
     enableMcpIntegration = true;
     extensions = [
+      "csharp"
+      "csv"
       "docker-compose"
       "dockerfile"
       "fish"
       "github-actions"
+      "just"
+      "liquid"
+      "make"
       "nix"
+      "python"
+      "python-requirements"
+      "rainbow-csv"
+      "ssh-config"
       "toml"
     ];
     extraPackages = with pkgs; [
