@@ -35,24 +35,37 @@ in
             gui = true;
           };
           my.features = {
-            atuin = true;
-            bash = true;
-            bitwarden = true;
-            direnv = true;
+            # Platform
+            steamdeck = true;
+
+            # Desktop
             firefox = true;
+
+            # Shell and terminal
+            bash = true;
             fish = true;
+            starship = true;
+            atuin = true;
+            direnv = true;
+            tmux = true;
+
+            # Development
+            vim = true;
             git = true;
             "github-cli" = true;
-            gpg = true;
             "nix-index" = true;
-            sonos = true;
-            sops = true;
+
+            # Keys and secrets
+            gpg = true;
             ssh = true;
-            starship = true;
-            steamdeck = true;
+            sops = true;
+
+            # Personal apps and storage
+            bitwarden = true;
             syncthing = true;
-            tmux = true;
-            vim = true;
+
+            # Peripherals and home devices
+            sonos = true;
           };
           my.atuin.domain = domain;
           my.bash.isSteamDeck = true;

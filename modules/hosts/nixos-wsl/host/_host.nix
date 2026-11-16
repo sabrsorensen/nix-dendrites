@@ -11,9 +11,12 @@
       workstation = true;
     };
     features = {
+      # System
       nix-ld = true;
-      codex = true;
+
+      # Development and AI
       zed = true;
+      codex = true;
     };
   };
   my.deployment = {

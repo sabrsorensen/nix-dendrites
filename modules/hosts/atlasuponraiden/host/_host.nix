@@ -15,15 +15,24 @@
         builder = true;
       };
       features = {
+        # System
+        firmware = true;
+        nix-ld = true;
+        unitFailureAlerts = true;
+
+        # Containers
+        docker = true;
+        podman = true;
+
+        # Shell and terminal
         atuin = true;
+
+        # Personal apps and storage
+        gdrive = true;
+
+        # Media
         beets = true;
         demlo = true;
-        docker = true;
-        firmware = true;
-        gdrive = true;
-        nix-ld = true;
-        podman = true;
-        unitFailureAlerts = true;
       };
       services = {
         ankerctl = true;

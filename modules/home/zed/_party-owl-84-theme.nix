@@ -123,12 +123,65 @@ in
         "terminal.ansi.dim_white" = "#b3b3b3ff";
         "link_text.hover" = "#82aaffff";
         "version_control.added" = "#9ccc65ff";
-        "version_control.modified" = "#e2b93dff";
+        "version_control.modified" = "#e2a2f4ff"; # lilac, matches the `modified` status
         "version_control.deleted" = "#ef5350ff";
         "version_control.word_added" = "#99b76d40";
         "version_control.word_deleted" = "#ef535059";
         "version_control.conflict_marker.ours" = "#9ccc651a";
         "version_control.conflict_marker.theirs" = "#82aaff1a";
+        # gitDecoration.{conflicting,ignored,modified}ResourceForeground
+        "version_control.conflict" = "#ffeb95cc";
+        "version_control.ignored" = "#395a75ff";
+        "version_control.renamed" = "#a2bffcff";
+        # diffEditor.{inserted,removed}Text{Background,Border}
+        "editor.diff_hunk.added.background" = "#99b76d23";
+        "editor.diff_hunk.added.hollow_background" = "#99b76d12";
+        "editor.diff_hunk.added.hollow_border" = "#c5e47833";
+        "editor.diff_hunk.deleted.background" = "#ef535033";
+        "editor.diff_hunk.deleted.hollow_background" = "#ef53501a";
+        "editor.diff_hunk.deleted.hollow_border" = "#ef53504d";
+        "editor.code_lens.foreground" = muted;
+        # editor.rangeHighlightBackground
+        "editor.debugger_active_line.background" = "#7e57c25a";
+        "debugger.accent" = "${purple}ff";
+
+        "background.appearance" = "opaque";
+        # selection.background (input fields, not the editor)
+        "element.selection_background" = "#4373c2ff";
+        "drop_target.border" = "${purple}ff";
+        "pane_group.border" = border;
+        "panel.overlay_background" = sidebar;
+        "panel.overlay_hover" = "#234d708c";
+        "panel.indent_guide" = "#5e81ce52";
+        "panel.indent_guide_hover" = "#5e81ce80";
+        "panel.indent_guide_active" = "#7e97acff";
+        "scrollbar.thumb.active_background" = "#084d81e6";
+        # The minimap thumb sits over code, so it is fainter than the scrollbar's.
+        "minimap.thumb.background" = "#084d8150";
+        "minimap.thumb.hover_background" = "#084d8180";
+        "minimap.thumb.active_background" = "#084d81a0";
+        "minimap.thumb.border" = "#00000000";
+        "terminal.ansi.background" = bg;
+
+        # Vim/Helix mode indicator: glow colour on a 10% tint, like the status keys.
+        "vim.normal.foreground" = "#82aaffff";
+        "vim.normal.background" = "#82aaff1a";
+        "vim.insert.foreground" = "#c5e478ff";
+        "vim.insert.background" = "#c5e4781a";
+        "vim.replace.foreground" = "#ef5350ff";
+        "vim.replace.background" = "#ef53501a";
+        "vim.visual.foreground" = "#c792eaff";
+        "vim.visual.background" = "#c792ea1a";
+        "vim.visual_line.foreground" = "#c792eaff";
+        "vim.visual_line.background" = "#c792ea1a";
+        "vim.visual_block.foreground" = "#c792eaff";
+        "vim.visual_block.background" = "#c792ea1a";
+        "vim.helix_normal.foreground" = "#82aaffff";
+        "vim.helix_normal.background" = "#82aaff1a";
+        "vim.helix_select.foreground" = "#c792eaff";
+        "vim.helix_select.background" = "#c792ea1a";
+        "vim.helix_jump_label.foreground" = "#ff5874ff";
+        "vim.yank.background" = "#7e57c25a";
         accents = [
           "#7fdbcaff"
           "#c792eaff"
@@ -183,6 +236,8 @@ in
             font_style = "italic";
           };
           constant.color = "#82aaffff";
+          # constant.language.{null,boolean,python}
+          "constant.builtin".color = "#ff5874ff";
           constructor.color = "#57eaf1ff";
           "diff.minus".color = "#ef5350ff";
           "diff.plus".color = "#c5e478ff";
@@ -241,6 +296,8 @@ in
             font_weight = 700;
           };
           type.color = "#ffcb8bff";
+          # support.type / support.class
+          "type.builtin".color = "#c5e478ff";
           variable.color = "#d6deebff";
           "variable.parameter".color = "#7fdbcaff";
           "variable.special".color = "#7fdbcaff";
@@ -255,7 +312,9 @@ in
       // statusKeys "hint" "#7fdbca" "#1d3b53ff"
       // statusKeys "ignored" "#395a75" border
       // statusKeys "info" "#64b5f6" "#1d3b53ff"
-      // statusKeys "modified" "#e2b93d" "#5d4c2fff"
+      # Soft lilac (editor.wordHighlightStrongBackground's hue) rather than
+      # Party Owl's #e2b93d gold, which is loud in the project tree.
+      // statusKeys "modified" "#e2a2f4" "#5b4e79ff"
       // statusKeys "predictive" "#5f7e97" border
       // statusKeys "renamed" "#a2bffc" "#1d3b53ff"
       // statusKeys "success" "#22da6e" "#1f4a33ff"

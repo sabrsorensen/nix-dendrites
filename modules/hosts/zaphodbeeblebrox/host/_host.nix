@@ -12,37 +12,52 @@
       builder = true;
     };
     features = {
-      gui = true;
-      reolink = true;
-      omnibin = true;
-      bootGardener = true;
-      gdrive = true;
-      atuin = true;
-      personalMcp = true;
-      vscode = true;
-      claude = true;
+      # System
       firmware = true;
-      nix-ld = true;
+      nvidia = true;
       bluetooth = true;
+      bootGardener = true;
+      nix-ld = true;
+
+      # Containers
       docker = true;
       podman = true;
-      bitwarden = true;
+
+      # Desktop
+      gui = true;
+      plasma = true;
       deskflow = true;
       flatpak = true;
-      lutris = true;
-      minecraft = true;
-      nvidia = true;
-      noMansSky = true;
-      sonos = true;
-      office = true;
-      plasma = true;
-      steam = true;
-      threedprinter = true;
-      w3dHubLauncher = true;
-      wine = true;
+
+      # Shell and terminal
       ghostty = true;
+      atuin = true;
+      omnibin = true;
+
+      # Development and AI
       zed = true;
+      vscode = false;
+      claude = true;
+      personalMcp = true;
+
+      # Personal apps and storage
+      bitwarden = true;
+      gdrive = true;
+      office = true;
+
+      # Peripherals and home devices
       zsa = true;
+      threedprinter = true;
+      reolink = true;
+      sonos = true;
+
+      # Gaming and Windows compatibility
+      steam = true;
+      wine = true;
+      lutris = true;
+      w3dHubLauncher = true;
+      minecraft = true;
+      noMansSky = true;
     };
     services.ssh = true;
   };

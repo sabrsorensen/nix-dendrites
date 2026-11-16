@@ -1,40 +1,22 @@
 { pkgs, ... }:
 {
-  # Enable Wine with WoW64 support for running 32-bit and 64-bit Windows apps
   environment.systemPackages = with pkgs; [
-    # Wine with 64-bit and 32-bit support
+    # WoW64 Wine runs both 32- and 64-bit Windows apps from one prefix.
     wineWow64Packages.stable
-
-    # Bottles for easy Wine prefix management
-    bottles
-
-    # Winetricks for easy Windows component installation
     winetricks
-
-    # Wine utilities
-    wine-staging # Alternative wine with additional patches
-
-    # Windows fonts for better compatibility
-    corefonts
-    vista-fonts
+    # Bottles for GUI Wine prefix management
+    bottles
   ];
-
-  # Enable 32-bit support in nixpkgs for Wine
-  nixpkgs.config = {
-    allowUnfree = true;
-    # Enable 32-bit support for Wine
-    allowUnsupportedSystem = true;
-  };
 
   # Wine/Proton use /dev/ntsync for in-kernel NT sync primitives when present
   # (mainline since 6.14, built as a module); otherwise they fall back to
   # wineserver round-trips.
   boot.kernelModules = [ "ntsync" ];
 
-  # Wine-specific system configuration
-  programs.dconf.enable = true; # Required for Bottles GUI
+  # Required for the Bottles GUI.
+  programs.dconf.enable = true;
 
-  # Fonts needed for Windows applications
+  # Windows fonts for app compatibility.
   fonts.packages = with pkgs; [
     corefonts
     vista-fonts
@@ -42,18 +24,13 @@
     dejavu_fonts
   ];
 
-  # Audio support for Wine applications
-  services.pulseaudio.support32Bit = true;
-
-  # Graphics drivers 32-bit support (you already have NVIDIA configured)
+  # 32-bit Mesa/Vulkan for 32-bit Windows apps. (32-bit audio comes from
+  # features.audio's PipeWire alsa.support32Bit.)
   hardware.graphics = {
+    enable = true;
     enable32Bit = true;
-    extraPackages32 = with pkgs.pkgsi686Linux; [
-      # Add 32-bit graphics packages if needed
-    ];
   };
 
-  # Allow unfree packages needed for Wine and Windows apps
   my.unfreePackageNames = [
     "corefonts"
     "vista-fonts"

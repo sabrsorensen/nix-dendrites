@@ -12,22 +12,35 @@
     home.enable = true;
     roles.workstation = true;
     features = {
-      atuin = true;
-      bitwarden = true;
+      # System
+      firmware = true;
       bootGardener = true;
-      decky = true;
+
+      # Desktop
       gui = true;
+      plasma = true;
       deskflow = true;
       firefox = true;
-      firmware = true;
+
+      # Shell and terminal
+      atuin = true;
+
+      # Development and AI
+      zed = true;
+
+      # Personal apps and storage
+      bitwarden = true;
+
+      # Peripherals and home devices
+      sonos = true;
+
+      # Gaming and Windows compatibility
+      decky = true;
+      wine = true;
       lutris = true;
+      w3dHubLauncher = true;
       minecraft = true;
       noMansSky = true;
-      plasma = true;
-      sonos = true;
-      w3dHubLauncher = true;
-      wine = true;
-      zed = true;
     };
   };
   users.groups.sam.gid = 1000;

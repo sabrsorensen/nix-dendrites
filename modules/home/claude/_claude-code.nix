@@ -123,6 +123,9 @@ in
           refreshInterval = 10;
         };
         theme = "custom:${themeSlug}";
+        # Plugins bundled with Claude Code itself (the "builtin" marketplace)
+        # are switched on here rather than installed via programs.claude-code.plugins.
+        enabledPlugins."cc-plugin-you-should-know@builtin" = true;
         agentPushNotifEnabled = true;
         inputNeededNotifEnabled = true;
       };

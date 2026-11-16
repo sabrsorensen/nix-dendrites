@@ -7,6 +7,22 @@
       pkgs,
       ...
     }:
+    let
+      lutris = pkgs.lutris.override {
+        buildFHSEnv =
+          args:
+          pkgs.buildFHSEnv (
+            args
+            // {
+              multiPkgs = p: lib.filter (x: lib.getName x != "gtk+") (args.multiPkgs p);
+            }
+          );
+
+        # Inside the FHS env so Lutris's "Enable MangoHud" system option
+        # finds the wrapper and its (64- and 32-bit) Vulkan layer.
+        extraPkgs = p: [ p.mangohud ];
+      };
+    in
     {
       options.my.host.features.lutris = lib.mkEnableOption "the Lutris game manager";
 
@@ -28,14 +44,15 @@
         # nixpkgs marks gtk2 (pname "gtk+") broken ahead of its removal
         # (NixOS/nixpkgs#410814), but pkgs/by-name/lu/lutris still lists it
         # in the FHS env's multiPkgs, so evaluating pkgs.lutris refuses.
-        # "ignore" rather than "warn" -- the warnings entry below already
-        # carries the recheck command.
-        nixpkgs.config.problems.handlers."gtk+".broken = "ignore";
+        # Drop it from Lutris's FHS env rather than allowing the broken
+        # package nixpkgs-wide: only native GTK2 Linux games need it, and
+        # nothing run through Lutris here (Wine/Proton titles) is one.
         warnings = [
           ''
-            lutris: allowing broken gtk2 ("gtk+") because nixpkgs' lutris FHS
-            env still pulls it in (NixOS/nixpkgs#410814). Remove the
-            problems.handlers override in modules/features/lutris/lutris.nix
+            lutris: filtering broken gtk2 ("gtk+") out of the lutris FHS env
+            because nixpkgs' package still lists it
+            (https://github.com/NixOS/nixpkgs/issues/410814).
+            Remove the buildFHSEnv override in modules/features/lutris/lutris.nix
             once this prints nothing:
               grep -n gtk2 "$(nix eval --raw .#nixosConfigurations.kamino.pkgs.path)/pkgs/by-name/lu/lutris/package.nix"
           ''
@@ -49,7 +66,7 @@
         # costs nothing to have available whenever Lutris is.
         # See docs/lutris-renegade-x-launcher.md.
         environment.systemPackages = [
-          pkgs.lutris
+          lutris
           (pkgs.callPackage ./_powershell-stub.nix { })
         ];
       };

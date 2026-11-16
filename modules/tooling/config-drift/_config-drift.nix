@@ -12,6 +12,13 @@ let
   # linked by Home Manager but edited in place by an activation step, so the
   # baseline is a copy taken right after activation (see home.activation
   # below).
+  #
+  # declared: what the live file is compared against key by key ("vs
+  # declared in Nix"), so keys tried out at runtime stay listed until they're
+  # ported to Nix or deleted. "baseline" reuses the generation file, which is
+  # exactly what Nix declares when Home Manager writes the whole file; a store
+  # path names the values a merge step layers into the file (Zed); null skips
+  # the check (Plasma). shape/snippet: see _declared-diff.py.
   mkEntry =
     {
       app,
@@ -20,6 +27,9 @@ let
       nixHint,
       note ? null,
       baselineKind ? "generation",
+      declared ? if baselineKind == "generation" then "baseline" else null,
+      shape ? "object",
+      snippet ? "nix",
     }:
     let
       baselineRelpath = lib.removePrefix "${config.home.homeDirectory}/" live;
@@ -33,6 +43,9 @@ let
         note
         baselineKind
         baselineRelpath
+        declared
+        shape
+        snippet
         ;
       baselinePath = if baselineKind == "snapshot" then "${snapshotDir}/${baselineRelpath}" else null;
     };
@@ -65,6 +78,8 @@ let
     format = "json";
     live = "${config.xdg.configHome}/ccstatusline/settings.json";
     nixHint = "modules/home/claude/ccstatusline-settings.json (export from the ccstatusline TUI)";
+    # Declared as a JSON export, not Nix attrs.
+    snippet = "none";
   };
 
   # With mutableUser* (the default) Home Manager doesn't link Zed's files --
@@ -72,21 +87,63 @@ let
   # place, so the baseline is a post-activation snapshot like plasma's. Zed
   # accepts comments/trailing commas, hence "jsonc".
   zedCfg = config.programs.zed-editor;
+  activation = config.home.activation;
+
+  # The declared side of a Zed file is the JSON Home Manager's merge step
+  # layers into it. For settings that's userSettings plus the
+  # auto_install_extensions and context_servers (MCP) entries the module adds
+  # itself, so it's read from the merge step rather than rebuilt here: the
+  # step's script is the only place the generated file's path appears.
+  # Only the manifest may force this: the entry list itself feeds
+  # home.activation.configDriftSnapshot below, so deciding which entries
+  # exist from home.activation would recurse.
+  zedStatic =
+    step: name:
+    let
+      found = lib.filter lib.isList (
+        builtins.split "(${builtins.storeDir}/[a-z0-9]{32}-${name})" activation.${step}.data
+      );
+    in
+    if !(activation ? ${step}) then
+      null
+    else if found == [ ] then
+      throw "config-drift: no ${name} store path in home.activation.${step}; Home Manager's zed-editor merge step changed shape"
+    else
+      builtins.head (builtins.head found);
+
   zedEntry =
-    file: option:
+    {
+      file,
+      option,
+      step,
+      static,
+      shape ? "object",
+    }:
     mkEntry {
       app = "zed";
       format = "jsonc";
       baselineKind = "snapshot";
+      declared = zedStatic step static;
+      inherit shape;
       live = "${config.xdg.configHome}/zed/${file}";
       nixHint = "modules/home/zed/_zed.nix (programs.zed-editor.${option})";
-      note = "Baseline is this file as Home Manager's merge left it at the last switch, so this shows every change made from Zed since then. The next switch only resets keys declared in Nix -- undeclared changes stay live but drop out of this report.";
+      note = "\"since last switch\" compares against this file as Home Manager's merge left it, so it shows every change made from Zed since then. \"vs declared\" compares against the values Nix merges in, so undeclared keys stay listed across switches until you port them to Nix or delete them from the live file (a switch only resets declared keys).";
     };
   zedEntries =
-    lib.optional zedCfg.mutableUserSettings (zedEntry "settings.json" "userSettings")
-    ++ lib.optional (zedCfg.mutableUserKeymaps && zedCfg.userKeymaps != [ ]) (
-      zedEntry "keymap.json" "userKeymaps"
-    );
+    lib.optional zedCfg.mutableUserSettings (zedEntry {
+      file = "settings.json";
+      option = "userSettings";
+      step = "zedSettingsActivation";
+      static = "zed-user-settings";
+    })
+    ++ lib.optional (zedCfg.mutableUserKeymaps && zedCfg.userKeymaps != [ ]) (zedEntry {
+      file = "keymap.json";
+      option = "userKeymaps";
+      step = "zedKeymapActivation";
+      static = "zed-user-keymaps";
+      # Home Manager merges keymap entries by context.
+      shape = "keyed:context";
+    });
 
   # plasma-manager (github:nix-community/plasma-manager) doesn't link its rc
   # files -- its configure-plasma activation step merges the declared keys
@@ -192,6 +249,7 @@ let
       coreutils
       diffutils
       jq
+      nixfmt
       python3
     ];
     text = ''
@@ -233,6 +291,9 @@ let
         relpath=$(jq -r '.baselineRelpath' <<<"$entry")
         hint=$(jq -r '.nixHint' <<<"$entry")
         note=$(jq -r '.note // empty' <<<"$entry")
+        declared=$(jq -r '.declared // empty' <<<"$entry")
+        shape=$(jq -r '.shape' <<<"$entry")
+        snippet=$(jq -r '.snippet' <<<"$entry")
 
         if [ ! -e "$live" ]; then
           continue
@@ -330,10 +391,42 @@ let
             ;;
         esac
 
-        if diff_output=$(diff -u --label "baseline ($relpath)" --label "live ($live)" <(printf '%s\n' "$base_norm") <(printf '%s\n' "$live_norm")); then
-          echo "  no drift"
-        else
-          echo "$diff_output"
+        entry_drift=0
+
+        # When the baseline is the declared file itself, the key-level
+        # comparison below covers this diff, so it's only shown for snapshot
+        # baselines (and entries without a declared check).
+        if [ "$declared" != "baseline" ]; then
+          if diff_output=$(diff -u --label "baseline ($relpath)" --label "live ($live)" <(printf '%s\n' "$base_norm") <(printf '%s\n' "$live_norm")); then
+            echo "  since last switch: no changes"
+          else
+            echo "  since last switch:"
+            echo "$diff_output"
+            entry_drift=1
+          fi
+        fi
+
+        if [ -n "$declared" ]; then
+          decl_norm=""
+          if [ "$declared" = "baseline" ]; then
+            decl_norm="$base_norm"
+          elif ! decl_norm=$(normalize_jsonc "$declared"); then
+            echo "  error: failed to parse declared values ($declared)" >&2
+            failed=1
+          fi
+          if [ -n "$decl_norm" ]; then
+            status=0
+            python3 ${./_declared-diff.py} --shape "$shape" --snippet "$snippet" \
+              <(printf '%s\n' "$decl_norm") <(printf '%s\n' "$live_norm") || status=$?
+            case "$status" in
+              0) ;;
+              1) entry_drift=1 ;;
+              *) failed=1 ;;
+            esac
+          fi
+        fi
+
+        if [ "$entry_drift" -eq 1 ]; then
           if [ -n "$note" ]; then
             echo "  note: $note"
           fi
@@ -385,6 +478,21 @@ in
             note = lib.mkOption {
               type = lib.types.nullOr lib.types.str;
               default = null;
+            };
+            declared = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+            };
+            shape = lib.mkOption {
+              type = lib.types.str;
+              default = "object";
+            };
+            snippet = lib.mkOption {
+              type = lib.types.enum [
+                "nix"
+                "none"
+              ];
+              default = "nix";
             };
           };
         }

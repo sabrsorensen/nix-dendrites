@@ -90,16 +90,23 @@ in
 
       agent.dock = "right";
       agent_servers.claude-acp.type = "registry";
+      base_keymap = "Zed";
+      # Projects opened from the UI/OS and from `zed <path>` both get a new window.
       default_open_behavior = "new_window";
+      cli_default_open_behavior = "new_window";
       reveal_if_open = true;
+      # Load a project's direnv/nix-direnv environment (e.g. a flake devShell)
+      # for language servers, tasks and the terminal by running
+      # `direnv export json` directly, independent of shell startup files.
+      load_direnv = "direct";
       session.trust_all_worktrees = true;
       collaboration_panel.dock = "left";
       git_panel.dock = "left";
       outline_panel.dock = "left";
-      project_panel.dock = "left";
 
       buffer_font_family = font;
       buffer_font_features.calt = true;
+      buffer_font_size = 15;
       colorize_brackets = true;
       cursor_animation.enabled = true;
       edit_predictions.provider = "none";
@@ -122,22 +129,39 @@ in
         "**/bin"
         "**/obj"
       ];
+      format_on_save = "on";
+      git.inline_blame.enabled = true;
       horizontal_scroll_margin = 10;
       indent_guides.coloring = "indent_aware";
+      minimap.show = "always";
+      project_panel = {
+        bold_folder_labels = true;
+        diagnostic_badges = true;
+        dock = "left";
+        git_status_indicator = true;
+      };
       restore_on_startup = "launchpad";
       show_whitespaces = "boundary";
+      status_bar.line_endings_button = true;
+      tabs.file_icons = true;
       tab_size = 2;
       telemetry = {
         diagnostics = false;
         metrics = false;
       };
       terminal = {
+        bell = "system";
         blinking = "on";
         copy_on_select = true;
         font_family = font;
         font_features.calt = true;
         shell.program = "fish";
       };
+      title_bar = {
+        button_layout = "platform_default";
+        show_menus = false;
+      };
+      ui_font_size = 16;
       use_smartcase_search = true;
       vertical_scroll_margin = 10;
       vim_mode = true;

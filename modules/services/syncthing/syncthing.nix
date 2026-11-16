@@ -38,7 +38,9 @@ let
       "3DPrinting" = mkFolder' "3D Printing" "3d_printing" nonGamingDevices;
       Downloads = mkFolder' "Downloads" "Downloads" (serverDevices ++ desktopDevices);
       gen_sync = mkFolder' "gen_sync" "gen_sync" nonGamingDevices;
-      MobileDownloads = mkFolder' "Mobile Downloads" "mobile_downloads" (mobileDevices ++ serverDevices ++ desktopDevices);
+      MobileDownloads = mkFolder' "Mobile Downloads" "mobile_downloads" (
+        mobileDevices ++ serverDevices ++ desktopDevices
+      );
       NewMusic = mkFolder' "NewMusic" "NewMusic" nonGamingDevices;
       NoMansSky = mkFolder' "NoMansSky" "Games/NoMansSky" (
         serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices
@@ -46,7 +48,9 @@ let
       ReturnToMoria = mkFolder' "ReturnToMoria" "Games/ReturnToMoria" (
         serverDevices ++ desktopDevices ++ gamingDevices ++ mobileDevices ++ [ "LavenderHaze" ]
       );
-      SteamPipe = mkFolder' "SteamPipe" "Games/SteamPipe" (serverDevices ++ desktopDevices ++ gamingDevices);
+      SteamPipe = mkFolder' "SteamPipe" "Games/SteamPipe" (
+        serverDevices ++ desktopDevices ++ gamingDevices
+      );
       StardewValley = mkFolder' "StardewValley" "Games/StardewValley" (
         serverDevices ++ desktopDevices ++ mobileDevices ++ gamingDevices ++ [ "LavenderHaze" ]
       );

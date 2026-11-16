@@ -14,28 +14,41 @@ in
       builder = true;
     };
     features = {
-      gui = true;
-      gdrive = true;
-      atuin = true;
-      personalMcp = true;
-      vscode = true;
-      zed = true;
-      ghostty = true;
-      claude = true;
+      # System
       firmware = true;
-      nix-ld = true;
       bluetooth = true;
-      bitwarden = true;
-      deskflow = true;
-      flatpak = true;
-      sonos = true;
-      office = true;
-      plasma = true;
-      wine = true;
       impermanence = true;
       # /home is its own persistent subvolume, so Home Manager bind mounts
       # into /persist would be redundant.
       persistenceHome = false;
+      nix-ld = true;
+
+      # Desktop
+      gui = true;
+      plasma = true;
+      deskflow = true;
+      flatpak = true;
+
+      # Shell and terminal
+      ghostty = true;
+      atuin = true;
+
+      # Development and AI
+      zed = true;
+      vscode = true;
+      claude = true;
+      personalMcp = true;
+
+      # Personal apps and storage
+      bitwarden = true;
+      gdrive = true;
+      office = true;
+
+      # Peripherals and home devices
+      sonos = true;
+
+      # Gaming and Windows compatibility
+      wine = true;
     };
     services.ssh = true;
   };
