@@ -106,16 +106,14 @@ in
     owner = "bschelst";
     repo = "protondb-decky";
     rev = "main";
-    srcHash = "sha256-PoZlcMMkgcLrPCHB07wFVXuz6siazZOrDoTtbeG4Gtw=";
-    pnpmHash = "sha256-I5RNOInDZE0hFZ48kf9iLtGe8cTKWrFRMGVufF5P3xI=";
+    srcHash = "sha256-O3dE+NQWwwUOaR1Vh/DLRPmsgYnGj9quiGl5lxM9/DY=";
+    pnpmHash = "sha256-XnrW/HG4GG3smQ2qGNc/W5w400MhVGyC9RGUxwdO6sU=";
     executablePaths = [ "*/bin/*" ];
   };
   "decky-tabmaster" = mk {
     pname = "decky-tabmaster";
     owner = "Tormak9970";
     repo = "TabMaster";
-    # Tracks main again: v3.1.0 and later build cleanly, the pnpm-lock.yaml
-    # mismatch that forced a v2.15.1 pin is gone.
     rev = "main";
     srcHash = "sha256-i26YmZ4Lur9/LWi3kD6I+mN8WEc6NkluFw0lqI6nvgA=";
     pnpmHash = "sha256-hn0zcSyThPOeSM1nyBVPiSIgnXnGXLGnd5Cs34+90yA=";
