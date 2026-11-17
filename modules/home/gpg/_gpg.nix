@@ -43,7 +43,7 @@ in
     defaultCacheTtl = 1800;
     maxCacheTtl = 7200;
     enableFishIntegration = true;
-    enableSshSupport = true;
+    enableSshSupport = false;
     pinentry.package = if isWsl then pkgs.pinentry-curses else pkgs.pinentry-qt;
     extraConfig = ''
       # Allow loopback pinentry for non-interactive scenarios
