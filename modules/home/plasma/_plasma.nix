@@ -409,6 +409,9 @@ let
           kxkbrc.Layout.DisplayNames = ",";
           kxkbrc.Layout.LayoutList = "us,us";
           kxkbrc.Layout.VariantList = lib.mkDefault "dvorak,";
+          # Caps Lock is Escape (for vim/Helix); Shift+Caps Lock is still Caps Lock.
+          kxkbrc.Layout.Options = "caps:escape_shifted_capslock";
+          kxkbrc.Layout.ResetOldOptions = true;
           plasma-localerc.Formats.LANG = "en_US.UTF-8";
           plasmarc.Wallpapers.usersWallpapers = "";
           spectaclerc.ImageSave.translatedScreenshotsFolder = "Screenshots";
