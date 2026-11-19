@@ -18,6 +18,10 @@
     cmd = [
       "--cleanup"
       "--label-enable"
+      # Watchtower passes its own stop timeout (default 10s) to the API,
+      # overriding each container's --stop-timeout.  Deluge needs minutes
+      # to flush torrents.state; this is only a ceiling for the others.
+      "--stop-timeout=270s"
     ];
     labels."com.centurylinklabs.watchtower.enable" = "true";
     log-driver = "journald";

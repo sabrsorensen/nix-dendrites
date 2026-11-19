@@ -44,6 +44,11 @@ in
       devices = [ ];
       environment = {
         "DELUGE_LOGLEVEL" = "error";
+        # deluged writes torrents.state/fastresume on SIGTERM; with many
+        # torrents that outlasts s6-overlay's default 3s grace and the
+        # truncated state makes Deluge forget every torrent on next start.
+        # Keep this under --stop-timeout below.
+        "S6_SERVICES_GRACETIME" = "240000";
         "PUID" = lib.toString config.users.users.${serviceName}.uid;
         "PGID" = lib.toString config.users.groups.${groupName}.gid;
         "TZ" = config.time.timeZone;
@@ -55,6 +60,8 @@ in
         "--health-start-period=5s"
         "--health-timeout=10s"
         "--network=container:gluetun"
+        # Podman's default 10s before SIGKILL; stays under TimeoutStopSec.
+        "--stop-timeout=270"
       ];
       image = "lscr.io/linuxserver/deluge:2.2.0-r1-ls364";
       labels."com.centurylinklabs.watchtower.enable" = "true";
@@ -91,6 +98,7 @@ in
       ];
     };
   };
+  systemd.services."podman-deluge".serviceConfig.TimeoutStopSec = lib.mkForce 300;
   systemd.services."podman-deluge".after = [ "podman-network-media.service" ];
   systemd.services."podman-deluge".requires = [ "podman-network-media.service" ];
   systemd.services."podman-gluetun".after = [ "podman-network-media.service" ];
