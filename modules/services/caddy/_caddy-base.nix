@@ -28,7 +28,7 @@
         "github.com/caddy-dns/cloudflare@v0.2.2"
         "github.com/sjtug/caddy2-filter@v0.0.0-20230306214137-04be952a71e1"
       ];
-      hash = "sha256-fiRfEVWlvLut6YJMNiAlMMknqURA7QYRUnZFlU/ciyo=";
+      hash = "sha256-Qq7donjZaBXhmCCWHZDN5wCMoO19fhWTVLFI9UuPSX8=";
     };
     email = "letsencrypt@{$DOMAIN}";
     environmentFile = config.sops.secrets.caddy_env.path;
