@@ -141,6 +141,10 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
+    ponytail = {
+      url = "github:DietrichGebert/ponytail";
+      flake = false;
+    };
     reolink-cli = {
       url = "github:reolink/reolink-cli";
       flake = false;

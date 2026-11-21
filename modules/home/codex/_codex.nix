@@ -32,6 +32,10 @@ in
           # The repo ships a .codex-plugin/plugin.json manifest, so Codex
           # loads its skills straight from the plugin source.
           inputs.superpowers
+          # Ponytail "lazy senior dev" mode (github:DietrichGebert/ponytail),
+          # via its .codex-plugin/plugin.json. Its two lifecycle hooks must be
+          # trusted once in Codex's /hooks before they run.
+          inputs.ponytail
         ];
       }
     ];
@@ -47,7 +51,7 @@ in
       ''
     ];
 
-    home.packages = with pkgs; [
-    ];
+    # The ponytail plugin's hooks invoke a bare `node`.
+    home.packages = [ pkgs.nodejs ];
   };
 }

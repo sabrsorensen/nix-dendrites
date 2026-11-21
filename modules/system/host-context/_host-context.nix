@@ -18,6 +18,21 @@ lib.mkMerge [
     };
   })
 
+  (lib.mkIf config.my.host.features.desktop {
+    my.host.features.plasma = lib.mkDefault true;
+  })
+
+  # Every graphical session here is picked from SDDM. A host that wants a
+  # different greeter sets features.sddm = false.
+  (lib.mkIf
+    (
+      config.my.host.features.desktop || config.my.host.features.hyprland || config.my.host.features.niri
+    )
+    {
+      my.host.features.sddm = lib.mkDefault true;
+    }
+  )
+
   (lib.mkIf config.my.host.features.decky {
     my.host.features = {
       deckyCatalog = lib.mkDefault true;

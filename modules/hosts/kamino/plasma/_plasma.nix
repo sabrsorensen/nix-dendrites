@@ -1,5 +1,5 @@
 # Kamino-only Plasma settings and keys whose value differs from the shared
-# base (modules/home/plasma/_plasma.nix). Imported by ../plasma.nix as a bare
+# base (modules/features/plasma/_plasma.nix). Imported by ../plasma.nix as a bare
 # programs.plasma attrset; merged over the base by the module system.
 {
   shortcuts = {

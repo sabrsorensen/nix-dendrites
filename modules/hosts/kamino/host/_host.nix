@@ -25,6 +25,9 @@
       # Desktop
       gui = true;
       plasma = true;
+      hyprland = true;
+      niri = true;
+      noctalia = true;
       deskflow = false;
       flatpak = true;
 

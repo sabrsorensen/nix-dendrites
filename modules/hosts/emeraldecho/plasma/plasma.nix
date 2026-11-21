@@ -1,7 +1,7 @@
 { inputs, lib, ... }:
 {
   # EmeraldEcho's Plasma deltas on top of the shared base in
-  # modules/home/plasma/_plasma.nix. Gated on the host name and broadcast like
+  # modules/features/plasma/_plasma.nix. Gated on the host name and broadcast like
   # every other host-specific module (cf. hardware-zaphodbeeblebrox).
   flake.modules.nixos = lib.optionalAttrs (inputs ? plasma-manager) {
     plasma-emeraldecho =

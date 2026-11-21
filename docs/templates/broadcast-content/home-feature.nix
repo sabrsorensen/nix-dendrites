@@ -1,24 +1,30 @@
 # modules/home/example/example.nix
 { ... }:
-{
-  flake.modules.nixos.home-example =
-    args@{
-      config,
-      lib,
-      ...
-    }:
-    let
-      host = config.my.host;
-      username = host.home.username;
-    in
+let
+  homeModule = import ./_example.nix;
+  featureModule =
+    args@{ config, lib, ... }:
     {
-      config = lib.mkIf (host.home.enable && host.features.example) {
-        home-manager.users.${username} = import ./_content.nix args;
-      };
+      options.my.features.example = lib.mkEnableOption "Example";
+      config = lib.mkIf config.my.features.example (homeModule args);
+    };
+in
+{
+  # Broadcast to every managed user; self-gates on my.features.example.
+  dendritic.homeManagerModules = [ featureModule ];
+  # Standalone Home Manager configurations import it by name.
+  flake.modules.homeManager.example = featureModule;
+
+  # Host-fact vocabulary only. The HM boundary (modules/home/home/_home.nix)
+  # maps it: `my.features.example = host.features.example;`
+  flake.modules.nixos.example =
+    { lib, ... }:
+    {
+      options.my.host.features.example = lib.mkEnableOption "Example";
     };
 }
 
-# modules/home/example/_content.nix
+# modules/home/example/_example.nix
 { pkgs, ... }:
 {
   home.packages = [ pkgs.example ];

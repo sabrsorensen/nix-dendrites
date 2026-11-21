@@ -243,9 +243,9 @@ large mostly-shared settings body** (captured desktop state, input-device ids,
 per-machine tuning — `programs.plasma` is the worked example):
 
 ```text
-modules/home/plasma/_plasma.nix           # shared base, gated on my.features.plasma
-modules/hosts/kamino/plasma/plasma.nix    # registers flake.modules.nixos.plasma-kamino
-modules/hosts/kamino/plasma/_plasma.nix   # Kamino's delta — a bare programs.plasma attrset
+modules/features/plasma/_plasma.nix      # shared base, gated on my.features.plasma
+modules/hosts/kamino/plasma/plasma.nix   # registers flake.modules.nixos.plasma-kamino
+modules/hosts/kamino/plasma/_plasma.nix  # Kamino's delta — a bare programs.plasma attrset
 ```
 
 ```nix
@@ -293,6 +293,37 @@ To resplit after editing host state: evaluate
 `config.home-manager.users.<user>.programs.<x>` for each host, diff the rendered
 attrsets, move the identical intersection to the base and everything else to the
 per-host payloads.
+
+## Desktop sessions
+
+`features.plasma`, `features.hyprland` and `features.niri` are independent
+sessions that can coexist on one host. `features.plasma` owns both halves of
+Plasma in `modules/features/plasma/`: the system session (`_plasma-nixos.nix`,
+also used on the Steam Deck under Jovian) and the plasma-manager user config.
+`features.desktop` is the session-agnostic layer under them (X server,
+geoclue, the portal service) and defaults `features.plasma` on.
+`features.desktop`, `features.hyprland` and `features.niri` all default
+`features.sddm` on (in `_host-context.nix`), and SDDM is the one greeter that
+lists them. Each compositor uses the native NixOS module
+(`programs.hyprland` / `programs.niri`) for the session, portals and polkit,
+plus the native Home Manager module (`wayland.windowManager.*`) for its config,
+with the HM package or portal set to `null` where NixOS already provides it.
+`features.noctalia` is a shell, not a session: the compositors spawn it at
+startup instead of using its `graphical-session.target` unit, which would also
+start it inside Plasma.
+
+Two nixpkgs modules silently conflict with established config once niri is
+enabled. Both are resolved in `modules/features/niri/_niri-nixos.nix`:
+
+- niri and plasma6 both `mkDefault` `services.displayManager.defaultSession`.
+  Plasma stays the default at priority 900, so a plain host value still wins.
+- niri enables gnome-keyring, which `mkDefault`-enables `gcr-ssh-agent`, and
+  that asserts against the repo-wide `programs.ssh.startAgent`. The OpenSSH
+  agent wins.
+
+Validate a session change by enabling it in memory with `extendModules` on a
+host that has Plasma and on one that doesn't, then confirm every other host's
+toplevel `drvPath` is unchanged.
 
 ## Architecture versus integration roles
 

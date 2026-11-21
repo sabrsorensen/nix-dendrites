@@ -164,7 +164,7 @@ let
       format = "kconfig";
       baselineKind = "snapshot";
       inherit live;
-      nixHint = "modules/home/plasma/_plasma.nix (shared) or modules/hosts/<host>/plasma/_plasma.nix (per-host delta)";
+      nixHint = "modules/features/plasma/_plasma.nix (shared) or modules/hosts/<host>/plasma/_plasma.nix (per-host delta)";
       note = "Baseline is this file as plasma-manager left it at the last switch, so this shows every change since then, declared key or not (plasma-manager's own login-time theme scripts can show up here too). The next switch only resets keys declared in Nix -- undeclared changes stay live but drop out of this report. \"nix run github:nix-community/plasma-manager\" (rc2nix) renders the live Plasma config as programs.plasma Nix.";
     }
   ) plasmaFiles;

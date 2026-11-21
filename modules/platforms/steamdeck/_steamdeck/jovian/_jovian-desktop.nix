@@ -5,20 +5,13 @@
   ...
 }:
 {
-  programs.partition-manager.enable = true;
-  # plasma6 mkDefault-enables this, and it adds kmail/kontact/merkuro/akonadi
-  # to systemPackages directly -- excludePackages can't remove them.
-  programs.kde-pim.enable = false;
-  services.desktopManager.plasma6.enable = true;
+  # The Plasma session, KDE apps and portal come from features.plasma
+  # (modules/features/plasma/_plasma-nixos.nix).
   services.xserver.xkb = {
     layout = "us";
     variant = "dvorak";
   };
   environment = {
-    plasma6.excludePackages = with pkgs.kdePackages; [
-      elisa
-      kate
-    ];
     systemPackages = with pkgs; [
       age
       curl
@@ -26,8 +19,6 @@
       git
       htop
       jovianPackages.jupiter-dock-updater-bin
-      kdePackages.kcalc
-      kdePackages.krdc
       lm_sensors.bin
       nix-output-monitor
       nix-tree
@@ -56,7 +47,6 @@
       source-han-serif
     ];
   };
-  programs.kdeconnect.enable = lib.mkIf config.my.host.is.finalSystem true;
   # Flatpak itself (service, shared app list, remotes) comes from the
   # features/flatpak module; only the Steam Deck-specific apps live here.
   my.host.features.flatpak = lib.mkIf config.my.host.is.finalSystem (lib.mkDefault true);
@@ -68,8 +58,4 @@
     "io.github.streetpea.Chiaki4deck"
     "io.github.unknownskl.greenlight"
   ];
-  xdg.portal = {
-    enable = true;
-    extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];
-  };
 }

@@ -82,6 +82,10 @@ in
       # .claude-plugin/plugin.json manifest plus skills/ and
       # hooks/hooks.json, which Claude Code discovers automatically.
       plugins.superpowers = inputs.superpowers;
+      # Ponytail "lazy senior dev" mode (github:DietrichGebert/ponytail):
+      # skills plus SessionStart/SubagentStart/UserPromptSubmit hooks, which
+      # run `node` from PATH.
+      plugins.ponytail = inputs.ponytail;
       # Carbon footprint tracking (github:gwittebolle/claude-carbon): Stop /
       # SessionEnd / SessionStart hooks plus the /carbon-* skills.
       plugins.claude-carbon = claudeCarbon;
@@ -134,9 +138,13 @@ in
     home.file."${config.programs.claude-code.configDir}/themes/${themeSlug}.json".text =
       builtins.toJSON (import ./_party-owl-84-theme.nix);
 
-    # On PATH for its TUI; settings.statusLine.command above uses the store
-    # path directly.
-    home.packages = [ ccstatusline ];
+    # ccstatusline is on PATH for its TUI; settings.statusLine.command above
+    # uses the store path directly. nodejs is there because the ponytail
+    # plugin's hooks invoke a bare `node`.
+    home.packages = [
+      ccstatusline
+      pkgs.nodejs
+    ];
 
     # Same mutable-copy bridge as settings.json below, so the ccstatusline TUI
     # can save while you try out layouts. The next switch resets it; export

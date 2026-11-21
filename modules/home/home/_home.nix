@@ -81,6 +81,9 @@
           vscode = host.features.vscode;
           zed = host.features.zed;
           ghostty = host.features.ghostty;
+          hyprland = host.features.hyprland;
+          niri = host.features.niri;
+          noctalia = host.features.noctalia;
           claude = host.features.claudeCode;
           codex = host.features.codex;
           recall = host.features.recall;

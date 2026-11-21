@@ -435,11 +435,4 @@ in
 {
   dendritic.homeManagerModules = [ featureModule ];
   flake.modules.homeManager.plasma = featureModule;
-
-  flake.modules.nixos.plasma =
-    { lib, ... }:
-    {
-      options.my.host.features.plasma =
-        lib.mkEnableOption "Plasma Manager declarative KDE Plasma configuration";
-    };
 }
