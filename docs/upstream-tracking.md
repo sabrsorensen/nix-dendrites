@@ -26,6 +26,8 @@ authoritative record; this table is just an index.
 | herdr-app without libghostty-vt's bundled Zig compiler_rt ("overlapping FDEs" link failure) | `modules/home/herdr/_herdr-home.nix` | herdr + gui hosts |
 | gtk2 (`gtk+`) filtered out of lutris's FHS env (NixOS/nixpkgs#410814) | `modules/features/lutris/lutris.nix` | lutris hosts |
 | nix-output-monitor + PR #321 (Determinate Nix activity types, issue #320) | `modules/system/nix/determinate/_determinate.nix` | determinateNix hosts |
+| ccusage + zstd in buildInputs (nixpkgs cargo-setup-hook forces `ZSTD_SYS_USE_PKG_CONFIG=1`) | `modules/home/ai-tools/_ai-tools.nix` | claude/codex hosts |
+| omnibin rebuilt from `inputs.omnibin` nix files + sqlite (cargo-setup-hook forces `LIBSQLITE3_SYS_USE_PKG_CONFIG=1`) | `modules/features/omnibin/omnibin.nix` | omnibin hosts |
 
 `decky-catalog/` is `modules/platforms/steamdeck/_steamdeck/decky-catalog/`.
 
