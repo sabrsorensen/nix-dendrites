@@ -99,6 +99,16 @@ in
     RandomizedDelaySec = "30m";
   };
   systemd.services.clamdscan = {
+    # clamdscan talks to clamd over its socket. nixpkgs only orders the scan
+    # after freshclam, so a timer firing while clamd's socket is down (e.g. a
+    # switch-to-configuration restarting clamav-daemon alongside the
+    # Persistent= catch-up) fails with "Could not connect to clamd". Pull the
+    # socket in and wait for it; a connection then socket-activates clamd.
+    requires = [ "clamav-daemon.socket" ];
+    after = [
+      "clamav-daemon.socket"
+      "clamav-daemon.service"
+    ];
     unitConfig.ConditionACPower = true;
     serviceConfig = {
       ExecStart = lib.mkForce "${lib.getExe clamdscanExisting} ${lib.escapeShellArgs cfg.scanner.scanDirectories}";
