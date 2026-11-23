@@ -109,6 +109,21 @@ they silently paper over.
   files upstream has since removed. Drop the Deskflow pin once nixpkgs ships
   Deskflow >= 1.27, and the libportal override once nixpkgs' libportal is
   >= 0.10 (`nix eval --raw nixpkgs#libportal.version`).
+- **Synergy 3/4 Symless binaries in FHS envs**
+  (`modules/features/synergy/`). Not in nixpkgs, which ships only the
+  open-source Synergy 1.14 (X11-only). `_fetch-symless.nix` downloads the Arch
+  packages through Symless's anonymous download permalink (the one the AUR
+  `synergy3-bin`/`synergy4-dragon-beta-bin` use) and a token scraped from the
+  download page; if the fetch fails with "no download token", compare against
+  those AUR PKGBUILDs. Both run unpatched inside `buildFHSEnv`: Synergy 3's
+  service is a Node SEA that patchelf can corrupt, and Synergy 4 hard-codes
+  `/usr/lib/synergy-dragon` and self-updates into
+  `/var/lib/synergy-dragon/versions`. The units, account and polkit rule
+  mirror the packages' own files (copied to
+  `share/synergy-dragon/packaging/` in the unwrapped Synergy 4 output) and
+  should be re-diffed on each version bump. Synergy 4's ports are
+  undocumented; only 24800 is opened. Needed for as long as these features
+  are used.
 
 ### Source-only inputs
 
