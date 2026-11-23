@@ -20,6 +20,7 @@ in
 {
   flake-file.inputs.herdr-nix = {
     url = "github:kevinpita/herdr-nix";
+    inputs.flake-utils.follows = "flake-utils";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 

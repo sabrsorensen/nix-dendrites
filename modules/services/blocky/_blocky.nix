@@ -48,7 +48,8 @@
         allowlists.ads = [
           "|
           *.amplitude.com
-          *.looker.com"
+          *.looker.com
+          appservice-diagnostics.trafficmanager.net"
         ];
         clientGroupsBlock.default = [ "ads" ];
       };

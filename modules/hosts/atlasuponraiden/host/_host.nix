@@ -44,6 +44,7 @@
         atuinServer = true;
         bazarr = true;
         caddy = true;
+        calibreWeb = true;
         deluge = true;
         flaresolverr = true;
         gonic = true;
@@ -51,6 +52,7 @@
         hawkbit = false;
         immich = true;
         jellyfin = true;
+        kosync = true;
         mealie = true;
         minecraft = true;
         moria = true;
@@ -69,6 +71,7 @@
         syncthing = true;
       };
     };
+    my.kosync.allowRegistration = false;
     my.nextcloud.dataDir = "/AnomalyRealm/nextcloud";
     users.users.sam = {
       extraGroups = [ "dialout" ];

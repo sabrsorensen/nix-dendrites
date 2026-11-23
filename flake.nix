@@ -21,7 +21,10 @@
     };
     claude-desktop = {
       url = "github:heytcass/claude-desktop-linux-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     codex-nix = {
       url = "github:sadjow/codex-cli-nix";
@@ -44,7 +47,10 @@
     };
     demlo = {
       url = "github:sabrsorensen/demlo/v3.8.1";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
     disko = {
@@ -68,7 +74,10 @@
     };
     herdr-nix = {
       url = "github:kevinpita/herdr-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nixpkgs.follows = "nixpkgs";
+      };
     };
     home-manager = {
       url = "github:nix-community/home-manager";
