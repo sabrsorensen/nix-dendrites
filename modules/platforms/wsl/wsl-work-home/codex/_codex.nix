@@ -185,8 +185,8 @@ let
                 url = "https://api.githubcopilot.com/mcp";
                 bearer_token_env_var = "HIGISH_GITHUB_NIXOS_MCP_TOKEN";
               };
-              HigiConfluence.url = "https://mcp.atlassian.com/v1/mcp/authv2";
-              HigiJira.url = "https://mcp.atlassian.com/v1/mcp/authv2";
+              HigiConfluence.url = "https://mcp.atlassian.com/v2/mcp";
+              HigiJira.url = "https://mcp.atlassian.com/v2/mcp";
               #Pulumi = {
               #  url = "https://mcp.ai.pulumi.com/mcp";
               #  bearer_token_env_var = "PULUMI_NIXOS_MCP_TOKEN";
