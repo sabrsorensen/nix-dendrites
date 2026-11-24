@@ -6,6 +6,13 @@
 }:
 {
   console.keyMap = "dvorak";
+  # X11/SDDM layout. Below mkDefault so Deskflow hosts keep their
+  # deliberate QWERTY default (modules/features/deskflow), but above the
+  # option default so it doesn't conflict with it.
+  services.xserver.xkb = {
+    layout = lib.mkOverride 1100 "us";
+    variant = lib.mkOverride 1100 "dvorak";
+  };
   boot = {
     zfs.forceImportRoot = false;
     tmp = {

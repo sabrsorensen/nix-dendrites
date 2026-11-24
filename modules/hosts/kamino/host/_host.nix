@@ -75,7 +75,7 @@
     ];
   };
   services.displayManager.autoLogin = {
-    enable = true;
+    enable = false;
     user = "sam";
   };
   # Numlock on by default: the SDDM greeter, and the console (in case a boot

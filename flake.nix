@@ -83,6 +83,7 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hyprland.url = "github:hyprwm/Hyprland";
     impermanence = {
       url = "https://flakehub.com/f/nix-community/impermanence/*";
       inputs = {

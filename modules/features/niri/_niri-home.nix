@@ -11,7 +11,10 @@
     enableDefaultConfig = true;
 
     settings = {
-      input.keyboard.xkb.layout = "us";
+      input.keyboard.xkb = {
+        layout = "us";
+        variant = "dvorak";
+      };
     };
 
     # Started from the compositor rather than as a graphical-session.target

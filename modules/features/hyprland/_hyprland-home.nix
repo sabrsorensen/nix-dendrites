@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   lua = lib.generators.mkLuaInline;
 in
@@ -13,10 +18,15 @@ in
     # attribute becomes an `hl.<name>(...)` call. See the option description
     # of wayland.windowManager.hyprland.settings and https://wiki.hypr.land.
     settings = {
+      terminal._var = "${pkgs.ghostty}/bin/ghostty";
       mod._var = "SUPER";
+      filemanager._var = "${pkgs.kdePackages.dolphin}/bin/dolphin";
 
       config = {
-        input.kb_layout = "us";
+        input = {
+          kb_layout = "us";
+          kb_variant = "dvorak";
+        };
         general = {
           gaps_in = 5;
           gaps_out = 10;
