@@ -17,6 +17,7 @@
       nvidia = false; # dGPU is failing; see hardware/_hardware.nix
       bootGardener = true;
       nix-ld = true;
+      smbMedia = true;
 
       # Containers
       docker = true;

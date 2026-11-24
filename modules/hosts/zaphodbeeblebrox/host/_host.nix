@@ -18,6 +18,7 @@
       bluetooth = true;
       bootGardener = true;
       nix-ld = true;
+      smbMedia = true;
 
       # Containers
       docker = true;

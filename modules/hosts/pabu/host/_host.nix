@@ -22,6 +22,7 @@ in
       # into /persist would be redundant.
       persistenceHome = false;
       nix-ld = true;
+      smbMedia = true;
 
       # Desktop
       gui = true;
